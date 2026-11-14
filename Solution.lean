@@ -4,4 +4,4 @@ public import Oberwolfach.MainTheoremFromProtectedPreparation
 
 public section
 
-/-! This draft imports the checked theorem. Comparator has not been run. -/
+/-! Imports the proved theorem for comparison with the independent Challenge. -/

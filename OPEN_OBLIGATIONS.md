@@ -1,4 +1,4 @@
-> **Historical development record.** The entries below describe earlier, incomplete checkpoints. The separate Lean 4.35 candidate has since passed its full local verification and independent NanoDa and con-ron checks of the main theorem. This unpublished draft is not the exact verified snapshot and still requires final-snapshot checks, human statement review, and Palomar verification. See the accompanying preparation records.
+> **Historical development record.** The entries below describe earlier, incomplete checkpoints; they are not the current status of the repository. Consult the README and the verification reports for the status of a particular commit.
 
 ## Protected-inner coverage audit (2 November 2026)
 

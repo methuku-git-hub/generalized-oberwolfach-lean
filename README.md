@@ -1,8 +1,9 @@
 # Prescribed 2-factor decompositions: a Lean formalization
 
-**Preparation draft.** This repository snapshot has not been published or
-submitted to Palomar. Human statement review and checks on the exact final
-snapshot remain to be completed.
+**Verification status.** This repository provides a formalization for Palomar
+review. The local checks described below and any Palomar verification should be
+read against the exact commit they checked; no independent human statement
+review had been recorded when this documentation was prepared.
 
 This project formalizes a theorem about edge-decomposing sufficiently large,
 even-regular graphs into an arbitrary prescribed list of spanning 2-regular

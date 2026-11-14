@@ -68,5 +68,6 @@ alignment:
       status: "proved"
       note: >-
         The original main-theorem gate and independent kernel checks passed on
-        a related source-stable local candidate. The exact prepared repository
-        has not yet passed Palomar Comparator or its own full final verification.
+        a related source-stable local candidate. The exact repository snapshot
+        must also be checked by Palomar Comparator; see the corresponding
+        mechanical verification report for its result.
