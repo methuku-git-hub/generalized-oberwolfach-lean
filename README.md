@@ -1,5 +1,35 @@
 # Prescribed 2-factor decompositions: a Lean formalization
 
+## Paper abstract
+
+**Paper authors:** Dong Yeap Kang, Abhishek Methuku and Pablo Oviedo.
+
+We prove an asymptotically sharp Dirac-type generalization of the
+Oberwolfach problem posed by Ringel in 1967, allowing decompositions
+into a prescribed list of possibly different spanning $2$-regular graphs.
+
+For $r\ge3$, let $C_r$ denote the cycle of length $r$, and let $\delta_{C_r}$ denote the asymptotic minimum-degree threshold for a $C_r$-decomposition, that is, the infimum of $d\in[0,1]$ such that every sufficiently large $n$-vertex graph $G$ with $\delta(G)\ge dn$, all vertex degrees even and $r\mid e(G)$ has a $C_r$-decomposition.
+
+For any nonempty set $\mathcal S\subseteq\{3,4,\ldots\}$ and $\alpha>0$, we show that every sufficiently large $n$-vertex $D$-regular graph with $D$ even and $D\ge(\sup_{r\in\mathcal S}\delta_{C_r}+\alpha)n$ admits an edge-decomposition into any prescribed list $F_1,\ldots,F_{D/2}$ of $2$-regular $n$-vertex graphs whose cycle lengths belong to $\mathcal S$.
+The degree condition is asymptotically best possible.
+
+Results of Barber–Kühn–Lo–Osthus on even cycles and of Delcourt–Postle, Granet–Horsley, Hou–Hu–Wang and Granet–Horsley–Santrio on odd cycles determine the cycle-decomposition thresholds:
+
+$$
+ \delta_{C_r} =
+ \begin{cases}
+  2/3,&r=4,\\
+  1/2,&r\ge6\text{ even},\\
+  1/2+1/(2r-2),&r\ge3\text{ odd}.
+ \end{cases}
+$$
+
+In particular, $D\ge(3/4+\alpha)n$ suffices for any prescribed list of spanning $2$-regular graphs.
+Our theorem settles, in a stronger form, conjectures of Glock–Joos–Kim–Kühn–Osthus (*J. Eur. Math. Soc.*, 2021) and Glock–Kühn–Osthus (*Surveys in Combinatorics 2021*) on sharp Dirac thresholds for the Oberwolfach problem.
+It also determines the sharp asymptotic degree threshold for resolvable cycle decompositions of regular graphs.
+
+*Formalization scope:* The Lean project formalizes the selected main theorem; it does not claim to formalize the entire paper or all its corollaries.
+
 **Verification status.** This repository provides a formalization for Palomar
 review. The local checks described below and any Palomar verification should be
 read against the exact commit they checked; no independent human statement
