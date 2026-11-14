@@ -1,0 +1,349 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedRestrictedNearBalancePacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedRestrictedNearBalancePacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedNearBalancePacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OccurrenceRestrictionCuts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedCanonicalPathCountRestriction</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Approximate packing in the actual host left after a reservation.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> The permitted reservation loss is fixed before the desired packing</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> remainder. Reserved edges are not counted as uncovered edges. The original</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> weights and spoke profiles are restricted without being recomputed. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 4000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_restricted_near_balance_packing (α p₀ : ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hα : 0&lt;α) (hαmax : α≤1) (hp₀ : 0&lt;p₀) (hp₀max : p₀≤1/2) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ c₀ : ℕ,∀ k : ℕ,c₀≤k+2 → ∀ β L bminus bplus ω h δ : ℝ,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     0&lt;β → 1≤L → 0&lt;bminus → 0&lt;bplus → 0&lt;ω → 0&lt;h → 0&lt;δ → δ&lt;1/4 →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ ε η₀ δ₀ σ : ℝ,0&lt;ε ∧ 0&lt;η₀ ∧ 0&lt;δ₀ ∧ 0&lt;σ ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ γ : ℝ,0&lt;γ → ∃ ηbal : ℝ,0&lt;ηbal ∧ ∀ b : ℕ,∃ n₀ : ℕ,</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ η : ℝ,0≤η → η≤ηbal →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∀ (V E K U : Type)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       [Fintype V] [Fintype E] [Fintype K] [Fintype U] [DecidableEq V] [DecidableEq U],</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ (tail head : E → V) (ktail khead : K → V) (π : Equiv.Perm V),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     Function.Injective (markedPhysicalEdge tail head ktail khead π) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀ (p D : ℝ),p₀≤p → p≤1/2 → n₀≤Fintype.card V →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (Fintype.card V:ℝ)/2≤D → D≤2*Fintype.card V →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ x,|occurrenceDegree tail x-p*D|≤ε*Fintype.card V) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ x,|occurrenceDegree head x-p*D|≤ε*Fintype.card V) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∀ x,|occurrenceDegree ktail x-p*D/(k+1:ℝ)|≤ε*Fintype.card V) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (∀ x,|occurrenceDegree khead x-p*D/(k+1:ℝ)|≤ε*Fintype.card V) →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀ x y,x≠y → 4*α*p^2*Fintype.card V≤</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       ((Finset.univ.filter (fun z =&gt; (∃ e,tail e=x ∧ head e=z) ∧ (∃ e,tail e=z ∧ head e=y))).card:ℝ)) →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∀ S T : Finset V,(1-2*min (α/16) (p/128))*Fintype.card V&lt;(S.card:ℝ)+T.card →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       4*(α*p/16)*Fintype.card V*min (S.card:ℝ) T.card≤</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ((Finset.univ.filter (fun e =&gt; tail e∈S ∧ head e∈T)).card:ℝ)) →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     ∀ H₀ Hₖ : V → U → Prop,</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ v u,¬(H₀ v u ∧ Hₖ v u)) →</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ C&#x27; : MarkedCycleTuple tail head ktail khead (k+1) π b,</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       4*β*Fintype.card V≤(Fintype.card {u // MarkedHubCompatible H₀ Hₖ C&#x27;.val u}:ℝ)) →</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ω*Fintype.card V≤Fintype.card U → Fintype.card U≤Fintype.card V →</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∀ (ps qs : Bool → U → ℝ) (δsp Dexc : ℝ),</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (∀ j,SparseIntersectionData (if j then Hₖ else H₀) (ps j) (qs j) L δsp Dexc) →</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     δsp+Dexc/(Fintype.card V:ℝ)+1/(Fintype.card U:ℝ)≤δ₀ →</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     ∀ i : Bool → Fin (k+2),(∀ j,markedPositionType (i j)=j) →</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (∀ u u&#x27; : U,u≠u&#x27; → 4*β*(Fintype.card V:ℝ)^(k+2)≤</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (Fintype.card (CommonMarkedCycle tail head ktail khead (k+1) π b H₀ Hₖ u u&#x27;):ℝ)) →</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (∀ j,∀ Q : BipartiteFourCycle (if j then Hₖ else H₀),</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       4*β*(Fintype.card V:ℝ)^(k+1)≤</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (Fintype.card (CanonicalCommonMarkedPath tail head ktail khead (k+1) π b H₀ Hₖ (i j)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         Q.val.1.1 Q.val.1.2 Q.val.2.1 Q.val.2.2):ℝ)) →</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     ∀ ψ : MarkedWheel tail head ktail khead (k+1) π b H₀ Hₖ → ℝ,</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (∀ e,|markedWheelRimLoad ψ e-1|≤η₀) →</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (∀ j v u,|markedSpokeResidual ψ j v u|≤η₀) →</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (∀ W,bminus/(Fintype.card V:ℝ)^(k+1)≤ψ W ∧ ψ W≤bplus/(Fintype.card V:ℝ)^(k+1)) →</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     BipartiteLargeCut (occurrenceMultiplicity tail head) δ (2*h) →</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     BipartiteLargeCut (occurrenceMultiplicity ktail khead) δ (2*h) →</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     BipartiteLargeCut (relationMultiplicity H₀) δ (2*h) →</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     BipartiteLargeCut (relationMultiplicity Hₖ) δ (2*h) →</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     ∀ (PE:E→Prop) (PK:K→Prop) (H₀&#x27; Hₖ&#x27;:V→U→Prop),</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (∀ v u,H₀&#x27; v u→H₀ v u) → (∀ v u,Hₖ&#x27; v u→Hₖ v u) →</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (∀ v,(∑ e,if ¬PE e∧tail e=v then (1:ℝ) else 0)≤σ*Fintype.card V ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (∑ e,if ¬PE e∧head e=v then (1:ℝ) else 0)≤σ*Fintype.card V ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (∑ e,if ¬PK e∧ktail e=v then (1:ℝ) else 0)≤σ*Fintype.card V ∧</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (∑ e,if ¬PK e∧khead e=v then (1:ℝ) else 0)≤σ*Fintype.card V ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (∑ u,if H₀ v u∧¬H₀&#x27; v u then (1:ℝ) else 0)≤σ*Fintype.card V ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (∑ u,if Hₖ v u∧¬Hₖ&#x27; v u then (1:ℝ) else 0)≤σ*Fintype.card V) →</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (∀ u,(∑ v,if H₀ v u∧¬H₀&#x27; v u then (1:ℝ) else 0)≤σ*Fintype.card V ∧</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       (∑ v,if Hₖ v u∧¬Hₖ&#x27; v u then (1:ℝ) else 0)≤σ*Fintype.card V) →</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     let t&#x27;:=fun e:{e//PE e}=&gt;tail e.val</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     let h&#x27;:=fun e:{e//PE e}=&gt;head e.val</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     let kt&#x27;:=fun e:{e//PK e}=&gt;ktail e.val</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     let kh&#x27;:=fun e:{e//PK e}=&gt;khead e.val;</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     (∀ v,|occurrenceDegree (Sum.elim t&#x27; kt&#x27;) v-</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       (∑ u,if H₀&#x27; v u then (1:ℝ) else 0)-(∑ u,if Hₖ&#x27; v u then (1:ℝ) else 0)|≤η*Fintype.card V) →</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (∀ v,|occurrenceDegree (Sum.elim h&#x27; kh&#x27;) v-</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       (∑ u,if H₀&#x27; v u then (1:ℝ) else 0)-(∑ u,if Hₖ&#x27; v u then (1:ℝ) else 0)|≤η*Fintype.card V) →</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     (∀ v,|occurrenceDegree kh&#x27; v-(∑ u,if Hₖ&#x27; v u then (1:ℝ) else 0)|≤η*Fintype.card V) →</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (∀ u,|(∑ v,if H₀&#x27; v u then (1:ℝ) else 0)-(k+1:ℝ)*(∑ v,if Hₖ&#x27; v u then (1:ℝ) else 0)|≤η*Fintype.card V) →</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     ∃ M : Finset (MarkedWheel t&#x27; h&#x27; kt&#x27; kh&#x27; (k+1) π b H₀&#x27; Hₖ&#x27;),</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       (∀ W∈M,∀ Z∈M,W≠Z → Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources Z)) ∧</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       (∀ x : V⊕U,((markedIncidentEdges t&#x27; h&#x27; kt&#x27; kh&#x27; π H₀&#x27; Hₖ&#x27; false x \</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>         M.biUnion markedActiveResources).card : ℝ)≤γ*Fintype.card V) ∧</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       (∀ x : V⊕U,((markedPhysicalIncidentEdges t&#x27; h&#x27; kt&#x27; kh&#x27; π H₀&#x27; Hₖ&#x27; x \</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>         M.biUnion markedWheelPhysicalResources).card : ℝ)≤γ*Fintype.card V) := by</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   obtain ⟨c₀,hc₀⟩:=marked_near_balance_wheel_packing α p₀ hα hαmax hp₀ hp₀max</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   refine ⟨max c₀ 4,?_⟩</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   intro k hk β L bminus bplus ω h δ hβ hL hbm hbp hω hh hδ hδsmall</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   have hkm:3≤k+1:=by omega</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   let c:ℝ:=(k:ℝ)+2</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   have hc:0&lt;c:=by dsimp only [c];positivity</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   obtain ⟨ε,η₀,δ₀,hε,hη,hδ₀,hpacking⟩:=hc₀ k ((le_max_left _ _).trans hk)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     β L bminus bplus ω h δ hβ hL hbm hbp hω hh hδ hδsmall</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   let σ:=min (ε/2) (min (α*p₀^2/4) (min (α*p₀/32)</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     (min (β/(8*c)) (min (η₀/(32*c^4*bplus))</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>       (min (δ₀*ω/(12*(L^2+ω))) (min (h/2) (h*ω/2)))))))</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hσ:0&lt;σ:=by dsimp only [σ];positivity</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   have hsε:σ≤ε/2:=by dsimp only [σ];exact min_le_left _ _</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   have hs2:σ≤α*p₀^2/4:=by dsimp only [σ];exact (min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   have hsCut:σ≤α*p₀/32:=by dsimp only [σ];exact (min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   have hsCount:σ≤β/(8*c):=by dsimp only [σ];exact (min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _)))</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   have hsLoad:σ≤η₀/(32*c^4*bplus):=by dsimp only [σ];exact (min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))))</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have hsData:σ≤δ₀*ω/(12*(L^2+ω)):=by dsimp only [σ];exact (min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _)))))</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>   have hsH:σ≤min (h/2) (h*ω/2):=by dsimp only [σ];exact (min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _)))))</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>   refine ⟨ε/2,η₀/2,δ₀/2,σ,by positivity,by positivity,by positivity,hσ,?_⟩</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>   intro γ hγ</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   obtain ⟨ηbal,hηbal,hpack⟩:=hpacking γ hγ</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>   refine ⟨ηbal,hηbal,?_⟩</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>   intro b</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>   obtain ⟨N,hN⟩:=hpack b</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>   refine ⟨max 1 N,?_⟩</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   intro η hηsmall hηbalSmall V E K U _ _ _ _ _ _ tail head ktail khead π hphys p D hp hpmax hn hDlo hDhi</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     hdo hdi hdko hdki htwo hcut H₀ Hₖ hdisj hhub hωn huV ps qs δsp Dexc hdata hsmall i hipos</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     hcommon hpaths ψ hRerr hSerr hψ hcut0 hcutK hcutH0 hcutHK PE PK H₀&#x27; Hₖ&#x27; hH0 hHK hV hU</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     t&#x27; h&#x27; kt&#x27; kh&#x27; hbp0 hbm0 hbk hbw</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>   let n:ℝ:=Fintype.card V</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>   have hnpos:0&lt;Fintype.card V:=by omega</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>   have hnreal:0&lt;n:=by change 0&lt;(Fintype.card V:ℝ);exact_mod_cast hnpos</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>   have hu:0&lt;Fintype.card U:=by</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     have ht:0&lt;(Fintype.card U:ℝ):=(mul_pos hω hnreal).trans_le hωn</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     exact_mod_cast ht</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>   have hωmax:ω≤1:=by</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     have huR:(Fintype.card U:ℝ)≤n:=by</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>       change (Fintype.card U:ℝ)≤(Fintype.card V:ℝ)</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>       exact_mod_cast huV</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     change ω*n≤_ at hωn</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     nlinarith</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>   let d:=σ*n</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>   have hd:0≤d:=by dsimp only [d];positivity</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>   obtain ⟨hinj,hkinj⟩:=markedPhysicalEdge_endpoint_injections tail head ktail khead π hphys</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>   have hEout (v:V):(∑ e,if ¬PE e∧tail e=v then (1:ℝ) else 0)≤d:=(hV v).1</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>   have hEin (v:V):(∑ e,if ¬PE e∧head e=v then (1:ℝ) else 0)≤d:=(hV v).2.1</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>   have hKout (v:V):(∑ e,if ¬PK e∧ktail e=v then (1:ℝ) else 0)≤d:=(hV v).2.2.1</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>   have hKin (v:V):(∑ e,if ¬PK e∧khead e=v then (1:ℝ) else 0)≤d:=(hV v).2.2.2.1</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>   have hH0row (v:V):(∑ u,if H₀ v u∧¬H₀&#x27; v u then (1:ℝ) else 0)≤d:=(hV v).2.2.2.2.1</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>   have hHKrow (v:V):(∑ u,if Hₖ v u∧¬Hₖ&#x27; v u then (1:ℝ) else 0)≤d:=(hV v).2.2.2.2.2</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>   have hH0col (u:U):(∑ v,if H₀ v u∧¬H₀&#x27; v u then (1:ℝ) else 0)≤d:=(hU u).1</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>   have hHKcol (u:U):(∑ v,if Hₖ v u∧¬Hₖ&#x27; v u then (1:ℝ) else 0)≤d:=(hU u).2</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>   have hdε : d≤(ε/2)*n := mul_le_mul_of_nonneg_right hsε hnreal.le</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>   have hdegree {A : Type} [Fintype A] (f : A → V) (keep : A → Prop) (μ : ℝ)</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>       (hbase : ∀ x,|occurrenceDegree f x-μ|≤(ε/2)*n)</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>       (hdel : ∀ x,(∑ a,if ¬keep a ∧ f a=x then (1:ℝ) else 0)≤d) :</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>       ∀ x,|occurrenceDegree (fun a : {a // keep a}=&gt;f a.val) x-μ|≤ε*n := by</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     intro x</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>     have hh := occurrenceDegree_restriction_target f keep x μ ((ε/2)*n) d (hbase x) (by convert hdel x using 1 &lt;;&gt; congr!)</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>     linarith only [hh,hdε]</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>   have hd0 := hdegree tail PE (p*D) hdo (by convert hEout using 1 &lt;;&gt; congr!)</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>   have hdi0 := hdegree head PE (p*D) hdi (by convert hEin using 1 &lt;;&gt; congr!)</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>   have hdk0 := hdegree ktail PK (p*D/(k+1:ℝ)) hdko (by convert hKout using 1 &lt;;&gt; congr!)</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>   have hdki0 := hdegree khead PK (p*D/(k+1:ℝ)) hdki (by convert hKin using 1 &lt;;&gt; congr!)</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>   have hp2 : p₀^2≤p^2 := pow_le_pow_left₀ hp₀.le hp 2</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>   have htwoCost : 2*d≤α*p^2*n := by</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>     have h1 := mul_le_mul_of_nonneg_right hs2 hnreal.le</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>     have h2 := mul_le_mul_of_nonneg_left hp2 (mul_nonneg hα.le hnreal.le)</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>     dsimp only [d]</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>     nlinarith only [h1,h2,mul_nonneg hσ.le hnreal.le]</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>   have htwo&#x27; (x y : V) (hxy : x≠y) : 2*α*p^2*n≤</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>       ((Finset.univ.filter (fun z=&gt;(∃ e : {e // PE e},tail e.val=x ∧ head e.val=z) ∧</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>         (∃ e : {e // PE e},tail e.val=z ∧ head e.val=y))).card:ℝ) := by</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>     have hbase := htwo x y hxy</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>     have hloss := represented_two_step_deletion tail head PE x y d (by convert hEout x using 1 &lt;;&gt; congr!) (by convert hEin y using 1 &lt;;&gt; congr!)</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>     have hh := (abs_le.mp hloss).1</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>     change 4*α*p^2*n≤_ at hbase</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>     nlinarith only [hh,hbase,htwoCost,mul_nonneg hα.le (mul_nonneg (sq_nonneg p) hnreal.le)]</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>   have hcutCost : d≤(α*p/16)*n := by</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>     have h1 := mul_le_mul_of_nonneg_right hsCut hnreal.le</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>     have h2 := mul_le_mul_of_nonneg_left hp (mul_nonneg hα.le hnreal.le)</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>     dsimp only [d]</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>     nlinarith only [h1,h2,mul_nonneg hσ.le hnreal.le]</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>   have hcut&#x27; (S T : Finset V)</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>       (hST : (1-2*min (α/16) (p/128))*n&lt;(S.card:ℝ)+T.card) :</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a>       2*(α*p/16)*n*min (S.card:ℝ) T.card≤</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>         ((Finset.univ.filter (fun e : {e // PE e}=&gt;tail e.val∈S ∧ head e.val∈T)).card:ℝ) := by</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>     have hbase := hcut S T hST</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>     have hloss:=occurrence_cut_restriction_loss hnpos tail head hinj PE d hd</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>       (by convert hEout using 1 &lt;;&gt; congr!) (by convert hEin using 1 &lt;;&gt; congr!) S T</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>     have hs : 0≤min (S.card:ℝ) T.card := by positivity</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>     have hh := mul_le_mul_of_nonneg_right hcutCost hs</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>     change 4*(α*p/16)*n*min (S.card:ℝ) T.card≤_ at hbase</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>     have hi : 2*(α*p/16)*n*min (S.card:ℝ) T.card≤</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>         ((Finset.univ.filter (fun e : E=&gt;tail e∈S ∧ head e∈T)).card:ℝ)-d*min (S.card:ℝ) T.card := by</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a>       have ht:0≤(α*p/16)*n*min (S.card:ℝ) T.card:=by</span>
+<span id="L185"><a href="#L185" class="ln"> 185</a>         have hp&#x27;:0≤p:=hp₀.le.trans hp</span>
+<span id="L186"><a href="#L186" class="ln"> 186</a>         positivity</span>
+<span id="L187"><a href="#L187" class="ln"> 187</a>       nlinarith only [hbase,hh,ht]</span>
+<span id="L188"><a href="#L188" class="ln"> 188</a>     convert (hi.trans (by convert hloss using 1 &lt;;&gt; congr!)) using 1 &lt;;&gt; congr!</span>
+<span id="L189"><a href="#L189" class="ln"> 189</a>   have hcountCost : 4*c*d≤β*n := by</span>
+<span id="L190"><a href="#L190" class="ln"> 190</a>     have hs := (le_div_iff₀ (by positivity : 0&lt;8*c)).mp hsCount</span>
+<span id="L191"><a href="#L191" class="ln"> 191</a>     have hh := mul_le_mul_of_nonneg_right hs hnreal.le</span>
+<span id="L192"><a href="#L192" class="ln"> 192</a>     have hnon : 0≤c*d := mul_nonneg hc.le hd</span>
+<span id="L193"><a href="#L193" class="ln"> 193</a>     dsimp only [d] at hnon ⊢</span>
+<span id="L194"><a href="#L194" class="ln"> 194</a>     nlinarith only [hh,hnon]</span>
+<span id="L195"><a href="#L195" class="ln"> 195</a>   have hcEq : ((k+1:ℕ):ℝ)+1=c := by dsimp only [c];push_cast;ring</span>
+<span id="L196"><a href="#L196" class="ln"> 196</a>   have hhub&#x27; := marked_hub_count_restriction PE PK hH0 hHK (2*β) d</span>
+<span id="L197"><a href="#L197" class="ln"> 197</a>     (by rw [hcEq];nlinarith only [hcountCost,mul_nonneg hc.le hd]) (by convert hH0row using 1 &lt;;&gt; congr!) (by convert hHKrow using 1 &lt;;&gt; congr!) (by intro C;convert hhub C using 1 &lt;;&gt; ring)</span>
+<span id="L198"><a href="#L198" class="ln"> 198</a>   have hcommon&#x27; (u u&#x27; : U) (hne : u≠u&#x27;) : 2*β*n^(k+2)≤</span>
+<span id="L199"><a href="#L199" class="ln"> 199</a>       (Fintype.card (CommonMarkedCycle (fun e : {e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L200"><a href="#L200" class="ln"> 200</a>         (fun e : {e // PK e}=&gt;ktail e.val) (fun e=&gt;khead e.val) (k+1) π b H₀&#x27; Hₖ&#x27; u u&#x27;):ℝ) := by</span>
+<span id="L201"><a href="#L201" class="ln"> 201</a>     have hh := marked_common_cycle_count_restriction (by omega : 1≤k+1) PE PK (2*β) d</span>
+<span id="L202"><a href="#L202" class="ln"> 202</a>       (by rw [hcEq];nlinarith only [hcountCost,mul_nonneg hc.le hd]) (by convert hEout using 1 &lt;;&gt; congr!) (by convert hKout using 1 &lt;;&gt; congr!) (by convert hH0col using 1 &lt;;&gt; congr!) (by convert hHKcol using 1 &lt;;&gt; congr!) u u&#x27; (by convert hcommon u u&#x27; hne using 1 &lt;;&gt; ring)</span>
+<span id="L203"><a href="#L203" class="ln"> 203</a>     convert hh using 1 &lt;;&gt; congr!</span>
+<span id="L204"><a href="#L204" class="ln"> 204</a>   have htyped (j : Bool) (v : V) (u : U) :</span>
+<span id="L205"><a href="#L205" class="ln"> 205</a>       (if j then Hₖ&#x27; else H₀&#x27;) v u → (if j then Hₖ else H₀) v u := by</span>
+<span id="L206"><a href="#L206" class="ln"> 206</a>     cases j</span>
+<span id="L207"><a href="#L207" class="ln"> 207</a>     · exact hH0 v u</span>
+<span id="L208"><a href="#L208" class="ln"> 208</a>     · exact hHK v u</span>
+<span id="L209"><a href="#L209" class="ln"> 209</a>   have hpaths&#x27; (j : Bool) (Q : BipartiteFourCycle (if j then Hₖ&#x27; else H₀&#x27;)) :</span>
+<span id="L210"><a href="#L210" class="ln"> 210</a>       2*β*n^(k+1)≤</span>
+<span id="L211"><a href="#L211" class="ln"> 211</a>       (Fintype.card (CanonicalCommonMarkedPath (fun e : {e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L212"><a href="#L212" class="ln"> 212</a>         (fun e : {e // PK e}=&gt;ktail e.val) (fun e=&gt;khead e.val) (k+1) π b H₀&#x27; Hₖ&#x27; (i j)</span>
+<span id="L213"><a href="#L213" class="ln"> 213</a>         Q.val.1.1 Q.val.1.2 Q.val.2.1 Q.val.2.2):ℝ) := by</span>
+<span id="L214"><a href="#L214" class="ln"> 214</a>     let Qp : BipartiteFourCycle (if j then Hₖ else H₀) :=</span>
+<span id="L215"><a href="#L215" class="ln"> 215</a>       ⟨Q.val,Q.property.1,Q.property.2.1,htyped j _ _ Q.property.2.2.1,</span>
+<span id="L216"><a href="#L216" class="ln"> 216</a>         htyped j _ _ Q.property.2.2.2.1,htyped j _ _ Q.property.2.2.2.2.1,</span>
+<span id="L217"><a href="#L217" class="ln"> 217</a>         htyped j _ _ Q.property.2.2.2.2.2⟩</span>
+<span id="L218"><a href="#L218" class="ln"> 218</a>     have hh := marked_canonical_path_count_restriction (by omega : 1≤k+1) PE PK (2*β) d</span>
+<span id="L219"><a href="#L219" class="ln"> 219</a>       (by rw [hcEq];nlinarith only [hcountCost,mul_nonneg hβ.le hnreal.le]) (by convert hEout using 1 &lt;;&gt; congr!) (by convert hEin using 1 &lt;;&gt; congr!) (by convert hKout using 1 &lt;;&gt; congr!) (by convert hKin using 1 &lt;;&gt; congr!) (by convert hH0col using 1 &lt;;&gt; congr!) (by convert hHKcol using 1 &lt;;&gt; congr!)</span>
+<span id="L220"><a href="#L220" class="ln"> 220</a>       (i j) Q.val.1.1 Q.val.1.2 Q.val.2.1 Q.val.2.2 (by convert hpaths j Qp using 1 &lt;;&gt; ring)</span>
+<span id="L221"><a href="#L221" class="ln"> 221</a>     convert hh using 1 &lt;;&gt; congr!</span>
+<span id="L222"><a href="#L222" class="ln"> 222</a>   let ρ := 6*(L^2+ω)*σ/ω</span>
+<span id="L223"><a href="#L223" class="ln"> 223</a>   have hρ : 0≤ρ := by dsimp only [ρ];positivity</span>
+<span id="L224"><a href="#L224" class="ln"> 224</a>   have hρid : ρ*ω=6*(L^2+ω)*σ := by dsimp only [ρ];field_simp</span>
+<span id="L225"><a href="#L225" class="ln"> 225</a>   have hρsmall : ρ≤δ₀/2 := by</span>
+<span id="L226"><a href="#L226" class="ln"> 226</a>     have hs := (le_div_iff₀ (by positivity : 0&lt;12*(L^2+ω))).mp hsData</span>
+<span id="L227"><a href="#L227" class="ln"> 227</a>     change 6*(L^2+ω)*σ/ω≤δ₀/2</span>
+<span id="L228"><a href="#L228" class="ln"> 228</a>     apply (div_le_iff₀ hω).mpr</span>
+<span id="L229"><a href="#L229" class="ln"> 229</a>     nlinarith only [hs]</span>
+<span id="L230"><a href="#L230" class="ln"> 230</a>   have hcolScale : 3*d≤ρ*n := by</span>
+<span id="L231"><a href="#L231" class="ln"> 231</a>     have hr : 6*σ≤ρ := by</span>
+<span id="L232"><a href="#L232" class="ln"> 232</a>       apply (le_div_iff₀ hω).mpr</span>
+<span id="L233"><a href="#L233" class="ln"> 233</a>       nlinarith only [mul_nonneg (sq_nonneg L) hσ.le]</span>
+<span id="L234"><a href="#L234" class="ln"> 234</a>     have hh := mul_le_mul_of_nonneg_right hr hnreal.le</span>
+<span id="L235"><a href="#L235" class="ln"> 235</a>     dsimp only [d]</span>
+<span id="L236"><a href="#L236" class="ln"> 236</a>     nlinarith only [hh,mul_nonneg hσ.le hnreal.le]</span>
+<span id="L237"><a href="#L237" class="ln"> 237</a>   have hrowScale : 2*L^2*d≤ρ*Fintype.card U := by</span>
+<span id="L238"><a href="#L238" class="ln"> 238</a>     have hh := mul_le_mul_of_nonneg_left hωn hρ</span>
+<span id="L239"><a href="#L239" class="ln"> 239</a>     have he := congrArg (fun z : ℝ=&gt;z*n) hρid</span>
+<span id="L240"><a href="#L240" class="ln"> 240</a>     have h1 : 0≤L^2*σ*n := by positivity</span>
+<span id="L241"><a href="#L241" class="ln"> 241</a>     have h2 : 0≤ω*σ*n := by positivity</span>
+<span id="L242"><a href="#L242" class="ln"> 242</a>     dsimp only [d]</span>
+<span id="L243"><a href="#L243" class="ln"> 243</a>     nlinarith only [hh,he,h1,h2]</span>
+<span id="L244"><a href="#L244" class="ln"> 244</a>   have hdata&#x27; (j : Bool) : SparseIntersectionData (if j then Hₖ&#x27; else H₀&#x27;)</span>
+<span id="L245"><a href="#L245" class="ln"> 245</a>       (ps j) (qs j) L (δsp+ρ) Dexc := by</span>
+<span id="L246"><a href="#L246" class="ln"> 246</a>     apply (hdata j).deletion (if j then Hₖ&#x27; else H₀&#x27;) (htyped j) d ρ hd hρ</span>
+<span id="L247"><a href="#L247" class="ln"> 247</a>     · intro v</span>
+<span id="L248"><a href="#L248" class="ln"> 248</a>       cases j</span>
+<span id="L249"><a href="#L249" class="ln"> 249</a>       · simpa only [Bool.false_eq_true,ite_false,bipAdj] using hH0row v</span>
+<span id="L250"><a href="#L250" class="ln"> 250</a>       · simpa only [ite_true,bipAdj] using hHKrow v</span>
+<span id="L251"><a href="#L251" class="ln"> 251</a>     · intro u</span>
+<span id="L252"><a href="#L252" class="ln"> 252</a>       cases j</span>
+<span id="L253"><a href="#L253" class="ln"> 253</a>       · simpa only [Bool.false_eq_true,ite_false,bipAdj] using hH0col u</span>
+<span id="L254"><a href="#L254" class="ln"> 254</a>       · simpa only [ite_true,bipAdj] using hHKcol u</span>
+<span id="L255"><a href="#L255" class="ln"> 255</a>     · exact hcolScale</span>
+<span id="L256"><a href="#L256" class="ln"> 256</a>     · exact hrowScale</span>
+<span id="L257"><a href="#L257" class="ln"> 257</a>   have hsmall&#x27; : (δsp+ρ)+Dexc/n+1/(Fintype.card U:ℝ)≤δ₀ := by</span>
+<span id="L258"><a href="#L258" class="ln"> 258</a>     change δsp+Dexc/n+1/(Fintype.card U:ℝ)≤δ₀/2 at hsmall</span>
+<span id="L259"><a href="#L259" class="ln"> 259</a>     linarith only [hsmall,hρsmall]</span>
+<span id="L260"><a href="#L260" class="ln"> 260</a>   have haggOut (x : V) :</span>
+<span id="L261"><a href="#L261" class="ln"> 261</a>       (∑ e,if ¬Sum.elim PE PK e ∧ Sum.elim tail ktail e=x then (1:ℝ) else 0)≤2*d := by</span>
+<span id="L262"><a href="#L262" class="ln"> 262</a>     simp only [Fintype.sum_sum_type,Sum.elim_inl,Sum.elim_inr]</span>
+<span id="L263"><a href="#L263" class="ln"> 263</a>     have he : (∑ e,if ¬PE e ∧ tail e=x then (1:ℝ) else 0)≤d := by convert hEout x using 1 &lt;;&gt; congr!</span>
+<span id="L264"><a href="#L264" class="ln"> 264</a>     have hk : (∑ e,if ¬PK e ∧ ktail e=x then (1:ℝ) else 0)≤d := by convert hKout x using 1 &lt;;&gt; congr!</span>
+<span id="L265"><a href="#L265" class="ln"> 265</a>     exact add_le_add he hk |&gt;.trans (by ring_nf;exact le_rfl)</span>
+<span id="L266"><a href="#L266" class="ln"> 266</a>   have haggIn (x : V) :</span>
+<span id="L267"><a href="#L267" class="ln"> 267</a>       (∑ e,if ¬Sum.elim PE PK e ∧ Sum.elim head khead e=x then (1:ℝ) else 0)≤2*d := by</span>
+<span id="L268"><a href="#L268" class="ln"> 268</a>     simp only [Fintype.sum_sum_type,Sum.elim_inl,Sum.elim_inr]</span>
+<span id="L269"><a href="#L269" class="ln"> 269</a>     have he : (∑ e,if ¬PE e ∧ head e=x then (1:ℝ) else 0)≤d := by convert hEin x using 1 &lt;;&gt; congr!</span>
+<span id="L270"><a href="#L270" class="ln"> 270</a>     have hk : (∑ e,if ¬PK e ∧ khead e=x then (1:ℝ) else 0)≤d := by convert hKin x using 1 &lt;;&gt; congr!</span>
+<span id="L271"><a href="#L271" class="ln"> 271</a>     exact add_le_add he hk |&gt;.trans (by ring_nf;exact le_rfl)</span>
+<span id="L272"><a href="#L272" class="ln"> 272</a>   have haggRow (x : V) :</span>
+<span id="L273"><a href="#L273" class="ln"> 273</a>       (∑ u,bipAdj (fun x u=&gt;(H₀ x u ∨ Hₖ x u) ∧ ¬(H₀&#x27; x u ∨ Hₖ&#x27; x u)) x u)≤2*d := by</span>
+<span id="L274"><a href="#L274" class="ln"> 274</a>     convert deleted_spoke_union_row_sum_le H₀ Hₖ H₀&#x27; Hₖ&#x27; x d (by convert hH0row x using 1 &lt;;&gt; congr!) (by convert hHKrow x using 1 &lt;;&gt; congr!) using 1 &lt;;&gt; simp only [bipAdj] &lt;;&gt; congr!</span>
+<span id="L275"><a href="#L275" class="ln"> 275</a>   have haggCol (u : U) :</span>
+<span id="L276"><a href="#L276" class="ln"> 276</a>       (∑ x,bipAdj (fun x u=&gt;(H₀ x u ∨ Hₖ x u) ∧ ¬(H₀&#x27; x u ∨ Hₖ&#x27; x u)) x u)≤2*d := by</span>
+<span id="L277"><a href="#L277" class="ln"> 277</a>     convert deleted_spoke_union_col_sum_le H₀ Hₖ H₀&#x27; Hₖ&#x27; u d (by convert hH0col u using 1 &lt;;&gt; congr!) (by convert hHKcol u using 1 &lt;;&gt; congr!) using 1 &lt;;&gt; simp only [bipAdj] &lt;;&gt; congr!</span>
+<span id="L278"><a href="#L278" class="ln"> 278</a>   let ψ&#x27; := fun W=&gt;ψ (markedWheelToLarger PE PK hH0 hHK W)</span>
+<span id="L279"><a href="#L279" class="ln"> 279</a>   obtain ⟨hψ&#x27;,hR&#x27;,hS&#x27;⟩ := marked_approximate_weights_restriction hkm hphys hnpos huV PE PK hH0 hHK hdisj</span>
+<span id="L280"><a href="#L280" class="ln"> 280</a>     ψ bminus bplus (η₀/2) (2*d) hbm.le hbp.le (by positivity) (by positivity) hψ hRerr hSerr</span>
+<span id="L281"><a href="#L281" class="ln"> 281</a>     haggOut haggIn haggRow haggCol</span>
+<span id="L282"><a href="#L282" class="ln"> 282</a>   have hloadCost : 8*((k+1:ℝ)+1)^4*bplus*(2*d)/n≤η₀/2 := by</span>
+<span id="L283"><a href="#L283" class="ln"> 283</a>     have hs := (le_div_iff₀ (by positivity : 0&lt;32*c^4*bplus)).mp hsLoad</span>
+<span id="L284"><a href="#L284" class="ln"> 284</a>     have he : 8*((k+1:ℝ)+1)^4*bplus*(2*d)/n=16*c^4*bplus*σ := by</span>
+<span id="L285"><a href="#L285" class="ln"> 285</a>       dsimp only [c,d]</span>
+<span id="L286"><a href="#L286" class="ln"> 286</a>       field_simp</span>
+<span id="L287"><a href="#L287" class="ln"> 287</a>       ring</span>
+<span id="L288"><a href="#L288" class="ln"> 288</a>     rw [he]</span>
+<span id="L289"><a href="#L289" class="ln"> 289</a>     nlinarith only [hs]</span>
+<span id="L290"><a href="#L290" class="ln"> 290</a>   have hR&#x27;&#x27; (e : {e // PE e}⊕{e // PK e}) : |markedWheelRimLoad ψ&#x27; e-1|≤η₀ := by</span>
+<span id="L291"><a href="#L291" class="ln"> 291</a>     have hh := hR&#x27; e</span>
+<span id="L292"><a href="#L292" class="ln"> 292</a>     simp only [Nat.cast_add,Nat.cast_one] at hh</span>
+<span id="L293"><a href="#L293" class="ln"> 293</a>     linarith only [hh,hloadCost]</span>
+<span id="L294"><a href="#L294" class="ln"> 294</a>   have hS&#x27;&#x27; (j : Bool) (v : V) (u : U) : |markedSpokeResidual ψ&#x27; j v u|≤η₀ := by</span>
+<span id="L295"><a href="#L295" class="ln"> 295</a>     have hh := hS&#x27; j v u</span>
+<span id="L296"><a href="#L296" class="ln"> 296</a>     simp only [Nat.cast_add,Nat.cast_one] at hh</span>
+<span id="L297"><a href="#L297" class="ln"> 297</a>     linarith only [hh,hloadCost]</span>
+<span id="L298"><a href="#L298" class="ln"> 298</a>   have hphys&#x27; := markedRestrictedPhysical_injective PE PK hphys</span>
+<span id="L299"><a href="#L299" class="ln"> 299</a>   have hdisj&#x27; (v : V) (u : U) : ¬(H₀&#x27; v u ∧ Hₖ&#x27; v u) :=</span>
+<span id="L300"><a href="#L300" class="ln"> 300</a>     fun h=&gt;hdisj v u ⟨hH0 v u h.1,hHK v u h.2⟩</span>
+<span id="L301"><a href="#L301" class="ln"> 301</a>   have hsH1:σ≤h:=le_trans (hsH.trans (min_le_left _ _)) (by linarith)</span>
+<span id="L302"><a href="#L302" class="ln"> 302</a>   have hsHω:σ/ω≤h:=by</span>
+<span id="L303"><a href="#L303" class="ln"> 303</a>     apply (div_le_iff₀ hω).mpr</span>
+<span id="L304"><a href="#L304" class="ln"> 304</a>     have ht:=hsH.trans (min_le_right _ _)</span>
+<span id="L305"><a href="#L305" class="ln"> 305</a>     nlinarith only [ht,mul_nonneg hh.le hω.le]</span>
+<span id="L306"><a href="#L306" class="ln"> 306</a>   have hcut0&#x27;:BipartiteLargeCut (occurrenceMultiplicity t&#x27; h&#x27;) δ h:=by</span>
+<span id="L307"><a href="#L307" class="ln"> 307</a>     have ht:=occurrence_bipartiteLargeCut_restriction hnpos tail head hinj PE δ (2*h) σ hσ.le</span>
+<span id="L308"><a href="#L308" class="ln"> 308</a>       (by convert hEout using 1 &lt;;&gt; congr!) (by convert hEin using 1 &lt;;&gt; congr!) hcut0</span>
+<span id="L309"><a href="#L309" class="ln"> 309</a>     apply bipartiteLargeCut_coefficient_mono _ δ (2*h-σ) h (by linarith)</span>
+<span id="L310"><a href="#L310" class="ln"> 310</a>     convert ht using 1 &lt;;&gt; congr!</span>
+<span id="L311"><a href="#L311" class="ln"> 311</a>   have hcutK&#x27;:BipartiteLargeCut (occurrenceMultiplicity kt&#x27; kh&#x27;) δ h:=by</span>
+<span id="L312"><a href="#L312" class="ln"> 312</a>     have ht:=occurrence_bipartiteLargeCut_restriction hnpos ktail khead hkinj PK δ (2*h) σ hσ.le</span>
+<span id="L313"><a href="#L313" class="ln"> 313</a>       (by convert hKout using 1 &lt;;&gt; congr!) (by convert hKin using 1 &lt;;&gt; congr!) hcutK</span>
+<span id="L314"><a href="#L314" class="ln"> 314</a>     apply bipartiteLargeCut_coefficient_mono _ δ (2*h-σ) h (by linarith)</span>
+<span id="L315"><a href="#L315" class="ln"> 315</a>     convert ht using 1 &lt;;&gt; congr!</span>
+<span id="L316"><a href="#L316" class="ln"> 316</a>   have hrowScale&#x27;:d≤(σ/ω)*Fintype.card U:=by</span>
+<span id="L317"><a href="#L317" class="ln"> 317</a>     have ht:=mul_le_mul_of_nonneg_left hωn (by positivity:0≤σ/ω)</span>
+<span id="L318"><a href="#L318" class="ln"> 318</a>     dsimp only [d]</span>
+<span id="L319"><a href="#L319" class="ln"> 319</a>     calc</span>
+<span id="L320"><a href="#L320" class="ln"> 320</a>       σ*n=(σ/ω)*(ω*n):=by field_simp</span>
+<span id="L321"><a href="#L321" class="ln"> 321</a>       _≤_:=ht</span>
+<span id="L322"><a href="#L322" class="ln"> 322</a>   have hcolScale&#x27;:d≤(σ/ω)*Fintype.card V:=by</span>
+<span id="L323"><a href="#L323" class="ln"> 323</a>     apply mul_le_mul_of_nonneg_right _ hnreal.le</span>
+<span id="L324"><a href="#L324" class="ln"> 324</a>     apply (le_div_iff₀ hω).mpr</span>
+<span id="L325"><a href="#L325" class="ln"> 325</a>     nlinarith only [mul_le_mul_of_nonneg_left hωmax hσ.le]</span>
+<span id="L326"><a href="#L326" class="ln"> 326</a>   have hcutSpoke (H H&#x27;:V→U→Prop) (hsub:∀ v u,H&#x27; v u→H v u)</span>
+<span id="L327"><a href="#L327" class="ln"> 327</a>       (hr:∀ v,(∑ u,if H v u∧¬H&#x27; v u then (1:ℝ) else 0)≤d)</span>
+<span id="L328"><a href="#L328" class="ln"> 328</a>       (hc:∀ u,(∑ v,if H v u∧¬H&#x27; v u then (1:ℝ) else 0)≤d)</span>
+<span id="L329"><a href="#L329" class="ln"> 329</a>       (hcut:BipartiteLargeCut (relationMultiplicity H) δ (2*h)):</span>
+<span id="L330"><a href="#L330" class="ln"> 330</a>       BipartiteLargeCut (relationMultiplicity H&#x27;) δ h:=by</span>
+<span id="L331"><a href="#L331" class="ln"> 331</a>     have ht:=bipartiteLargeCut_subrelation V U hnpos hu H H&#x27; hsub δ (2*h) (σ/ω) (by positivity)</span>
+<span id="L332"><a href="#L332" class="ln"> 332</a>       (fun v=&gt;(hr v).trans hrowScale&#x27;) (fun u=&gt;(hc u).trans hcolScale&#x27;) hcut</span>
+<span id="L333"><a href="#L333" class="ln"> 333</a>     exact bipartiteLargeCut_coefficient_mono _ δ (2*h-σ/ω) h (by linarith) ht</span>
+<span id="L334"><a href="#L334" class="ln"> 334</a>   have hcutH0&#x27;:=hcutSpoke H₀ H₀&#x27; hH0 hH0row hH0col hcutH0</span>
+<span id="L335"><a href="#L335" class="ln"> 335</a>   have hcutHK&#x27;:=hcutSpoke Hₖ Hₖ&#x27; hHK hHKrow hHKcol hcutHK</span>
+<span id="L336"><a href="#L336" class="ln"> 336</a>   have hresult:=hN η hηsmall hηbalSmall V {e//PE e} {e//PK e} U</span>
+<span id="L337"><a href="#L337" class="ln"> 337</a>     t&#x27; h&#x27; kt&#x27; kh&#x27; π hphys&#x27; p D hp hpmax ((le_max_right _ _).trans hn) hDlo hDhi</span>
+<span id="L338"><a href="#L338" class="ln"> 338</a>     hd0 hdi0 hdk0 hdki0 (by convert htwo&#x27; using 1 &lt;;&gt; congr!) (by convert hcut&#x27; using 1 &lt;;&gt; congr!)</span>
+<span id="L339"><a href="#L339" class="ln"> 339</a>     H₀&#x27; Hₖ&#x27; hdisj&#x27; (by convert hhub&#x27; using 1 &lt;;&gt; congr!) hωn huV ps qs (δsp+ρ) Dexc hdata&#x27; hsmall&#x27; i hipos</span>
+<span id="L340"><a href="#L340" class="ln"> 340</a>     (by convert hcommon&#x27; using 1 &lt;;&gt; congr!) (by convert hpaths&#x27; using 1 &lt;;&gt; congr!)</span>
+<span id="L341"><a href="#L341" class="ln"> 341</a>     ψ&#x27; hR&#x27;&#x27; hS&#x27;&#x27; hψ&#x27;</span>
+<span id="L342"><a href="#L342" class="ln"> 342</a>     (occurrenceMultiplicity t&#x27; h&#x27;) (occurrenceMultiplicity kt&#x27; kh&#x27;) (relationMultiplicity H₀&#x27;) (relationMultiplicity Hₖ&#x27;)</span>
+<span id="L343"><a href="#L343" class="ln"> 343</a>     (fun _ _=&gt;le_rfl) (fun _ _=&gt;le_rfl) (fun _ _=&gt;le_rfl) (fun _ _=&gt;le_rfl)</span>
+<span id="L344"><a href="#L344" class="ln"> 344</a>     hbp0 hbm0 hbk hbw hcut0&#x27; hcutK&#x27; hcutH0&#x27; hcutHK&#x27;</span>
+<span id="L345"><a href="#L345" class="ln"> 345</a>   convert hresult using 1 &lt;;&gt; congr!</span>
+<span id="L346"><a href="#L346" class="ln"> 346</a> end Oberwolfach</span></pre></html>

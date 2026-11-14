@@ -1,0 +1,164 @@
+--- manuscript-before-cycle-rounding-21Oct2026.tex
++++ readability_refactored_manuscript_29Sep2026.tex
+@@ -4826,51 +4826,99 @@
+ $\Pr(e\notin E(R))\le C\sqrt\eta$ for every $e\in E(B)$.
+ \end{lemma}
+ \begin{proof}
+-Put $f(v)=d_B(v)-k$ and let $M$ be their common total on either
+-part. Then
+-$f(v)=(\sqrt\eta\pm\eta)m+O(1)$ and
+-$M=(\sqrt\eta\pm\eta)m^2+O(m)$.
+ Put
+ \[
+  \delta_0=\min\{\beta/4,1/8\},\qquad
+- h=\min\{\beta/2,1/4\}.
+-\]
++ h=\min\{\beta/2,1/4\},\qquad C=4/h.
++\]
++Choose $\eta_0>0$ so that
++$\sqrt{\eta_0}<\min\{1/8,\delta_0/8,1/(2C)\}$,
++and, for each $0<\eta<\eta_0$, choose $m_0\ge1/\eta$.
++Write $s_0=\sqrt\eta$ and $p=Cs_0$.
++The degree assumptions give
++$d-s_0m\ge(1/2+\beta-\eta-s_0)m>0$, so $k\ge0$.
++Put $f(v)=d_B(v)-k$ and
++$M=\sum_{v\in A_1}f(v)=\sum_{v\in A_2}f(v)$.
++The definition of $k$ and $m\ge1/\eta$ give
++\[
++ (s_0-\eta)m\le f(v)<(s_0+\eta)m+1
++                       \le(s_0+2\eta)m.
++\]
++The same bounds hold for $M/m$. Since
++\[
++ \frac{s_0+2\eta}{s_0-\eta}
++   =1+\frac{3s_0}{1-s_0}\le1+\delta_0,
++ \qquad \frac{s_0+2\eta}{p}
++   =\frac{1+2s_0}{C}\le\frac h2,
++\]
++we have $0<p<1$, $M/p\le hm^2/2$, and
++\[
++ \frac{f(v)}p\in(1\pm\delta_0)\frac{M}{pm}
++       \qquad(v\in A_1\cup A_2).
++\]
++
+ Let $S\subseteq A_1$ and $T\subseteq A_2$, and write
+ $s=|S|/m$ and $t=|T|/m$. Suppose $s+t>1-2\delta_0$.
+-If $s\le t$, then $t>1/2-\delta_0$, so
++If $s\le t$, then $t>1/2-\delta_0$ and
+ \[
+  e_B(S,T)\ge |S|\bigl((1/2+\beta)m-(m-|T|)\bigr)
+-             \ge hm|S|.
+-\]
+-The case $t\le s$ is symmetric. Thus $B$ satisfies the cut
+-hypothesis of Lemma~\ref{lem:prelim:normalized-demands} with
+-both part sizes $m$, $\delta=\delta_0$ and $h$.
+-
+-Choose $C\ge4/h$ and put $p=C\sqrt\eta$. After decreasing
+-$\eta_0$ and, for the fixed $\eta$, increasing $m_0$, we have
+-$p<1$ and
+-\[
+- \frac{M}{p}\le\frac h2m^2,\qquad
+- \frac{f(v)}p\in(1\pm\delta_0)\frac{M}{pm}
+-       \quad(v\in A_1\cup A_2).
+-\]
+-In particular these demands are nonnegative.
+-Lemma~\ref{lem:prelim:normalized-demands}, with
+-$M/p$ in place of its total demand, gives $q:E(B)\to[0,1]$
+-with degree $f(v)/p$ at every $v$. Set $z=pq$. Then $z$ has
+-degrees $f(v)$ and $0\le z(e)\le p$ for every $e\in E(B)$.
+-
+-The bounded bipartite degree polytope
+-\[
+- \{x\in[0,1]^{E(B)}:\ \sum_{e\in E_B(v)}x(e)=f(v)\ (v\in V(B))\}
+-\]
+-contains $z$. Apply \cite[Theorem~2.3, properties (P1)--(P2)]{GKPS2006}
+-to $z$. The demands $f(v)$ are integers, so the output has exactly
+-these degrees and expected incidence vector $z$. Thus $z$ is a convex
+-combination of indicators of subgraphs with degrees $f(v)$. Sample one of these subgraphs according
+-to the convex coefficients and delete it.
+-The surviving graph is $k$-regular and
+-$\Pr(e\text{ is deleted})=z(e)\le p$.
++             \ge hm|S|,
++\]
++since $\beta-\delta_0\ge h$.
++The case $t\le s$ is symmetric. Thus
++Lemma~\ref{lem:prelim:normalized-demands}, with both part sizes $m$,
++$\delta=\delta_0$ and total demand $M/p$, gives
++$q:E(B)\to[0,1]$ with incident sum $f(v)/p$ at every vertex $v$.
++Set $z=pq$. Then $z$ has incident sums $f(v)$ and
++$0\le z(e)\le p$ for every $e\in E(B)$.
++
++We show that every $x\in[0,1]^{E(B)}$ with incident sums $f(v)$
++is a finite convex combination of indicators of spanning subgraphs
++$D\subseteq B$ satisfying $d_D(v)=f(v)$ for every $v$.
++We induct on the number of edges $e$ with $0<x(e)<1$.
++If there are no such edges, $x$ itself is the indicator of such a
++subgraph. Otherwise let $F_x$ be the spanning subgraph with edge set
++$\{e\in E(B):0<x(e)<1\}$. For every vertex $v$,
++\[
++ \sum_{e\in E_{F_x}(v)}x(e)
++   =f(v)-|\{e\in E_B(v):x(e)=1\}|\in\mathbb Z.
++\]
++Thus $F_x$ has no vertex of degree one. A component of $F_x$
++containing an edge has minimum degree at least two and hence
++contains a cycle. Since $B$ is bipartite, this cycle has even
++length. Write its edges in cyclic order as $e_1,\ldots,e_{2\ell}$,
++and define $\sigma:E(B)\to\{-1,0,1\}$ by
++\[
++ \sigma(e_{2j-1})=1,\quad \sigma(e_{2j})=-1\quad(j\in[\ell]),
++ \qquad \sigma(e)=0\quad(e\notin\{e_1,\ldots,e_{2\ell}\}).
++\]
++Put
++\[
++ t_+=\min_{j\in[\ell]}\{1-x(e_{2j-1}),x(e_{2j})\},\qquad
++ t_-=\min_{j\in[\ell]}\{x(e_{2j-1}),1-x(e_{2j})\},
++\]
++and let $x^+=x+t_+\sigma$ and $x^-=x-t_-\sigma$.
++Both $t_+$ and $t_-$ are positive. The vectors $x^+,x^-$ belong
++to $[0,1]^{E(B)}$, and their incident sums remain $f(v)$ because
++$\sigma$ has incident sum zero at each vertex. Each vector has
++strictly fewer coordinates in $(0,1)$ than $x$. Moreover,
++\[
++ x=\frac{t_-}{t_++t_-}x^+
++     +\frac{t_+}{t_++t_-}x^-.
++\]
++Applying the induction hypothesis to $x^+$ and $x^-$ proves the claim.
++
++In particular, write
++$z=\sum_{i=1}^N\lambda_i\mathbf1_{E(D_i)}$, where $N\ge1$,
++$\lambda_i\ge0$, $\sum_i\lambda_i=1$, and each $D_i\subseteq B$
++is spanning with $d_{D_i}(v)=f(v)$ for every $v$.
++Choose $i$ with probability $\lambda_i$ and let $R=B-E(D_i)$.
++Then $d_R(v)=d_B(v)-f(v)=k$ for every $v$, and
++\[
++ \Pr(e\notin E(R))
++   =\sum_{i:e\in E(D_i)}\lambda_i=z(e)\le p=C\sqrt\eta
++       \qquad(e\in E(B)).
++\]
+ \end{proof}
+ 
+ We use the distance and $(b,\pi)$-separation in
+@@ -4961,7 +5009,10 @@
+ 
+ On each good partition, apply
+ Lemma~\ref{lem:four:random-regularization} independently to
+-the $c$ interfaces, with the common degree parameter $d=Dm/n$.
++the $c$ interfaces, with $\beta/2$ in place of $\beta$ and the
++common degree parameter $d=Dm/n$. This is valid since each interface
++has minimum degree at least $(q_c+\beta-\varepsilon_0-\eta)m$,
++which is at least $(1/2+\beta/2)m$.
+ They become $k$-regular for
+ $k=\lfloor Dm/n-\sqrt\eta m\rfloor$.
+ Since $D\ge(q_c+\beta-\varepsilon_0)n$, for small $\eta$
+@@ -24949,11 +25000,6 @@
+ \newblock {\em Canadian Journal of Mathematics}, 9:210--218, 1957.
+ \newblock \url{https://doi.org/10.4153/CJM-1957-024-0}.
+ 
+-\bibitem{GKPS2006}
+-Rajiv Gandhi, Samir Khuller, Srinivasan Parthasarathy, and Aravind Srinivasan.
+-\newblock Dependent rounding and its applications to approximation algorithms.
+-\newblock {\em Journal of the ACM}, 53(3):324--360, 2006.
+-
+ \bibitem{GlockGouldJoosKuhnOsthus2021}
+ Stefan Glock, Stephen Gould, Felix Joos, Daniela K{\"u}hn, and Deryk Osthus.
+ \newblock Counting {Hamilton} cycles in {Dirac} hypergraphs.

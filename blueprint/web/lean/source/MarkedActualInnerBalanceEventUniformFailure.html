@@ -1,0 +1,241 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedActualInnerBalanceEventUniformFailure.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedActualInnerBalanceEventUniformFailure.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFiniteBalanceAdaptiveVortexEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedFixedVortexInnerDegrees</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedFixedVortexSizes</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedSeedDensities</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedActiveSizeThreshold</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.MarkedActiveSeedMass</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> import Oberwolfach.VortexSamplingDomainSizes</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> /-! Balance on the actual fixed inner vortex pairs, with a second event on</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> the same retained law and all later allowed deletions quantified together. -/</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option autoImplicit false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 40000000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> open scoped BigOperators</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> noncomputable section</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> namespace Oberwolfach</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem marked_actual_inner_balance_event_uniform_failure</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (c:ℕ) (hc:3≤c) (α ρ₀ sstar tstar epsBal Qexp ζ:ℝ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hα:0&lt;α) (hρ₀:0&lt;ρ₀) (hsstar:0&lt;sstar) (htstar:0&lt;tstar)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hepsBal:0&lt;epsBal) (hζ:0&lt;ζ):</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∃ βmax:ℝ,0&lt;βmax ∧ ∀ χ:ℝ,0&lt;χ→∀ ε:ℝ,0&lt;ε→ε≤1/4→∀ (d:ℕ) (hd:2≤d),∃ N₀:ℕ,1≤N₀ ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ m₀:ℕ,1≤m₀ ∧ ∀ (V U:Type) [Fintype V] [Fintype U] [LinearOrder V] [DecidableEq U]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (G:SimpleGraph V) (D m:ℕ) (β:ℝ) (Q:Vortex U G D β ε m),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     G.IsRegularOfDegree D→∀ (hn:0&lt;Fintype.card V),N₀≤Fintype.card V→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (1/2+α)*Fintype.card V≤(D:ℝ)→∀ (hρlo:ρ₀≤ initialIndexDensity U D) (hρhi:initialIndexDensity U D≤1),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     0≤β→β≤βmax→m₀≤m→∀ (π:Equiv.Perm V)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (hπ:∀ i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀ x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)→∀ L:ℕ,L&lt;Q.length→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     letI : Nonempty V:=Fintype.card_pos_iff.mp hn</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let W:=markedVortexVertexType Q</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     letI : ∀ i,DecidableEq (W i):=fun _ a b=&gt;Classical.propDecidable (a=b)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let Z:=markedVortexHubType Q</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let f:=markedVortexVertexEmbedding Q</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let g:=markedVortexHubEmbedding Q</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let ρ:=markedVortexPermutation Q π hπ</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let A:=markedVortexInnerVertices Q</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let B:=markedVortexInnerHubs Q</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let M:=fun i=&gt;(A i).card</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let Dbal:=fun i=&gt;2*((B i).card:ℝ)/initialIndexDensity U D;</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     ∀ (Γ Color:Type) [Fintype Γ] [Fintype Color] (s₀:ℝ) (hslo:sstar≤s₀) (hshi:s₀≤1/100),</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let dens:=initialIndexDensity U D</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let densities:=marked_seed_density_bounds c (by omega) dens s₀ ρ₀ sstar hρ₀ hsstar hρlo hρhi hslo hshi</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let p:=dens*s₀/2</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let kval:=p/(c:ℝ);</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     ∀ (q:U→Γ→ℝ) (hq:∀ u a,0≤q u a) (hQ:∀ u,∑ a,q u a≤1/8)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a)) (a:Γ) (j:Color),</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀ u,q u a=s₀/c)→(∀ u,s u j=s₀)→tstar≤s₀/c→</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     ∀ (Extra:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a→Prop) (extraErr:ℝ),</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     1-extraErr≤(rawMarkedRetentionLaw π d hd a p kval (densities.1.trans_le densities.2.1).le</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (densities.1.trans_le densities.2.2.1).le densities.2.2.2.2.2.2.2.2 q hq hQ s hs hS).probability Extra→</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     1-χ-(Fintype.card V:ℝ)^(-Qexp)-extraErr≤</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (rawMarkedRetentionLaw π d hd a p kval (densities.1.trans_le densities.2.1).le</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (densities.1.trans_le densities.2.2.1).le densities.2.2.2.2.2.2.2.2 q hq hQ s hs hS).probability</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (fun z=&gt;(∀ i≤L,</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>           let σi := rawMarkedRestrictPair (f i) (g i) z.1</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           let Hi := fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>             (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f i x) (g i u)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>           let E := MarkedSampleArc (G.comap (f i)) (ρ i) (3*d) (fun e=&gt;σi (Sum.inl e)) false</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>           let KArc := MarkedSampleArc (G.comap (f i)) (ρ i) (3*d) (fun e=&gt;σi (Sum.inl e)) true</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>           let S := Finset.univ.filter (fun s:W i×Z i=&gt;Hi false s.1 s.2∨Hi true s.1 s.2)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>           let err := (epsBal+(c+2:ℕ)*ζ)*M i;</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>           (∀ v j,|markedFiniteDomainBalance (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>             (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (Hi true) Finset.univ S c (A i) (B i) v j|≤err) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>           ∀ (KA : Finset (E⊕KArc)) (KS : Finset (W i×Z i)),KS⊆S→</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>           let R := markedFiniteResources (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>             (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (ρ i) KA KS;</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>           R.filter (markedInnerResource (A i) (B i))=∅→</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>           ∀ δ:ℝ,0≤δ→</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>           (∀ physical v,(((markedIncidentEdges (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>             (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (ρ i) (Hi false) (Hi true) physical v).filter</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>             (fun e=&gt;markedActivePhysical (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>               (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (ρ i) (Hi false) (Hi true) e∈</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>                 R.filter (markedStarResource (A i) (B i)))).card:ℝ)≤δ)→</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>           let σ&#x27; := rawMarkedDeleteRims σi (markedSampleArcSetGraph (G.comap (f i)) (ρ i) d σi KA).edgeFinset</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>           let H&#x27; := markedDeletePhysicalSpokes Hi (markedFiniteSpokeGraph KS)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>           let E&#x27; := MarkedSampleArc (G.comap (f i)) (ρ i) (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>           let K&#x27; := MarkedSampleArc (G.comap (f i)) (ρ i) (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>           let S&#x27; := Finset.univ.filter (fun s:W i×Z i=&gt;H&#x27; false s.1 s.2∨H&#x27; true s.1 s.2);</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>           (∀ v j,|markedFiniteDomainBalance (fun e:E&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>             (fun e:K&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2) (H&#x27; true) Finset.univ S&#x27; c (A i) (B i) v j|≤err+(c+2)*δ) ∧</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>           (∀ v,Sum.elim (fun x=&gt;x∈A i) (fun u=&gt;u∈B i) v→∀ j,</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>             markedFiniteDomainBalance (fun e:E&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>               (fun e:K&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2) (H&#x27; true) Finset.univ S&#x27; c (A i) (B i) v j=</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>             markedFiniteDomainBalance (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>               (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (Hi true) Finset.univ S c (A i) (B i) v j) ) ∧ Extra z):=by</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   let βmax:=min (α/8) (min (1/4) (epsBal/4))</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   have hβmax:0&lt;βmax:=by dsimp [βmax];positivity</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   refine ⟨βmax,hβmax,?_⟩</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   intro χ hχ ε he he1 d hd</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   let K:=2/ε</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   let pstar:=ρ₀*tstar/4</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   have hK:1≤K:=by dsimp [K];apply (le_div_iff₀ he).2;linarith</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   have hpstar:0&lt;pstar:=by dsimp [pstar];positivity</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   obtain ⟨M₀,N₀,hM₀,hN₀,hevent⟩:=marked_finite_balance_adaptive_vortex_event c d hd epsBal K (1/2) χ 1 Qexp pstar ζ</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     hepsBal hK (by norm_num) (by norm_num) hχ hpstar hζ</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   refine ⟨N₀,hN₀,?_⟩</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   obtain ⟨m₀,hm₀,hsize⟩:=marked_active_size_threshold ρ₀ ε hρ₀ he M₀ M₀</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   refine ⟨m₀,hm₀,?_⟩</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   intro V U _ _ _ _ G D m β Q hreg hn hn0 hD hρlo hρhi hb hbmax hm π hπ hshort L hL W Z f g ρ A B M Dbal</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   letI : ∀ i,DecidableEq (W i):=fun _ a b=&gt;Classical.propDecidable (a=b)</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   have hρ:0 &lt; initialIndexDensity U D:=hρ₀.trans_le hρlo</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   have hbα:β≤α/8:=hbmax.trans (min_le_left _ _)</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have hb1:β≤1/4:=hbmax.trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>   have hbeps:β≤epsBal/4:=hbmax.trans ((min_le_right _ _).trans (min_le_right _ _))</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>   obtain ⟨hsizeW,_,hsizeB⟩:=hsize m hm</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>   have hmpos:0&lt;m:=by</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     have hp:(0:ℝ)&lt;M₀:=by exact_mod_cast hM₀</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     by_contra hh</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     have hm0:m=0:=by omega</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     rw [hm0] at hsizeW</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     simp at hsizeW</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     linarith</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>   have hDhalf:(Fintype.card V:ℝ)/2≤D:=by have hh:(0:ℝ)≤Fintype.card V:=Nat.cast_nonneg _;nlinarith</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>   have hDpos:0&lt;D:=by</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     have hn&#x27;:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     exact_mod_cast (lt_of_lt_of_le (by linarith:(0:ℝ)&lt;(Fintype.card V:ℝ)/2) hDhalf)</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>   have hU:Fintype.card U≤Fintype.card V:=by</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     have hh:=Q.index_size_upper hreg hn hDpos he.le hρhi (i:=0) (by omega)</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     rw [Q.indices_initial,Q.initial,Finset.card_univ,Finset.card_univ] at hh</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     omega</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>   have hWcard (i:ℕ) (hi:i≤L):Fintype.card (W i)=(Q.vertices i).card:=by</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     change Fintype.card (Q.extendedVertices i)=_</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     rw [Fintype.card_coe,Q.extendedVertices_eq (hi.trans hL.le)]</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>   have hZcard (i:ℕ) (hi:i≤L):Fintype.card (Z i)=(Q.indices i).card:=by</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     change Fintype.card (Q.extendedIndices i)=_</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     rw [Fintype.card_coe,Q.extendedIndices_eq (hi.trans hL.le)]</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>   have hAcard (i:ℕ) (hi:i≤L):(A i).card=(Q.vertices (i+1)).card:=by</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     rw [(marked_vortex_inner_cardinalities Q i).1,Q.extendedVertices_eq (by omega:i+1≤Q.length)]</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>   have hBcard (i:ℕ) (hi:i≤L):(B i).card=(Q.indices (i+1)).card:=by</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     rw [(marked_vortex_inner_cardinalities Q i).2.2.1,Q.extendedIndices_eq (by omega:i+1≤Q.length)]</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>   have hA (i:ℕ) (hi:i≤L):M₀≤(A i).card:=by</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     have hh:=Q.vertices_lower (by omega:i+1≤Q.length)</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     have hs:(M₀:ℝ)≤ε*m/2:=by nlinarith</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     rw [hAcard i hi]</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     exact_mod_cast hs.trans hh</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>   have hB (i:ℕ) (hi:i≤L):M₀≤(B i).card:=by</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>     have hh:=Q.vertices_lower (by omega:i+1≤Q.length)</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>     have hj:=Q.index_size_lower hreg hn hDhalf hρ₀ hρlo hb hb1 (by omega:i+1≤Q.length)</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     have hx:=mul_le_mul_of_nonneg_left hh (show 0≤ρ₀/8 by positivity)</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>     have hs:(M₀:ℝ)≤ρ₀*ε*m/16:=by nlinarith</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>     rw [hBcard i hi]</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>     exact_mod_cast (show (M₀:ℝ)≤(Q.indices (i+1)).card by nlinarith)</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>   have hstep (i:ℕ) (hi:i&lt;L):((M (i+1):ℝ))≤(1/2)*M i:=by</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     dsimp [M]</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>     rw [hAcard (i+1) (by omega),hAcard i (by omega)]</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>     have hh:((Q.vertices (i+2)).card:ℝ)≤ε*(Q.vertices (i+1)).card:=(Q.consecutive_size_bounds he hmpos (by omega)).2</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>     nlinarith [Nat.cast_nonneg (α:=ℝ) (Q.vertices (i+1)).card]</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>   have hAM (i:ℕ) (hi:i≤L):(A i).card≤M i:=le_rfl</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>   have hBM (i:ℕ) (hi:i≤L):(B i).card≤M i:=by</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>     dsimp [M]</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>     rw [hAcard i hi,hBcard i hi]</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>     have hh:=Q.index_size_upper hreg hn hDpos he.le hρhi (by omega:i+1≤Q.length)</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>     omega</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>   have hInv (i:ℕ) (hi:i≤L) (x:W i):ρ i x∈A i↔x∈A i:=</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>     (marked_vortex_permutation_compatibility Q π hπ i).2.1 x</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>   have hW (i:ℕ) (hi:i≤L):(Fintype.card (W i):ℝ)≤K*M i:=by</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>     dsimp [K,M]</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>     rw [hWcard i hi,hAcard i hi]</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>     have hh:ε*(Q.vertices i).card/2≤((Q.vertices (i+1)).card:ℝ):=(Q.consecutive_size_bounds he hmpos (by omega)).1</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>     have haux:((Q.vertices i).card:ℝ)≤(2*(Q.vertices (i+1)).card)/ε:=by</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>       apply (le_div_iff₀ he).2</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>       nlinarith</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>     convert haux using 1 &lt;;&gt; ring</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>   have hZ (i:ℕ) (hi:i≤L):(Fintype.card (Z i):ℝ)≤K*M i:=by</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>     have hh:=Q.extended_index_size_upper hreg hn hDpos he.le hρhi i</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>     rw [Q.extendedIndices_eq (hi.trans hL.le),Q.extendedVertices_eq (hi.trans hL.le),←hZcard i hi,←hWcard i hi] at hh</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>     have hh&#x27;:(2:ℝ)*Fintype.card (Z i)≤Fintype.card (W i):=by exact_mod_cast hh</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>     nlinarith [hW i hi,Nat.cast_nonneg (α:=ℝ) (Fintype.card (Z i))]</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>   have hnear (i:ℕ) (hi:i≤L) (x:W i):|(((G.comap (f i)).neighborFinset x∩A i).card:ℝ)-Dbal i|≤β*M i:=</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>     by</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>       have hh := (marked_vortex_fixed_inner_degree_fields Q hreg hn hD hα hρ hb hbα hb1 he hmpos i (hi.trans_lt hL)).2.1 x</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a>       have heq : (fun a b:W i =&gt; Subtype.instDecidableEq a b) = (fun a b:W i =&gt; Classical.propDecidable (a=b)) := Subsingleton.elim _ _</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>       rw [heq] at hh</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>       exact hh</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>   intro Γ Color _ _ s₀ hslo hshi dens densities p kval q hq hQ s hs hS a j hq0 hs0 htlo Extra extraErr hExtra</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>   letI : Nonempty V:=Fintype.card_pos_iff.mp hn</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>   have hLsize:(L+1:ℝ)≤(Fintype.card V:ℝ)^(1:ℝ):=by</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>     have hh:L+1≤Fintype.card V:=le_trans (Nat.add_le_add_right hL.le 1) (Q.number_of_levels_le_order he (by linarith) hmpos)</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>     simpa only [Real.rpow_one] using (show (L+1:ℝ)≤Fintype.card V by exact_mod_cast hh)</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>   have hbalance (i:ℕ) (hi:i≤L):p*Dbal i=s₀*(B i).card ∧ kval*Dbal i=(s₀/c)*(B i).card:=by</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>     have hh:=marked_seed_density_balance c (by omega) dens s₀ ((B i).card) hρ.ne&#x27;</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a>     constructor &lt;;&gt; dsimp [p,kval,Dbal,dens] at hh ⊢ &lt;;&gt; field_simp &lt;;&gt; ring</span>
+<span id="L185"><a href="#L185" class="ln"> 185</a>   have hmass:pstar*Fintype.card V≤(s₀/c)*Fintype.card U:=</span>
+<span id="L186"><a href="#L186" class="ln"> 186</a>     marked_active_seed_mass_bound D ρ₀ tstar (s₀/c) pstar hρ₀ htstar hn hDhalf hρlo htlo (by dsimp [pstar];rfl)</span>
+<span id="L187"><a href="#L187" class="ln"> 187</a>   have hp:0&lt;p:=densities.1.trans_le densities.2.1</span>
+<span id="L188"><a href="#L188" class="ln"> 188</a>   have hk:0&lt;kval:=densities.1.trans_le densities.2.2.1</span>
+<span id="L189"><a href="#L189" class="ln"> 189</a>   have hphys:2*p+2*kval≤1:=densities.2.2.2.2.2.2.2.2</span>
+<span id="L190"><a href="#L190" class="ln"> 190</a>   have hc0:(c:ℝ)≠0:=by exact_mod_cast (show c≠0 by omega)</span>
+<span id="L191"><a href="#L191" class="ln"> 191</a>   have hratio:s₀=(c:ℝ)*(s₀/c):=by field_simp [hc0]</span>
+<span id="L192"><a href="#L192" class="ln"> 192</a>   have hh:=hevent V U Γ Color W Z hn0 hU G π hshort f g ρ</span>
+<span id="L193"><a href="#L193" class="ln"> 193</a>     (fun i x=&gt;(marked_vortex_permutation_compatibility Q π hπ i).1 x) A B M L hLsize hA hB hstep hAM hBM hInv hW hZ</span>
+<span id="L194"><a href="#L194" class="ln"> 194</a>     Dbal β hb hbeps (by</span>
+<span id="L195"><a href="#L195" class="ln"> 195</a>       intro i hi x</span>
+<span id="L196"><a href="#L196" class="ln"> 196</a>       have hh:=hnear i hi x</span>
+<span id="L197"><a href="#L197" class="ln"> 197</a>       exact hh) p kval hp.le hk.le hphys q hq hQ s hs hS a j s₀ (s₀/c) hq0 hs0</span>
+<span id="L198"><a href="#L198" class="ln"> 198</a>     (fun i hi=&gt;(hbalance i hi).1) (fun i hi=&gt;(hbalance i hi).2) hratio</span>
+<span id="L199"><a href="#L199" class="ln"> 199</a>     hmass</span>
+<span id="L200"><a href="#L200" class="ln"> 200</a>   let μ:=rawMarkedRetentionLaw π d hd a p kval hp.le hk.le hphys q hq hQ s hs hS</span>
+<span id="L201"><a href="#L201" class="ln"> 201</a>   let EBal:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;</span>
+<span id="L202"><a href="#L202" class="ln"> 202</a>     ∀ i≤L,</span>
+<span id="L203"><a href="#L203" class="ln"> 203</a>           let σi := rawMarkedRestrictPair (f i) (g i) z.1</span>
+<span id="L204"><a href="#L204" class="ln"> 204</a>           let Hi := fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L205"><a href="#L205" class="ln"> 205</a>             (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f i x) (g i u)</span>
+<span id="L206"><a href="#L206" class="ln"> 206</a>           let E := MarkedSampleArc (G.comap (f i)) (ρ i) (3*d) (fun e=&gt;σi (Sum.inl e)) false</span>
+<span id="L207"><a href="#L207" class="ln"> 207</a>           let KArc := MarkedSampleArc (G.comap (f i)) (ρ i) (3*d) (fun e=&gt;σi (Sum.inl e)) true</span>
+<span id="L208"><a href="#L208" class="ln"> 208</a>           let S := Finset.univ.filter (fun s:W i×Z i=&gt;Hi false s.1 s.2∨Hi true s.1 s.2)</span>
+<span id="L209"><a href="#L209" class="ln"> 209</a>           let err := (epsBal+(c+2:ℕ)*ζ)*M i;</span>
+<span id="L210"><a href="#L210" class="ln"> 210</a>           (∀ v j,|markedFiniteDomainBalance (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L211"><a href="#L211" class="ln"> 211</a>             (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (Hi true) Finset.univ S c (A i) (B i) v j|≤err) ∧</span>
+<span id="L212"><a href="#L212" class="ln"> 212</a>           ∀ (KA : Finset (E⊕KArc)) (KS : Finset (W i×Z i)),KS⊆S→</span>
+<span id="L213"><a href="#L213" class="ln"> 213</a>           let R := markedFiniteResources (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L214"><a href="#L214" class="ln"> 214</a>             (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (ρ i) KA KS;</span>
+<span id="L215"><a href="#L215" class="ln"> 215</a>           R.filter (markedInnerResource (A i) (B i))=∅→</span>
+<span id="L216"><a href="#L216" class="ln"> 216</a>           ∀ δ:ℝ,0≤δ→</span>
+<span id="L217"><a href="#L217" class="ln"> 217</a>           (∀ physical v,(((markedIncidentEdges (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L218"><a href="#L218" class="ln"> 218</a>             (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (ρ i) (Hi false) (Hi true) physical v).filter</span>
+<span id="L219"><a href="#L219" class="ln"> 219</a>             (fun e=&gt;markedActivePhysical (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L220"><a href="#L220" class="ln"> 220</a>               (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (ρ i) (Hi false) (Hi true) e∈</span>
+<span id="L221"><a href="#L221" class="ln"> 221</a>                 R.filter (markedStarResource (A i) (B i)))).card:ℝ)≤δ)→</span>
+<span id="L222"><a href="#L222" class="ln"> 222</a>           let σ&#x27; := rawMarkedDeleteRims σi (markedSampleArcSetGraph (G.comap (f i)) (ρ i) d σi KA).edgeFinset</span>
+<span id="L223"><a href="#L223" class="ln"> 223</a>           let H&#x27; := markedDeletePhysicalSpokes Hi (markedFiniteSpokeGraph KS)</span>
+<span id="L224"><a href="#L224" class="ln"> 224</a>           let E&#x27; := MarkedSampleArc (G.comap (f i)) (ρ i) (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L225"><a href="#L225" class="ln"> 225</a>           let K&#x27; := MarkedSampleArc (G.comap (f i)) (ρ i) (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true</span>
+<span id="L226"><a href="#L226" class="ln"> 226</a>           let S&#x27; := Finset.univ.filter (fun s:W i×Z i=&gt;H&#x27; false s.1 s.2∨H&#x27; true s.1 s.2);</span>
+<span id="L227"><a href="#L227" class="ln"> 227</a>           (∀ v j,|markedFiniteDomainBalance (fun e:E&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L228"><a href="#L228" class="ln"> 228</a>             (fun e:K&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2) (H&#x27; true) Finset.univ S&#x27; c (A i) (B i) v j|≤err+(c+2)*δ) ∧</span>
+<span id="L229"><a href="#L229" class="ln"> 229</a>           (∀ v,Sum.elim (fun x=&gt;x∈A i) (fun u=&gt;u∈B i) v→∀ j,</span>
+<span id="L230"><a href="#L230" class="ln"> 230</a>             markedFiniteDomainBalance (fun e:E&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L231"><a href="#L231" class="ln"> 231</a>               (fun e:K&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2) (H&#x27; true) Finset.univ S&#x27; c (A i) (B i) v j=</span>
+<span id="L232"><a href="#L232" class="ln"> 232</a>             markedFiniteDomainBalance (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L233"><a href="#L233" class="ln"> 233</a>               (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (Hi true) Finset.univ S c (A i) (B i) v j)</span>
+<span id="L234"><a href="#L234" class="ln"> 234</a>   have hbase:1-χ-(Fintype.card V:ℝ)^(-Qexp)≤μ.probability EBal:=by simpa only [μ,EBal] using hh</span>
+<span id="L235"><a href="#L235" class="ln"> 235</a>   have hjoin:=finiteLaw_good_intersection μ EBal Extra extraErr hExtra</span>
+<span id="L236"><a href="#L236" class="ln"> 236</a>   change 1-χ-(Fintype.card V:ℝ)^(-Qexp)-extraErr≤μ.probability (fun z=&gt;EBal z ∧ Extra z)</span>
+<span id="L237"><a href="#L237" class="ln"> 237</a>   linarith</span>
+<span id="L238"><a href="#L238" class="ln"> 238</a> end Oberwolfach</span></pre></html>

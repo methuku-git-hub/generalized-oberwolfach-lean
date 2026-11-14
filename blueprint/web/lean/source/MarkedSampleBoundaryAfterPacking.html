@@ -1,0 +1,80 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSampleBoundaryAfterPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSampleBoundaryAfterPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSampleBoundaryPhysicalGraph</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedBoundaryMaskAfterPacking</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PhysicalBoundaryClassesAfterPacking</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The actual marked boundary remainder after the approximate packing</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> and subsequent covering has the required fixed-domain class changes.</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> All roots remain in the ambient domains and the bound has no extra factor</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> of the reservation probability. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 22000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U Gamma Color:Type} [Fintype V] [LinearOrder V] [Fintype U] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     [Fintype Gamma] [Fintype Color]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem marked_sample_boundary_classes_after_packing (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (σ₀:RawMarkedOutcome V U Gamma Color) (H:Bool→V→U→Prop)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (X:Finset V) (Z:Finset U) (hX:∀ v,π v∈X↔v∈X)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (C D:SimpleGraph (V⊕U)) (σ:Sym2 (V⊕U)→Bool)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (ℓ δ:ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hCR:Disjoint C (retainedGraph (ordinaryBoundaryGraph (markedSampleArcSetGraph P π d σ₀ Finset.univ)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (fun v u=&gt;H false v u∨H true v u) X Z) σ))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hleft:∀ z,((((ordinaryBoundaryGraph (markedSampleArcSetGraph P π d σ₀ Finset.univ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (fun v u=&gt;H false v u∨H true v u) X Z)\retainedGraph</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (ordinaryBoundaryGraph (markedSampleArcSetGraph P π d σ₀ Finset.univ)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (fun v u=&gt;H false v u∨H true v u) X Z) σ)\C).degree z:ℝ)≤ℓ)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hcover:∀ z,(D.degree z:ℝ)≤δ):</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let G:=ordinaryBoundaryGraph (markedSampleArcSetGraph P π d σ₀ Finset.univ)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (fun v u=&gt;H false v u∨H true v u) X Z</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let R:=(G\C)\D;</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (∀ mark incoming x,x∉X→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       ((changed ((markedEndpointLabels P π d X (mark,incoming,x) σ₀).filter</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         (fun v=&gt;σ (markedBoundaryEndpointCoin π mark incoming x (Sum.inl v))=true))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         ((markedEndpointLabels P π d X (mark,incoming,x) σ₀).filter</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (fun v=&gt;markedBoundaryEndpointCoin π mark incoming x (Sum.inl v)∈R.edgeSet))).card:ℝ)≤ℓ+δ) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∀ b x,x∉X→</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       ((changed ((Z.filter (H b x)).filter (fun u=&gt;σ s(Sum.inl x,Sum.inr u)=true))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         ((Z.filter (H b x)).filter (fun u=&gt;R.Adj (Sum.inl x) (Sum.inr u)))).card:ℝ)≤ℓ+δ) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ u,u∉Z→</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       ((changed ((X.filter (fun x=&gt;H false x u∨H true x u)).filter</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         (fun x=&gt;σ s(Sum.inl x,Sum.inr u)=true))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         ((X.filter (fun x=&gt;H false x u∨H true x u)).filter</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         (fun x=&gt;R.Adj (Sum.inl x) (Sum.inr u)))).card:ℝ)≤ℓ+δ):=by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro G R</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hbound {T:Type} [DecidableEq T] (S:Finset T) (x:V⊕U)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (h:S.card≤((G\retainedGraph G σ)\C).degree x+D.degree x):(S.card:ℝ)≤ℓ+δ:=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hh:(S.card:ℝ)≤((G\retainedGraph G σ)\C).degree x+D.degree x:=by exact_mod_cast h</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     exact hh.trans (add_le_add (hleft x) (hcover x))</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   refine ⟨?_,?_,?_⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   · intro mark incoming x hx</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     apply hbound _ (Sum.inl (if mark&amp;&amp;incoming then π x else x))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     apply marked_endpoint_class_after_packing π mark incoming x _ G C D σ _ hCR</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     intro v hv</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     exact marked_sample_endpoint_coin_mem_boundary P π d σ₀ H X Z hX mark incoming x hx v hv</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   · intro b x hx</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     apply hbound _ (Sum.inl x)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     apply marked_spoke_class_after_packing x _ G C D σ _ hCR</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     intro u hu</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     obtain ⟨hu,hH⟩:=Finset.mem_filter.mp hu</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     change G.Adj (Sum.inl x) (Sum.inr u)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     rw [ordinaryBoundaryGraph_adj]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     refine ⟨?_,?_⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     · cases b &lt;;&gt; simp only [ordinaryPhysicalGraph] &lt;;&gt; tauto</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     · simp [ordinaryInnerVertices_left,ordinaryInnerVertices_right,hx,hu]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   · intro u hu</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     apply hbound _ (Sum.inr u)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     apply marked_spoke_column_after_packing u _ G C D σ _ hCR</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     intro x hx</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     obtain ⟨hx,hH⟩:=Finset.mem_filter.mp hx</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     change G.Adj (Sum.inl x) (Sum.inr u)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     rw [ordinaryBoundaryGraph_adj]</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     refine ⟨hH,?_⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     simp [ordinaryInnerVertices_left,ordinaryInnerVertices_right,hx,hu]</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> </span>
+<span id="L77"><a href="#L77" class="ln">  77</a> end Oberwolfach</span></pre></html>

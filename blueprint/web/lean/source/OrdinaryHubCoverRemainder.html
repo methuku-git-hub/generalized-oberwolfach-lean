@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryHubCoverRemainder.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryHubCoverRemainder.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryHubWheelPacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryWheelRemainders</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Identify the exact spoke graph covered by the successive hub factors.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> If each factor uses the entire original neighbourhood of its hub, deletion</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> removes all and only those hub columns; wheel divisibility is preserved. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 2200000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   {Q F : SimpleGraph V} {H : V→U→Prop} {r n : ℕ}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ordinaryHubResources (R : SimpleGraph V) (u : Fin n→U) (T : Fin n→Finset V) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ordinaryHostResources R (fun v w=&gt;∃ i,u i=w ∧ v∈T i)=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       R.edgeFinset.image Sum.inl ∪ Finset.univ.biUnion (fun i=&gt;(T i).image (fun v=&gt;Sum.inr (v,u i))) := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   ext e</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   cases e with</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   | inl e =&gt;</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     simp only [ordinaryHostResources_rim,Finset.mem_union,Finset.mem_image,Sum.inl.injEq,</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       Sum.inr_ne_inl,and_false,exists_false,Finset.mem_biUnion,Finset.mem_univ,true_and,or_false,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       SimpleGraph.mem_edgeFinset,exists_eq_right]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   | inr vu =&gt;</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     rcases vu with ⟨v,w⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     simp only [ordinaryHostResources_spoke,Finset.mem_union,Finset.mem_image,Sum.inl_ne_inr,</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       and_false,exists_false,false_or,Finset.mem_biUnion,Finset.mem_univ,true_and,</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       Sum.inr.injEq,Prod.mk.injEq,exists_eq_right]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     constructor</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     · rintro ⟨i,hi,hv⟩;exact ⟨i,v,hv,rfl,hi⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     · rintro ⟨i,z,hz,hzv,hi⟩;subst z;exact ⟨i,hi,hz⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> theorem ordinary_hub_packing_decomposition (u : Fin n→U) (T : Fin n→Finset V)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (M : Finset (OrdinaryWheel Q F H r))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hM : ∀ W∈M,∀ Z∈M,W≠Z → Disjoint (ordinaryWheelResources W) (ordinaryWheelResources Z))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hunion : M.biUnion ordinaryWheelResources=(ordinaryWheelRimGraph M).edgeFinset.image Sum.inl ∪</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       Finset.univ.biUnion (fun i=&gt;(T i).image (fun v=&gt;Sum.inr (v,u i)))) :</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     HasOrdinaryWheelDecomposition (ordinaryWheelRimGraph M) (fun v w=&gt;∃ i,u i=w ∧ v∈T i) r := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   apply ordinary_packing_exact_decomposition M hM</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   rw [ordinaryHubResources]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   exact hunion</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> </span>
+<span id="L44"><a href="#L44" class="ln">  44</a> theorem ordinary_hub_cover_remainder (u : Fin n→U)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (T : Fin n→Finset V) (hT : ∀ i v,v∈T i ↔ H v (u i))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (M : Finset (OrdinaryWheel Q F H r))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hM : ∀ W∈M,∀ Z∈M,W≠Z → Disjoint (ordinaryWheelResources W) (ordinaryWheelResources Z))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hunion : M.biUnion ordinaryWheelResources=(ordinaryWheelRimGraph M).edgeFinset.image Sum.inl ∪</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       Finset.univ.biUnion (fun i=&gt;(T i).image (fun v=&gt;Sum.inr (v,u i))))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hQ : ∀ v,Q.degree v=2*(Finset.univ.filter (H v)).card)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hU : ∀ w,r∣(Finset.univ.filter (fun v=&gt;H v w)).card) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     let H&#x27; : V→U→Prop:=fun v w=&gt;H v w ∧ w∉Finset.univ.image u</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     ordinaryHostResources (Q\ordinaryWheelRimGraph M) H&#x27;=</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       ordinaryHostResources Q H\M.biUnion ordinaryWheelResources ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (∀ v,(Q\ordinaryWheelRimGraph M).degree v=2*(Finset.univ.filter (H&#x27; v)).card) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (∀ w,r∣(Finset.univ.filter (fun v=&gt;H&#x27; v w)).card) := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   dsimp only</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   let K : V→U→Prop:=fun v w=&gt;∃ i,u i=w ∧ v∈T i</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hK (v : V) (w : U) : K v w ↔ H v w ∧ w∈Finset.univ.image u := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     constructor</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     · rintro ⟨i,hi,hv⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       exact ⟨hi ▸ (hT i v).mp hv,Finset.mem_image.mpr ⟨i,Finset.mem_univ _,hi⟩⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     · rintro ⟨hv,hw⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       obtain ⟨i,_,hi⟩:=Finset.mem_image.mp hw</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       exact ⟨i,hi,(hT i v).mpr (hi.symm ▸ hv)⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hrest : (fun v w=&gt;H v w ∧ ¬K v w)=(fun v w=&gt;H v w ∧ w∉Finset.univ.image u) := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     funext v w;apply propext;rw [hK];tauto</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hcover : M.biUnion ordinaryWheelResources=ordinaryHostResources (ordinaryWheelRimGraph M) K := by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     rw [ordinaryHubResources]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     exact hunion</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hbal:=ordinary_decomposition_remainder_balance Q (ordinaryWheelRimGraph M) H K r</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (ordinaryWheelRimGraph_subhost M) (fun v w h=&gt;(hK v w).mp h |&gt;.1) hQ hU</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (ordinary_hub_packing_decomposition u T M hM hunion)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hrestpt (v : V) (w : U) : (H v w ∧ ¬K v w)=(H v w ∧ w∉Finset.univ.image u) :=</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     congrFun (congrFun hrest v) w</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   simp_rw [hrestpt] at hbal</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   refine ⟨?_,hbal⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   rw [hcover,←ordinaryHostResources_sdiff,hrest]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

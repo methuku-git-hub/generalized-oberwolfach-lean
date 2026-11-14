@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReservedCanonicalCombinedDeletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReservedCanonicalCombinedDeletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReservedCanonicalDeletionGraphs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedReservedUnionReverseIdentity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedFiniteResourcesProjections</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedReservedCanonicalStarArcs</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedReservedCanonicalSpokes</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.MarkedFiniteResourcesPackingUnion</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> /-! The physical resources deleted for the canonical first cover agree</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> before and after removing the reserved absorber. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 16000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_reserved_canonical_combined_deletion_identity</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d m:ℕ) (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (C:Finset (Finset V⊕(V×U))) (I T:Finset V) (J W:Finset U)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hI:∀ x,π x∈I↔x∈I) (hC:∀ e∈C,¬markedInnerResource I J e):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let E:=MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let K:=MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) true</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let tail:=fun e:E=&gt;e.val.1</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let head:=fun e:E=&gt;e.val.2</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let ktail:=fun e:K=&gt;e.val.1</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let khead:=fun e:K=&gt;e.val.2</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let S:=Finset.univ.filter (fun z:V×U=&gt;H false z.1 z.2∨H true z.1 z.2)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let DR:=physicalEdgeGraph (markedReservedRimPairs C)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let DS:=markedFiniteSpokeGraph (markedReservedSpokePairs C)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let σ&#x27;:=rawMarkedDeleteRims σ DR.edgeFinset</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let H&#x27;:=markedDeletePhysicalSpokes H DS</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let E&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let K&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let t&#x27;:=fun e:E&#x27;=&gt;e.val.1</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let h&#x27;:=fun e:E&#x27;=&gt;e.val.2</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let kt&#x27;:=fun e:K&#x27;=&gt;e.val.1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let kh&#x27;:=fun e:K&#x27;=&gt;e.val.2</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let emb:=markedSampleDeletedArcsEmbedding P π d σ DR.edgeFinset;</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     ∀ (DA:Finset (E⊕K)) (DS₀:Finset (V×U)),</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let CA:=(Finset.univ.filter (fun a:E⊕K=&gt;Sum.elim tail ktail a∈I∧Sum.elim head khead a∈I))\DA</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let CS:=(S.filter (fun z=&gt;z.1∈I∧z.2∈J))\DS₀</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let KA:=CA.filter (fun a=&gt;Sum.elim tail ktail a∈T∨Sum.elim head khead a∈T)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let KS:=CS.filter (fun z=&gt;z.1∈T∨z.2∈W)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let DA&#x27;:=Finset.univ.filter (fun a:E&#x27;⊕K&#x27;=&gt;emb a∈DA)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let S&#x27;:=Finset.univ.filter (fun z:V×U=&gt;H&#x27; false z.1 z.2∨H&#x27; true z.1 z.2)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     let CA&#x27;:=(Finset.univ.filter (fun a:E&#x27;⊕K&#x27;=&gt;Sum.elim t&#x27; kt&#x27; a∈I∧Sum.elim h&#x27; kh&#x27; a∈I))\DA&#x27;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     let CS&#x27;:=(S&#x27;.filter (fun z=&gt;z.1∈I∧z.2∈J))\DS₀</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let KA&#x27;:=CA&#x27;.filter (fun a=&gt;Sum.elim t&#x27; kt&#x27; a∈T∨Sum.elim h&#x27; kh&#x27; a∈T)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     let KS&#x27;:=CS&#x27;.filter (fun z=&gt;z.1∈T∨z.2∈W);</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     ∀ (M:Finset (MarkedWheel tail head ktail khead m π (3*d) (H false) (H true)))</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (M&#x27;:Finset (MarkedWheel t&#x27; h&#x27; kt&#x27; kh&#x27; m π (3*d) (H&#x27; false) (H&#x27; true))),</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     M&#x27;.biUnion markedWheelPhysicalResources=M.biUnion markedWheelPhysicalResources→</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     let R:=markedSampleArcSetGraph P π d σ (KA∪M.biUnion markedWheelArcs)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     let Q:=markedFiniteSpokeGraph (KS∪M.biUnion markedWheelSpokePairs)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     let R&#x27;:=markedSampleArcSetGraph P π d σ&#x27; (KA&#x27;∪M&#x27;.biUnion markedWheelArcs)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     let Q&#x27;:=markedFiniteSpokeGraph (KS&#x27;∪M&#x27;.biUnion markedWheelSpokePairs)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     let D:=R⊔DR</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     let edgeInst:Fintype D.edgeSet:=@SimpleGraph.fintypeEdgeSet V D (Sym2.instFintype)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (fun x y=&gt;Classical.propDecidable (D.Adj x y));</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     rawMarkedDeleteRims σ (@SimpleGraph.edgeFinset V D edgeInst)=rawMarkedDeleteRims σ&#x27; R&#x27;.edgeFinset ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     markedDeletePhysicalSpokes H (Q⊔DS)=markedDeletePhysicalSpokes H&#x27; Q&#x27;:=by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   intro E K tail head ktail khead S DR DS σ&#x27; H&#x27; E&#x27; K&#x27; t&#x27; h&#x27; kt&#x27; kh&#x27; emb DA DS₀ CA CS KA KS DA&#x27; S&#x27; CA&#x27; CS&#x27; KA&#x27; KS&#x27; M M&#x27; hres R Q R&#x27; Q&#x27; D edgeInst</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hg:=marked_reserved_canonical_deletion_graphs_equal P π d m σ H C I T J W hI hC DA DS₀ M M&#x27; hres</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hh:=marked_reserved_union_reverse_sequential_identity σ H C R Q</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hr:R&#x27;=R:=hg.1</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hs:Q&#x27;=Q:=hg.2</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   dsimp only at hh</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   rw [hr,hs]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   exact hh</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> end Oberwolfach</span></pre></html>

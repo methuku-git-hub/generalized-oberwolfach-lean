@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPhysicalGraphLeftover.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPhysicalGraphLeftover.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedIncidentResources</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPackingResourceDetermination</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrdinaryBoundaryGraph</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Convert actual graph degrees to counts of unused physical resources.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> The row and hub summands remain distinct, and each neighbour contributes</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> one distinct resource. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 5000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> def markedPairResource: (V⊕U)→(V⊕U)→(Finset V⊕(V×U))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   | Sum.inl x,Sum.inl y=&gt;Sum.inl {x,y}</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   | Sum.inl x,Sum.inr u=&gt;Sum.inr (x,u)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   | Sum.inr u,Sum.inl x=&gt;Sum.inr (x,u)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   | Sum.inr _,Sum.inr _=&gt;Sum.inl ∅</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem graph_degree_le_marked_incident (G:SimpleGraph (V⊕U))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (S:Finset (Finset V⊕(V×U))) (hU:∀ u v,¬G.Adj (Sum.inr u) (Sum.inr v))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hS:∀ x y,G.Adj x y→markedPairResource x y∈S) (x:V⊕U):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     G.degree x≤(S.filter (markedPhysicalIncident x)).card:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let f:{y // G.Adj x y}→S.filter (markedPhysicalIncident x):=fun y=&gt;</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ⟨markedPairResource x y.val,Finset.mem_filter.mpr ⟨hS x y.val y.property,by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       cases x &lt;;&gt; rcases y with ⟨(_|_),hy⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       all_goals simp only [markedPairResource,markedPhysicalIncident,Finset.mem_insert,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         Finset.mem_singleton,true_or]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       exact (hU _ _ hy).elim⟩⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hi:Function.Injective f:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     intro y z he</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have he&#x27;:markedPairResource x y.val=markedPairResource x z.val:=congrArg Subtype.val he</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     apply Subtype.ext</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     cases x with</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     | inl v=&gt;</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       rcases y with ⟨(y|y),hy⟩ &lt;;&gt; rcases z with ⟨(z|z),hz⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       · have hp:({v,y}:Finset V)={v,z}:=Sum.inl.inj he&#x27;</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         have hyz:y=v∨y=z:=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>           have h:y∈({v,z}:Finset V):=hp ▸ (by simp)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>           simpa only [Finset.mem_insert,Finset.mem_singleton] using h</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         rcases hyz with hyz|hyz</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         · exact (hy.ne (congrArg Sum.inl hyz.symm)).elim</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         · exact congrArg Sum.inl hyz</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       · exact (Sum.inl_ne_inr he&#x27;).elim</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       · exact (Sum.inr_ne_inl he&#x27;).elim</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       · exact congrArg Sum.inr (Prod.mk.inj (Sum.inr.inj he&#x27;)).2</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     | inr u=&gt;</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       rcases y with ⟨(y|y),hy⟩ &lt;;&gt; rcases z with ⟨(z|z),hz⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       · exact congrArg Sum.inl (Prod.mk.inj (Sum.inr.inj he&#x27;)).1</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       · exact (hU _ _ hz).elim</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       · exact (hU _ _ hy).elim</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       · exact (hU _ _ hy).elim</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hc:=Fintype.card_le_of_injective f hi</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have he:Fintype.card {y // G.Adj x y}=G.degree x:=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     convert G.card_neighborSet_eq_degree x using 1 &lt;;&gt; congr!</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   rw [he,Fintype.card_coe] at hc</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   exact hc</span>
+<span id="L60"><a href="#L60" class="ln">  60</a> </span>
+<span id="L61"><a href="#L61" class="ln">  61</a> theorem graph_degree_le_unused_marked_incident (G:SimpleGraph (V⊕U))</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (S C:Finset (Finset V⊕(V×U))) (hU:∀ u v,¬G.Adj (Sum.inr u) (Sum.inr v))</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (hS:∀ x y,G.Adj x y→markedPairResource x y∈S∧markedPairResource x y∉C) (x:V⊕U):</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     G.degree x≤((S.filter (markedPhysicalIncident x))\C).card:=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have h:=graph_degree_le_marked_incident G (S\C) hU</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (fun x y h=&gt;Finset.mem_sdiff.mpr (hS x y h)) x</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   convert h using 1</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   congr 1</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   ext e</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   simp only [Finset.mem_filter,Finset.mem_sdiff]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   tauto</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

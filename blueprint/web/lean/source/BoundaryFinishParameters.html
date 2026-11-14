@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BoundaryFinishParameters.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BoundaryFinishParameters.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BoundaryPathMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Choose the reservation density before the conflict-degree bound. The</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> later order threshold makes the integer cap and all finite extension losses</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> fit the prescribed common-neighbourhood and inner-degree margins. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 3500000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem boundary_finish_parameters (r:ℕ) (C β ν:ℝ) (hC:0≤C) (hβ:0&lt;β) (hν:0&lt;ν):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ τ:ℝ,0&lt;τ ∧ τ≤1 ∧ ∀ L:ℝ,0≤L→∃ n₀:ℕ,</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       ∀ (n N D:ℕ),n₀≤n→∀ d₀ e₀:ℝ,</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>         (N:ℝ)≤C*τ*(n:ℝ)^2→(D:ℝ)≤C*τ*n→d₀≤C*τ*n→e₀≤C*τ*n→</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>         0&lt;Nat.ceil (Real.sqrt τ*n) ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>         (N*r:ℕ)/(Nat.ceil (Real.sqrt τ*n):ℝ)+((r:ℝ)+3)*(L+1)+</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>           2*(d₀+2*(Nat.ceil (Real.sqrt τ*n)+D:ℕ))+e₀+(D*r:ℕ)+3*D&lt;β*n ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>         d₀+(3*(Nat.ceil (Real.sqrt τ*n)+D):ℕ)≤ν*n ∧ (D*r:ℕ)≤ν*n:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let A:ℝ:=(2*(r:ℝ)+10)*C+4</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let B:ℝ:=4*C+C*r+7</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hA:0&lt;A:=by dsimp [A];positivity</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hB:0&lt;B:=by dsimp [B];positivity</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let κ:=min 1 (min (β/(4*A)) (ν/B))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hκ:0&lt;κ:=lt_min (by norm_num) (lt_min (by positivity) (by positivity))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hκ1:κ≤1:=min_le_left _ _</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hκβ:κ≤β/(4*A):=(min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hκν:κ≤ν/B:=(min_le_right _ _).trans (min_le_right _ _)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hsmall:A*κ≤β/4:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have hh:κ*(4*A)≤β:=(le_div_iff₀ (by positivity : (0:ℝ)&lt;4*A)).mp hκβ</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     nlinarith only [hh]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hνbound:B*κ≤ν:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hh:κ*B≤ν:=(le_div_iff₀ hB).mp hκν</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     nlinarith only [hh]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hrow:(4*C+6)*κ≤ν:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     apply le_trans _ hνbound</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact mul_le_mul_of_nonneg_right (by dsimp [B];nlinarith only [hC,mul_nonneg hC (Nat.cast_nonneg r)]) hκ.le</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hcol:C*r*κ≤ν:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     apply le_trans _ hνbound</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     exact mul_le_mul_of_nonneg_right (by dsimp [B];nlinarith only [hC,mul_nonneg hC (Nat.cast_nonneg r)]) hκ.le</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   refine ⟨κ^2,pow_pos hκ _,by nlinarith only [hκ.le,hκ1],?_⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   intro L hL</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   obtain ⟨n₀,hn₀⟩:=exists_nat_gt (max (1/κ) (4*(((r:ℝ)+3)*(L+1)+4)/β))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   refine ⟨max 1 n₀,?_⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro n N D hn d₀ e₀ hN hD hd he</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hnR:(0:ℝ)&lt;n:=Nat.cast_pos.mpr (by omega)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hnn:(n₀:ℝ)≤n:=by exact_mod_cast (show n₀≤n by omega)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hscale:1≤κ*n:=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hh:1/κ≤(n:ℝ):=(le_max_left _ _).trans (hn₀.le.trans hnn)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     nlinarith only [(div_le_iff₀ hκ).mp hh]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have horder:4*(((r:ℝ)+3)*(L+1)+4)≤β*n:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have hh:4*(((r:ℝ)+3)*(L+1)+4)/β≤(n:ℝ):=(le_max_right _ _).trans (hn₀.le.trans hnn)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     nlinarith only [(div_le_iff₀ hβ).mp hh]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hsqrt:Real.sqrt (κ^2)=κ:=Real.sqrt_sq hκ.le</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   rw [hsqrt]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   obtain ⟨hK,hbudget⟩:=boundary_path_square_root_margin n N D r (by omega) κ C β L d₀ e₀</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     hκ hκ1 hC hβ hN hD hd he hsmall horder</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hκsq:κ^2≤κ:=by nlinarith only [hκ.le,hκ1]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hD&#x27;:(D:ℝ)≤C*κ*n:=hD.trans</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hκsq hC) hnR.le)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hd&#x27;:d₀≤C*κ*n:=hd.trans</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hκsq hC) hnR.le)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hKhi:(Nat.ceil (κ*n):ℝ)≤κ*n+1:=(Nat.ceil_lt_add_one (by positivity : (0:ℝ)≤κ*n)).le</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   refine ⟨hK,hbudget,?_,?_⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   · push_cast</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     nlinarith only [hKhi,hscale,hD&#x27;,hd&#x27;,mul_le_mul_of_nonneg_right hrow hnR.le]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   · push_cast</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     nlinarith only [mul_le_mul_of_nonneg_right hD&#x27; (Nat.cast_nonneg r),</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       mul_le_mul_of_nonneg_right hcol hnR.le]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> </span>
+<span id="L71"><a href="#L71" class="ln">  71</a> end Oberwolfach</span></pre></html>

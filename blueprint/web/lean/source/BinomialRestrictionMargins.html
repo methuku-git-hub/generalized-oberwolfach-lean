@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BinomialRestrictionMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BinomialRestrictionMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BinomialPowerTailMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! One threshold handles every fixed restriction of sufficiently large</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> order, even when that order is much smaller than the ambient graph. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1600000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem uniform_binomial_restriction_tail (K a b : ℝ) (hK : 0≤K) (ha : 0&lt;a) (hb : 0&lt;b) (L : ℕ) :</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∃ m N : ℕ,1≤m ∧ 1≤N ∧ ∀ n : ℕ,N≤n → ∀ M : ℕ,m≤M →</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∀ p : ℝ,0≤p → p≤K*(n:ℝ)^(-b) →</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       (M.choose (Nat.ceil (a*M)):ℝ)*p^(Nat.ceil (a*M))≤1/(n:ℝ)^L := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   obtain ⟨N,hN1,hN⟩ := eventually_binomial_deletion_tail K a b hK ha hb</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   let c := a*b/2</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hc : 0&lt;c := by dsimp [c];positivity</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   refine ⟨max 1 (Nat.ceil ((L:ℝ)/c)),N,le_max_left _ _,hN1,?_⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   intro n hn M hM p hp hrate</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hnR : (1:ℝ)≤n := by exact_mod_cast hN1.trans hn</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hLM : (L:ℝ)≤c*M := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     have hceil : (L:ℝ)/c≤(M:ℝ) := (Nat.le_ceil _).trans (by exact_mod_cast (show Nat.ceil ((L:ℝ)/c)≤M by omega))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     have hh := (div_le_iff₀ hc).mp hceil</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     linarith</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hh := hN n hn M (Nat.ceil (a*M)) p hp hrate (Nat.le_ceil _)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hpow : (n:ℝ)^(-c*M)≤(n:ℝ)^(-(L:ℝ)) := Real.rpow_le_rpow_of_exponent_le hnR (by linarith)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   apply hh.trans</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   simpa only [Real.rpow_neg (by linarith : (0:ℝ)≤n),Real.rpow_natCast,one_div] using hpow</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem retention_restriction_union_margin (d C Q n : ℕ) (hn : 2*(d+2)≤n)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (I m : ℕ) (hI : I≤n^C) (hm : m≤n) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (I:ℝ)*(m+(d+1:ℕ)*n)*(1/(n:ℝ)^(C+Q+3))≤1/(2*(n:ℝ)^Q) := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hn2 : (2:ℝ)≤n := by exact_mod_cast (show 2≤n by omega)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hnpos : (0:ℝ)&lt;n := by linarith</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hd : (2:ℝ)*(d+2)≤n := by exact_mod_cast hn</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hsize : (I:ℝ)*(m+(d+1:ℕ)*n)≤(d+2)*(n:ℝ)^(C+1) := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hiR : (I:ℝ)≤(n:ℝ)^C := by exact_mod_cast hI</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hmR : (m:ℝ)≤n := by exact_mod_cast hm</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     calc</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       _ ≤ (n:ℝ)^C*(n+(d+1:ℕ)*n) := mul_le_mul hiR (by gcongr) (by positivity) (by positivity)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       _ = _ := by simp only [Nat.cast_add,Nat.cast_one,pow_succ];ring</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have heq : ((d:ℝ)+2)*(n:ℝ)^(C+1)*(1/(n:ℝ)^(C+Q+3))=</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       ((d:ℝ)+2)/(n:ℝ)^2*(1/(n:ℝ)^Q) := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hex : C+Q+3=(C+1)+Q+2 := by omega</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     rw [hex,pow_add,pow_add]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     field_simp</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     simp only [pow_add,pow_succ]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hconst : ((d:ℝ)+2)/(n:ℝ)^2≤1/2 := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     apply (div_le_iff₀ (by positivity)).mpr</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have hnSq : (n:ℝ)≤(n:ℝ)^2 := by nlinarith</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     nlinarith</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   calc</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     _ ≤ (d+2)*(n:ℝ)^(C+1)*(1/(n:ℝ)^(C+Q+3)) := mul_le_mul_of_nonneg_right hsize (by positivity)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     _ = _ := heq</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     _ ≤ (1/2)*(1/(n:ℝ)^Q) := mul_le_mul_of_nonneg_right hconst (by positivity)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     _ = _ := by ring</span>
+<span id="L57"><a href="#L57" class="ln">  57</a> </span>
+<span id="L58"><a href="#L58" class="ln">  58</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedInnerFactorActiveRestriction.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedInnerFactorActiveRestriction.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedInnerFactorInputsAfterBothPackings</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawMarkedRestrictionComposition</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The fixed inner coefficients and the original outcome are evaluated on</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> the same vertices whether the inner or the active restriction is taken first. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 18000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V VA W U UA Γ Color:Type} [Fintype V] [Fintype VA] [Fintype W] [Fintype U] [Fintype UA]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [Fintype Γ] [Fintype Color] [LinearOrder V] [LinearOrder VA] [LinearOrder W]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [DecidableEq U] [DecidableEq UA]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_inner_factor_active_restriction</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (f:VA↪oV) (i:W↪oVA) (g:UA↪U) (P:SimpleGraph V) (ρ:Equiv.Perm W)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (d r:ℕ) (D p k s₀ t eta beta:ℝ) (weight:(Fin (r+4+1)→W)→ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (Q:UA→Γ→ℝ) (S:UA→Color→ℝ) (a:Γ) (c:Color)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hrows:MarkedRowsWithSpokes (P.comap (fun x:W=&gt;f (i x))) ρ d 1 Finset.univ p k Q S a c</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ((t/2)*Fintype.card W) (rawMarkedRestrictPair (fun x:W=&gt;f (i x)) g σ) (fun b x u=&gt;H b (f (i x)) (g u)))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hconfigs:MarkedLocalConfigurationsWithSpokes r (P.comap (fun x:W=&gt;f (i x))) ρ d Finset.univ beta beta</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (rawMarkedRestrictPair (fun x:W=&gt;f (i x)) g σ) (fun b x u=&gt;H b (f (i x)) (g u)))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hload:MarkedLocalSpokeLoadsWithSpokes (P.comap (fun x:W=&gt;f (i x))) ρ d (r+4) D p k s₀ weight eta</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (rawMarkedRestrictPair (fun x:W=&gt;f (i x)) g σ) (fun b x u=&gt;H b (f (i x)) (g u))):</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let σA:=rawMarkedRestrictPair f g σ</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let HA:=fun b x u=&gt;H b (f x) (g u);</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     MarkedRowsWithSpokes ((P.comap f).comap i) ρ d 1 Finset.univ p k Q S a c</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ((t/2)*Fintype.card W) (rawMarkedRestrictVertices i σA) (fun b x u=&gt;HA b (i x) u)∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     MarkedLocalConfigurationsWithSpokes r ((P.comap f).comap i) ρ d Finset.univ beta beta</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (rawMarkedRestrictVertices i σA) (fun b x u=&gt;HA b (i x) u)∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     MarkedLocalSpokeLoadsWithSpokes ((P.comap f).comap i) ρ d (r+4) D p k s₀ weight eta</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (rawMarkedRestrictVertices i σA) (fun b x u=&gt;HA b (i x) u):=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro σA HA</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hP:((P.comap f).comap i)=P.comap (fun x:W=&gt;f (i x)):=by ext x y;rfl</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hσ:rawMarkedRestrictVertices i σA=rawMarkedRestrictPair (fun x:W=&gt;f (i x)) g σ:=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     rawMarkedRestrictVertices_pair_comp f i g σ</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   rw [hP,hσ]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   exact ⟨hrows,hconfigs,hload⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

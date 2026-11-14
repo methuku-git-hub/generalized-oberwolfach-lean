@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedBaseRealization.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedBaseRealization.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedBaseSurvival</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPhysicalCuts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The pattern product counts actual ordinary arcs and the unique marked</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> closing arc, after the prescribed auxiliary-distance deletion. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1600000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V : Type} [Fintype V] [LinearOrder V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (P : SimpleGraph V) (π : Equiv.Perm V) (b m : ℕ) (T₀ TK : Finset V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> def MarkedBaseRims (σ : Sym2 V→Option (Bool×Bool)) (f : Fin (m+1)→V) : Prop :=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   (∀ i : Fin m,markedPhysicalRim P π b σ false (f i.castSucc) (f i.succ)=1) ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   markedPhysicalRim P π b σ true (f (Fin.last m)) (f 0)=1</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem markedBase_states_iff_rims (hb : 1≤b) (hm : 2≤m)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (C : DenseMarkedBaseFamily P π b m T₀ TK) (σ : Sym2 V→Option (Bool×Bool)) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀ e∈markedBaseRequiredEdges P π b m T₀ TK C,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       σ e=markedBaseRequiredState P π b m T₀ TK C e) ↔ MarkedBaseRims P π b m σ C.val := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hO (i : Fin m) : ¬PermutationClose π b (C.val i.castSucc) (C.val i.succ) :=</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     C.property.1 i.castSucc i.succ (by intro h;have hh:=congrArg Fin.val h;simp at hh)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hK : ¬PermutationClose π b (C.val (Fin.last m)) (C.val 0) :=</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     C.property.1 (Fin.last m) 0 (by intro h;have hh:=congrArg Fin.val h;simp at hh;omega)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hstates : (∀ e∈markedBaseRequiredEdges P π b m T₀ TK C,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       σ e=markedBaseRequiredState P π b m T₀ TK C e) ↔</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       ∀ i : Fin m⊕Unit,σ (twistedTupleEdge C.val (π (C.val 0)) i)=markedBasePositionState P π b m T₀ TK C i := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     constructor</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     · intro h i</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       have hh := h _ (Finset.mem_image.mpr ⟨i,Finset.mem_univ _,rfl⟩)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       simpa only [markedBaseRequiredState_apply P π b m T₀ TK hb hm] using hh</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     · intro h e he</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       obtain ⟨i,_,rfl⟩ := Finset.mem_image.mp he</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       rw [markedBaseRequiredState_apply P π b m T₀ TK hb hm]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       exact h i</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   rw [hstates]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hOrd (i : Fin m) :</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       markedPhysicalRim P π b σ false (C.val i.castSucc) (C.val i.succ)=1 ↔</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         σ s(C.val i.castSucc,C.val i.succ)=some (false,orientationBit (C.val i.castSucc) (C.val i.succ)) := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     simp [markedPhysicalRim,permutationSeparatedMatrix,markedPhysicalOrientation,hO i,C.property.2.2.2.1 i]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hLast : markedPhysicalRim P π b σ true (C.val (Fin.last m)) (C.val 0)=1 ↔</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       σ s(C.val (Fin.last m),π (C.val 0))=some (true,orientationBit (C.val (Fin.last m)) (π (C.val 0))) := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     simp [markedPhysicalRim,permutationSeparatedMatrix,markedPhysicalOrientation,hK,C.property.2.2.2.2]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   constructor</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   · intro h</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     exact ⟨fun i=&gt;(hOrd i).mpr (h (Sum.inl i)),hLast.mpr (h (Sum.inr ()))⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · intro h i</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     cases i with</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     | inl i=&gt;exact (hOrd i).mp (h.1 i)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     | inr i=&gt;exact hLast.mp h.2</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> </span>
+<span id="L56"><a href="#L56" class="ln">  56</a> theorem markedBaseSurvivalSum_count (hb : 1≤b) (hm : 2≤m)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (σ : Sym2 V→Option (Bool×Bool)) :</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     markedBaseSurvivalSum P π b m T₀ TK σ=</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (Fintype.card {C : DenseMarkedBaseFamily P π b m T₀ TK // MarkedBaseRims P π b m σ C.val}:ℝ)/</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (Fintype.card V:ℝ)^(m+1) := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   unfold markedBaseSurvivalSum</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   simp_rw [patternValue_indicator,markedBase_states_iff_rims P π b m T₀ TK hb hm]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   rw [← Finset.mul_sum]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hcard : (∑ C : DenseMarkedBaseFamily P π b m T₀ TK,</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       if MarkedBaseRims P π b m σ C.val then (1:ℝ) else 0)=</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       Fintype.card {C : DenseMarkedBaseFamily P π b m T₀ TK // MarkedBaseRims P π b m σ C.val} := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     simp only [Fintype.card_subtype,Finset.card_filter,Nat.cast_sum,Nat.cast_ite,Nat.cast_one,Nat.cast_zero]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   rw [hcard]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   ring</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> </span>
+<span id="L71"><a href="#L71" class="ln">  71</a> end Oberwolfach</span></pre></html>

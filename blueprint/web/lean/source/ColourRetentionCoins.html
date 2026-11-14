@@ -1,0 +1,152 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ColourRetentionCoins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ColourRetentionCoins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TentativeColouring</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Colour-dependent retention coins, sampled together with the colour</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> at each vertex. Different vertices, not the two components at one vertex,</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> are the independent coordinates. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1600000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def FiniteLaw.withCoin {C : Type*} [Fintype C] (μ : FiniteLaw C)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (a : C → ℝ) (ha : ∀ c,0≤a c ∧ a c≤1) : FiniteLaw (C×Bool) where</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   mass x := μ.mass x.1*(if x.2 then a x.1 else 1-a x.1)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   nonneg x := mul_nonneg (μ.nonneg _) (by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     cases x.2 &lt;;&gt; simp only [Bool.false_eq_true,ite_false,ite_true]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     · exact sub_nonneg.mpr (ha _).2</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     · exact (ha _).1)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   total := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     rw [Fintype.sum_prod_type]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     have he (c : C) : (∑ b : Bool,μ.mass c*(if b then a c else 1-a c))=μ.mass c := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       rw [Fintype.sum_bool]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       simp only [Bool.false_eq_true,ite_false,ite_true]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       ring</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     simp_rw [he]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     exact μ.total</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem finiteLaw_withCoin_colour {C : Type*} [Fintype C]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (μ : FiniteLaw C) (a : C → ℝ) (ha : ∀ c,0≤a c ∧ a c≤1) (c : C) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (μ.withCoin a ha).probability (fun x=&gt;x.1=c)=μ.mass c := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   classical</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   unfold FiniteLaw.probability FiniteLaw.withCoin</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   rw [Fintype.sum_prod_type]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   simp only [Fintype.sum_bool,Bool.false_eq_true,ite_false,ite_true]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have he (d : C) :</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (if d=c then μ.mass d*a d else 0)+</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (if d=c then μ.mass d*(1-a d) else 0)=if d=c then μ.mass d else 0 := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     split_ifs &lt;;&gt; ring</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   simp_rw [he]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   simp</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> </span>
+<span id="L44"><a href="#L44" class="ln">  44</a> theorem finiteLaw_withCoin_not_colour {C : Type*} [Fintype C]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (μ : FiniteLaw C) (a : C → ℝ) (ha : ∀ c,0≤a c ∧ a c≤1) (c : C) :</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (μ.withCoin a ha).probability (fun x=&gt;x.1≠c)=1-μ.mass c := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hh := finiteLaw_probability_compl (μ.withCoin a ha) (fun x=&gt;x.1=c)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   rw [finiteLaw_withCoin_colour] at hh</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   linarith</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> theorem finiteLaw_withCoin_success {C : Type*} [Fintype C]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (μ : FiniteLaw C) (a : C → ℝ) (ha : ∀ c,0≤a c ∧ a c≤1) (c : C) :</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (μ.withCoin a ha).probability (fun x=&gt;x.1=c ∧ x.2=true)=μ.mass c*a c := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have he (x : C×Bool) : (x.1=c ∧ x.2=true) ↔ x=(c,true) := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     constructor</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     · rintro ⟨h₁,h₂⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       exact Prod.ext h₁ h₂</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     · rintro rfl</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       exact ⟨rfl,rfl⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   rw [finiteLaw_probability_congr _ _ _ he,finiteLaw_probability_point]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   rfl</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> </span>
+<span id="L63"><a href="#L63" class="ln">  63</a> def coinColourSurvives {V C : Type*} (G : SimpleGraph V)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (σ : V → C×Bool) (v : V) : Prop :=</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   (σ v).2=true ∧ tentativeColourSurvives G (fun u=&gt;(σ u).1) v</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a> def coinRetainedColour {V C : Type*} (G : SimpleGraph V)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (σ : V → C×Bool) (v : V) : Option C :=</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   if coinColourSurvives G σ v then some (σ v).1 else none</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> </span>
+<span id="L71"><a href="#L71" class="ln">  71</a> theorem coinRetainedColour_eq_some {V C : Type*} (G : SimpleGraph V)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (σ : V → C×Bool) (v : V) (c : C) :</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     coinRetainedColour G σ v=some c ↔ (σ v).1=c ∧ coinColourSurvives G σ v := by</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   unfold coinRetainedColour</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   split_ifs &lt;;&gt; simp_all</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> </span>
+<span id="L77"><a href="#L77" class="ln">  77</a> theorem coinRetainedColour_proper {V C : Type*} (G : SimpleGraph V)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (σ : V → C×Bool) {u v : V} (h : G.Adj u v) (c : C)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     (hu : coinRetainedColour G σ u=some c) : coinRetainedColour G σ v≠some c := by</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   intro hv</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   obtain ⟨huc,_,hus⟩ := (coinRetainedColour_eq_some G σ u c).mp hu</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   obtain ⟨hvc,_⟩ := (coinRetainedColour_eq_some G σ v c).mp hv</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   exact hus v h (hvc.trans huc.symm)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a> </span>
+<span id="L85"><a href="#L85" class="ln">  85</a> theorem coinRetainedColour_probability</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     {V C : Type*} [Fintype V] [DecidableEq V] [Fintype C]</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (G : SimpleGraph V) (μ : V → FiniteLaw C)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     (a : V → C → ℝ) (ha : ∀ v c,0≤a v c ∧ a v c≤1) (v : V) (c : C) :</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     (FiniteLaw.pi (fun u=&gt;(μ u).withCoin (a u) (ha u))).probability</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>       (fun σ=&gt;coinRetainedColour G σ v=some c)=</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>       (μ v).mass c*a v c*</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>         ∏ u∈Finset.univ.filter (fun u=&gt;G.Adj v u),(1-(μ u).mass c) := by</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   classical</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   let ν := fun u=&gt;(μ u).withCoin (a u) (ha u)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   let A : V → C×Bool → Prop := fun u x=&gt;</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     if u=v then x.1=c ∧ x.2=true else if G.Adj v u then x.1≠c else True</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   have hevent (σ : V → C×Bool) :</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>       (coinRetainedColour G σ v=some c) ↔ ∀ u,A u (σ u) := by</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     rw [coinRetainedColour_eq_some]</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     constructor</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     · rintro ⟨hc,hcoin,hkeep⟩ u</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       by_cases hu : u=v</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>       · simp [A,hu,hc,hcoin]</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>       · by_cases hadj : G.Adj v u</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>         · simpa [A,hu,hadj,hc] using hkeep u hadj</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>         · simp [A,hu,hadj]</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     · intro h</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>       obtain ⟨hc,hcoin⟩ : (σ v).1=c ∧ (σ v).2=true := by simpa [A] using h v</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>       refine ⟨hc,hcoin,?_⟩</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       intro u hadj</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       have huv : u≠v := fun he=&gt;G.irrefl (he ▸ hadj)</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>       simpa [A,huv,hadj,hc] using h u</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>   rw [finiteLaw_probability_congr (FiniteLaw.pi ν) _ _ hevent,</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     finiteLaw_pi_probability_forall ν A]</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>   have hcoord (u : V) : (ν u).probability (A u)=</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>       if u=v then (μ v).mass c*a v c else if G.Adj v u then 1-(μ u).mass c else 1 := by</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     by_cases hu : u=v</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     · subst u</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>       simp only [A,ite_true]</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>       exact finiteLaw_withCoin_success _ _ _ _</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     · by_cases hadj : G.Adj v u</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>       · simp only [A,hu,ite_false,hadj,ite_true]</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>         exact finiteLaw_withCoin_not_colour _ _ _ _</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>       · simp only [A,hu,ite_false,hadj]</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>         exact finiteLaw_probability_true _</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>   simp_rw [hcoord]</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>   rw [← Finset.mul_prod_erase Finset.univ</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     (fun u=&gt;if u=v then (μ v).mass c*a v c else if G.Adj v u then 1-(μ u).mass c else 1)</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     (Finset.mem_univ v)]</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>   simp only [ite_true]</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>   congr 1</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>   have he : (Finset.univ.erase v).filter (fun u=&gt;G.Adj v u)=</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>       Finset.univ.filter (fun u=&gt;G.Adj v u) := by</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     ext u</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     simp only [Finset.mem_filter,Finset.mem_erase,Finset.mem_univ,and_true,true_and]</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     constructor</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     · exact fun h=&gt;h.2</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     · intro h</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>       exact ⟨fun he=&gt;G.irrefl (he ▸ h),h⟩</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>   calc</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     _ = ∏ u∈Finset.univ.erase v,if G.Adj v u then 1-(μ u).mass c else 1 := by</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>       apply Finset.prod_congr rfl</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>       intro u hu</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>       simp only [(Finset.mem_erase.mp hu).1,ite_false]</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>     _ = ∏ u∈(Finset.univ.erase v).filter (fun u=&gt;G.Adj v u),(1-(μ u).mass c) := by</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>       rw [Finset.prod_filter]</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>     _ = _ := by rw [he]</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a> </span>
+<span id="L149"><a href="#L149" class="ln"> 149</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,93 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PartitionWeightData.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PartitionWeightData.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PartitionTupleLoads</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.NearRegularCyclicWeights</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! All incidence equations for the same weighting on one good partition.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> These data are obtained from random regularization and the proved positive</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> cyclic decomposition; they are not inputs to the main theorem. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> structure PartitionTupleWeightConditions {V : Type*} [Fintype V] {ℓ k : ℕ} {d : Fin k → ℕ}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (G : SimpleGraph V) (σ : Fin (ℓ + 2) → Equiv.Perm V) (P : FixedPartition V k d)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (a : Fin (ℓ + 2) ⊕ Fin (ℓ + 2) → Fin k) (p q A B : ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (w : (Fin (ℓ + 2) → V × V) → ℝ) : Prop where</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   nonneg : ∀ t, 0 ≤ w t</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   support : ∀ t, 0 &lt; w t → TwistedCyclicTupleValid G σ t ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ i, P.1 (t i).1 = a (Sum.inl i) ∧ P.1 (t i).2 = a (Sum.inr i)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   lower : ∀ t, TwistedCyclicTupleValid G σ t →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀ i, P.1 (t i).1 = a (Sum.inl i) ∧ P.1 (t i).2 = a (Sum.inr i)) → A ≤ w t</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   upper : ∀ t, w t ≤ B</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   left : ∀ i x y,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (1-p) * (if P.1 x = a (Sum.inl i) ∧ P.1 y = a (Sum.inr i) ∧ G.Adj x y then 1 else 0) ≤</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∑ t, if t i = (x,y) then w t else 0) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∑ t, if t i = (x,y) then w t else 0) ≤</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (if P.1 x = a (Sum.inl i) ∧ P.1 y = a (Sum.inr i) ∧ G.Adj x y then 1 else 0)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   right : ∀ i x y,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (1-p) * (if P.1 x = a (Sum.inr i) ∧ P.1 y = a (Sum.inl (finRotate (ℓ + 2) i)) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       G.Adj x (σ i y) then 1 else 0) ≤</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∑ t, if ((t i).2,(t (finRotate (ℓ + 2) i)).1) = (x,y) then w t else 0) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∑ t, if ((t i).2,(t (finRotate (ℓ + 2) i)).1) = (x,y) then w t else 0) ≤</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (if P.1 x = a (Sum.inr i) ∧ P.1 y = a (Sum.inl (finRotate (ℓ + 2) i)) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         G.Adj x (σ i y) then 1 else 0)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   positions : ∀ i v,</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∑ t, if (t i).1 = v then w t else 0) = (if P.1 v = a (Sum.inl i) then q else 0) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (∑ t, if (t i).2 = v then w t else 0) = (if P.1 v = a (Sum.inr i) then q else 0)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem near_regular_partition_tuple_weights (β : ℝ) (hβ : 0 &lt; β) :</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     ∃ C η₀ : ℝ, 0 &lt; C ∧ 0 &lt; η₀ ∧ ∀ η : ℝ, 0 &lt; η → η &lt; η₀ →</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       ∃ m₀ : ℕ, ∀ (V : Type) [Fintype V] (ℓ k : ℕ) (d : Fin k → ℕ)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (G : SimpleGraph V) (σ : Fin (ℓ + 2) → Equiv.Perm V) (P : FixedPartition V k d)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (a : Fin (ℓ + 2) ⊕ Fin (ℓ + 2) → Fin k) (m : ℕ) (hm : ∀ s, d (a s) = m),</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       0 &lt; m → m₀ ≤ m → ∀ d₀ α : ℝ, 0 &lt; α →</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (1/2+β) * m ≤ d₀ - η * m →</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∀ s v, |(graphCellDegree G (Equiv.refl V) P v (a s) : ℝ) - d₀| ≤ η * m) →</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀ i v, |(graphCellDegree G (σ i) P v (a (Sum.inl (finRotate (ℓ + 2) i))) : ℝ) - d₀| ≤ η * m) →</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       let q := ⌊d₀ - Real.sqrt η * m⌋₊</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       ((ℓ + 2) + (2 * (ℓ + 2) - 1) * α) * m ≤ (2 * (ℓ + 2) - 1) * (q : ℝ) →</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       ∃ w, PartitionTupleWeightConditions G σ P a (C * Real.sqrt η) q</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         ((1 - 2 * (ℓ + 2) * (C * Real.sqrt η)) *</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>           (((ℓ + 2 : ℝ) * cyclicSectorLower ℓ α) / (m : ℝ) ^ (2 * ℓ + 2)))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (((ℓ + 2 : ℝ) * cyclicSectorUpper ℓ α) / (m : ℝ) ^ (2 * ℓ + 2)) w := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   obtain ⟨C,η₀,hC,hη₀,hall⟩ := near_regular_cyclic_matrix_weights β hβ</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   refine ⟨C,η₀,hC,hη₀,?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   intro η hη hηsmall</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   obtain ⟨m₀,hm₀⟩ := hall η hη hηsmall</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   refine ⟨m₀,?_⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   intro V _ ℓ k d G σ P a m hm hmpos hmlarge d₀ α hα hmin hid hσ q hthreshold</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   letI : NeZero m := ⟨by omega⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   let M := partitionCyclicMatrices G σ P a m hm</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨hl,hr⟩ := partitionCyclicMatrices_near_degrees G σ P a m hm d₀ η hid hσ</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hb := partitionCyclicMatrices_binary G σ P a m hm</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have ht := hm₀ ℓ (Fin m) (by simpa using hmlarge) M hb d₀ α hα</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (by intro i x; simpa only [Fintype.card_fin] using hmin.trans (hl i x).1)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (by intro i y; simpa only [Fintype.card_fin] using hmin.trans (hr i y).1)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (by simpa only [Fintype.card_fin] using hl)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (by simpa only [Fintype.card_fin] using hr)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (by simpa only [Fintype.card_fin] using hthreshold)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   simp only [Fintype.card_fin] at ht</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   obtain ⟨w,hwn,hws,hwl,hwr,hwp,hwu,hwb⟩ := ht</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   let W := embeddedWeight (partitionCyclicTupleEmbedding P a m hm) w</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hB : 0 ≤ ((ℓ + 2 : ℝ) * cyclicSectorUpper ℓ α) / (m : ℝ) ^ (2 * ℓ + 2) := by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     exact le_trans (hwn (fun _ =&gt; (0,0))) (hwu _)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   obtain ⟨hbound,hsupport,hlower⟩ := partitionTuple_weight_support_and_bounds G σ P a m hm</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     w _ _ hB hwn hws hwb hwu</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   refine ⟨W,⟨fun t =&gt; (hbound t).1, hsupport, hlower, fun t =&gt; (hbound t).2, ?_, ?_, ?_⟩⟩</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   · exact partitionTuple_left_edge_bounds G σ P a m hm w (C * Real.sqrt η) (by</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       intro i x y</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       convert hwl i x y using 2 &lt;;&gt; apply Finset.sum_congr rfl &lt;;&gt; intro v _ &lt;;&gt; split_ifs &lt;;&gt; rfl)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   · exact partitionTuple_cross_edge_bounds G σ P a m hm w (C * Real.sqrt η) (by</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       intro i x y</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       convert hwr i x y using 2 &lt;;&gt; apply Finset.sum_congr rfl &lt;;&gt; intro v _ &lt;;&gt; split_ifs &lt;;&gt; rfl)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   · exact partitionTuple_position_loads P a m hm w q (by</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       intro i x</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       convert hwp i x using 2 &lt;;&gt; apply Finset.sum_congr rfl &lt;;&gt; intro v _ &lt;;&gt; split_ifs &lt;;&gt; rfl)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a> </span>
+<span id="L90"><a href="#L90" class="ln">  90</a> end Oberwolfach</span></pre></html>

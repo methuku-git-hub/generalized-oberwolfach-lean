@@ -1,0 +1,201 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedAssignedRowPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedAssignedRowPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedAssignedRowAfterDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedRowRimClassification</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedFreeRowLoads</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedFreeRimDisjointness</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Pack the wheels through one prescribed row. Only the union of free</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> physical rim edges is deleted in subsequent path choices. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 16000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E T : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {tail head : E → V} {ktail khead : T → V} {H₀ HK : V → U → Prop}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {π : Equiv.Perm V} {b l : ℕ} {c ch : ℝ}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem marked_assigned_row_packing</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (Q : MarkedHostExtensionCounts tail head ktail khead H₀ HK π b l c ch)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hl : 2≤l) (hb : 1≤b) (X : Finset V) (hX : ∀ x, π x∈X ↔ x∈X)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (v : V) (hv : v∉X) (N K D₀ : ℕ) (hK : 0&lt;K)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (a z : Fin N → V) (u : Fin N → U) (jin jout : Fin N → Bool)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hu : Function.Injective u) (ha : ∀ i, a i∈X) (hz : ∀ i, z i∈X)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (htypes : ∀ i, ¬(jin i=true ∧ jout i=true))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (haz : ∀ i, ¬PermutationClose π b (a i) (z i))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hav : ∀ i, ¬PermutationClose π b (a i) v) (hzv : ∀ i, ¬PermutationClose π b (z i) v)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (haH : ∀ i, if jout i then HK (a i) (u i) else H₀ (a i) (u i))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hzH : ∀ i, H₀ (z i) (u i))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hroot : ∀ i, if jin i then HK v (u i) else H₀ v (u i))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hopen : ∀ i, markedArcPresent tail head ktail khead (jout i) v (a i))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hclose : ∀ i, markedArcPresent tail head ktail khead (jin i) (z i) v)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hroots : ∀ i j, i≠j → Disjoint (markedRowRootRims π v (a i) (z i) (jin i) (jout i))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (markedRowRootRims π v (a j) (z j) (jin j) (jout j)))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hend : ∀ x, (Finset.univ.filter (fun i =&gt; x=a i ∨ x=z i)).card≤D₀)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hbudget : ((Xᶜ).card:ℝ)+(N*(l+4):ℕ)/(K:ℝ)+(l+5)*(2*b+1)+8*(K+D₀:ℕ)&lt;c) :</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∃ C : Fin N → MarkedWheel tail head ktail khead (l+3) π b H₀ HK,</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ i, (C i).2.val=u i ∧ ∃ p : Fin (l+3) ↪ V,</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         p 0=a i ∧ p (Fin.last (l+2))=z i ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (∀ j, (C i).1.val j=Fin.cons (α:=fun _=&gt;V) v p (markedAssignedRowOrder (l+3) (jin i) (jout i) j)) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         ∀ j, p j∈X) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (∀ i j, i≠j → Disjoint (markedWheelPhysicalResources (C i)) (markedWheelPhysicalResources (C j))) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (∀ x∈X, markedFamilyFreeRowLoad C a z x≤K) ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (∀ x, (spanningRestriction (markedFamilyRim C) X).degree x≤4*(K+D₀)) ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∀ x∈X, (Finset.univ.filter (markedFamilySpokes C x)).card≤K+D₀) ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (∀ w, (Finset.univ.filter (fun x =&gt; markedFamilySpokes C x w)).card≤l+4) := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let Good (i : Fin N) (C : MarkedWheel tail head ktail khead (l+3) π b H₀ HK) :=</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     C.2.val=u i ∧ ∃ p : Fin (l+3) ↪ V,</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       p 0=a i ∧ p (Fin.last (l+2))=z i ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀ j, C.1.val j=Fin.cons (α:=fun _=&gt;V) v p (markedAssignedRowOrder (l+3) (jin i) (jout i) j)) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       ∀ j, p j∈X</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have forced_bound {k : ℕ} (e : Fin k ↪ Fin N) (x : V) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (Finset.univ.filter (fun j =&gt; x=a (e j) ∨ x=z (e j))).card≤D₀ := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     apply le_trans _ (hend x)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     apply Finset.card_le_card_of_injOn e</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     · intro j hj; exact Finset.mem_filter.mpr ⟨Finset.mem_univ _,(Finset.mem_filter.mp hj).2⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     · intro i _ j _ hij; exact e.injective hij</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have classify {i : Fin N} {C : MarkedWheel tail head ktail khead (l+3) π b H₀ HK}</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (hC : Good i C) :</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       ∀ e∈markedCyclePhysicalEdges tail head ktail khead (l+3) π b C.1,</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         e⊆X ∨ e∈markedRowRootRims π v (a i) (z i) (jin i) (jout i) := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     obtain ⟨hCu,p,hp0,hplast,hp,hpX⟩ := hC</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hh := marked_assigned_row_rim_classification (by omega : 2≤l+2) p v (jin i) (jout i)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (htypes i) X (fun x hx =&gt; (hX x).mpr hx) hpX C hp</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     simpa only [hp0,hplast] using hh</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hp : ∀ k : ℕ, ∀ hk : k≤N,</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       ∃ C : Fin k → MarkedWheel tail head ktail khead (l+3) π b H₀ HK,</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (∀ j, Good ⟨j.val,lt_of_lt_of_le j.isLt hk⟩ (C j)) ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (∀ i j, i≠j → Disjoint (markedWheelPhysicalResources (C i)) (markedWheelPhysicalResources (C j))) ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       ∀ x∈X, markedFamilyFreeRowLoad C</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         (fun j =&gt; a ⟨j.val,lt_of_lt_of_le j.isLt hk⟩)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         (fun j =&gt; z ⟨j.val,lt_of_lt_of_le j.isLt hk⟩) x≤K := by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     intro k</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     induction k with</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     | zero =&gt;</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       intro hk</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       refine ⟨Fin.elim0,fun j =&gt; Fin.elim0 j,fun i =&gt; Fin.elim0 i,?_⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       intro x hx; simp [markedFamilyFreeRowLoad]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     | succ k ih =&gt;</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       intro hk</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       have hkN : k≤N := by omega</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       obtain ⟨C,hC,hdis,hcap⟩ := ih hkN</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       let e : Fin k ↪ Fin N := ⟨fun j =&gt; ⟨j.val,lt_of_lt_of_le j.isLt hkN⟩,</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>         by intro a b h; exact Fin.ext (congrArg (fun z : Fin N =&gt; z.val) h)⟩</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       let i : Fin N := ⟨k,by omega⟩</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       let D := spanningRestriction (markedFamilyRim C) X</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       let S := Finset.univ.filter (fun x =&gt; K≤markedFamilyFreeRowLoad C (a ∘ e) (z ∘ e) x)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       let W := (Xᶜ∪S) \ {a i,z i}</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       have hS : (S.card:ℝ)≤(N*(l+4):ℕ)/(K:ℝ) := by</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>         apply (le_div_iff₀ (Nat.cast_pos.mpr hK)).mpr</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>         have hh : K*S.card≤N*(l+4) := (markedFamilyFreeRowLoad_saturated C (a ∘ e) (z ∘ e) K).trans</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>           (by simp only [Fintype.card_fin]; exact Nat.mul_le_mul_right (l+4) hkN)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>         exact_mod_cast (by simpa only [Nat.mul_comm] using hh)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       have hW : (W.card:ℝ)≤((Xᶜ).card:ℝ)+(N*(l+4):ℕ)/(K:ℝ) := by</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>         have hh : (W.card:ℝ)≤(Xᶜ).card+S.card := by</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>           exact_mod_cast (Finset.card_le_card Finset.sdiff_subset).trans (Finset.card_union_le (Xᶜ) S)</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>         linarith only [hh,hS]</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>       have hD : ∀ x, (D.degree x:ℝ)≤4*(K+D₀:ℕ) := by</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>         intro x</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>         have hh := marked_free_rim_degree C (a ∘ e) (z ∘ e) hb X hX K D₀ hcap (forced_bound e) x</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>         exact_mod_cast hh</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       have haW : a i∉W := by simp [W]</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       have hzW : z i∉W := by simp [W]</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>       have haZ : a i∉({v}:Finset V) := by</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>         intro h</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>         exact hv ((Finset.mem_singleton.mp h) ▸ ha i)</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       have hzZ : z i∉({v}:Finset V) := by</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>         intro h</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>         exact hv ((Finset.mem_singleton.mp h) ▸ hz i)</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>       have hoD : ¬D.Adj v (if jout i then π (a i) else a i) := by</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>         intro h; exact hv ((spanningRestriction_adj _ _ _ _).mp h).2.1</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       have hcD : ¬D.Adj (z i) (if jin i then π v else v) := by</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>         intro h</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>         have hh := ((spanningRestriction_adj _ _ _ _).mp h).2.2</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>         cases hji : jin i</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>         · rw [hji] at hh; exact hv hh</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>         · rw [hji] at hh; exact hv ((hX v).mp hh)</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>       obtain ⟨p,B,hp0,hplast,hBu,hB,havB,hsep,hBD⟩ := marked_assigned_row_after_deletion Q hl D</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>         (4*(K+D₀:ℕ)) (by positivity) hD v (a i) (z i) (u i) (jin i) (jout i) (htypes i)</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>         W {v} (by simp) haW hzW haZ hzZ (haz i)</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>         (by intro x hx; rw [Finset.mem_singleton.mp hx]; exact hav i)</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>         (by intro x hx; rw [Finset.mem_singleton.mp hx]; exact hzv i)</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>         (haH i) (hzH i) (hroot i) (hopen i) (hclose i) hoD hcD</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>         (by simp only [Finset.card_singleton,Nat.cast_one]; linarith only [hW,hbudget])</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>       have hpX : ∀ j, p j∈X := by</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>         intro j</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>         by_contra hx</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>         apply (havB j).1</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>         apply Finset.mem_sdiff.mpr</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>         refine ⟨Finset.mem_union_left _ (Finset.mem_compl.mpr hx),?_⟩</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>         intro h</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>         rcases Finset.mem_insert.mp h with he|he</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>         · exact hx (he ▸ ha i)</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>         · exact hx ((Finset.mem_singleton.mp he) ▸ hz i)</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>       have hBG : Good i B := ⟨hBu,p,hp0,hplast,hB,hpX⟩</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>       have hcross : ∀ j, Disjoint (markedWheelPhysicalResources (C j)) (markedWheelPhysicalResources B) := by</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>         apply marked_free_rim_extension_disjoint (by omega) hb C B X</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>           (fun j =&gt; markedRowRootRims π v (a (e j)) (z (e j)) (jin (e j)) (jout (e j)))</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>           (markedRowRootRims π v (a i) (z i) (jin i) (jout i))</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>         · intro j; exact classify (hC j)</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>         · exact classify hBG</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>         · intro j; exact marked_row_root_rim_not_inside X hX v _ _ hv _ _</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>         · intro j; apply hroots (e j) i</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>           intro he; have hh := congrArg (fun z : Fin N =&gt; z.val) he</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>           have hj := j.isLt; dsimp [e,i] at hh; omega</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>         · intro j h</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>           have he := hu ((hC j).1.symm.trans (h.trans hBu))</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>           have hh := congrArg (fun z : Fin N =&gt; z.val) he</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>           have hj := j.isLt; dsimp [e,i] at hh; omega</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>         · exact hBD</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>       refine ⟨Fin.snoc C B,?_,?_,?_⟩</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>       · intro j</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>         refine Fin.lastCases ?_ (fun j =&gt; ?_) j</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>         · simpa only [Fin.snoc_last,Fin.val_last,i] using hBG</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>         · simpa only [Fin.snoc_castSucc,Fin.val_castSucc] using hC j</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>       · intro j q</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>         refine Fin.lastCases ?_ (fun j&#x27; =&gt; ?_) j</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>         · refine Fin.lastCases ?_ (fun q&#x27; =&gt; ?_) q</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>           · intro h; exact (h rfl).elim</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>           · intro _; simpa only [Fin.snoc_last,Fin.snoc_castSucc] using (hcross q&#x27;).symm</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>         · refine Fin.lastCases ?_ (fun q&#x27; =&gt; ?_) q</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>           · intro _; simpa only [Fin.snoc_last,Fin.snoc_castSucc] using hcross j&#x27;</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>           · intro h; simpa only [Fin.snoc_castSucc] using hdis j&#x27; q&#x27; (fun he =&gt; h (congrArg Fin.castSucc he))</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>       · intro x hx</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>         have haeq : (fun j : Fin (k+1) =&gt; a ⟨j.val,lt_of_lt_of_le j.isLt hk⟩)=Fin.snoc (a ∘ e) (a i) := by</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>           funext j; refine Fin.lastCases ?_ (fun j =&gt; ?_) j &lt;;&gt; simp [e,i]</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>         have hzeq : (fun j : Fin (k+1) =&gt; z ⟨j.val,lt_of_lt_of_le j.isLt hk⟩)=Fin.snoc (z ∘ e) (z i) := by</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>           funext j; refine Fin.lastCases ?_ (fun j =&gt; ?_) j &lt;;&gt; simp [e,i]</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>         rw [haeq,hzeq,markedFamilyFreeRowLoad_snoc]</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>         by_cases hfree : x∈markedWheelRows B ∧ x≠a i ∧ x≠z i</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>         · rw [if_pos hfree]</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>           have hxS : x∉S := by</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>             intro hs</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>             rw [marked_one_root_rows p v _ B hB] at hfree</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a>             rcases Finset.mem_insert.mp hfree.1 with h|h</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>             · exact hv (h ▸ hx)</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>             · obtain ⟨j,hj,he⟩ := Finset.mem_image.mp h</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>               apply (havB j).1</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>               rw [he]</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>               exact Finset.mem_sdiff.mpr ⟨Finset.mem_union_right _ hs,by simpa using hfree.2⟩</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>           have hh : markedFamilyFreeRowLoad C (a ∘ e) (z ∘ e) x&lt;K := by</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>             simpa only [S,Finset.mem_filter,Finset.mem_univ,true_and,not_le] using hxS</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>           omega</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>         · rw [if_neg hfree,Nat.add_zero]; exact hcap x hx</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a>   obtain ⟨C,hC,hdis,hcap⟩ := hp N le_rfl</span>
+<span id="L185"><a href="#L185" class="ln"> 185</a>   refine ⟨C,hC,hdis,hcap,marked_free_rim_degree C a z hb X hX K D₀ hcap hend,?_,?_⟩</span>
+<span id="L186"><a href="#L186" class="ln"> 186</a>   · intro x hx</span>
+<span id="L187"><a href="#L187" class="ln"> 187</a>     exact (markedFamilySpokes_row C x).trans ((markedFamilyRowLoad_le_free_add_forced C a z x).trans</span>
+<span id="L188"><a href="#L188" class="ln"> 188</a>       (Nat.add_le_add (hcap x hx) (hend x)))</span>
+<span id="L189"><a href="#L189" class="ln"> 189</a>   · intro w</span>
+<span id="L190"><a href="#L190" class="ln"> 190</a>     have hh : markedFamilyHubLoad C w≤1 := by</span>
+<span id="L191"><a href="#L191" class="ln"> 191</a>       apply Finset.card_le_one.mpr</span>
+<span id="L192"><a href="#L192" class="ln"> 192</a>       intro i hi j hj</span>
+<span id="L193"><a href="#L193" class="ln"> 193</a>       apply hu</span>
+<span id="L194"><a href="#L194" class="ln"> 194</a>       exact (hC i).1.symm.trans ((Finset.mem_filter.mp hi).2.trans</span>
+<span id="L195"><a href="#L195" class="ln"> 195</a>         ((Finset.mem_filter.mp hj).2.symm.trans (hC j).1))</span>
+<span id="L196"><a href="#L196" class="ln"> 196</a>     exact (markedFamilySpokes_column C w).trans (by simpa using Nat.mul_le_mul_right (l+4) hh)</span>
+<span id="L197"><a href="#L197" class="ln"> 197</a> </span>
+<span id="L198"><a href="#L198" class="ln"> 198</a> end Oberwolfach</span></pre></html>

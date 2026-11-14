@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedUnitPotentialLoads.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedUnitPotentialLoads.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TypedMarkedPotentialResources</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.TypedCycleClassLoads</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Potential spoke loads over a single formal hub are exactly ordered</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> cycle sums with the tested typed vertex omitted. Rim indicators are all</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> retained: the omitted root is a spoke, never a rim edge. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 18000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V E K:Type} [Fintype V] [Fintype E] [Fintype K] [DecidableEq V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {tail head:E→V} {ktail khead:K→V} {m b:ℕ} {π:Equiv.Perm V}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> def markedUnitWheel (C:MarkedCycleTuple tail head ktail khead m π b):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     MarkedWheel tail head ktail khead m π b (fun (_:V) (_:Unit)=&gt;True) (fun _ _=&gt;True):=</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   ⟨C,⟨(),trivial,fun _=&gt;trivial⟩⟩</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> def markedUnitWheelEquiv:</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     MarkedCycleTuple tail head ktail khead m π b≃</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       MarkedWheel tail head ktail khead m π b (fun (_:V) (_:Unit)=&gt;True) (fun _ _=&gt;True) where</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   toFun:=markedUnitWheel</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   invFun:=Sigma.fst</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   left_inv _:=rfl</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   right_inv W:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     rcases W with ⟨C,⟨u,hu⟩⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     cases u</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     rfl</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem marked_unit_spoke_mem (C:MarkedCycleTuple tail head ktail khead m π b) (j:Bool) (v:V):</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (Sum.inr (j,v,()):(E⊕K)⊕(Bool×V×Unit))∈typedMarkedOccurrenceResources (markedUnitWheel C)↔</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (j,v)∈typedMarkedCycleVertices C:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   rw [typedMarkedOccurrenceResources_spoke]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   simp only [typedMarkedCycleVertices,Finset.mem_image,Finset.mem_univ,true_and,</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     Prod.mk.injEq,markedUnitWheel,markedPositionType,and_true]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a> </span>
+<span id="L39"><a href="#L39" class="ln">  39</a> theorem marked_unit_omitted_condition</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (C:MarkedCycleTuple tail head ktail khead m π b) (R:E⊕K→Prop) (H:Bool→V→Unit→Prop) (j:Bool) (v:V):</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ e∈typedMarkedOccurrenceResources (markedUnitWheel C),e≠Sum.inr (j,v,())→</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       Sum.elim R (fun a:Bool×V×Unit=&gt;H a.1 a.2.1 a.2.2) e)↔</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (∀ e,CanonicalMarkedArcMem C e→R e)∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       ∀ x∈typedMarkedCycleVertices C,x≠(j,v)→H x.1 x.2 ():=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   constructor</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   · intro h</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     constructor</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     · intro e he</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       exact h (Sum.inl e) ((typedMarkedOccurrenceResources_rim _ e).mpr he) (by simp)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     · rintro ⟨k,w⟩ hw hne</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       apply h (Sum.inr (k,w,())) ((marked_unit_spoke_mem C k w).mpr hw)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       intro he</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       apply hne</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       exact Prod.ext (congrArg (fun x:Bool×V×Unit=&gt;x.1) (Sum.inr.inj he))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (congrArg (fun x:Bool×V×Unit=&gt;x.2.1) (Sum.inr.inj he))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   · rintro ⟨hr,hs⟩ e he hne</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     cases e with</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     | inl e=&gt;exact hr e ((typedMarkedOccurrenceResources_rim _ e).mp he)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     | inr x=&gt;</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       rcases x with ⟨k,w,u⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       cases u</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       apply hs (k,w) ((marked_unit_spoke_mem C k w).mp he)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       intro h</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       apply hne</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       exact congrArg (fun x:Bool×V=&gt;Sum.inr (x.1,x.2,())) h</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a> theorem marked_unit_potential_load</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (w:MarkedCycleTuple tail head ktail khead m π b→ℝ) (R:E⊕K→Prop) (H:Bool→V→Unit→Prop) (j:Bool) (v:V):</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     typedMarkedPotentialLoad (H₀:=fun (_:V) (_:Unit)=&gt;True) (Hₖ:=fun _ _=&gt;True) (fun W=&gt;w W.1) R H (Sum.inr (j,v,()))=</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       ∑ C,if (j,v)∈typedMarkedCycleVertices C∧(∀ e,CanonicalMarkedArcMem C e→R e)∧</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         (∀ x∈typedMarkedCycleVertices C,x≠(j,v)→H x.1 x.2 ()) then w C else 0:=by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   unfold typedMarkedPotentialLoad resourceRootOmittedLoad</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   rw [←Equiv.sum_comp markedUnitWheelEquiv]</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   apply Finset.sum_congr rfl</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   intro C hC</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   simp only [markedUnitWheelEquiv,Equiv.coe_fn_mk]</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   rw [marked_unit_spoke_mem,marked_unit_omitted_condition]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   split_ifs &lt;;&gt; rfl</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

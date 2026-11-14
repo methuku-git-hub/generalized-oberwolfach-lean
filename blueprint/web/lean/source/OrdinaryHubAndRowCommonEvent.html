@@ -1,0 +1,145 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryHubAndRowCommonEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryHubAndRowCommonEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryHubCoverCommonEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryRowCoverEventAfterHubs</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! A single original-law event constructs both the hub wheels and the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> subsequent longer-cycle row covers. The hub packing is constructed inside</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> this theorem; it is not an input. Fixed counting domains precede sampling. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 512</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 6500000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ordinary_hub_and_row_common_event (m:ℕ) (hm:3≤m) (α p ω:ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hα:0&lt;α) (hp:0&lt;p) (hp1:p≤1) (hω:0&lt;ω):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ K:ℕ,0&lt;K ∧ ∃ ε₀ ρ θ:ℝ,0&lt;ε₀ ∧ 0&lt;ρ ∧ 0&lt;θ ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ Dmax d q₀:ℕ,∀ hd:2≤d,∃ N:ℕ,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ (V U Γ Color:Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       [DecidableEq V] [DecidableEq U],</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (P F:SimpleGraph V) (π:Equiv.Perm V) (B:Finset U),N≤Fintype.card V →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ω*Fintype.card V≤(B.card:ℝ) → Fintype.card U≤Fintype.card V →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ v,(cycleThreshold (m+1)+α)*Fintype.card V≤(P.degree v:ℝ)) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ v,F.degree v≤Dmax) → permutationConflictGraph π (3*d)≤F →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ z l,0&lt;l→l&lt;2*d+1→(π^l) z≠z) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀ (pR pH D ε:ℝ) (hpR:p≤pR) (hpR1:pR≤1),p≤pH → pH≤1 →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (Fintype.card V:ℝ)/2≤D → 0≤ε → ε≤ε₀ →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ v,|(P.degree v:ℝ)-D|≤ε*Fintype.card V) → pR*D=2*Fintype.card U*pH →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀ (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (j:Color),(∀ u,s u j=pH) →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     1-1/(Fintype.card V:ℝ)^q₀≤</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (FiniteLaw.pi (rawWheelLaw (fun _=&gt;pR) (fun _=&gt;hp.le.trans hpR) (fun _=&gt;hpR1) d hd q hq hQ s hs hS)).probability</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (fun σ=&gt;∀ (Q:SimpleGraph V) (H:V→U→Prop) (L:ℝ),Q≤P → 0≤L → L≤ρ*Fintype.card V →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (∀ v,(F.degree v:ℝ)≤L) →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         (∀ v,((changed ((rawWheelGraph P σ).neighborFinset v) (Q.neighborFinset v)).card:ℝ)≤L) →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (∀ v,((changed (Finset.univ.filter (rawWheelSpokes π d σ j v)) (Finset.univ.filter (H v))).card:ℝ)≤L) →</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (∀ u,((changed (Finset.univ.filter (fun v=&gt;rawWheelSpokes π d σ j v u))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>           (Finset.univ.filter (fun v=&gt;H v u))).card:ℝ)≤L) →</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       ∀ X:Finset V,((Finset.univ\X).card:ℝ)≤p^6*(min α 1)*Fintype.card V/8 →</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       ∀ (nh:ℕ) (u:Fin nh→U),Function.Injective u → (2*nh:ℝ)≤L →</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         (∀ i,u i∉B) → (∀ i,Finset.univ.filter (fun v=&gt;H v (u i))⊆X) →</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         (∀ i,(m+1)∣(Finset.univ.filter (fun v=&gt;H v (u i))).card) →</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       ∀ (nr:ℕ) (x:Fin nr→V),(nr:ℝ)≤θ*Fintype.card V → Function.Injective x → (∀ i,x i∉X) →</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         (∀ i,Q.neighborFinset (x i)⊆X) → (∀ i a,Q.Adj (x i) a→¬F.Adj (x i) a) →</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         (∀ i,Q.degree (x i)=2*(Finset.univ.filter (H (x i))).card) → (∀ i a,H (x i) a→a∈B) →</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       ∃ M:Finset (OrdinaryWheel Q F H (m+1)),</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         (∀ W∈M,∀ Z∈M,W≠Z→Disjoint (ordinaryWheelResources W) (ordinaryWheelResources Z)) ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         M.biUnion ordinaryWheelResources=(ordinaryWheelRimGraph M).edgeFinset.image Sum.inl ∪</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>           Finset.univ.biUnion (fun i=&gt;(Finset.univ.filter (fun v=&gt;H v (u i))).image (fun v=&gt;Sum.inr (v,u i))) ∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         (∀ v,(ordinaryWheelRimGraph M).degree v≤2*nh) ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         ∃ C:Fin nr→Finset (OrdinaryWheel (Q\ordinaryWheelRimGraph M) F</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>           (fun v a=&gt;H v a∧¬ordinaryPackingSpokes M v a) (m+1)),</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>           (∀ i,OrdinaryRowCover (C i) (x i) X K) ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>           (∀ i j,i≠j→Disjoint ((C i).biUnion ordinaryWheelResources) ((C j).biUnion ordinaryWheelResources)) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           (∀ i,∀ W∈C i,∀ k,x k∈(ordinaryWheelRim W).support↔k=i) ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>           (∀ a∈X,(ordinaryWheelRimGraph (Finset.univ.biUnion C)).degree a≤nr*(2*(K+1))) ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>           (∀ a∈X,(Finset.univ.filter (ordinaryPackingSpokes (Finset.univ.biUnion C) a)).card≤nr*(K+1)) ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>           (∀ a,(Finset.univ.filter (fun v=&gt;ordinaryPackingSpokes (Finset.univ.biUnion C) v a)).card≤nr*(m+1)) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>           (∀ i,Disjoint ((C i).biUnion ordinaryWheelResources) (M.biUnion ordinaryWheelResources))):=by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   obtain ⟨ε₀,ρh,hε₀,hρh,hhub⟩:=ordinary_hub_cover_common_event m (by omega) α p ω hα hp hp1 hω</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨K,hK,θ,εr,hθ,hεr,hrow⟩:=ordinary_row_cover_event_after_hubs (m+1) (by omega) 1 α ω p le_rfl hα hω hp hp1</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   let ρ:=min ρh (εr*(min 1 ω)/6)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hρ:0&lt;ρ:=lt_min hρh (by positivity)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hρhub:ρ≤ρh:=min_le_left _ _</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hρrow:6*ρ≤εr*min 1 ω:=by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hh:=min_le_right ρh (εr*(min 1 ω)/6)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     dsimp [ρ];linarith only [hh]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   refine ⟨K,hK,ε₀,ρ,θ,hε₀,hρ,hθ,?_⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   intro Dmax d q₀ hd</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   obtain ⟨Nh,hh⟩:=hhub Dmax (Nat.cast_nonneg _) d (q₀+1) hd</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   obtain ⟨Nr,hr⟩:=hrow d Dmax (q₀+1) hd</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   refine ⟨max 2 (max Nh Nr),?_⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   intro V U Γ Color _ _ _ _ _ _ P F π B hn hB hU hP hF hclose hnoshort</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     pR pH D ε hpR hpR1 hpH hpH1 hD hε hεsmall hreg hbalance q hq hQ s hs hS j hj</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hnN:0&lt;Fintype.card V:=by omega</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   have hnR:(0:ℝ)&lt;Fintype.card V:=Nat.cast_pos.mpr hnN</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   have hUlo:ω*Fintype.card V≤(Fintype.card U:ℝ):=</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     hB.trans (Nat.cast_le.mpr (Finset.card_le_univ B))</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hProw (v:V):(1/2+α)*(Finset.univ:Finset V).card≤((Finset.univ∩P.neighborFinset v).card:ℝ):=by</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     have hhalf: (1/2:ℝ)+α≤cycleThreshold (m+1)+α:=by linarith only [cycleThreshold_half_le (show 3≤m+1 by omega)]</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     simpa only [Finset.card_univ,Finset.univ_inter,SimpleGraph.card_neighborFinset_eq_degree] using</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       (mul_le_mul_of_nonneg_right hhalf hnR.le).trans (hP v)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have ph:=hh V U Γ Color P (by omega) hUlo hU hP F π</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (fun v=&gt;Nat.cast_le.mpr (hF v)) hclose hnoshort pR pH D ε hpR hpR1 hpH hpH1 hD hε hεsmall hreg hbalance q hq hQ s hs hS j hj</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have pr:=hr V U Γ Color P F π Finset.univ B (by simpa only [Finset.card_univ] using (show Nr≤Fintype.card V by omega))</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     (by simp) (by simpa using (Nat.cast_le.mpr hU:(Fintype.card U:ℝ)≤Fintype.card V))</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     (by simpa only [Finset.card_univ] using hB) hclose hF hProw hnoshort pR pH (hp.le.trans hpR) hpR1 hpR hpH hpH1 q hq hQ s hs hS j hj</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   let μ:=FiniteLaw.pi (rawWheelLaw (fun _:Sym2 V=&gt;pR) (fun _=&gt;hp.le.trans hpR) (fun _=&gt;hpR1) d hd q hq hQ s hs hS)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   have combine (E F:((e:RawWheelCoordinate V U)→RawWheelCoordinateState Γ Color e)→Prop)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       (he:1-1/(Fintype.card V:ℝ)^(q₀+1)≤μ.probability E)</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>       (hf:1-1/(Fintype.card V:ℝ)^(q₀+1)≤μ.probability F):</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>       1-1/(Fintype.card V:ℝ)^q₀≤μ.probability (fun σ=&gt;E σ∧F σ):=by</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     have hi:=finiteLaw_good_intersection μ E F (1/(Fintype.card V:ℝ)^(q₀+1)) hf</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     have hb:=scaled_inverse_power_le (Fintype.card V) q₀ hnN 2 (by exact_mod_cast (show 2≤Fintype.card V by omega))</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     have hb&#x27;:2*(1/(Fintype.card V:ℝ)^(q₀+1))≤1/(Fintype.card V:ℝ)^q₀:=by convert hb using 1 &lt;;&gt; ring</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     linarith only [he,hi,hb&#x27;]</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   have joint:=combine _ _ ph (by simpa only [Finset.card_univ] using pr)</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   apply joint.trans</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   apply finiteLaw_probability_mono</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   intro σ hσ Q H L hQP hL hLρ hFL hQR hHr hHc X hmissing nh u hu hnh hnotB hTX hdiv nr x hnr hx hxX hroot hFx hbal hrootB</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   have hLhub:L≤ρh*Fintype.card V:=hLρ.trans (mul_le_mul_of_nonneg_right hρhub hnR.le)</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have hinc (v:V):(2*(Finset.univ.filter (fun i=&gt;H v (u i))).card:ℝ)≤ρh*Fintype.card V:=by</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     have hh:(Finset.univ.filter (fun i=&gt;H v (u i))).card≤nh:=by simpa using Finset.card_filter_le (s:=Finset.univ) (fun i=&gt;H v (u i))</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     have hh&#x27;:(2*(Finset.univ.filter (fun i=&gt;H v (u i))).card:ℝ)≤2*nh:=by exact_mod_cast Nat.mul_le_mul_left 2 hh</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     exact hh&#x27;.trans (hnh.trans hLhub)</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   obtain ⟨M,hM,hunion,hdeg,_⟩:=hσ.1 Q H L hQP hL hLhub hFL hQR hHr hHc nh u hu hinc hdiv</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>   have hMdeg (v:V):(ordinaryWheelRimGraph M).degree v≤2*nh:=</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     (hdeg v).trans (Nat.mul_le_mul_left 2 (by simpa using Finset.card_filter_le (s:=Finset.univ) (fun i=&gt;H v (u i))))</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>   have hLa:6*L≤εr*Fintype.card V:=by</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     have hh:=mul_le_mul_of_nonneg_right hρrow hnR.le</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     have hsmall:εr*(min 1 ω)*Fintype.card V≤εr*Fintype.card V:=by</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>       calc</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>         _≤εr*1*Fintype.card V:=mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left (min_le_left _ _) hεr.le) hnR.le</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>         _=_:=by ring</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     nlinarith only [hh,hsmall,hLρ]</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>   have hLb:6*L≤εr*B.card:=by</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     have hh:=mul_le_mul_of_nonneg_right hρrow hnR.le</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     have hsmall:εr*(min 1 ω)*Fintype.card V≤εr*B.card:=by</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>       calc</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>         _≤εr*ω*Fintype.card V:=mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left (min_le_right _ _) hεr.le) hnR.le</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>         _=εr*(ω*Fintype.card V):=by ring</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>         _≤_:=mul_le_mul_of_nonneg_left hB hεr.le</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     nlinarith only [hh,hsmall,hLρ]</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>   have hHrB (v:V):((changed (B∩Finset.univ.filter (rawWheelSpokes π d σ j v)) (B∩Finset.univ.filter (H v))).card:ℝ)≤L:=by</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     apply le_trans _ (hHr v)</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     apply Nat.cast_le.mpr</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     apply Finset.card_le_card</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     intro a ha</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     simp only [changed,Finset.mem_union,Finset.mem_sdiff,Finset.mem_inter] at ha ⊢</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     tauto</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>   obtain ⟨C,hC⟩:=hσ.2 Q H L hL (by simpa only [Finset.card_univ] using hLa) hLb hQP</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     (fun v=&gt;by simpa only [Finset.univ_inter] using hQR v) hHrB</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     (fun a _=&gt;by simpa only [Finset.univ_inter] using hHc a)</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     X (Finset.subset_univ _) (by simpa only [Finset.card_univ] using hmissing)</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     nr x (by simpa only [Finset.card_univ] using hnr) hx hxX hroot hFx hbal hrootB</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>     nh u hu (fun i=&gt;Finset.univ.filter (fun v=&gt;H v (u i))) M hTX hnotB hnh hMdeg hunion</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>   exact ⟨M,hM,hunion,hMdeg,C,hC⟩</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a> </span>
+<span id="L142"><a href="#L142" class="ln"> 142</a> end Oberwolfach</span></pre></html>

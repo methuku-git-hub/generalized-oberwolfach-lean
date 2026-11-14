@@ -1,0 +1,34 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceDeepConfigurationsAfterChanges.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceDeepConfigurationsAfterChanges.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedLocalConfigurationsAfterHostChange</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedLocalEstimateMonotonicity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The local configuration field on the original parent domain, with the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> actual coefficient margins visible. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 6000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem marked_reference_deep_configurations_after_changes</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (r:ℕ) (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (βC βP βA t ζ:ℝ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (σ τ:RawMarkedOutcome V U Γ Color) (H H&#x27;:Bool→V→U→Prop)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (FR:SimpleGraph V) (FS:SimpleGraph (V⊕U))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hRim:∀ a,¬(rawMarkedPairRims P π d σ a↔rawMarkedPairRims P π d τ a)→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       markedPairPhysical π a∈FR.edgeFinset)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hSpoke:∀ b v u,¬(H b v u↔H&#x27; b v u)→FS.Adj (Sum.inl v) (Sum.inr u))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hDR:∀ v,(FR.degree v:ℝ)≤ζ*Fintype.card V)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hDS:∀ z,(FS.degree z:ℝ)≤ζ*Fintype.card V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (htypes:∀ v u,¬(H false v u∧H true v u))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hC:3*min βA (t/4)≤βC-(r+5:ℕ)*(ζ+ζ))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hP:3*min βA (t/4)≤βP-(r+7:ℕ)*ζ-(r+4:ℕ)*ζ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hc:MarkedLocalConfigurationsWithSpokes r P π d Finset.univ βC βP σ H):</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     MarkedLocalConfigurationsWithSpokes r P π d Finset.univ</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (3*min βA (t/4)) (3*min βA (t/4)) τ H&#x27; := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hh:=marked_local_configurations_after_host_change r P π d βC βP ζ σ τ H H&#x27; FR FS</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     hRim hSpoke hDR hDS htypes hc</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   exact markedLocalConfigurations_mono r P π d Finset.univ _ _ _ _ hC hP τ H&#x27; hh</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> end Oberwolfach</span></pre></html>

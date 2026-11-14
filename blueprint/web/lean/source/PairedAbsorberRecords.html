@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PairedAbsorberRecords.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PairedAbsorberRecords.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PairedAbsorberTemplate</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.AbsorberFreeCounts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Convert every paired realization, with all its ordered labels and</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> cycle identifiers, to the explicit template. The conversion is injective. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option synthInstance.maxSize 256</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 2800000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V C : Type*} [Fintype V] [DecidableEq V] [Fintype C] [DecidableEq C]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {c : ℕ} [NeZero c]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> abbrev PairedCycleRecord (R : C → Finset V) (X : Finset V) :=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   Σ f : RootedLabelMap V (c*c) c X,</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     {C₀ : C // R C₀=(pairedBasePositions (c:=c)).image f.val} ×</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (∀ i : Fin c,{C₀ : C // R C₀=(pairedZeroPositions i).image f.val}) ×</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ i : Fin c,{C₀ : C // R C₀=(pairedOnePositions i).image f.val})</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> def pairedCycleRecordToLabelled (R : C → Finset V) (X : Finset V)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (D : PairedCycleRecord (c:=c) R X) : LabelledCycleRecord R (pairedAbsorberTemplate c).val X := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   refine ⟨D.1,?_⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   intro o</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   rcases o with i | j</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   · exact D.2.2.1 i</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   · refine Fin.cases ?_ (fun i =&gt; ?_) j</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     · exact D.2.1</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     · exact D.2.2.2 i</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> </span>
+<span id="L33"><a href="#L33" class="ln">  33</a> theorem pairedCycleRecordToLabelled_map (R : C → Finset V) (X : Finset V)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (D : PairedCycleRecord (c:=c) R X) : (pairedCycleRecordToLabelled R X D).1=D.1 := rfl</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> </span>
+<span id="L36"><a href="#L36" class="ln">  36</a> theorem pairedCycleRecordToLabelled_base (R : C → Finset V) (X : Finset V)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (D : PairedCycleRecord (c:=c) R X) :</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ((pairedCycleRecordToLabelled R X D).2 (Sum.inr 0)).val=D.2.1.val := rfl</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem pairedCycleRecordToLabelled_zero (R : C → Finset V) (X : Finset V)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (D : PairedCycleRecord (c:=c) R X) (i : Fin c) :</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     ((pairedCycleRecordToLabelled R X D).2 (Sum.inl i)).val=(D.2.2.1 i).val := rfl</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> </span>
+<span id="L44"><a href="#L44" class="ln">  44</a> theorem pairedCycleRecordToLabelled_one (R : C → Finset V) (X : Finset V)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (D : PairedCycleRecord (c:=c) R X) (i : Fin c) :</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     ((pairedCycleRecordToLabelled R X D).2 (Sum.inr i.succ)).val=(D.2.2.2 i).val := rfl</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> theorem pairedCycleRecordToLabelled_injective (R : C → Finset V) (X : Finset V) :</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     Function.Injective (pairedCycleRecordToLabelled (c:=c) R X) := by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro D E he</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hf : D.1=E.1 := congrArg (fun F : LabelledCycleRecord R (pairedAbsorberTemplate c).val X =&gt; F.1) he</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hbase : D.2.1.val=E.2.1.val :=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     congrArg (fun F : LabelledCycleRecord R (pairedAbsorberTemplate c).val X =&gt; (F.2 (Sum.inr 0)).val) he</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hz (i : Fin c) : (D.2.2.1 i).val=(E.2.2.1 i).val :=</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     congrArg (fun F : LabelledCycleRecord R (pairedAbsorberTemplate c).val X =&gt; (F.2 (Sum.inl i)).val) he</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have ho (i : Fin c) : (D.2.2.2 i).val=(E.2.2.2 i).val :=</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     congrArg (fun F : LabelledCycleRecord R (pairedAbsorberTemplate c).val X =&gt; (F.2 (Sum.inr i.succ)).val) he</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   rcases D with ⟨f,d₀,dz,do&#x27;⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   rcases E with ⟨g,e₀,ez,eo⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   change f=g at hf</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   subst g</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hb : d₀=e₀ := Subtype.ext hbase</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hzz : dz=ez := funext (fun i =&gt; Subtype.ext (hz i))</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hoo : do&#x27;=eo := funext (fun i =&gt; Subtype.ext (ho i))</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   subst e₀;subst ez;subst eo;rfl</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a> theorem paired_absorber_template_count (R : C → Finset V) (X : Finset V) :</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     Fintype.card (PairedCycleRecord (c:=c) R X) ≤</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       Fintype.card (LabelledCycleRecord R (pairedAbsorberTemplate c).val X) :=</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   Fintype.card_le_of_injective _ (pairedCycleRecordToLabelled_injective R X)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

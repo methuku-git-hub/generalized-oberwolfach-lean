@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The target and its mathematical representation</title>
+<link rel="next" href="sect0003.html" title="A checked conditional reduction to the fixed-set theorem" />
+<link rel="prev" href="sect0001.html" title="Verification status" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000003">1 The target and its mathematical representation</h1>
+<div class="definition_thmwrapper theorem-style-plain" id="bp:graphs">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.1</span>
+    <span class="definition_thmtitle">Finite graphs and prescribed decompositions</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:graphs">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.EdgePartition" class="lean_decl">Oberwolfach.EdgePartition</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.HasFactorDecomposition" class="lean_decl">Oberwolfach.HasFactorDecomposition</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   All ordinary graphs are simple graphs on \(\{ 0,\ldots ,n-1\} \). A family \((H_i)_{i{\lt}q}\) partitions the edges of \(G\) if, for every \(u,v\), </p>
+<div class="displaymath" id="a0000000041">
+  \[  G(u,v)\iff \exists i{\lt}q\  H_i(u,v),\qquad H_i(u,v)\wedge H_j(u,v)\Longrightarrow i=j.  \]
+</div>
+<p> A decomposition into \((F_i)_{i{\lt}q}\) additionally supplies an isomorphism \(H_i\cong F_i\) for every \(i\). Thus the definition records multiplicities in the prescribed list, spanning vertex sets and exact edge coverage. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-plain" id="bp:thresholds">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.2</span>
+    <span class="definition_thmtitle">Ordinary cycle thresholds</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:thresholds">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:graphs">Definition 1.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.IsCycleCopy" class="lean_decl">Oberwolfach.IsCycleCopy</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.CycleDivisible" class="lean_decl">Oberwolfach.CycleDivisible</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.AdmissibleCycleBound" class="lean_decl">Oberwolfach.AdmissibleCycleBound</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold" class="lean_decl">Oberwolfach.cycleThreshold</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.allowedThreshold" class="lean_decl">Oberwolfach.allowedThreshold</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>    An embedded \(r\)-cycle is specified by an injection from \(\{ 0,\ldots ,r-1\} \) whose consecutive pairs, with indices taken modulo \(r\), are precisely its edges. Other ambient vertices are isolated. A \(C_r\)-decomposition partitions edges into such embedded cycles. A graph is \(C_r\)-divisible if all degrees are even and \(r\) divides its number of edges. Define </p>
+<div class="displaymath" id="a0000000042">
+  \[  \begin{gathered} \delta _r=\inf \{ d\in [0,1]:\exists N\  \forall n\ge N\  \forall G,\\ \  G\text{ is }C_r\text{-divisible},\  \delta (G)\ge dn \Longrightarrow G\text{ has a }C_r\text{-decomposition}\} ,\\ \delta _S=\sup _{r\in S}\delta _r. \end{gathered}  \]
+</div>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:threshold-bounds">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">1.3</span>
+    <span class="lemma_thmtitle">Elementary consequences of the infimum definition</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:threshold-bounds">#</a>
+    
+    <a class="icon proof" href="sect0002.html#a0000000043"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:thresholds">Definition 1.2</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.one_admissible" class="lean_decl">Oberwolfach.one_admissible</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold_nonneg" class="lean_decl">Oberwolfach.cycleThreshold_nonneg</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold_le_one" class="lean_decl">Oberwolfach.cycleThreshold_le_one</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold_positive_margin" class="lean_decl">Oberwolfach.cycleThreshold_positive_margin</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    The admissible set contains \(1\), and \(0\le \delta _r\le 1\). For every \(\alpha {\gt}0\), all sufficiently large \(C_r\)-divisible graphs of minimum degree at least \((\delta _r+\alpha )n\) have a \(C_r\)-decomposition. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000043">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>A nonempty \(n\)-vertex simple graph has each degree below \(n\), so the assertion at degree coefficient \(1\) is vacuous. All admissible coefficients are nonnegative. The defining property of an infimum gives an admissible \(d{\lt}\delta _r+\alpha \); its order threshold also works for the larger degree bound. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:finite-local-lemma">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">1.4</span>
+    <span class="lemma_thmtitle">Finite local lemma on the original coordinate space</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:finite-local-lemma">#</a>
+    
+    <a class="icon proof" href="sect0002.html#a0000000044"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0008.html#bp:common-event-probability">Lemma 7.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_localLemma" class="lean_decl">Oberwolfach.finiteLaw_localLemma</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_coordinate_localLemma" class="lean_decl">Oberwolfach.finiteLaw_coordinate_localLemma</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_disjoint_supported_events" class="lean_decl">Oberwolfach.finiteLaw_disjoint_supported_events</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For finitely many bad events \(A_i\), suppose \(A_i\) is independent of the avoidance of any set of events outside \(N_i\cup \{ i\} \). If \(0\le x_i{\lt}1\) and \(\Pr (A_i)\le x_i\prod _{j\in N_i}(1-x_j)\), then the probability of avoiding every bad event is positive. For a finite product law, disjoint specified coordinate supports imply the required independence. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000044">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Induction on the conditioning set bounds the probability of a bad event intersected with that set’s avoidance. Separate neighbours from non-neighbours and use the induction hypothesis to bound the denominator without dividing by an avoidance probability. Multiply the resulting positive factors. Independence for coordinate supports is proved for the given product measure. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:finite-talagrand">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">1.5</span>
+    <span class="theorem_thmtitle">Finite-product convex-distance inequality</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:finite-talagrand">#</a>
+    
+    <a class="icon proof" href="sect0002.html#a0000000045"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0008.html#bp:categorical-concentration">Theorem 7.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_convexDistance_mgf" class="lean_decl">Oberwolfach.finiteLaw_convexDistance_mgf</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_convexDistance_tail" class="lean_decl">Oberwolfach.finiteLaw_convexDistance_tail</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.convexDistanceSq_value_certificate" class="lean_decl">Oberwolfach.convexDistanceSq_value_certificate</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    For a configuration \(x\) and a nonempty set \(A\), let \(D_A(x)\) be the minimum of \(\sum _i z_i^2\) over the convex hull of the vectors \((\mathbf1_{x_i\ne y_i})_i\), \(y\in A\). For any finite product law, </p>
+<div class="displaymath" id="a0000000046">
+  \[  \mathbb E\exp (D_A/4)\le \Pr (A)^{-1}\qquad (\Pr (A){\gt}0), \qquad \Pr (A)\Pr (D_A\ge t)\le e^{-t/4}.  \]
+</div>
+<p> If coordinate certificate weights lie in \([0,c]\), have sum at most \(D\), and changing from \(x\) to any \(y\in A\) incurs certificate weight at least \(t\ge 0\), then \(t^2\le cD\, D_A(x)\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000045">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Compactness of the finite convex hull gives the minimum. Project away one coordinate and mix a fibre minimizer with a projected minimizer. The new coordinate contributes at most \((1-\theta )^2\). Convexity of the exponential gives the required interpolation of finite exponential moments. The scalar choice of \(\theta \) yields the fibre bound \((2-\Pr (A_a)/\Pr (B))/\Pr (B)\), where \(B\) is the projection. Fibres of probability zero are treated separately. Exact product disintegration and induction on the finite coordinate set prove the moment bound; exponential Markov gives the tail bound. The certificate estimate follows from a linear half-space containing the convex hull and the Cauchy–Schwarz inequality. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:colouring-certificate-concentration">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">1.6</span>
+    <span class="lemma_thmtitle">Certificates and one common local event</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:colouring-certificate-concentration">#</a>
+    
+    <a class="icon proof" href="sect0002.html#a0000000047"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:finite-talagrand">Theorem 1.5</a></li>
+          
+          <li><a href="sect0002.html#bp:finite-local-lemma">Lemma 1.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_exists_median" class="lean_decl">Oberwolfach.finiteLaw_exists_median</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_bounded_certificate_tail" class="lean_decl">Oberwolfach.finiteLaw_bounded_certificate_tail</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_coordinate_localLemma_degree" class="lean_decl">Oberwolfach.finiteLaw_coordinate_localLemma_degree</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.local_certificate_common_event" class="lean_decl">Oberwolfach.local_certificate_common_event</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Suppose \(0\le R\le M\) has nonnegative coordinate certificate weights, each at most \(c{\gt}0\), with total at most \(D{\gt}0\). Put \(p_t=4\exp (-t^2/(4cD))\). If \(t\ge 0\) and \(Mp_t\le t\), then \(\Pr (|R-\mathbb ER|\ge 3t)\le p_t\). For a finite family of such variables, suppose each uses at most \(r\) coordinates and each coordinate occurs in at most \(s\) supports, with \(r,s\ge 1\). If every tail bound is at most \(1/(4rs)\), there is one positive-mass outcome satisfying all the strict deviation bounds. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000047">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The convex-distance inequality first gives a median tail. Truncating the absolute deviation bounds the distance between the mean and median by \(2t\). Intersecting coordinate supports give a dependency degree at most \(rs\); the finite local lemma then supplies one common outcome. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:tentative-colouring-counts">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">1.7</span>
+    <span class="lemma_thmtitle">Concrete tentative-colouring counts</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:tentative-colouring-counts">#</a>
+    
+    <a class="icon proof" href="sect0002.html#a0000000048"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:colouring-certificate-concentration">Lemma 1.6</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.coinRetainedColour_probability" class="lean_decl">Oberwolfach.coinRetainedColour_probability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.equalizedColour_survival_probability" class="lean_decl">Oberwolfach.equalizedColour_survival_probability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.joint_coinRetention_probability" class="lean_decl">Oberwolfach.joint_coinRetention_probability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.coinConflict_certificate" class="lean_decl">Oberwolfach.coinConflict_certificate</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.nibbleColourCount_certificate" class="lean_decl">Oberwolfach.nibbleColourCount_certificate</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.nibbleAvailableColours_card" class="lean_decl">Oberwolfach.nibbleAvailableColours_card</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    A vertex tentatively chooses a colour and a colour-dependent retention coin. It retains the colour if the coin succeeds and no neighbour chose that colour. The retained colours form a proper partial colouring. All one-root and independent-set joint retention probabilities are computed in the original product law. For lists of size \(l\), let \(N(v,c)\) be the number of neighbours with \(c\) in their lists. If \(N(v,c)\le K\) whenever \(c\) belongs to the list at \(v\), the coin probability \((1-1/l)^{K-N(v,c)}\) makes the retention probability at every vertex exactly \((1-1/l)^K\). </p>
+<p>For a clique \(T\), the number of rejected vertices has coordinate certificate weights at most \(2\) and total at most \(3|T|\). For a family of \(k\) vertex sets and a fixed list \(L\), let \(M(a,b)\) count colours in \(L\) assigned in at least \(a\) sets and rejected in at least \(b\) sets. This count has certificate weights at most \(1\) and total at most \(3k|L|\). If the sets are cliques, the number of colours left after removing all retained colours is exactly \(\sum _{a=0}^{k}(M(a,a)-M(a+1,a))\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000048">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Coordinatewise probabilities give the retention identities. Certificates use actual conflicting neighbours and the rejection coin at the assigned vertex. Distinct colours cannot use the same witness coordinate. In a clique, a colour assigned at several vertices is rejected at all of them. The final identity is a finite telescoping sum over the numbers of sets where the colour was assigned and rejected. The full iteration using these results is proved in Node&#160;<a href="sect0017.html#bp:near-optimal-colouring">D.1</a>. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:remaining-colour-degrees">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">1.8</span>
+    <span class="lemma_thmtitle">Concentration of the remaining colour degrees</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:remaining-colour-degrees">#</a>
+    
+    <a class="icon proof" href="sect0002.html#a0000000049"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:colouring-certificate-concentration">Lemma 1.6</a></li>
+          
+          <li><a href="sect0002.html#bp:tentative-colouring-counts">Lemma 1.7</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.neighbour_colour_witnesses" class="lean_decl">Oberwolfach.neighbour_colour_witnesses</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.hypergraph_neighbourColourCount_certificate" class="lean_decl">Oberwolfach.hypergraph_neighbourColourCount_certificate</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.remainingColourVertices_card" class="lean_decl">Oberwolfach.remainingColourVertices_card</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.remainingColourVertices_concentration" class="lean_decl">Oberwolfach.remainingColourVertices_concentration</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Let \(U\) be a clique in the line graph of a hypergraph of rank at most \(k\) and codegree at most \(B\). For each edge in \(U\), consider its resource cliques other than the clique defining \(U\). For a fixed colour, count the uncoloured edges satisfying lower bounds on the numbers of these cliques where that colour was assigned and rejected. The coordinate certificates have maximum weight at most \(2+(k+3)kB\) and total weight at most \((3+3k)|U|\). </p>
+<p>The actual remaining colour degree is the alternating sum of the diagonal and next-diagonal counts. The formal result gives a mean-centred tail bound by applying the proved certificate inequality to these counts. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000049">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Choose a maximal matching on rejected vertices of a fixed colour. Paired vertices witness each other’s rejection; the unmatched vertices are independent. The rank bound controls the number of unmatched neighbours that can use one witness. Each direct witness is needed by at most \(kB\) counted edges, by the codegree bound and exclusion of the defining resource. Composing these witnesses gives the displayed certificate weights. The exact alternating-sum identity and the finite union bound give the concentration estimate in the original product probability space. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:joint-retention-calculations">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">1.9</span>
+    <span class="lemma_thmtitle">Joint retention and overlapping resource cliques</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:joint-retention-calculations">#</a>
+    
+    <a class="icon proof" href="sect0002.html#a0000000050"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:tentative-colouring-counts">Lemma 1.7</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.mixed_joint_coinRetention_probability" class="lean_decl">Oberwolfach.mixed_joint_coinRetention_probability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_avoidance_expansion" class="lean_decl">Oberwolfach.finiteLaw_avoidance_expansion</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_clique_restriction_loss" class="lean_decl">Oberwolfach.finiteLaw_clique_restriction_loss</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.disjoint_clique_joint_retention" class="lean_decl">Oberwolfach.disjoint_clique_joint_retention</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.hypergraph_colour_common_neighbours" class="lean_decl">Oberwolfach.hypergraph_colour_common_neighbours</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.restricted_hypergraph_clique_cross_degree" class="lean_decl">Oberwolfach.restricted_hypergraph_clique_cross_degree</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For properly prescribed root colours, the exact joint retention probability is the product of the root probabilities and the probabilities that each remaining vertex avoids the set of colours prescribed at its root neighbours. Different colours forbidden at one vertex are not treated as independent events. For a common root colour, the exact overlap factor and its two-sided bound are proved. </p>
+<p>The joint event that every clique retains a fixed colour expands over choices of its unique retained vertices. Removing pair intersections has an explicitly bounded probability cost. For disjoint cliques, the joint-retention estimate includes both the overlap error on nonconflicting tuples and the number of conflicting tuples. Hypergraph rank and codegree bounds imply the neighbourhood bounds required in this estimate. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000050">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Compute coordinate probabilities under the original colour-and-coin law. Expand clique events using uniqueness of a retained vertex in a clique. Conflicting tuples have probability zero; count them by fixing all but one coordinate. Apply the exact same-colour joint formula to the other tuples. Inclusion–exclusion is proved without an independence assumption. These calculations do not yet supply the complete iterative colouring argument or the weighted matching theorem. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:matching-colour-selection">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">1.10</span>
+    <span class="lemma_thmtitle">Random partitions and selection of supplied colour classes</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:matching-colour-selection">#</a>
+    
+    <a class="icon proof" href="sect0002.html#a0000000051"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0008.html#bp:common-event-probability">Lemma 7.5</a></li>
+          
+          <li><a href="sect0008.html#bp:categorical-concentration">Theorem 7.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.hypergraphColorPartition_exists" class="lean_decl">Oberwolfach.hypergraphColorPartition_exists</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.weightedColor_common_upper" class="lean_decl">Oberwolfach.weightedColor_common_upper</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.colorClassLottery_matching" class="lean_decl">Oberwolfach.colorClassLottery_matching</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Under their explicit finite tail-sum inequalities, the independently chosen vertex and edge partitions simultaneously satisfy the stated degree and fixed weighted-sum estimates. Given proper edge-colourings within the resulting vertex-disjoint parts, independently choosing one colour class in each part produces a matching and satisfies the supplied finite family of weighted estimates. Existence of the required near-optimal proper edge-colourings is not proved by this node. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000051">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Compute expectations in the original finite product law. Root-omitted degree sums are controlled before exposing the root’s colour. For weighted edge partitions use the multiplicative exponential bound, retaining the factor equal to the number of colours. A common-event estimate applies to all fixed tests. Supplied proper colour classes and disjoint vertex parts give a matching; bounded differences controls its weighted sums. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-plain" id="bp:targets">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1.11</span>
+    <span class="definition_thmtitle">The two target propositions</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:targets">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:graphs">Definition 1.1</a></li>
+          
+          <li><a href="sect0002.html#bp:thresholds">Definition 1.2</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.AllowedCycleLengths" class="lean_decl">Oberwolfach.AllowedCycleLengths</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.DecompositionAt" class="lean_decl">Oberwolfach.DecompositionAt</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.FixedSetTheorem" class="lean_decl">Oberwolfach.FixedSetTheorem</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.MainTheorem" class="lean_decl">Oberwolfach.MainTheorem</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>    For a \(2\)-regular graph \(F\), allowed component lengths are encoded by </p>
+<div class="displaymath" id="a0000000052">
+  \[  \forall v,\quad |\{ w:v\text{ is connected to }w\text{ in }F\} |\in S.  \]
+</div>
+<p> Write \(\mathcal D(S,\alpha ,n)\) for the conclusion of the main theorem at these parameters, universally quantified over the even degree \(D\), the family indexed by \(\{ 0,\ldots ,D/2-1\} \) and the \(D\)-regular host. The fixed-set target is </p>
+<div class="displaymath" id="a0000000053">
+  \[  \forall S\ne \varnothing \  \forall \alpha {\gt}0\  \exists N\  \forall n\ge N, \quad \mathcal D(S,\alpha ,n),  \]
+</div>
+<p> and the uniform target is </p>
+<div class="displaymath" id="a0000000054">
+  \[  \forall \alpha {\gt}0\  \exists N\  \forall S\ne \varnothing \  \forall n\ge N, \quad \mathcal D(S,\alpha ,n).  \]
+</div>
+<p> In both formulas, \(S\subseteq \{ 3,4,\ldots \} \). These are definitions of propositions, not proofs of either proposition. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:main">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">1.12</span>
+    <span class="theorem_thmtitle">Main theorem: open target</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#bp:main">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:targets">Definition 1.11</a></li>
+          
+          <li><a href="sect0003.html#bp:uniform">Theorem 2.2</a></li>
+          
+          <li><a href="sect0012.html#bp:fixed">Proposition 11.1</a></li>
+          
+          <li><a href="sect0039.html#bp:factor-embeddings-exhaust-host">Lemma E.774</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.MainTheorem" class="lean_decl">Oberwolfach.MainTheorem</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    For every \(\alpha {\gt}0\), there is an order threshold depending only on \(\alpha \) such that every sufficiently large \(n\)-vertex \(D\)-regular graph, where \(D\) is even and \(D\ge (\delta _S+\alpha )n\), decomposes into every prescribed family of \(D/2\) spanning \(2\)-factors with component lengths in \(S\). </p>
+<p><i class="itshape">Manuscript label:</i> thm:new:prescribed-factor.</p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0001.html" title="Verification status"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0003.html" title="A checked conditional reduction to the fixed-set theorem"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

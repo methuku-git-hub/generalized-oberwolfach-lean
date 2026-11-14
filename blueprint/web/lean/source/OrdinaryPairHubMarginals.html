@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryPairHubMarginals.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryPairHubMarginals.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryPairHubLoadConcentration</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Exact single-resource marginals for the intersection of the spoke</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> neighbourhoods of two distinct hubs in the original raw experiment. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 16000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def ordinaryPairHubMarginal (P:SimpleGraph V) (ρ:Sym2 V→ℝ) (s:U→Color→ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (j:Color) (u u&#x27;:U):Sym2 V⊕(V×Unit)→ℝ</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   | Sum.inl e=&gt;if e∈P.edgeSet then ρ e else 0</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   | Sum.inr _=&gt;s u j*s u&#x27; j</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> theorem ordinary_pair_hub_resource_probability</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (hd:2≤d)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (ρ:Sym2 V→ℝ) (hρ:∀ e,0≤ρ e) (hρ1:∀ e,ρ e≤1)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hS:∀ u,∑ j,s u j ≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hnoshort:∀ x k,0&lt;k→k&lt;2*d+1→(π^k) x≠x)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (j:Color) (u u&#x27;:U) (hne:u≠u&#x27;) (a:Sym2 V⊕(V×Unit)):</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (FiniteLaw.pi (rawWheelLaw ρ hρ hρ1 d hd q hq hQ s hs hS)).probability</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (fun σ=&gt;ordinaryResourceState (rawWheelGraph P σ) (ordinaryPairHubSpokes π d σ j u u&#x27;) a=true)=</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ordinaryPairHubMarginal P ρ s j u u&#x27; a := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let μ:=rawWheelLaw ρ hρ hρ1 d hd q hq hQ s hs hS</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   cases a with</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   | inl e=&gt;</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hh:=rawWheelResource_probability P π ρ hρ hρ1 d hd q hq hQ s hs hS hnoshort j (Sum.inl e)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     simpa [ordinaryResourceState,ordinaryPairHubMarginal,rawWheelMarginal] using hh</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   | inr a=&gt;</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     rcases a with ⟨v,⟨⟩⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let a:Sym2 V⊕(V×U):=Sum.inr (v,u)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let b:Sym2 V⊕(V×U):=Sum.inr (v,u&#x27;)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hab:a≠b:=by intro h;exact hne (congrArg Prod.snd (Sum.inr.inj h))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hdis:=rawWheelResourceCoordinates_disjoint π d a b hab (by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       intro x h y k hx hy</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       have hx&#x27;:(x,h)=(v,u):=Sum.inr.inj hx.symm</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       have hy&#x27;:(y,k)=(v,u&#x27;):=Sum.inr.inj hy.symm</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       left</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       have hh:h=u:=congrArg Prod.snd hx&#x27;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       have hk:k=u&#x27;:=congrArg Prod.snd hy&#x27;</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       simpa only [hh,hk] using hne)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     let Ev:=fun (z:RawWheelOutcome V U Γ Color)=&gt;rawWheelSpokes π d z j v u</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let Ev&#x27;:=fun (z:RawWheelOutcome V U Γ Color)=&gt;rawWheelSpokes π d z j v u&#x27;</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have hEv:∀ z z&#x27;,(∀ e∈rawWheelResourceCoordinates π d a,z e=z&#x27; e)→(Ev z↔Ev z&#x27;):=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       intro z z&#x27; hz</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       have hh:=rawWheelResourceState_supported P π d j a z z&#x27; hz</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       simpa [a,Ev,ordinaryResourceState,decide_eq_decide] using hh</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hEv&#x27;:∀ z z&#x27;,(∀ e∈rawWheelResourceCoordinates π d b,z e=z&#x27; e)→(Ev&#x27; z↔Ev&#x27; z&#x27;):=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       intro z z&#x27; hz</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       have hh:=rawWheelResourceState_supported P π d j b z z&#x27; hz</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       simpa [b,Ev&#x27;,ordinaryResourceState,decide_eq_decide] using hh</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hind:=finiteLaw_disjoint_supported_events μ _ _ hdis Ev Ev&#x27; hEv hEv&#x27;</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hp:=rawWheelResource_probability P π ρ hρ hρ1 d hd q hq hQ s hs hS hnoshort j a</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hp&#x27;:=rawWheelResource_probability P π ρ hρ hρ1 d hd q hq hQ s hs hS hnoshort j b</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hp0:(FiniteLaw.pi μ).probability Ev=s u j:=by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       simpa [μ,Ev,a,ordinaryResourceState,rawWheelMarginal] using hp</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     have hp0&#x27;:(FiniteLaw.pi μ).probability Ev&#x27;=s u&#x27; j:=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       simpa [μ,Ev&#x27;,b,ordinaryResourceState,rawWheelMarginal] using hp&#x27;</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     rw [hp0,hp0&#x27;] at hind</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     simpa [ordinaryResourceState,ordinaryPairHubSpokes,ordinaryPairHubMarginal,Ev,Ev&#x27;] using hind</span>
+<span id="L68"><a href="#L68" class="ln">  68</a> end Oberwolfach</span></pre></html>

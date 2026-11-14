@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedWalkComplementSeparation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedWalkComplementSeparation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedWalkInteriorReservedSet</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.InteriorImageSeparation</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Derive the final within-factor image separation from reconstructed walk</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> coverage, endpoint agreement, and disjoint residual spoke/complement sets. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem marked_walk_complement_image_separation</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {X V I:Type*} [DecidableEq X] [DecidableEq V] [Fintype I]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (G:SimpleGraph V) (n:I→ℕ) (inner:∀i,Fin (n i+1)↪X)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (g:{x // x∈bufferedPathFullDomain n inner}↪V)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (fC:{x // x∉bufferedPathStrictInterior n inner}→V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (a b:I→V) (q:∀i,G.Walk (a i) (b i))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hpath:∀i,(q i).IsPath) (hlen:∀i,(q i).length=n i)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hmatch:∀i p,g ⟨inner i p,buffered_path_vertex_mem_domain n inner i p⟩=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       simpleWalkLengthEmbedding G (q i) (hpath i) (n i) (hlen i) p)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hwalkDis:∀i j,i≠j→Disjoint (q i).support.toFinset (q j).support.toFinset)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (R Z:Finset V) (hRZ:Disjoint R Z)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hcover:Finset.univ.biUnion (fun i=&gt;(q i).support.toFinset)=R ∪ Finset.univ.image b)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hend:∀i (p:Fin (n i+1)),(p=0 ∨ p=Fin.last (n i))→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ∀hpD:inner i p∉bufferedPathStrictInterior n inner,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       g ⟨inner i p,buffered_path_vertex_mem_domain n inner i p⟩=fC ⟨inner i p,hpD⟩)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hZ:∀x (hx:x∉bufferedPathStrictInterior n inner),x∉bufferedPathFullDomain n inner→fC ⟨x,hx⟩∈Z) :</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀x (hx:x∈bufferedPathStrictInterior n inner) y (hy:y∉bufferedPathStrictInterior n inner),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       g ⟨x,buffered_strict_interior_subset_domain n inner hx⟩≠fC ⟨y,hy⟩ := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hbound:∀x (hx:x∈bufferedPathFullDomain n inner) (hxD:x∉bufferedPathStrictInterior n inner),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       g ⟨x,hx⟩=fC ⟨x,hxD⟩:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     intro x hx hxD</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     obtain ⟨i,hi|hi⟩:=buffered_path_boundary_is_endpoint n inner x hx hxD</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     · subst x</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       exact hend i 0 (Or.inl rfl) hxD</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     · subst x</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       exact hend i (Fin.last (n i)) (Or.inr rfl) hxD</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hinside:=buffered_marked_walk_interiors_in_reserved G n inner g a b q hpath hlen hmatch hwalkDis R hcover</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   apply interior_image_separated_by_boundary_and_avoidance</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (bufferedPathFullDomain n inner) (bufferedPathStrictInterior n inner)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (buffered_strict_interior_subset_domain n inner) R g fC hbound hinside</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   intro x hx hxA hmem</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   exact (Finset.disjoint_left.mp hRZ) hmem (hZ x hx hxA)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

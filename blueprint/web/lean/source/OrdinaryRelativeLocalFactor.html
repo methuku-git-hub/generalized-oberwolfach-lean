@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryRelativeLocalFactor.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryRelativeLocalFactor.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinarySparseLocalFactor</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryLocalNeighbourhoods</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Exact ordinary local factors from the lower relative-neighbourhood</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> hypothesis used in the manuscript. Constants are uniform over both spoke</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> counts, both densities and all graphs. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 512</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 3800000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ordinary_relative_local_factor (m : ℕ) (hm : 2≤m) (α p b B : ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hα : 0&lt;α) (hp : 0&lt;p) (hp1 : p≤1) (hb : 0&lt;b) (hB : 0≤B) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ ε₀ η : ℝ,0&lt;ε₀ ∧ 0&lt;η ∧ ∃ N : ℕ,</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       ∀ (V : Type) [Fintype V] [DecidableEq V],N≤Fintype.card V →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ∀ (P Q F : SimpleGraph V) (T : Finset V) (j : ℕ) (q s ε : ℝ),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       j≤2 → p≤q → p≤s → ε≤ε₀ →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀ v,(ordinaryLocalBaseDegree m+α)*Fintype.card V≤(P.degree v:ℝ)) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀ v,(F.degree v:ℝ)≤ε₀*Fintype.card V) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ S : Finset V,S.card≤ordinaryLocalRootBound m →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         q^S.card*s^j*((common Finset.univ S (fun x=&gt;(P\F).neighborFinset x)).card:ℝ)-</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>           ε*Fintype.card V≤((common T S (fun x=&gt;Q.neighborFinset x)).card:ℝ)) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (m+1)∣T.card → ∀ wt : LocalOrdinaryCycle Q F T (m+1)→ℝ,</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ C,b/(Fintype.card V:ℝ)^m≤wt C ∧ wt C≤B/(Fintype.card V:ℝ)^m) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ v∈T,|1-hypergraphWeightedDegree localOrdinaryVertices wt v|≤η) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       HasResourceDecomposition (localOrdinaryVertices (Q:=Q) (F:=F) (T:=T) (r:=m+1)) T := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let u := min α (1/4)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hu : 0&lt;u := lt_min hα (by norm_num)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   let μ := u/2</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hμ : 0&lt;μ := by dsimp [μ];positivity</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let δ := ordinaryLocalBaseDegree m+μ</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨hδ,hmargin⟩ := ordinary_local_margin m α hα</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   change δ≤1 at hδ</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   change 0&lt;1-(ordinaryLocalRootBound m:ℝ)*(1-δ) at hmargin</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   let γ := p^(ordinaryLocalRootBound m+2)*(1-(ordinaryLocalRootBound m:ℝ)*(1-δ))/2</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hγ : 0&lt;γ := by dsimp [γ];positivity</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   obtain ⟨εf,η,hεf,hη,N,hfactor⟩ := ordinary_sparse_local_factor m hm γ γ b B hγ hγ hb hB</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let ε₀ := min εf (min μ γ)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hε₀ : 0&lt;ε₀ := lt_min hεf (lt_min hμ hγ)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   refine ⟨ε₀,η,hε₀,hη,N,?_⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro V _ _ hn P Q F T j q s ε hj hq hs hε hP hF hrel hdiv wt hw herr</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have heμ : ε₀≤μ := (min_le_right εf _).trans (min_le_left μ γ)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have heγ : ε₀≤γ := (min_le_right εf _).trans (min_le_right μ γ)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have heF : ε₀≤εf := min_le_left _ _</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hP&#x27; (v : V) : (δ+μ)*Fintype.card V≤(P.degree v:ℝ) := by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have huα : u≤α := min_le_left _ _</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have hcoef : δ+μ≤ordinaryLocalBaseDegree m+α := by dsimp [δ,μ];linarith</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact (mul_le_mul_of_nonneg_right hcoef (Nat.cast_nonneg _)).trans (hP v)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hF&#x27; (v : V) : (F.degree v:ℝ)≤μ*Fintype.card V :=</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hF v).trans (mul_le_mul_of_nonneg_right heμ (Nat.cast_nonneg _))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hc (S : Finset V) (hS : S.card≤ordinaryLocalRootBound m) :</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       γ*Fintype.card V≤((common T S (fun x=&gt;Q.neighborFinset x)).card:ℝ) := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hh := ordinary_relative_common_lower P Q F T S (ordinaryLocalRootBound m) j δ μ p q s ε</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       hδ hμ.le hp hp1 hq hs hS hj hP&#x27; hF&#x27; hmargin.le (hrel S hS)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hεγ := hε.trans heγ</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hcoef : γ≤p^(ordinaryLocalRootBound m+2)*(1-(ordinaryLocalRootBound m:ℝ)*(1-δ))-ε := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       dsimp [γ] at *;linarith only [hεγ]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     exact (mul_le_mul_of_nonneg_right hcoef (Nat.cast_nonneg _)).trans hh</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hsize : γ*Fintype.card V≤(T.card:ℝ) := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     simpa [common] using</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       hc ∅ (by simp [ordinaryLocalRootBound])</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   exact hfactor V hn Q F T hsize hdiv</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (fun v=&gt;(hF v).trans (mul_le_mul_of_nonneg_right heF (Nat.cast_nonneg _)))</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (fun S hS=&gt;hc S hS) wt hw herr</span>
+<span id="L69"><a href="#L69" class="ln">  69</a> </span>
+<span id="L70"><a href="#L70" class="ln">  70</a> end Oberwolfach</span></pre></html>

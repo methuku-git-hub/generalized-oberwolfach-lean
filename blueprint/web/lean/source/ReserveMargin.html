@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ReserveMargin.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ReserveMargin.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointReserve</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Quantitative slack in the reserve capacities at a positive degree margin. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> open scoped BigOperators</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem reserve_capacity_positive_margin {k n δ d α : ℝ}</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hk : 2 ≤ k) (hn : 0 &lt; n) (hα : 0 &lt; α)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hthreshold : (k + (2 * k - 1) * α) * n ≤ (2 * k - 1) * δ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hd : δ ≤ d) (hdn : d ≤ n) (hδn : δ ≤ n) :</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     let σ := (2 * k - 1) * α / k</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     0 &lt; σ ∧ σ &lt; 1 ∧ 0 &lt; d + δ - n ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (d / k) / (d + δ - n) ≤ 1 - σ := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   dsimp only</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hk0 : 0 &lt; k := by linarith</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hfac : 0 &lt; 2 * k - 1 := by linarith</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hextra : 0 &lt; (2 * k - 1) * α * n := mul_pos (mul_pos hfac hα) hn</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hbase : k * n ≤ (2 * k - 1) * δ := by nlinarith</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hδ0 : 0 ≤ δ :=</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (pos_of_mul_pos_right (lt_of_lt_of_le (mul_pos hk0 hn) hbase) hfac.le).le</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hden := (reserve_capacity_inequality hk hn hδ0 hbase hd).1</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hσ : 0 &lt; (2 * k - 1) * α / k := div_pos (mul_pos hfac hα) hk0</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hσk : (2 * k - 1) * α &lt; k := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hmul := mul_le_mul_of_nonneg_left hδn hfac.le</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     nlinarith</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   refine ⟨hσ, (div_lt_one hk0).mpr hσk, hden, ?_⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   apply (div_le_iff₀ hden).mpr</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   apply (div_le_iff₀ hk0).mpr</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hcalc : (1 - (2 * k - 1) * α / k) * (d + δ - n) * k =</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (k - (2 * k - 1) * α) * (d + δ - n) := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     field_simp</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   rw [hcalc]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hgap := mul_nonneg (by linarith : 0 ≤ k - 1) (sub_nonneg.mpr hd)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hdenle : d + δ - n ≤ n := by linarith</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hslack := mul_le_mul_of_nonneg_left hdenle (mul_pos hfac hα).le</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   nlinarith</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem scaled_path_two_sided {a b d σ q n k : ℝ}</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hσ : 0 &lt; σ) (hq : 0 &lt; q) (hn : 0 &lt; n) (hk : 1 &lt; k)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (ha : σ ≤ a) (hb : σ ≤ b) (ha1 : a ≤ 1) (hb1 : b ≤ 1)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hd : σ * q * n ≤ d) (hdn : d ≤ n) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     σ ^ 2 / ((k - 1) * n) ≤ (a * b / d) / (k - 1) ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (a * b / d) / (k - 1) ≤ 1 / ((k - 1) * σ * q * n) := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hd0 : 0 &lt; d := lt_of_lt_of_le (mul_pos (mul_pos hσ hq) hn) hd</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hk1 : 0 &lt; k - 1 := by linarith</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have ha0 : 0 ≤ a := (lt_of_lt_of_le hσ ha).le</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hb0 : 0 ≤ b := (lt_of_lt_of_le hσ hb).le</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hp : σ ^ 2 ≤ a * b := by nlinarith [mul_le_mul ha hb hσ.le ha0]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hp1 : a * b ≤ 1 := by nlinarith [mul_le_mul ha1 hb1 hb0 (by norm_num : (0 : ℝ) ≤ 1)]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   constructor</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   · calc</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       σ ^ 2 / ((k - 1) * n) = (σ ^ 2 / n) / (k - 1) := by field_simp</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       _ ≤ (a * b / d) / (k - 1) := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         apply div_le_div_of_nonneg_right _ hk1.le</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         exact div_le_div₀ (mul_nonneg ha0 hb0) hp hd0 hdn</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   · calc</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (a * b / d) / (k - 1) ≤ (1 / (σ * q * n)) / (k - 1) := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         apply div_le_div_of_nonneg_right _ hk1.le</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         exact div_le_div₀ (by norm_num : (0 : ℝ) ≤ 1) hp1 (mul_pos (mul_pos hσ hq) hn) hd</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       _ = 1 / ((k - 1) * σ * q * n) := by field_simp</span>
+<span id="L63"><a href="#L63" class="ln">  63</a> </span>
+<span id="L64"><a href="#L64" class="ln">  64</a> end Oberwolfach</span></pre></html>

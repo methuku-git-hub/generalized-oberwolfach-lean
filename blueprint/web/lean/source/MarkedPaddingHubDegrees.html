@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPaddingHubDegrees.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPaddingHubDegrees.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPaddingDegrees</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Padding uses fresh hub occurrences. An old hub keeps its original</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> spokes; each new hub has one marked spoke and exactly m ordinary spokes. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 10000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {U S I:Type} [Fintype S] [Fintype I] [DecidableEq U] [DecidableEq I]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem padding_old_hub_count (hub:S→U) (js:S→Bool) (m:ℕ) (u:U) (j:Bool):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     Fintype.card {s // paddingSpokeHub (I:=I) hub m s=Sum.inl u∧paddingSpokeType js m s=j}=</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       Fintype.card {s:S // hub s=u∧js s=j}:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   rw [finite_card_sum_predicate (fun s=&gt;paddingSpokeHub (I:=I) hub m s=Sum.inl u∧paddingSpokeType js m s=j)]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   simp only [paddingSpokeHub,paddingSpokeType,Sum.elim_inl,Sum.elim_inr,Sum.inl.injEq,</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     Sum.inr_ne_inl,false_and]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   simp only [Fintype.card_eq_zero,add_zero]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem padding_new_hub_count (hub:S→U) (js:S→Bool) (m:ℕ) (i:I) (j:Bool):</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     Fintype.card {s // paddingSpokeHub hub m s=Sum.inr i∧paddingSpokeType js m s=j}=</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       if j then 1 else m:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   rw [finite_card_sum_predicate (fun s=&gt;paddingSpokeHub hub m s=Sum.inr i∧paddingSpokeType js m s=j)]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   simp only [paddingSpokeHub,paddingSpokeType,Sum.elim_inl,Sum.elim_inr,Sum.inl_ne_inr,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     Sum.inr.injEq,false_and,Fintype.card_eq_zero,zero_add]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have he:Fintype.card {z:I×Fin (m+1) // z.1=i∧decide (z.2=0)=j}=</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       Fintype.card {k:Fin (m+1) // decide (k=0)=j}:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     apply Fintype.card_congr</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     exact {</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       toFun:=fun z=&gt;⟨z.val.2,z.property.2⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       invFun:=fun k=&gt;⟨(i,k.val),rfl,k.property⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       left_inv:=fun z=&gt;by apply Subtype.ext;exact Prod.ext z.property.1.symm rfl</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       right_inv:=fun _=&gt;rfl}</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   rw [he]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   cases j</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · simp only [Bool.false_eq_true,ite_false,decide_eq_false_iff_not]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     rw [Fintype.card_subtype_compl,Fintype.card_subtype_eq,Fintype.card_fin]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     omega</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   · simp only [ite_true,decide_eq_true_eq,Fintype.card_subtype_eq]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> theorem padding_hub_balance (hub:S→U) (js:S→Bool) (m:ℕ)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hbal:∀ u,Fintype.card {s:S // hub s=u∧js s=false}=m*Fintype.card {s:S // hub s=u∧js s=true}):</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∀ u:U⊕I,Fintype.card {s // paddingSpokeHub hub m s=u∧paddingSpokeType js m s=false}=</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       m*Fintype.card {s // paddingSpokeHub hub m s=u∧paddingSpokeType js m s=true}:=by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro u</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   cases u with</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   | inl u=&gt;simpa only [padding_old_hub_count] using hbal u</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   | inr i=&gt;simp only [padding_new_hub_count,Bool.false_eq_true,ite_false,ite_true,mul_one]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> end Oberwolfach</span></pre></html>

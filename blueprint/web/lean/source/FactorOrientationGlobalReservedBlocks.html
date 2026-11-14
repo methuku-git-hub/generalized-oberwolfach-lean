@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FactorOrientationGlobalReservedBlocks.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FactorOrientationGlobalReservedBlocks.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FactorCycleOrientation</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ExtendComponentCycleChoices</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.LongReservedSigmaBlocks</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The global factor orientation agrees with each original reserved cyclic</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> block because the selected component orders were preserved. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 16000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem factor_cycle_orientation_reserved_block_step_from_global</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {X I:Type*} [Fintype X] [DecidableEq X] [Fintype I]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (G:SimpleGraph X) (hG:G.IsRegularOfDegree 2)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (components:I↪G.ConnectedComponent)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (E:∀C:G.ConnectedComponent,SimpleGraph.cycleGraph (Fintype.card C) ≃g C.toSimpleGraph)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (c d:ℕ) (q:LongReservedBlockIndex G components c d) (t:ℕ) (ht:t≤d)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (j:Fin (c*t+4)):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let e:=fun i=&gt;E (components i)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let σ:=factorCycleOrientation G E</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let block:=longReservedSigmaBlock G components c d e q t ht</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     σ (block ⟨j.val,by omega⟩)=block ⟨j.val+1,by omega⟩:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let e:=fun i=&gt;E (components i)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   let σ:=factorCycleOrientation G E</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let C:=components q.1</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let fit:=long_reserved_sigma_block_fit G components c d q</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let block:=longReservedComponentBlock G C (e q.1) c d t q.2.val ht fit</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hE:E C=e q.1:=rfl</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hσ:=factor_cycle_orientation_on_component G E C (block ⟨j.val,by omega⟩)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   change σ ((block ⟨j.val,by omega⟩).val)=(block ⟨j.val+1,by omega⟩).val</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   rw [hσ,hE]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   apply congrArg Subtype.val</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   dsimp [block,longReservedComponentBlock]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   simp only [RelIso.symm_apply_apply]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   apply congrArg (e q.1)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   apply Fin.ext</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   rw [finRotate_apply]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   simp only [Fin.val_add]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hcard:Fintype.card C=Fintype.card (components q.1):=rfl</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hthree:3≤Fintype.card C:=(component_regular_two_cycle_iso G hG C).1</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   letI:NeZero (Fintype.card C):=⟨by omega⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hOne:((1:Fin (Fintype.card C)):ℕ)=1:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     rw [Fin.val_one&#x27;,Nat.mod_eq_of_lt (by omega)]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   rw [hOne]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hprod:c*t≤c*d:=Nat.mul_le_mul_left c ht</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   simp only [Nat.mul_add,Nat.mul_one] at fit</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   rw [Nat.mod_eq_of_lt (by omega)]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   omega</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> end Oberwolfach</span></pre></html>

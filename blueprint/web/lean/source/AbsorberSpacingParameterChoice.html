@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AbsorberSpacingParameterChoice.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AbsorberSpacingParameterChoice.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongPrescribedLoadMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Choose the cycle spacing after the list and residual constants. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem absorber_spacing_parameter_choice</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (β b:ℝ) (hβ:0&lt;β) (hb:0&lt;b):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     ∃M:ℕ,∀m:ℕ,M≤m→0&lt;m ∧ 4/(m:ℝ)≤b/2 ∧ 1/(100*(m:ℝ))≤β/4 ∧</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>       ∃N:ℕ,∀n:ℕ,N≤n→4*(n:ℝ)^(3/4:ℝ)≤b*n/2:=by</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   let δ:=min (2*b) β</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hδ:0&lt;δ:=lt_min (by positivity) hβ</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hδb:δ≤2*b:=min_le_left _ _</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hδβ:δ≤β:=min_le_right _ _</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   obtain ⟨M,hM⟩:=long_prescribed_load_margins δ hδ</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   refine ⟨max M 1,?_⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   intro m hm</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hmM:M≤m:=le_trans (le_max_left _ _) hm</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hmpos:0&lt;m:=by omega</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   obtain ⟨hsmall,N,hN⟩:=hM m hmM</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hmR:0&lt;(m:ℝ):=by exact_mod_cast hmpos</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   refine ⟨hmpos,?_,?_,N,?_⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · linarith</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   · have hh:1/(100*(m:ℝ))≤4/(m:ℝ):=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       apply (div_le_iff₀ (by positivity : 0&lt;100*(m:ℝ))).2</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       field_simp</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       nlinarith</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     linarith</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   · intro n hn</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have hh:=hN n hn</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hscale:=mul_le_mul_of_nonneg_right hδb (Nat.cast_nonneg n)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     nlinarith</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> end Oberwolfach</span></pre></html>

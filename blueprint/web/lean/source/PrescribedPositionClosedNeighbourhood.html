@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedPositionClosedNeighbourhood.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedPositionClosedNeighbourhood.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Combinatorics.SimpleGraph.Finite</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteHighEventsCommon</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Closed-neighbourhood sizes for graphs of maximum degree two. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {X:Type} [Fintype X] [DecidableEq X]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> def prescribedClosedNeighbourhood (Q:SimpleGraph X) (v:X):Finset X:=</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   insert v (Q.neighborFinset v)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def prescribedClosedNeighbourhoods (Q:SimpleGraph X) (S:Finset X):Finset X:=</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   S.biUnion (prescribedClosedNeighbourhood Q)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem prescribed_closed_neighbourhood_card (Q:SimpleGraph X) (hdeg:∀x,Q.degree x≤2) (v:X):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (prescribedClosedNeighbourhood Q v).card≤3 := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   calc</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (prescribedClosedNeighbourhood Q v).card≤(Q.neighborFinset v).card+1:=Finset.card_insert_le _ _</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     _=Q.degree v+1:=by rw [Q.card_neighborFinset_eq_degree]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     _≤3:=by have h:=hdeg v;omega</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem prescribed_closed_neighbourhoods_card (Q:SimpleGraph X) (hdeg:∀x,Q.degree x≤2) (S:Finset X):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (prescribedClosedNeighbourhoods Q S).card≤3*S.card := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   calc</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (prescribedClosedNeighbourhoods Q S).card≤∑ v∈S,(prescribedClosedNeighbourhood Q v).card:=Finset.card_biUnion_le</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     _≤∑ _v∈S,3:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       apply Finset.sum_le_sum</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       intro v hv</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       exact prescribed_closed_neighbourhood_card Q hdeg v</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     _=3*S.card:=by simp [Nat.mul_comm]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> theorem prescribed_edge_closed_neighbourhood_card (Q:SimpleGraph X) (hdeg:∀x,Q.degree x≤2)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (u v:X) (huv:Q.Adj u v):</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (prescribedClosedNeighbourhood Q u∪prescribedClosedNeighbourhood Q v).card≤4 := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hv:v∈Q.neighborFinset u:=(Q.mem_neighborFinset u v).mpr huv</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hu:u∈Q.neighborFinset v:=(Q.mem_neighborFinset v u).mpr huv.symm</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hnu:((Q.neighborFinset u).erase v).card≤1:=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hd:=hdeg u</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hc:=Finset.card_erase_of_mem hv</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     rw [Q.card_neighborFinset_eq_degree] at hc</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     omega</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hnv:((Q.neighborFinset v).erase u).card≤1:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have hd:=hdeg v</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hc:=Finset.card_erase_of_mem hu</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     rw [Q.card_neighborFinset_eq_degree] at hc</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     omega</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   let T:Finset X:={u,v}∪(Q.neighborFinset u).erase v∪(Q.neighborFinset v).erase u</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hsub:prescribedClosedNeighbourhood Q u∪prescribedClosedNeighbourhood Q v⊆T:=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     intro x hx</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     simp only [prescribedClosedNeighbourhood,Finset.mem_union,Finset.mem_insert] at hx</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     simp only [T,Finset.mem_union,Finset.mem_insert,Finset.mem_singleton,Finset.mem_erase]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     rcases hx with (hx|hx)|(hx|hx)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     · exact Or.inl (Or.inl (Or.inl hx))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     · by_cases h:x=v</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       · exact Or.inl (Or.inl (Or.inr h))</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       · exact Or.inl (Or.inr ⟨h,hx⟩)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     · exact Or.inl (Or.inl (Or.inr hx))</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     · by_cases h:x=u</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       · exact Or.inl (Or.inl (Or.inl h))</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       · exact Or.inr ⟨h,hx⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have ht:T.card≤4:=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     have hpair:({u,v}:Finset X).card≤2:=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       calc</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         ({u,v}:Finset X).card≤({v}:Finset X).card+1:=Finset.card_insert_le _ _</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         _=2:=by simp</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     have hsum:=Finset.card_union_le ({u,v}:Finset X) ((Q.neighborFinset u).erase v)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hsum&#x27;:=Finset.card_union_le ({u,v}∪(Q.neighborFinset u).erase v) ((Q.neighborFinset v).erase u)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     dsimp [T]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     omega</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   exact (Finset.card_le_card hsub).trans ht</span>
+<span id="L73"><a href="#L73" class="ln">  73</a> end Oberwolfach</span></pre></html>

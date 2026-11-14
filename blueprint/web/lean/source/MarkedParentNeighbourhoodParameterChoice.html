@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedParentNeighbourhoodParameterChoice.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedParentNeighbourhoodParameterChoice.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedParentConfigurationHierarchy</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Compatible parent neighbourhood and spoke-agreement tolerances under</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> arbitrary positive upper caps. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_parent_neighbourhood_parameter_choice</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (r:ℕ) (κ x tolcap ζcap:ℝ)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hκ:0&lt;κ) (hx:0&lt;x) (htolcap:0&lt;tolcap) (hζcap:0&lt;ζcap):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ tol ζ:ℝ,0&lt;tol ∧ tol≤tolcap ∧ 0&lt;ζ ∧ ζ≤ζcap ∧</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       tol+(r+12:ℕ)*ζ≤κ/4 ∧ tol+(r+12:ℕ)*ζ≤x/2 ∧ ζ≤κ/4:=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   let b:=min κ x</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hb:0&lt;b:=by dsimp [b];positivity</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hbκ:b≤κ:=min_le_left _ _</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hbx:b≤x:=min_le_right _ _</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   let tol:=min tolcap (b/16)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   let ζ:=min ζcap (b/(16*(r+13:ℕ)))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have htol:0&lt;tol:=by dsimp [tol];positivity</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hζ:0&lt;ζ:=by dsimp [ζ];positivity</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have htcap:tol≤tolcap:=min_le_left _ _</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have ht:tol≤b/16:=min_le_right _ _</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hzcap:ζ≤ζcap:=min_le_left _ _</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hz:ζ≤b/(16*(r+13:ℕ)):=min_le_right _ _</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hprod:ζ*(16*(r+13:ℕ))≤b:=(le_div_iff₀ (by positivity)).mp hz</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hless:((r+12:ℕ):ℝ)≤(r+13:ℕ):=by exact_mod_cast (show r+12≤r+13 by omega)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hloss:((r+12:ℕ):ℝ)*ζ≤b/16:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     nlinarith [mul_nonneg hζ.le (sub_nonneg.mpr hless)]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hζsmall:ζ≤b/16:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have hr:(1:ℝ)≤(r+13:ℕ):=by exact_mod_cast (show 1≤r+13 by omega)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     nlinarith [mul_nonneg hζ.le (sub_nonneg.mpr hr)]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   exact ⟨tol,ζ,htol,htcap,hζ,hzcap,by linarith,by linarith,by linarith⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> end Oberwolfach</span></pre></html>

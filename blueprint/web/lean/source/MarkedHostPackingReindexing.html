@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHostPackingReindexing.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHostPackingReindexing.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedHostReindexing</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedFiniteResourceSupport</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Reindex a packing between equivalent typed hosts and identify its</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> actual remainder. Divisibility is derived by subtracting the packing in</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> the destination host, not postulated for a resource set. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 14000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U E K E&#x27; K&#x27;:Type}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [Fintype V] [Fintype U] [Fintype E] [Fintype K] [Fintype E&#x27;] [Fintype K&#x27;]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [DecidableEq V] [DecidableEq U] [DecidableEq E] [DecidableEq K]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     [DecidableEq E&#x27;] [DecidableEq K&#x27;]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem markedHostReindex_packing</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (tail head:E → V) (ktail khead:K → V) (tail&#x27; head&#x27;:E&#x27; → V) (ktail&#x27; khead&#x27;:K&#x27; → V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (H₀ HK:V → U → Prop) (π:Equiv.Perm V) (m b:ℕ) (e:E≃E&#x27;) (k:K≃K&#x27;)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (ht:∀ a,tail&#x27; (e a)=tail a) (hh:∀ a,head&#x27; (e a)=head a)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hkt:∀ a,ktail&#x27; (k a)=ktail a) (hkh:∀ a,khead&#x27; (k a)=khead a)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ HK))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hM:∀ Y∈M,∀ Z∈M,Y≠Z → Disjoint (markedWheelPhysicalResources Y) (markedWheelPhysicalResources Z)) :</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ N:Finset (MarkedWheel tail&#x27; head&#x27; ktail&#x27; khead&#x27; m π b H₀ HK),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ Y∈N,∀ Z∈N,Y≠Z → Disjoint (markedWheelPhysicalResources Y) (markedWheelPhysicalResources Z)) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       N.biUnion markedWheelPhysicalResources=M.biUnion markedWheelPhysicalResources := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let f:=Function.Embedding.refl V</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let g:=Function.Embedding.refl U</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let φ:MarkedWheel tail head ktail khead m π b H₀ HK ↪</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       MarkedWheel tail&#x27; head&#x27; ktail&#x27; khead&#x27; m π b H₀ HK := markedWheelVertexEmbedding f g (fun _=&gt;rfl) e k ht hh hkt hkh (fun _ _ h=&gt;h) (fun _ _ h=&gt;h)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   refine ⟨M.image φ,markedPackingVertexEmbedding_matching f g (fun _=&gt;rfl) e k ht hh hkt hkh</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (fun _ _ h=&gt;h) (fun _ _ h=&gt;h) M hM,?_⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have h:=markedPackingVertexEmbedding_resources f g (fun _=&gt;rfl) e k ht hh hkt hkh</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (fun _ _ h=&gt;h) (fun _ _ h=&gt;h) M</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hi:(markedResourceEmbedding f g : (Finset V⊕(V×U)) → (Finset V⊕(V×U)))=id:=</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     funext markedResourceEmbedding_refl</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   rw [hi,Finset.image_id] at h</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   exact h</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem markedHostReindex_packing_remainder</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (tail head:E → V) (ktail khead:K → V) (tail&#x27; head&#x27;:E&#x27; → V) (ktail&#x27; khead&#x27;:K&#x27; → V)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (H₀ HK:V → U → Prop) (π:Equiv.Perm V) (m b:ℕ) (e:E≃E&#x27;) (k:K≃K&#x27;)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (ht:∀ a,tail&#x27; (e a)=tail a) (hh:∀ a,head&#x27; (e a)=head a)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hkt:∀ a,ktail&#x27; (k a)=ktail a) (hkh:∀ a,khead&#x27; (k a)=khead a)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hp&#x27;:Function.Injective (markedPhysicalEdge tail&#x27; head&#x27; ktail&#x27; khead&#x27; π))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hH:∀ v u,¬(H₀ v u∧HK v u)) :</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     let S:=Finset.univ.filter (fun s:V×U=&gt;H₀ s.1 s.2∨HK s.1 s.2);</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     MarkedRemainderDivisible tail&#x27; head&#x27; ktail&#x27; khead&#x27; HK Finset.univ S m →</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     ∀ M:Finset (MarkedWheel tail head ktail khead m π b H₀ HK),</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (∀ Y∈M,∀ Z∈M,Y≠Z → Disjoint (markedWheelPhysicalResources Y) (markedWheelPhysicalResources Z)) →</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     ∃ N:Finset (MarkedWheel tail&#x27; head&#x27; ktail&#x27; khead&#x27; m π b H₀ HK),</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (∀ Y∈N,∀ Z∈N,Y≠Z → Disjoint (markedWheelPhysicalResources Y) (markedWheelPhysicalResources Z)) ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       N.biUnion markedWheelPhysicalResources=M.biUnion markedWheelPhysicalResources ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       MarkedRemainderDivisible tail&#x27; head&#x27; ktail&#x27; khead&#x27; HK (Finset.univ\N.biUnion markedWheelArcs)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         (S\N.biUnion markedWheelSpokePairs) m ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       markedFiniteResources tail&#x27; head&#x27; ktail&#x27; khead&#x27; π (Finset.univ\N.biUnion markedWheelArcs) (S\N.biUnion markedWheelSpokePairs)=</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         markedFiniteResources tail head ktail khead π (Finset.univ\M.biUnion markedWheelArcs) (S\M.biUnion markedWheelSpokePairs) := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   intro S hd M hM</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   obtain ⟨N,hN,hR⟩:=markedHostReindex_packing tail head ktail khead tail&#x27; head&#x27; ktail&#x27; khead&#x27; H₀ HK π m b e k ht hh hkt hkh M hM</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hNA:N.biUnion markedWheelArcs⊆Finset.univ:=Finset.subset_univ _</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hNS:N.biUnion markedWheelSpokePairs⊆S:=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     intro s hs</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     obtain ⟨W,_,hs⟩:=Finset.mem_biUnion.mp hs</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     exact Finset.mem_filter.mpr ⟨Finset.mem_univ _,markedWheelPhysicalResources_spoke_present W s.1 s.2 ((markedWheel_spoke_resource W s).mp hs)⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   refine ⟨N,hN,hR,marked_packing_remainder_divisible hH Finset.univ S hd N hN hNA hNS,?_⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   rw [markedFiniteResources_sdiff _ _ _ _ π hp&#x27;,markedPackingResources_eq_finite,</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     markedFiniteResources_sdiff _ _ _ _ π hp,markedPackingResources_eq_finite,hR]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hu:(Finset.univ:Finset (E⊕K)).image (e.toEmbedding.sumMap k.toEmbedding)=Finset.univ:=by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     apply Finset.image_univ_of_surjective</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     intro a</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     cases a with</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     | inl a=&gt;exact ⟨Sum.inl (e.symm a),by simp⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     | inr a=&gt;exact ⟨Sum.inr (k.symm a),by simp⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have heq:=markedHostReindex_resources tail head ktail khead tail&#x27; head&#x27; ktail&#x27; khead&#x27; π e k ht hh hkt hkh Finset.univ S</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   rw [hu] at heq</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   rw [heq]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

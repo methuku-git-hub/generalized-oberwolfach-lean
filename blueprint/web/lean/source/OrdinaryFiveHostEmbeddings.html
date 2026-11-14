@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryFiveHostEmbeddings.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryFiveHostEmbeddings.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryActualDiagramModels</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Construct all five finite graph pairs of the ordinary terminal-absorber</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> diagram together in the actual host. The original pair is preserved in the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> first attachment; the final attachment has an actual wheel decomposition.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> Every expansion is separated from both attachments and from the others. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 1536</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 28000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V₀ U₀ V U:Type} [Fintype V₀] [Fintype U₀] [Fintype V] [Fintype U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [DecidableEq V₀] [DecidableEq U₀] [DecidableEq V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem ordinary_five_host_embeddings (G:SimpleGraph V₀) (Hs:V₀→U₀→Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (r m:ℕ) (hr:3≤r) (hm:Fintype.card V₀+Fintype.card U₀≤m)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (Q F:SimpleGraph V) (H:V→U→Prop) (A W R:Finset V) (B:Finset U)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (φ:V₀↪V) (ψ:U₀↪U) (hφ:∀ v,φ v∈R) (hψ:∀ u,ψ u∈B)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hG:∀ v w,G.Adj v w→Q.Adj (φ v) (φ w)) (hHs:∀ v u,Hs v u→H (φ v) (ψ u))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (d c cH:ℝ) (hd:0≤d) (hF:∀ v,(F.degree v:ℝ)≤d)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hA:c≤(A.card:ℝ)) (hU:cH≤(Fintype.card U:ℝ))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hcount:∀ v w,c≤((A∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hpair:∀ a b v w,c≤(((A.filter (fun z=&gt;H z a∧H z b))∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hhub:∀ T:Finset V,T.card≤r→(∀ v∈T,∀ w∈T,¬F.Adj v w)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       cH≤((common Finset.univ T (fun v=&gt;Finset.univ.filter (H v))).card:ℝ))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hbudget:W.card+((R.card:ℝ)+6*ordinaryDiagramSize r m+r+6)*(d+1)&lt;c)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hB:(B.card:ℝ)+6*ordinaryDiagramSize r m&lt;cH) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let k:=G.edgeFinset.card/r</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let Gc:=ordinaryComparisonRim r k (by omega)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let Hc:=ordinaryComparisonSpokes r k (by omega)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∃ eL:OrdinaryPairHostEmbedding (actualAttachmentRim G Hs (SimpleGraph.cycleGraph r) ⟨0,by omega⟩)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         (actualAttachmentSpokes G Hs (⟨0,by omega⟩:Fin r)) Q H,</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ a,eL.row (.inl a)=φ a)∧(∀ a,eL.hub (.inl a)=ψ a)∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ i w,eL.row (.inr (i,w))∈A∧eL.row (.inr (i,w))∉W∧eL.row (.inr (i,w))∉R∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         ∀ z∈R,¬F.Adj (eL.row (.inr (i,w))) z)∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (∀ i,eL.hub (.inr i)∉B)∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       ∃ extra:Finset (Sym2 V⊕(V×U)),</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         eL.resources=ordinaryHostResources (G.map φ) (ordinaryMappedSpokes Hs φ ψ)∪extra∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         Disjoint (ordinaryHostResources (G.map φ) (ordinaryMappedSpokes Hs φ ψ)) extra∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         HasResourceDecomposition (ordinaryWheelResources (P:=Q) (F:=F) (Hbase:=H) (r:=r)) extra∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         ∃ eR:OrdinaryPairHostEmbedding (actualAttachmentRim Gc Hc (SimpleGraph.cycleGraph r) ⟨0,by omega⟩)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>             (actualAttachmentSpokes Gc Hc (⟨0,by omega⟩:Fin r)) Q H,</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>           eR.IsFresh F A W (R∪Finset.univ.image eL.row) (B∪Finset.univ.image eL.hub)∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>           HasResourceDecomposition (ordinaryWheelResources (P:=Q) (F:=F) (Hbase:=H) (r:=r)) eR.resources∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>           ∃ e:∀ i:Fin 3,OrdinaryPairHostEmbedding (ordinaryDiagramExpansionRim G Hs r hr i)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>               (ordinaryDiagramExpansionSpokes G Hs r hr i) Q H,</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>             (∀ i,(e i).IsFresh F A W ((R∪Finset.univ.image eL.row)∪Finset.univ.image eR.row)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>               ((B∪Finset.univ.image eL.hub)∪Finset.univ.image eR.hub))∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>             (∀ i j,i≠j→∀ a b,(e i).row a≠(e j).row b)∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>             (∀ i j,i≠j→∀ a b,(e i).hub a≠(e j).hub b)∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>             (∀ i j,i≠j→∀ a b,¬F.Adj ((e i).row a) ((e j).row b)) := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   dsimp only</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   let k:=G.edgeFinset.card/r</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   let Gc:=ordinaryComparisonRim r k (by omega)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   let Hc:=ordinaryComparisonSpokes r k (by omega)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   let M:=ordinaryDiagramSize r m</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hd1:0≤d+1:=by linarith</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hM:0≤(M:ℝ):=by positivity</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hLsize:Fintype.card (ActualExpansionRow G Hs (Fin r))+Fintype.card (ActualExpansionHub G Hs)≤M:=</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (actual_expansion_order_bound G Hs r m hm).trans (by dsimp [M,ordinaryDiagramSize];omega)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hJord:=ordinary_comparison_order_bound G r m (by omega)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hRsize:Fintype.card (ActualExpansionRow Gc Hc (Fin r))+Fintype.card (ActualExpansionHub Gc Hc)≤M:=</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (actual_expansion_order_bound Gc Hc r (m^2*(r+2)) hJord).trans (by dsimp [M,ordinaryDiagramSize];omega)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hLv:Fintype.card (V₀⊕((G.edgeFinset⊕ActualSpoke Hs)×Fin r))≤M:=by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     simpa only [ActualExpansionRow,ExpansionRow] using (Nat.le_add_right _ _).trans hLsize</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hLhub:Fintype.card (U₀⊕(G.edgeFinset⊕ActualSpoke Hs))≤M:=by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     simpa only [ActualExpansionHub,ExpansionHub] using (Nat.le_add_left _ _).trans hLsize</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hRv:Fintype.card (OrdinaryComparisonRows r k⊕((Gc.edgeFinset⊕ActualSpoke Hc)×Fin r))≤M:=by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     simpa only [ActualExpansionRow,ExpansionRow] using (Nat.le_add_right _ _).trans hRsize</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hRhub:Fintype.card (OrdinaryComparisonHubs k⊕(Gc.edgeFinset⊕ActualSpoke Hc))≤M:=by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     simpa only [ActualExpansionHub,ExpansionHub] using (Nat.le_add_left _ _).trans hRsize</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hLi:(Fintype.card (G.edgeFinset⊕ActualSpoke Hs):ℝ)*r≤M:=by</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     have hh:=hLsize</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     simp only [ActualExpansionRow,ActualExpansionHub,ExpansionRow,ExpansionHub,Fintype.card_sum,Fintype.card_prod,Fintype.card_fin] at hh</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     exact_mod_cast (show Fintype.card (G.edgeFinset⊕ActualSpoke Hs)*r≤M by simpa only [Fintype.card_sum] using (show (Fintype.card G.edgeFinset+Fintype.card (ActualSpoke Hs))*r≤M by omega))</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hLh:(Fintype.card (G.edgeFinset⊕ActualSpoke Hs):ℝ)≤M:=by</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     have hh:=hLsize</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     simp only [ActualExpansionRow,ActualExpansionHub,ExpansionRow,ExpansionHub,Fintype.card_sum,Fintype.card_prod,Fintype.card_fin] at hh</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     exact_mod_cast (show Fintype.card (G.edgeFinset⊕ActualSpoke Hs)≤M by simpa only [Fintype.card_sum] using (show Fintype.card G.edgeFinset+Fintype.card (ActualSpoke Hs)≤M by omega))</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   obtain ⟨fL,gL,hfL,hgL,hpriv,hnewhub,hprivF,hQL,hHL,hpartition,hdis,hextra⟩:=</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     ordinary_relative_attachment_realization Q F H A W R B φ ψ G Hs (actualAttachmentRoot G Hs)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       hφ hψ hG hHs r hr d c cH hd hF hcount hhub</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       (by have hh:=mul_le_mul_of_nonneg_right (show (R.card:ℝ)+Fintype.card (G.edgeFinset⊕ActualSpoke Hs)*r+r+6≤R.card+6*M+r+6 by linarith only [hLi,hM]) hd1</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>           linarith only [hbudget,hh])</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       (by linarith only [hB,hLh,hM])</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   let eL:OrdinaryPairHostEmbedding (actualAttachmentRim G Hs (SimpleGraph.cycleGraph r) ⟨0,by omega⟩)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>       (actualAttachmentSpokes G Hs (⟨0,by omega⟩:Fin r)) Q H:=⟨fL,gL,hQL,hHL⟩</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   refine ⟨eL,hfL,hgL,hpriv,hnewhub,_,hpartition,hdis,hextra,?_⟩</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   let RL:=R∪Finset.univ.image fL</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   let BL:=B∪Finset.univ.image gL</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   have hRL:(RL.card:ℝ)≤R.card+M:=by</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     have hc:(Finset.univ.image fL).card≤M:=Finset.card_image_le.trans ((Finset.card_univ).trans_le hLv)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     exact_mod_cast (Finset.card_union_le _ _).trans (Nat.add_le_add_left hc _)</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   have hBL:(BL.card:ℝ)≤B.card+M:=by</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     have hc:(Finset.univ.image gL).card≤M:=Finset.card_image_le.trans ((Finset.card_univ).trans_le hLhub)</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     exact_mod_cast (Finset.card_union_le _ _).trans (Nat.add_le_add_left hc _)</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hRi:(k:ℝ)+k*r+Fintype.card (Gc.edgeFinset⊕ActualSpoke Hc)*r≤M:=by</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     have hh:=hRv</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     simp only [Fintype.card_sum,Fintype.card_prod,Fintype.card_fin,OrdinaryComparisonRows] at hh</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     have hs:k+k*r+Fintype.card (Gc.edgeFinset⊕ActualSpoke Hc)*r≤M:=by</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>       simpa only [Fintype.card_sum] using hh</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     exact_mod_cast hs</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have hRh:(k:ℝ)+Fintype.card (Gc.edgeFinset⊕ActualSpoke Hc)≤M:=by</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     have hh:=hRhub</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     simp only [Fintype.card_sum,OrdinaryComparisonHubs,Fintype.card_empty,Fintype.card_fin,zero_add] at hh</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     have hs:k+Fintype.card (Gc.edgeFinset⊕ActualSpoke Hc)≤M:=by</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>       simpa only [Fintype.card_sum] using hh</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     exact_mod_cast hs</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>   obtain ⟨fR,gR,hfR,hgR,hFR,hQR,hHR,hdecR⟩:=ordinary_fresh_comparison_attachment Q F H A W RL BL r k hr</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     (actualAttachmentRoot Gc Hc) d c cH hd hF hA hcount hhub</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     (by have hh:=mul_le_mul_of_nonneg_right (show (RL.card:ℝ)+k+k*r+Fintype.card (Gc.edgeFinset⊕ActualSpoke Hc)*r+r+6≤R.card+6*M+r+6 by linarith only [hRL,hRi,hM]) hd1</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>         linarith only [hbudget,hh])</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     (by linarith only [hB,hBL,hRh,hM])</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>   let eR:OrdinaryPairHostEmbedding (actualAttachmentRim Gc Hc (SimpleGraph.cycleGraph r) ⟨0,by omega⟩)</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>       (actualAttachmentSpokes Gc Hc (⟨0,by omega⟩:Fin r)) Q H:=⟨fR,gR,hQR,hHR⟩</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>   refine ⟨eR,⟨hfR,hgR,hFR⟩,hdecR,?_⟩</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>   let R&#x27;:=RL∪Finset.univ.image fR</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>   let B&#x27;:=BL∪Finset.univ.image gR</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>   have hRR:(R&#x27;.card:ℝ)≤R.card+2*M:=by</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     have hc:(Finset.univ.image fR).card≤M:=Finset.card_image_le.trans ((Finset.card_univ).trans_le hRv)</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     have hh:(R&#x27;.card:ℝ)≤RL.card+M:=by exact_mod_cast (Finset.card_union_le _ _).trans (Nat.add_le_add_left hc _)</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     linarith only [hRL,hh]</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>   have hBB:(B&#x27;.card:ℝ)≤B.card+2*M:=by</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     have hc:(Finset.univ.image gR).card≤M:=Finset.card_image_le.trans ((Finset.card_univ).trans_le hRhub)</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     have hh:(B&#x27;.card:ℝ)≤BL.card+M:=by exact_mod_cast (Finset.card_union_le _ _).trans (Nat.add_le_add_left hc _)</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     linarith only [hBL,hh]</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>   exact ordinary_joint_expansion_embeddings 3 M r hr</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     (ordinaryDiagramOldRows G r) (ordinaryDiagramOldHubs (U₀:=U₀) G r)</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     (ordinaryDiagramEdges G r hr) (ordinaryDiagramSpokes G Hs r hr)</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     (ordinaryDiagramX G r hr) (ordinaryDiagramY G r hr) (ordinaryDiagramV G Hs r hr) (ordinaryDiagramU G Hs r hr)</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     (ordinary_diagram_model_size G Hs r m hr hm) Q F H A W R&#x27; B&#x27; d c cH hd hF hA hU hcount hpair hhub</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     (by norm_num</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>         have hh:=mul_le_mul_of_nonneg_right hRR hd1</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>         nlinarith only [hbudget,hh])</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     (by norm_num;linarith only [hB,hBB])</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a> </span>
+<span id="L139"><a href="#L139" class="ln"> 139</a> end Oberwolfach</span></pre></html>

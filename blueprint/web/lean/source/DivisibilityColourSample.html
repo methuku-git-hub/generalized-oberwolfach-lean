@@ -1,0 +1,109 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>DivisibilityColourSample.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>DivisibilityColourSample.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ColouredTwoPaths</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! One independent edge-colouring simultaneously controls all colour degrees</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> and all ordered two-path candidate sets used in the divisibility repair. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1500000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> universe u</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem divisibility_colour_common_event {V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {R : ℕ} (G : SimpleGraph V) (ρ : Fin R → ℝ) (hρ : ∀ a,0≤ρ a)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hsum : ∑ a,ρ a=1) (b : Fin R) (η : ℝ) (hη : 0≤η) (hn : 0&lt;Fintype.card V) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     1-4*R*(Fintype.card V:ℝ)^2*Real.exp (-η^2*Fintype.card V)≤</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (FiniteLaw.pi (fun _ : Sym2 V =&gt; FiniteLaw.categorical ρ hρ hsum)).probability</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         (fun σ =&gt; (∀ a v,|(sampledColourDegree G σ a v:ℝ)-ρ a*G.degree v|&lt;η*Fintype.card V) ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>           (∀ a u v,u≠v → |(colouredTwoPathCount G σ u v a b:ℝ)-</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>             ((G.neighborFinset u∩G.neighborFinset v).card:ℝ)*ρ a*ρ b|&lt;η*Fintype.card V)) := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let n : ℝ := Fintype.card V</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hnp : 0&lt;n := Nat.cast_pos.mpr hn</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hn1 : 1≤n := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     dsimp only [n]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     exact_mod_cast (show 1≤Fintype.card V by omega)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let μ := FiniteLaw.pi (fun _ : Sym2 V =&gt; FiniteLaw.categorical ρ hρ hsum)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let J := (Fin R×V)⊕(Fin R×{p : V×V // p.1≠p.2})</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let X (j : J) (σ : Sym2 V → Fin R) : ℝ :=</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     match j with</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     | Sum.inl (a,v) =&gt; (sampledColourDegree G σ a v:ℝ)-ρ a*G.degree v</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     | Sum.inr (a,p) =&gt; (colouredTwoPathCount G σ p.1.1 p.1.2 a b:ℝ)-</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         ((G.neighborFinset p.1.1∩G.neighborFinset p.1.2).card:ℝ)*ρ a*ρ b</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let B := 2*Real.exp (-η^2*n)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hbad (j : J) : μ.probability (fun σ =&gt; η*n≤|X j σ|)≤B := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     rcases j with ⟨a,v⟩ | ⟨a,p⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     · have hh := sampledColourDegree_tail G ρ hρ hsum a v (t:=η*n) (by positivity)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       have he : -2*(η*n)^2/n = -2*η^2*n := by field_simp &lt;;&gt; ring</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       change μ.probability (fun σ =&gt; η*n≤|X (Sum.inl (a,v)) σ|)≤2*Real.exp (-2*(η*n)^2/n) at hh</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       rw [he] at hh</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       apply hh.trans</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       apply mul_le_mul_of_nonneg_left _ (by norm_num)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       apply Real.exp_le_exp.mpr</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       have hh0 : 0≤η^2*n := by positivity</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       nlinarith</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     · have hh := colouredTwoPathCount_tail G ρ hρ hsum p.1.1 p.1.2 p.2 a b (t:=η*n) (by positivity)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       have he : -(η*n)^2/n = -η^2*n := by field_simp &lt;;&gt; ring</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       change μ.probability (fun σ =&gt; η*n≤|X (Sum.inr (a,p)) σ|)≤2*Real.exp (-(η*n)^2/n) at hh</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       rw [he] at hh</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       exact hh</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hcard : (Fintype.card J:ℝ)≤2*R*n^2 := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hpair : (Fintype.card {p : V×V // p.1≠p.2}:ℝ)≤n^2 := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       have hh := Fintype.card_subtype_le (fun p : V×V =&gt; p.1≠p.2)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       simpa only [Fintype.card_prod,Nat.cast_mul,n,pow_two] using (Nat.cast_le (α:=ℝ)).mpr hh</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hR : (0:ℝ)≤R := Nat.cast_nonneg _</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hh := mul_le_mul_of_nonneg_left hpair hR</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     simp only [J,Fintype.card_sum,Fintype.card_prod,Fintype.card_fin,Nat.cast_add,Nat.cast_mul]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     change (R:ℝ)*n+R*(Fintype.card {p : V×V // p.1≠p.2}:ℝ)≤2*R*n^2</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hh2 := mul_le_mul_of_nonneg_left (show n≤n^2 by nlinarith) hR</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     nlinarith</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hbound : (∑ _ : J,B)≤4*R*n^2*Real.exp (-η^2*n) := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     simp only [Finset.sum_const,Finset.card_univ,nsmul_eq_mul]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     have hh := mul_le_mul_of_nonneg_right hcard (show 0≤B by dsimp [B];positivity)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     dsimp only [B] at *</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     nlinarith</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hh := finiteLaw_common_event_lower μ Finset.univ (fun j σ =&gt; η*n≤|X j σ|)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (fun _ =&gt; B) (fun j _ =&gt; hbad j)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   apply (sub_le_sub_left hbound 1).trans (hh.trans _)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   apply finiteLaw_probability_mono</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   intro σ hσ</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   constructor</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   · intro a v</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     exact not_le.mp (hσ (Sum.inl (a,v)) (Finset.mem_univ _))</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · intro a u v huv</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     exact not_le.mp (hσ (Sum.inr (a,⟨(u,v),huv⟩)) (Finset.mem_univ _))</span>
+<span id="L77"><a href="#L77" class="ln">  77</a> </span>
+<span id="L78"><a href="#L78" class="ln">  78</a> theorem divisibility_colour_sample (R : ℕ) (η : ℝ) (hη : 0&lt;η) :</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     ∃ N : ℕ,∀ (V : Type u) [Fintype V] [DecidableEq V],N≤Fintype.card V →</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     ∀ (G : SimpleGraph V) (ρ : Fin R → ℝ) (hρ : ∀ a,0≤ρ a) (hsum : ∑ a,ρ a=1)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       (b : Fin R),∃ σ : Sym2 V → Fin R,</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       (∀ a v,|(sampledColourDegree G σ a v:ℝ)-ρ a*G.degree v|&lt;η*Fintype.card V) ∧</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       (∀ a u v,u≠v → |(colouredTwoPathCount G σ u v a b:ℝ)-</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>         ((G.neighborFinset u∩G.neighborFinset v).card:ℝ)*ρ a*ρ b|&lt;η*Fintype.card V) := by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   obtain ⟨N,hN⟩ := eventually_stretchedExp_le_inv_pow (4*R) 2 (c:=η^2) (p:=1)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     (sq_pos_of_pos hη) (by norm_num) 1</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   refine ⟨max N 2,?_⟩</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   intro V instV instDec hn G ρ hρ hsum b</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   have hn2 : 2≤Fintype.card V := (le_max_right _ _).trans hn</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   have hn2r : (2:ℝ)≤Fintype.card V := by exact_mod_cast hn2</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   have hh := divisibility_colour_common_event G ρ hρ hsum b η hη.le (by omega)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   have hb := hN (Fintype.card V) ((le_max_left _ _).trans hn)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   simp only [Real.rpow_two,Real.rpow_one,pow_one] at hb</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   have hp : 0&lt;1-4*R*(Fintype.card V:ℝ)^2*Real.exp (-η^2*Fintype.card V) := by</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     have hi : 1/(Fintype.card V:ℝ)&lt;1 := (div_lt_one (by positivity)).mpr (by linarith)</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     linarith</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   have hprob := hp.trans_le hh</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   by_contra hnone</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hall (σ : Sym2 V → Fin R) : ¬((∀ a v,|(sampledColourDegree G σ a v:ℝ)-ρ a*G.degree v|&lt;η*Fintype.card V) ∧</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>       (∀ a u v,u≠v → |(colouredTwoPathCount G σ u v a b:ℝ)-</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>         ((G.neighborFinset u∩G.neighborFinset v).card:ℝ)*ρ a*ρ b|&lt;η*Fintype.card V)) :=</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     fun h =&gt; hnone ⟨σ,h⟩</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   simp only [FiniteLaw.probability,hall,ite_false,Finset.sum_const_zero] at hprob</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   exact (lt_irrefl 0) hprob</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a> </span>
+<span id="L106"><a href="#L106" class="ln"> 106</a> end Oberwolfach</span></pre></html>

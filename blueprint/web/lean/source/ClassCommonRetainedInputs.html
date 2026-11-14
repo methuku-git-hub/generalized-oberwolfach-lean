@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ClassCommonRetainedInputs.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ClassCommonRetainedInputs.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ClassProjectedRetention</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A common raw experiment whose class views have the prescribed collapsed</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> laws can be followed by class-specific retention on the same outcome. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem class_common_retained_inputs {I Ω:Type} [Fintype I] [DecidableEq I] [Fintype Ω]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {A B:I→Type} [∀ i,Fintype (A i)] [∀ i,Fintype (B i)]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {F:∀ i,B i→Type} [∀ i x,Fintype (F i x)]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (μ:FiniteLaw Ω) (view:∀ i,Ω→A i) (f:∀ i,A i→B i)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (raw:∀ i,FiniteLaw (A i)) (selected:∀ i,FiniteLaw (B i))</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hview:∀ i,μ.map (view i)=raw i) (hcollapse:∀ i,(raw i).map (f i)=selected i)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (ν:∀ i x,FiniteLaw (F i x)):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     let joint:=μ.sigma (fun ω=&gt;FiniteLaw.pi (fun i=&gt;ν i (f i (view i ω))));</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ i,joint.map (fun z=&gt;(⟨f i (view i z.1),z.2 i⟩:(Σ x:B i,F i x)))=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (selected i).sigma (ν i):=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   intro joint i</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hh:=class_projected_retention_map μ view f ν i</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   rw [hview i,hcollapse i] at hh</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   exact hh</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> end Oberwolfach</span></pre></html>

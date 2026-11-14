@@ -1,0 +1,88 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryLocalExtensions.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryLocalExtensions.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LocalExtensionCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PermutationConflictDegree</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The ordinary local-extension lemma. Both positive coefficients and</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> the tolerance precede the conflict radius. Only the order threshold</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> depends on that radius, and neighbourhood hypotheses include every root</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> in the ambient vertex set. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option synthInstance.maxSize 512</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 4500000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ordinary_local_extensions (r : ℕ) (hr : 3≤r) (α ρ₀ s₀ : ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hα : 0&lt;α) (hρ₀ : 0&lt;ρ₀) (hρ₀1 : ρ₀≤1) (hs₀ : 0&lt;s₀) (hs₀1 : s₀≤1) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ β ε₀ : ℝ,0&lt;β ∧ 0&lt;ε₀ ∧ ∀ d : ℕ,∃ N : ℕ,</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       ∀ (V U : Type) [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U],</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ∀ (P R : SimpleGraph V) (H : V→U→Prop) (π : Equiv.Perm V)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         (A : Finset V) (B : Finset U) (ρ s ε : ℝ),N≤A.card →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ρ₀≤ρ → s₀≤s → ε≤ε₀ →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀ v,(cycleThreshold r+α)*A.card≤((A∩P.neighborFinset v).card:ℝ)) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ X : Finset V,∀ J : Finset U,X.card≤ordinaryExtensionRootBound r → J.card≤2 →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (ρ*s)^X.card*s^J.card*((common A X (fun v=&gt;(P\permutationConflictGraph π (3*d)).neighborFinset v)).card:ℝ)-ε*A.card≤</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>           ((common (common A X (fun v=&gt;R.neighborFinset v)) J</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>             (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u))).card:ℝ)) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ X : Finset V,X.card≤r+6 →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (∀ v∈X,∀ w∈X,¬(permutationConflictGraph π (3*d)).Adj v w) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         (s^X.card-ε)*B.card≤((common B X (fun v=&gt;Finset.univ.filter (H v))).card:ℝ)) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ X : Finset V,∀ J : Finset U,X.card≤ordinaryExtensionRootBound r → J.card≤2 →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         β*A.card≤((common (common A X (fun v=&gt;R.neighborFinset v)) J</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>           (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u))).card:ℝ)) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ X : Finset V,X.card≤r+6 → (X:Set V).Pairwise (fun v w=&gt;¬PermutationClose π (3*d) v w) →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         β*B.card≤((common B X (fun v=&gt;Finset.univ.filter (H v))).card:ℝ)) := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let γ:=min α 1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let p:=ρ₀*s₀</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   let β:=min (p^6*γ/4) (s₀^(r+6)/2)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hγ : 0&lt;γ := lt_min hα (by norm_num)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hγ1 : γ≤1 := min_le_right _ _</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hγα : γ≤α := min_le_left _ _</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hp : 0&lt;p := mul_pos hρ₀ hs₀</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hps : p≤s₀ := by dsimp [p];nlinarith only [hρ₀1,hs₀.le]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hp1 : p≤1 := hps.trans hs₀1</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hβ : 0&lt;β := by dsimp [β];positivity</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   refine ⟨β,β,hβ,hβ,?_⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro d</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨N,hN⟩:=exists_nat_gt ((48:ℝ)*d/γ)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   refine ⟨N,?_⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro V U _ _ _ _ P R H π A B ρ s ε hn hρ hs hε hdeg hrows hindices</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let k:=ordinaryExtensionRootBound r</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hk:=ordinaryExtensionRootBound_range r</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hAn : (N:ℝ)≤A.card := by exact_mod_cast hn</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hscale : (48:ℝ)*d≤γ*A.card := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hh:=(div_lt_iff₀ hγ).mp (hN.trans_le hAn)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     nlinarith only [hh]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hkR : (k:ℝ)≤4 := by exact_mod_cast hk.2</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hloss : (k:ℝ)*(6*d)≤γ*A.card/2 := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hh:=mul_le_mul_of_nonneg_right hkR (by positivity : (0:ℝ)≤6*d)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     nlinarith only [hh,hscale]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hF (v : V) : ((permutationConflictGraph π (3*d)).degree v:ℝ)≤6*d := by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hh:=permutationConflictGraph_degree_le π (3*d) v</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     exact_mod_cast (by omega : (permutationConflictGraph π (3*d)).degree v≤6*d)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hq : p≤ρ*s := mul_le_mul hρ hs hs₀.le (hρ₀.le.trans hρ)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hdeg&#x27; (v : V) : (1-1/(k:ℝ)+γ)*A.card≤((A∩P.neighborFinset v).card:ℝ) := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hh:=ordinaryExtensionRootBound_threshold r hr</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     exact (mul_le_mul_of_nonneg_right (by dsimp [k];linarith only [hh,hγα])</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (Nat.cast_nonneg A.card)).trans (hdeg v)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   constructor</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · intro X J hX hJ</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have hc:=extension_relative_row_lower P R (permutationConflictGraph π (3*d)) A X J</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u)) k γ p (ρ*s) s ε (6*d)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       hk.1 hk.2 hγ hγ1 hp hp1 hq (hps.trans hs) (by positivity) hX hJ hloss</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       (hε.trans (min_le_left _ _)) (fun v _=&gt;hdeg&#x27; v) (fun v _=&gt;hF v)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       (by convert hrows X J hX hJ using 1 &lt;;&gt; congr!)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     exact (mul_le_mul_of_nonneg_right (min_le_left _ _) (Nat.cast_nonneg A.card)).trans hc</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   · intro X hX hsep</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hind : ∀ v∈X,∀ w∈X,¬(permutationConflictGraph π (3*d)).Adj v w := by</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       intro v hv w hw he</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       exact hsep hv hw he.1 he.2</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     have hc:=extension_relative_index_lower B X (fun v=&gt;Finset.univ.filter (H v)) r s₀ s ε</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       hs₀ hs₀1 hs hX (hε.trans (min_le_right _ _)) (hindices X hX hind)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     exact (mul_le_mul_of_nonneg_right (min_le_right _ _) (Nat.cast_nonneg B.card)).trans hc</span>
+<span id="L84"><a href="#L84" class="ln">  84</a> </span>
+<span id="L85"><a href="#L85" class="ln">  85</a> end Oberwolfach</span></pre></html>

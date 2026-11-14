@@ -1,0 +1,442 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TypedDegreeDemandArithmetic.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TypedDegreeDemandArithmetic.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResidueDegreeDemands</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SparseCorrectionMatrices</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Integer degree sequences for the fixed-type sparse correction.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> All signed imbalances are retained, including the hub imbalance. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1400000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem integer_average_abs_le {I : Type*} [Fintype I]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hn : 0&lt;Fintype.card I) (f : I → ℤ) {e : ℝ}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hf : ∀ i,|(f i : ℝ)|≤e) :</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     |(∑ i,(f i : ℝ))/Fintype.card I|≤e := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   exact abs_le.mpr (finite_average_interval hn (fun i=&gt;(f i : ℝ)) (fun i=&gt;abs_le.mp (hf i)))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem signed_total_natural_demands {I : Type*} [Fintype I]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hn : 0&lt;Fintype.card I) (T : ℤ) (hT : 0≤T) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ f : I → ℕ,(∑ i,(f i : ℤ))=T ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ∀ i,|(f i : ℝ)-(T : ℝ)/Fintype.card I|≤1 := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   obtain ⟨f,hf,hb⟩ := near_uniform_integer_demands hn T.toNat</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have ht : (T.toNat : ℤ)=T := Int.toNat_of_nonneg hT</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   refine ⟨f,?_,?_⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · exact (by exact_mod_cast hf : (∑ i,(f i : ℤ))=(T.toNat : ℤ)).trans ht</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   · intro i</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     have htR : (T.toNat : ℝ)=(T : ℝ) := by exact_mod_cast ht</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     simpa only [htR] using hb i</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> </span>
+<span id="L31"><a href="#L31" class="ln">  31</a> theorem nat_demand_of_real_nonneg (a : ℤ) (ha : (0:ℝ)≤a) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (a.toNat : ℤ)=a := Int.toNat_of_nonneg (by exact_mod_cast ha)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> /-- For the four deletion matrices, the two rim demand pairs have equal</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> integer totals and remove exactly the four supplied imbalances. -/</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> theorem typed_degree_demands {V U : Type*} [Fintype V] [Fintype U]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hn : 0&lt;Fintype.card V) (hs : 0&lt;Fintype.card U) (hsn : Fintype.card U≤Fintype.card V)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (base q : ℕ) (hq : 1≤q) (bp bm bk : V → ℤ) (bw : U → ℤ)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (htot : ∑ v,bp v=∑ v,bm v) {e : ℝ} (he : 0≤e)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hbp : ∀ v,|(bp v : ℝ)|≤e) (hbm : ∀ v,|(bm v : ℝ)|≤e)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hbk : ∀ v,|(bk v : ℝ)|≤e) (hbw : ∀ u,|(bw u : ℝ)|≤e)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hmargin : 3+4*e≤(Fintype.card U : ℝ)*base/Fintype.card V) :</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∃ (a h ko ki ro ri : V → ℕ) (hu : U → ℕ),</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∑ v,a v=Fintype.card U*base) ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (∑ v,h v=∑ u,hu u) ∧ (∑ v,ko v=∑ v,ki v) ∧ (∑ v,ro v=∑ v,ri v) ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (∀ v,(ko v : ℤ)+ro v-(a v+h v : ℕ)=bp v) ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (∀ v,(ki v : ℤ)+ri v-(a v+h v : ℕ)=bm v) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∀ v,(ki v : ℤ)-a v=bk v) ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀ u,(hu u : ℤ)-q*base=bw u) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (∀ v,|(a v : ℝ)-(Fintype.card U : ℝ)*base/Fintype.card V|≤1) ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (∀ v,|(h v : ℝ)-(∑ u,(hu u : ℝ))/Fintype.card V|≤1) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (∀ v,|(ko v : ℝ)-(∑ x,(ki x : ℝ))/Fintype.card V|≤1) ∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (∀ v,|(ki v : ℝ)-(∑ x,(ki x : ℝ))/Fintype.card V|≤1+2*e) ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (∀ v,|(ro v : ℝ)-(∑ x,(ri x : ℝ))/Fintype.card V|≤3+2*e) ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (∀ v,|(ri v : ℝ)-(∑ x,(ri x : ℝ))/Fintype.card V|≤1+4*e) := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   classical</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   let n : ℝ := Fintype.card V</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   let s : ℝ := Fintype.card U</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   let T : ℕ := Fintype.card U*base</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   let μ : ℝ := s*base/n</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hnR : 0&lt;n := by dsimp [n];exact_mod_cast hn</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hsR : 0&lt;s := by dsimp [s];exact_mod_cast hs</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hsnR : s≤n := by dsimp [s,n];exact_mod_cast hsn</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hqR : (1:ℝ)≤q := by exact_mod_cast hq</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hμ : 3+4*e≤μ := hmargin</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hμnon : 0≤μ := by positivity</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hμbase : μ≤base := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     apply (div_le_iff₀ hnR).mpr</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     nlinarith [mul_le_mul_of_nonneg_right hsnR (Nat.cast_nonneg base : (0:ℝ)≤base)]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hbase : e≤base := by linarith</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨a,ha,haerr⟩ := near_uniform_integer_demands (V:=V) hn T</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have haR : (∑ v,(a v : ℝ))=s*base := by dsimp [s];exact_mod_cast ha</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hae (v : V) : |(a v : ℝ)-μ|≤1 := by simpa only [T,Nat.cast_mul] using haerr v</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   let hu (u : U) := ((q:ℤ)*base+bw u).toNat</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hhuZ (u : U) : (hu u : ℤ)=(q:ℤ)*base+bw u := by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     apply nat_demand_of_real_nonneg</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     push_cast</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hb := (abs_le.mp (hbw u)).1</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     nlinarith [mul_nonneg (show (0:ℝ)≤q-1 by linarith) (Nat.cast_nonneg base : (0:ℝ)≤base)]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   have hhuR (u : U) : (hu u : ℝ)=(q:ℝ)*base+bw u := by exact_mod_cast hhuZ u</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   let H : ℕ := ∑ u,hu u</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   obtain ⟨h,hh,hherr⟩ := near_uniform_integer_demands (V:=V) hn H</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   let BK : ℝ := (∑ v,(bk v : ℝ))/n</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   let BM : ℝ := (∑ v,(bm v : ℝ))/n</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   let BW : ℝ := (∑ u,(bw u : ℝ))/n</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have hBK : |BK|≤e := integer_average_abs_le hn bk hbk</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hBM : |BM|≤e := integer_average_abs_le hn bm hbm</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hBW : |BW|≤e := by</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     have hb := integer_average_abs_le hs bw hbw</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     rw [abs_le] at hb ⊢</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     have hblo := (le_div_iff₀ hsR).mp hb.1</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     have hbhi := (div_le_iff₀ hsR).mp hb.2</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     constructor</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     · apply (le_div_iff₀ hnR).mpr</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>       have := mul_le_mul_of_nonneg_left hsnR he</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       nlinarith</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     · apply (div_le_iff₀ hnR).mpr</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>       have := mul_le_mul_of_nonneg_left hsnR he</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>       nlinarith</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   have hHR : (H : ℝ)=s*((q:ℝ)*base)+(∑ u,(bw u : ℝ)) := by</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     simp only [H,Nat.cast_sum,hhuR,Finset.sum_add_distrib,Finset.sum_const,</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       Finset.card_univ,nsmul_eq_mul]</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     rfl</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   have hHmean : (H : ℝ)/n=q*μ+BW := by rw [hHR];dsimp [μ,BW];ring</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have hhe (v : V) : |(h v : ℝ)-(q*μ+BW)|≤1 := by rw [← hHmean];exact hherr v</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>   let ki (v : V) := ((a v:ℤ)+bk v).toNat</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>   have hkiZ (v : V) : (ki v : ℤ)=(a v : ℤ)+bk v := by</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     apply nat_demand_of_real_nonneg</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     push_cast</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     have ha&#x27; := abs_le.mp (hae v)</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     have hb&#x27; := abs_le.mp (hbk v)</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     linarith [ha&#x27;.1,hb&#x27;.1]</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>   have hkiR (v : V) : (ki v : ℝ)=(a v : ℝ)+bk v := by exact_mod_cast hkiZ v</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   let TK : ℕ := ∑ v,ki v</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>   obtain ⟨ko,hko,hkoerr⟩ := near_uniform_integer_demands (V:=V) hn TK</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>   have hTKmean : (TK : ℝ)/n=μ+BK := by</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     simp only [TK,Nat.cast_sum,hkiR,Finset.sum_add_distrib,haR]</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     dsimp [μ,BK]</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     ring</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>   have hkoe (v : V) : |(ko v : ℝ)-(μ+BK)|≤1 := by rw [← hTKmean];exact hkoerr v</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>   let ri (v : V) := ((h v : ℤ)+bm v-bk v).toNat</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>   let ro (v : V) := ((h v : ℤ)+a v+bp v-ko v).toNat</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>   have hqμ : μ≤q*μ := by nlinarith [mul_nonneg (show (0:ℝ)≤q-1 by linarith) hμnon]</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>   have hriZ (v : V) : (ri v : ℤ)=(h v : ℤ)+bm v-bk v := by</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     apply nat_demand_of_real_nonneg</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     push_cast</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     have h1 := abs_le.mp (hhe v)</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     have h2 := abs_le.mp (hbm v)</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     have h3 := abs_le.mp (hbk v)</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     have h4 := abs_le.mp hBW</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     linarith [h1.1,h2.1,h3.2,h4.1]</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>   have hroZ (v : V) : (ro v : ℤ)=(h v : ℤ)+a v+bp v-ko v := by</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     apply nat_demand_of_real_nonneg</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     push_cast</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     have h1 := abs_le.mp (hhe v)</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     have h2 := abs_le.mp (hae v)</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     have h3 := abs_le.mp (hbp v)</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     have h4 := abs_le.mp (hkoe v)</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>     have h5 := abs_le.mp hBW</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>     have h6 := abs_le.mp hBK</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     linarith [h1.1,h2.1,h3.1,h4.2,h5.1,h6.2]</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>   have hriR (v : V) : (ri v : ℝ)=(h v : ℝ)+bm v-bk v := by exact_mod_cast hriZ v</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>   have hroR (v : V) : (ro v : ℝ)=(h v : ℝ)+a v+bp v-ko v := by exact_mod_cast hroZ v</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>   have hsumR : (∑ v,ro v)=(∑ v,ri v) := by</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>     have hkoZ : (∑ v,(ko v : ℤ))=∑ v,(ki v : ℤ) := by exact_mod_cast hko</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     have hz : (∑ v,(ro v : ℤ))=(∑ v,(ri v : ℤ)) := by</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>       simp only [hroZ,hriZ,Finset.sum_sub_distrib,Finset.sum_add_distrib,htot]</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>       have hk : (∑ v,(ko v : ℤ))=(∑ v,(a v : ℤ))+(∑ v,bk v) := by</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>         rw [hkoZ];simp only [hkiZ,Finset.sum_add_distrib]</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>       omega</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>     exact_mod_cast hz</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>   have hT0mean : (∑ v,(ri v : ℝ))/n=q*μ+BW+BM-BK := by</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>     simp only [hriR,Finset.sum_sub_distrib,Finset.sum_add_distrib]</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>     have hhR : (∑ v,(h v : ℝ))=H := by exact_mod_cast hh</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>     rw [hhR]</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>     calc</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>       _ = (H : ℝ)/n+(∑ v,(bm v : ℝ))/n-(∑ v,(bk v : ℝ))/n := by ring</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>       _ = _ := by rw [hHmean]</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>   refine ⟨a,h,ko,ki,ro,ri,hu,ha,hh,hko,hsumR,?_,?_,?_,?_,hae,(by simpa only [H,Nat.cast_sum] using hherr),(by simpa only [TK,Nat.cast_sum] using hkoerr),?_,?_,?_⟩</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>   · intro v; rw [hroZ];push_cast;ring</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>   · intro v; rw [hkiZ,hriZ];push_cast;ring</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>   · intro v;rw [hkiZ];ring</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>   · intro u;rw [hhuZ];ring</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>   · intro v</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>     rw [← Nat.cast_sum,← show TK=∑ x,ki x from rfl,hTKmean,hkiR,abs_le]</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>     have h1 := abs_le.mp (hae v)</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>     have h2 := abs_le.mp (hbk v)</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>     have h3 := abs_le.mp hBK</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>     constructor &lt;;&gt; linarith [h1.1,h1.2,h2.1,h2.2,h3.1,h3.2]</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>   · intro v</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>     rw [hT0mean,hroR,abs_le]</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>     have h1 := abs_le.mp (hhe v)</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>     have h2 := abs_le.mp (hae v)</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a>     have h3 := abs_le.mp (hbp v)</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>     have h4 := abs_le.mp (hkoe v)</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>     have h5 := abs_le.mp hBM</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>     constructor &lt;;&gt; linarith [h1.1,h1.2,h2.1,h2.2,h3.1,h3.2,h4.1,h4.2,h5.1,h5.2]</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>   · intro v</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>     rw [hT0mean,hriR,abs_le]</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>     have h1 := abs_le.mp (hhe v)</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>     have h2 := abs_le.mp (hbm v)</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>     have h3 := abs_le.mp (hbk v)</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>     have h4 := abs_le.mp hBM</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a>     have h5 := abs_le.mp hBK</span>
+<span id="L185"><a href="#L185" class="ln"> 185</a>     constructor &lt;;&gt; linarith [h1.1,h1.2,h2.1,h2.2,h3.1,h3.2,h4.1,h4.2,h5.1,h5.2]</span>
+<span id="L186"><a href="#L186" class="ln"> 186</a> </span>
+<span id="L187"><a href="#L187" class="ln"> 187</a> </span>
+<span id="L188"><a href="#L188" class="ln"> 188</a> /-- A centered bound implies the upper demand hypothesis of the proved</span>
+<span id="L189"><a href="#L189" class="ln"> 189</a> integral cut theorem; the common lower mean is kept explicit. -/</span>
+<span id="L190"><a href="#L190" class="ln"> 190</a> theorem near_uniform_matrix_degrees_centered {X Y : Type*}</span>
+<span id="L191"><a href="#L191" class="ln"> 191</a>     [Fintype X] [Fintype Y] [DecidableEq X] [DecidableEq Y]</span>
+<span id="L192"><a href="#L192" class="ln"> 192</a>     (L : X → Y → ℕ) (f : X → ℕ) (g : Y → ℕ) {δ h E μ : ℝ}</span>
+<span id="L193"><a href="#L193" class="ln"> 193</a>     (hn : 0&lt;Fintype.card X) (hs : 0&lt;Fintype.card Y)</span>
+<span id="L194"><a href="#L194" class="ln"> 194</a>     (hδ : 0≤δ) (hδsmall : δ&lt;1/4) (htot : ∑ x,f x=∑ y,g y)</span>
+<span id="L195"><a href="#L195" class="ln"> 195</a>     (hcap : (∑ x,(f x : ℝ))≤h*Fintype.card X*Fintype.card Y/2)</span>
+<span id="L196"><a href="#L196" class="ln"> 196</a>     (hμf : μ≤(∑ x,(f x : ℝ))/Fintype.card X)</span>
+<span id="L197"><a href="#L197" class="ln"> 197</a>     (hμg : μ≤(∑ y,(g y : ℝ))/Fintype.card Y)</span>
+<span id="L198"><a href="#L198" class="ln"> 198</a>     (hE : E≤δ*μ)</span>
+<span id="L199"><a href="#L199" class="ln"> 199</a>     (hf : ∀ x,|(f x : ℝ)-(∑ z,(f z : ℝ))/Fintype.card X|≤E)</span>
+<span id="L200"><a href="#L200" class="ln"> 200</a>     (hg : ∀ y,|(g y : ℝ)-(∑ z,(g z : ℝ))/Fintype.card Y|≤E)</span>
+<span id="L201"><a href="#L201" class="ln"> 201</a>     (hcut : BipartiteLargeCut L δ h) :</span>
+<span id="L202"><a href="#L202" class="ln"> 202</a>     ∃ J : X → Y → ℕ,(∀ x y,J x y≤L x y) ∧</span>
+<span id="L203"><a href="#L203" class="ln"> 203</a>       (∀ x,∑ y,J x y=f x) ∧ (∀ y,∑ x,J x y=g y) := by</span>
+<span id="L204"><a href="#L204" class="ln"> 204</a>   have ht : (∑ x,(f x : ℝ))=∑ y,(g y : ℝ) := by exact_mod_cast htot</span>
+<span id="L205"><a href="#L205" class="ln"> 205</a>   apply near_uniform_matrix_degrees L f g hn hs hδ hδsmall</span>
+<span id="L206"><a href="#L206" class="ln"> 206</a>     (Finset.sum_nonneg (fun x _=&gt;Nat.cast_nonneg _)) hcap rfl ht.symm</span>
+<span id="L207"><a href="#L207" class="ln"> 207</a>   · intro x</span>
+<span id="L208"><a href="#L208" class="ln"> 208</a>     have hh := (abs_le.mp (hf x)).2</span>
+<span id="L209"><a href="#L209" class="ln"> 209</a>     have hm := mul_le_mul_of_nonneg_left hμf hδ</span>
+<span id="L210"><a href="#L210" class="ln"> 210</a>     calc</span>
+<span id="L211"><a href="#L211" class="ln"> 211</a>       _ ≤ (1+δ)*((∑ z,(f z : ℝ))/Fintype.card X) := by linarith</span>
+<span id="L212"><a href="#L212" class="ln"> 212</a>       _ = _ := by ring</span>
+<span id="L213"><a href="#L213" class="ln"> 213</a>   · intro y</span>
+<span id="L214"><a href="#L214" class="ln"> 214</a>     have hh := (abs_le.mp (hg y)).2</span>
+<span id="L215"><a href="#L215" class="ln"> 215</a>     have hm := mul_le_mul_of_nonneg_left hμg hδ</span>
+<span id="L216"><a href="#L216" class="ln"> 216</a>     rw [← ht] at hh hm</span>
+<span id="L217"><a href="#L217" class="ln"> 217</a>     calc</span>
+<span id="L218"><a href="#L218" class="ln"> 218</a>       _ ≤ (1+δ)*((∑ z,(f z : ℝ))/Fintype.card Y) := by linarith</span>
+<span id="L219"><a href="#L219" class="ln"> 219</a>       _ = _ := by ring</span>
+<span id="L220"><a href="#L220" class="ln"> 220</a>   · exact hcut</span>
+<span id="L221"><a href="#L221" class="ln"> 221</a> </span>
+<span id="L222"><a href="#L222" class="ln"> 222</a> /-- Four actual integral deletion matrices. No graph factor or correction</span>
+<span id="L223"><a href="#L223" class="ln"> 223</a> operator is assumed: each matrix is obtained from the normalized cut theorem. -/</span>
+<span id="L224"><a href="#L224" class="ln"> 224</a> theorem typed_integer_correction_matrices {V U : Type*}</span>
+<span id="L225"><a href="#L225" class="ln"> 225</a>     [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L226"><a href="#L226" class="ln"> 226</a>     (A₀ Aₖ : V → V → ℕ) (H₀ Hₖ : V → U → ℕ)</span>
+<span id="L227"><a href="#L227" class="ln"> 227</a>     (hn : 0&lt;Fintype.card V) (hs : 0&lt;Fintype.card U) (hsn : Fintype.card U≤Fintype.card V)</span>
+<span id="L228"><a href="#L228" class="ln"> 228</a>     (base q : ℕ) (hq : 1≤q) (bp bm bk : V → ℤ) (bw : U → ℤ)</span>
+<span id="L229"><a href="#L229" class="ln"> 229</a>     (htot : ∑ v,bp v=∑ v,bm v) {e δ hc : ℝ} (he : 0≤e)</span>
+<span id="L230"><a href="#L230" class="ln"> 230</a>     (hδ : 0≤δ) (hδsmall : δ&lt;1/4)</span>
+<span id="L231"><a href="#L231" class="ln"> 231</a>     (hbp : ∀ v,|(bp v : ℝ)|≤e) (hbm : ∀ v,|(bm v : ℝ)|≤e)</span>
+<span id="L232"><a href="#L232" class="ln"> 232</a>     (hbk : ∀ v,|(bk v : ℝ)|≤e) (hbw : ∀ u,|(bw u : ℝ)|≤e)</span>
+<span id="L233"><a href="#L233" class="ln"> 233</a>     (hmargin : 3+4*e≤δ*((Fintype.card U : ℝ)*base/Fintype.card V-3*e))</span>
+<span id="L234"><a href="#L234" class="ln"> 234</a>     (hcap : (q:ℝ)*base+3*e≤hc*Fintype.card V/2)</span>
+<span id="L235"><a href="#L235" class="ln"> 235</a>     (hcut0 : BipartiteLargeCut A₀ δ hc) (hcutK : BipartiteLargeCut Aₖ δ hc)</span>
+<span id="L236"><a href="#L236" class="ln"> 236</a>     (hcutH0 : BipartiteLargeCut H₀ δ hc) (hcutHK : BipartiteLargeCut Hₖ δ hc) :</span>
+<span id="L237"><a href="#L237" class="ln"> 237</a>     ∃ (J₀ Jₖ : V → V → ℕ) (L₀ Lₖ : V → U → ℕ),</span>
+<span id="L238"><a href="#L238" class="ln"> 238</a>       (∀ x y,J₀ x y≤A₀ x y) ∧ (∀ x y,Jₖ x y≤Aₖ x y) ∧</span>
+<span id="L239"><a href="#L239" class="ln"> 239</a>       (∀ v u,L₀ v u≤H₀ v u) ∧ (∀ v u,Lₖ v u≤Hₖ v u) ∧</span>
+<span id="L240"><a href="#L240" class="ln"> 240</a>       (∀ v,(∑ x,(J₀ v x : ℤ))+(∑ x,(Jₖ v x : ℤ))-</span>
+<span id="L241"><a href="#L241" class="ln"> 241</a>         (∑ u,(L₀ v u : ℤ))-(∑ u,(Lₖ v u : ℤ))=bp v) ∧</span>
+<span id="L242"><a href="#L242" class="ln"> 242</a>       (∀ v,(∑ x,(J₀ x v : ℤ))+(∑ x,(Jₖ x v : ℤ))-</span>
+<span id="L243"><a href="#L243" class="ln"> 243</a>         (∑ u,(L₀ v u : ℤ))-(∑ u,(Lₖ v u : ℤ))=bm v) ∧</span>
+<span id="L244"><a href="#L244" class="ln"> 244</a>       (∀ v,(∑ x,(Jₖ x v : ℤ))-(∑ u,(Lₖ v u : ℤ))=bk v) ∧</span>
+<span id="L245"><a href="#L245" class="ln"> 245</a>       (∀ u,(∑ v,(L₀ v u : ℤ))-(q:ℤ)*(∑ v,(Lₖ v u : ℤ))=bw u) ∧</span>
+<span id="L246"><a href="#L246" class="ln"> 246</a>       (∀ v,(∑ x,(J₀ v x : ℝ))≤(q+2:ℝ)*base ∧</span>
+<span id="L247"><a href="#L247" class="ln"> 247</a>         (∑ x,(J₀ x v : ℝ))≤(q+2:ℝ)*base ∧</span>
+<span id="L248"><a href="#L248" class="ln"> 248</a>         (∑ x,(Jₖ v x : ℝ))≤(q+2:ℝ)*base ∧</span>
+<span id="L249"><a href="#L249" class="ln"> 249</a>         (∑ x,(Jₖ x v : ℝ))≤(q+2:ℝ)*base ∧</span>
+<span id="L250"><a href="#L250" class="ln"> 250</a>         (∑ u,(L₀ v u : ℝ))≤(q+2:ℝ)*base ∧</span>
+<span id="L251"><a href="#L251" class="ln"> 251</a>         (∑ u,(Lₖ v u : ℝ))≤(q+2:ℝ)*base) ∧</span>
+<span id="L252"><a href="#L252" class="ln"> 252</a>       (∀ u,(∑ v,(L₀ v u : ℝ))≤(q+2:ℝ)*base ∧</span>
+<span id="L253"><a href="#L253" class="ln"> 253</a>         (∑ v,(Lₖ v u : ℝ))≤(q+2:ℝ)*base) := by</span>
+<span id="L254"><a href="#L254" class="ln"> 254</a>   classical</span>
+<span id="L255"><a href="#L255" class="ln"> 255</a>   let n : ℝ := Fintype.card V</span>
+<span id="L256"><a href="#L256" class="ln"> 256</a>   let s : ℝ := Fintype.card U</span>
+<span id="L257"><a href="#L257" class="ln"> 257</a>   let μ : ℝ := s*base/n</span>
+<span id="L258"><a href="#L258" class="ln"> 258</a>   have hnR : 0&lt;n := by dsimp [n];exact_mod_cast hn</span>
+<span id="L259"><a href="#L259" class="ln"> 259</a>   have hsR : 0&lt;s := by dsimp [s];exact_mod_cast hs</span>
+<span id="L260"><a href="#L260" class="ln"> 260</a>   have hsnR : s≤n := by dsimp [s,n];exact_mod_cast hsn</span>
+<span id="L261"><a href="#L261" class="ln"> 261</a>   have hqR : (1:ℝ)≤q := by exact_mod_cast hq</span>
+<span id="L262"><a href="#L262" class="ln"> 262</a>   have hμnon : 0≤μ := by positivity</span>
+<span id="L263"><a href="#L263" class="ln"> 263</a>   have hμbase : μ≤base := by</span>
+<span id="L264"><a href="#L264" class="ln"> 264</a>     apply (div_le_iff₀ hnR).mpr</span>
+<span id="L265"><a href="#L265" class="ln"> 265</a>     nlinarith [mul_le_mul_of_nonneg_right hsnR (Nat.cast_nonneg base : (0:ℝ)≤base)]</span>
+<span id="L266"><a href="#L266" class="ln"> 266</a>   have hμpos : 0&lt;μ-3*e := by</span>
+<span id="L267"><a href="#L267" class="ln"> 267</a>     by_contra hh</span>
+<span id="L268"><a href="#L268" class="ln"> 268</a>     have hp := mul_nonpos_of_nonneg_of_nonpos hδ (le_of_not_gt hh)</span>
+<span id="L269"><a href="#L269" class="ln"> 269</a>     linarith</span>
+<span id="L270"><a href="#L270" class="ln"> 270</a>   have hplain : 3+4*e≤μ := by nlinarith</span>
+<span id="L271"><a href="#L271" class="ln"> 271</a>   obtain ⟨a,h,ko,ki,ro,ri,hu,ha,hh,hko,hro,hop,hip,hik,hiu,hae,hhe,hkoe,hkie,hroe,hrie⟩ :=</span>
+<span id="L272"><a href="#L272" class="ln"> 272</a>     typed_degree_demands hn hs hsn base q hq bp bm bk bw htot he hbp hbm hbk hbw hplain</span>
+<span id="L273"><a href="#L273" class="ln"> 273</a>   let BK : ℝ := (∑ v,(bk v : ℝ))/n</span>
+<span id="L274"><a href="#L274" class="ln"> 274</a>   let BM : ℝ := (∑ v,(bm v : ℝ))/n</span>
+<span id="L275"><a href="#L275" class="ln"> 275</a>   let BW : ℝ := (∑ u,(bw u : ℝ))/n</span>
+<span id="L276"><a href="#L276" class="ln"> 276</a>   let BWu : ℝ := (∑ u,(bw u : ℝ))/s</span>
+<span id="L277"><a href="#L277" class="ln"> 277</a>   have hBK : |BK|≤e := integer_average_abs_le hn bk hbk</span>
+<span id="L278"><a href="#L278" class="ln"> 278</a>   have hBM : |BM|≤e := integer_average_abs_le hn bm hbm</span>
+<span id="L279"><a href="#L279" class="ln"> 279</a>   have hBWu : |BWu|≤e := integer_average_abs_le hs bw hbw</span>
+<span id="L280"><a href="#L280" class="ln"> 280</a>   have hBW : |BW|≤e := by</span>
+<span id="L281"><a href="#L281" class="ln"> 281</a>     rw [abs_le] at hBWu ⊢</span>
+<span id="L282"><a href="#L282" class="ln"> 282</a>     have hblo := (le_div_iff₀ hsR).mp hBWu.1</span>
+<span id="L283"><a href="#L283" class="ln"> 283</a>     have hbhi := (div_le_iff₀ hsR).mp hBWu.2</span>
+<span id="L284"><a href="#L284" class="ln"> 284</a>     constructor</span>
+<span id="L285"><a href="#L285" class="ln"> 285</a>     · apply (le_div_iff₀ hnR).mpr</span>
+<span id="L286"><a href="#L286" class="ln"> 286</a>       nlinarith [mul_le_mul_of_nonneg_left hsnR he]</span>
+<span id="L287"><a href="#L287" class="ln"> 287</a>     · apply (div_le_iff₀ hnR).mpr</span>
+<span id="L288"><a href="#L288" class="ln"> 288</a>       nlinarith [mul_le_mul_of_nonneg_left hsnR he]</span>
+<span id="L289"><a href="#L289" class="ln"> 289</a>   have haR : (∑ v,(a v : ℝ))=s*base := by dsimp [s];exact_mod_cast ha</span>
+<span id="L290"><a href="#L290" class="ln"> 290</a>   have hhR : (∑ v,(h v : ℝ))=∑ u,(hu u : ℝ) := by exact_mod_cast hh</span>
+<span id="L291"><a href="#L291" class="ln"> 291</a>   have hkoR : (∑ v,(ko v : ℝ))=∑ v,(ki v : ℝ) := by exact_mod_cast hko</span>
+<span id="L292"><a href="#L292" class="ln"> 292</a>   have hroR : (∑ v,(ro v : ℝ))=∑ v,(ri v : ℝ) := by exact_mod_cast hro</span>
+<span id="L293"><a href="#L293" class="ln"> 293</a>   have hhuR (u : U) : (hu u : ℝ)=(q:ℝ)*base+bw u := by</span>
+<span id="L294"><a href="#L294" class="ln"> 294</a>     have hh : (hu u : ℝ)-(q:ℝ)*base=bw u := by exact_mod_cast hiu u</span>
+<span id="L295"><a href="#L295" class="ln"> 295</a>     linarith</span>
+<span id="L296"><a href="#L296" class="ln"> 296</a>   have hkiR (v : V) : (ki v : ℝ)=(a v : ℝ)+bk v := by</span>
+<span id="L297"><a href="#L297" class="ln"> 297</a>     have hh : (ki v : ℝ)-a v=bk v := by exact_mod_cast hik v</span>
+<span id="L298"><a href="#L298" class="ln"> 298</a>     linarith</span>
+<span id="L299"><a href="#L299" class="ln"> 299</a>   have hriR (v : V) : (ri v : ℝ)=(h v : ℝ)+bm v-bk v := by</span>
+<span id="L300"><a href="#L300" class="ln"> 300</a>     have hh : (ki v : ℝ)+ri v-((a v : ℝ)+h v)=bm v := by exact_mod_cast hip v</span>
+<span id="L301"><a href="#L301" class="ln"> 301</a>     rw [hkiR] at hh</span>
+<span id="L302"><a href="#L302" class="ln"> 302</a>     linarith</span>
+<span id="L303"><a href="#L303" class="ln"> 303</a>   have hsumhu : (∑ u,(hu u : ℝ))=s*((q:ℝ)*base)+(∑ u,(bw u : ℝ)) := by</span>
+<span id="L304"><a href="#L304" class="ln"> 304</a>     simp only [hhuR,Finset.sum_add_distrib,Finset.sum_const,Finset.card_univ,nsmul_eq_mul]</span>
+<span id="L305"><a href="#L305" class="ln"> 305</a>     rfl</span>
+<span id="L306"><a href="#L306" class="ln"> 306</a>   have hHmean : (∑ v,(h v : ℝ))/n=q*μ+BW := by rw [hhR,hsumhu];dsimp [μ,BW];ring</span>
+<span id="L307"><a href="#L307" class="ln"> 307</a>   have hHumean : (∑ u,(hu u : ℝ))/s=q*base+BWu := by</span>
+<span id="L308"><a href="#L308" class="ln"> 308</a>     rw [hsumhu]</span>
+<span id="L309"><a href="#L309" class="ln"> 309</a>     dsimp [BWu]</span>
+<span id="L310"><a href="#L310" class="ln"> 310</a>     field_simp</span>
+<span id="L311"><a href="#L311" class="ln"> 311</a>   have hKmean : (∑ v,(ki v : ℝ))/n=μ+BK := by</span>
+<span id="L312"><a href="#L312" class="ln"> 312</a>     simp only [hkiR,Finset.sum_add_distrib,haR]</span>
+<span id="L313"><a href="#L313" class="ln"> 313</a>     dsimp [μ,BK];ring</span>
+<span id="L314"><a href="#L314" class="ln"> 314</a>   have hRmean : (∑ v,(ri v : ℝ))/n=q*μ+BW+BM-BK := by</span>
+<span id="L315"><a href="#L315" class="ln"> 315</a>     simp only [hriR,Finset.sum_sub_distrib,Finset.sum_add_distrib]</span>
+<span id="L316"><a href="#L316" class="ln"> 316</a>     calc</span>
+<span id="L317"><a href="#L317" class="ln"> 317</a>       _ = (∑ v,(h v : ℝ))/n+(∑ v,(bm v : ℝ))/n-(∑ v,(bk v : ℝ))/n := by ring</span>
+<span id="L318"><a href="#L318" class="ln"> 318</a>       _ = _ := by rw [hHmean]</span>
+<span id="L319"><a href="#L319" class="ln"> 319</a>   have hqμ : μ≤q*μ := by nlinarith [mul_nonneg (show (0:ℝ)≤q-1 by linarith) hμnon]</span>
+<span id="L320"><a href="#L320" class="ln"> 320</a>   have hqbase : (base:ℝ)≤q*base := by nlinarith [mul_nonneg (show (0:ℝ)≤q-1 by linarith) (Nat.cast_nonneg base : (0:ℝ)≤base)]</span>
+<span id="L321"><a href="#L321" class="ln"> 321</a>   have hHlo : μ-3*e≤(∑ v,(h v : ℝ))/n := by rw [hHmean];linarith [(abs_le.mp hBW).1]</span>
+<span id="L322"><a href="#L322" class="ln"> 322</a>   have hHulo : μ-3*e≤(∑ u,(hu u : ℝ))/s := by rw [hHumean];linarith [(abs_le.mp hBWu).1]</span>
+<span id="L323"><a href="#L323" class="ln"> 323</a>   have hKlo : μ-3*e≤(∑ v,(ki v : ℝ))/n := by rw [hKmean];linarith [(abs_le.mp hBK).1]</span>
+<span id="L324"><a href="#L324" class="ln"> 324</a>   have hRlo : μ-3*e≤(∑ v,(ri v : ℝ))/n := by</span>
+<span id="L325"><a href="#L325" class="ln"> 325</a>     rw [hRmean];linarith [(abs_le.mp hBW).1,(abs_le.mp hBM).1,(abs_le.mp hBK).2]</span>
+<span id="L326"><a href="#L326" class="ln"> 326</a>   have hHcap : (∑ v,(h v : ℝ))≤hc*n*s/2 := by</span>
+<span id="L327"><a href="#L327" class="ln"> 327</a>     have hh&#x27; : (∑ u,(hu u : ℝ))/s≤hc*n/2 := by rw [hHumean];linarith [(abs_le.mp hBWu).2]</span>
+<span id="L328"><a href="#L328" class="ln"> 328</a>     rw [hhR]</span>
+<span id="L329"><a href="#L329" class="ln"> 329</a>     nlinarith [(div_le_iff₀ hsR).mp hh&#x27;]</span>
+<span id="L330"><a href="#L330" class="ln"> 330</a>   have hKcap : (∑ v,(ko v : ℝ))≤hc*n*n/2 := by</span>
+<span id="L331"><a href="#L331" class="ln"> 331</a>     rw [hkoR]</span>
+<span id="L332"><a href="#L332" class="ln"> 332</a>     have hh&#x27; : (∑ v,(ki v : ℝ))/n≤hc*n/2 := by rw [hKmean];linarith [(abs_le.mp hBK).2]</span>
+<span id="L333"><a href="#L333" class="ln"> 333</a>     nlinarith [(div_le_iff₀ hnR).mp hh&#x27;]</span>
+<span id="L334"><a href="#L334" class="ln"> 334</a>   have hRcap : (∑ v,(ro v : ℝ))≤hc*n*n/2 := by</span>
+<span id="L335"><a href="#L335" class="ln"> 335</a>     rw [hroR]</span>
+<span id="L336"><a href="#L336" class="ln"> 336</a>     have hm := mul_le_mul_of_nonneg_left hμbase (Nat.cast_nonneg q : (0:ℝ)≤q)</span>
+<span id="L337"><a href="#L337" class="ln"> 337</a>     have hh&#x27; : (∑ v,(ri v : ℝ))/n≤hc*n/2 := by</span>
+<span id="L338"><a href="#L338" class="ln"> 338</a>       rw [hRmean];linarith [(abs_le.mp hBW).2,(abs_le.mp hBM).2,(abs_le.mp hBK).1]</span>
+<span id="L339"><a href="#L339" class="ln"> 339</a>     nlinarith [(div_le_iff₀ hnR).mp hh&#x27;]</span>
+<span id="L340"><a href="#L340" class="ln"> 340</a>   have hHKcap : (∑ v,(a v : ℝ))≤hc*n*s/2 := by</span>
+<span id="L341"><a href="#L341" class="ln"> 341</a>     rw [haR]</span>
+<span id="L342"><a href="#L342" class="ln"> 342</a>     have hb : (base:ℝ)≤hc*n/2 := by linarith</span>
+<span id="L343"><a href="#L343" class="ln"> 343</a>     nlinarith [mul_le_mul_of_nonneg_left hb hsR.le]</span>
+<span id="L344"><a href="#L344" class="ln"> 344</a>   have hhuErr (u : U) : |(hu u : ℝ)-(∑ v,(hu v : ℝ))/s|≤3+4*e := by</span>
+<span id="L345"><a href="#L345" class="ln"> 345</a>     rw [hhuR,hHumean,abs_le]</span>
+<span id="L346"><a href="#L346" class="ln"> 346</a>     have h1 := abs_le.mp (hbw u)</span>
+<span id="L347"><a href="#L347" class="ln"> 347</a>     have h2 := abs_le.mp hBWu</span>
+<span id="L348"><a href="#L348" class="ln"> 348</a>     constructor &lt;;&gt; linarith [h1.1,h1.2,h2.1,h2.2]</span>
+<span id="L349"><a href="#L349" class="ln"> 349</a>   have hHKtot : ∑ v,a v=∑ _ : U,base := by simpa only [Finset.sum_const,Finset.card_univ,smul_eq_mul] using ha</span>
+<span id="L350"><a href="#L350" class="ln"> 350</a>   have hHKmean : (∑ _ : U,(base:ℝ))/s=base := by simp [s,ne_of_gt hsR]</span>
+<span id="L351"><a href="#L351" class="ln"> 351</a>   have hamean : (∑ v,(a v : ℝ))/n=μ := by rw [haR]</span>
+<span id="L352"><a href="#L352" class="ln"> 352</a>   obtain ⟨Lₖ,hLK,hLKrow,hLKcol⟩ := near_uniform_matrix_degrees_centered Hₖ a (fun _=&gt;base)</span>
+<span id="L353"><a href="#L353" class="ln"> 353</a>     hn hs hδ hδsmall hHKtot hHKcap</span>
+<span id="L354"><a href="#L354" class="ln"> 354</a>     (show μ-3*e≤(∑ v,(a v : ℝ))/n by rw [hamean];linarith)</span>
+<span id="L355"><a href="#L355" class="ln"> 355</a>     (show μ-3*e≤(∑ _ : U,(base:ℝ))/s by rw [hHKmean];linarith)</span>
+<span id="L356"><a href="#L356" class="ln"> 356</a>     hmargin (fun v=&gt;(by rw [hamean];exact (hae v).trans (by linarith)))</span>
+<span id="L357"><a href="#L357" class="ln"> 357</a>     (fun u=&gt;by rw [hHKmean];simp only [sub_self,abs_zero];linarith) hcutHK</span>
+<span id="L358"><a href="#L358" class="ln"> 358</a>   obtain ⟨L₀,hL0,hL0row,hL0col⟩ := near_uniform_matrix_degrees_centered H₀ h hu</span>
+<span id="L359"><a href="#L359" class="ln"> 359</a>     hn hs hδ hδsmall hh hHcap hHlo hHulo hmargin</span>
+<span id="L360"><a href="#L360" class="ln"> 360</a>     (fun v=&gt;by rw [hhR];exact (hhe v).trans (by linarith)) hhuErr hcutH0</span>
+<span id="L361"><a href="#L361" class="ln"> 361</a>   obtain ⟨Jₖ,hJK,hJKrow,hJKcol⟩ := near_uniform_matrix_degrees_centered Aₖ ko ki</span>
+<span id="L362"><a href="#L362" class="ln"> 362</a>     hn hn hδ hδsmall hko hKcap (by rw [hkoR];exact hKlo) hKlo hmargin</span>
+<span id="L363"><a href="#L363" class="ln"> 363</a>     (fun v=&gt;by rw [hkoR];exact (hkoe v).trans (by linarith))</span>
+<span id="L364"><a href="#L364" class="ln"> 364</a>     (fun v=&gt;(hkie v).trans (by linarith)) hcutK</span>
+<span id="L365"><a href="#L365" class="ln"> 365</a>   obtain ⟨J₀,hJ0,hJ0row,hJ0col⟩ := near_uniform_matrix_degrees_centered A₀ ro ri</span>
+<span id="L366"><a href="#L366" class="ln"> 366</a>     hn hn hδ hδsmall hro hRcap (by rw [hroR];exact hRlo) hRlo hmargin</span>
+<span id="L367"><a href="#L367" class="ln"> 367</a>     (fun v=&gt;by rw [hroR];exact (hroe v).trans (by linarith))</span>
+<span id="L368"><a href="#L368" class="ln"> 368</a>     (fun v=&gt;(hrie v).trans (by linarith)) hcut0</span>
+<span id="L369"><a href="#L369" class="ln"> 369</a>   have hbounds (v : V) : (a v : ℝ)≤(q+2:ℝ)*base ∧ (h v : ℝ)≤(q+2:ℝ)*base ∧</span>
+<span id="L370"><a href="#L370" class="ln"> 370</a>       (ko v : ℝ)≤(q+2:ℝ)*base ∧ (ki v : ℝ)≤(q+2:ℝ)*base ∧</span>
+<span id="L371"><a href="#L371" class="ln"> 371</a>       (ro v : ℝ)≤(q+2:ℝ)*base ∧ (ri v : ℝ)≤(q+2:ℝ)*base := by</span>
+<span id="L372"><a href="#L372" class="ln"> 372</a>     have h1 := (abs_le.mp (hae v)).2</span>
+<span id="L373"><a href="#L373" class="ln"> 373</a>     have h2 := (abs_le.mp (hhe v)).2</span>
+<span id="L374"><a href="#L374" class="ln"> 374</a>     have h3 := (abs_le.mp (hkoe v)).2</span>
+<span id="L375"><a href="#L375" class="ln"> 375</a>     have h4 := (abs_le.mp (hkie v)).2</span>
+<span id="L376"><a href="#L376" class="ln"> 376</a>     have h5 := (abs_le.mp (hroe v)).2</span>
+<span id="L377"><a href="#L377" class="ln"> 377</a>     have h6 := (abs_le.mp (hrie v)).2</span>
+<span id="L378"><a href="#L378" class="ln"> 378</a>     change (a v : ℝ)-μ≤1 at h1</span>
+<span id="L379"><a href="#L379" class="ln"> 379</a>     rw [← hhR,hHmean] at h2</span>
+<span id="L380"><a href="#L380" class="ln"> 380</a>     rw [hKmean] at h3 h4</span>
+<span id="L381"><a href="#L381" class="ln"> 381</a>     rw [hRmean] at h5 h6</span>
+<span id="L382"><a href="#L382" class="ln"> 382</a>     have h7 := (abs_le.mp hBW).2</span>
+<span id="L383"><a href="#L383" class="ln"> 383</a>     have h8 := abs_le.mp hBK</span>
+<span id="L384"><a href="#L384" class="ln"> 384</a>     have h9 := (abs_le.mp hBM).2</span>
+<span id="L385"><a href="#L385" class="ln"> 385</a>     have h10 := mul_le_mul_of_nonneg_left hμbase (Nat.cast_nonneg q : (0:ℝ)≤q)</span>
+<span id="L386"><a href="#L386" class="ln"> 386</a>     refine ⟨?_,?_,?_,?_,?_,?_⟩</span>
+<span id="L387"><a href="#L387" class="ln"> 387</a>     · nlinarith only [h1,hqbase,hμbase,hplain,he]</span>
+<span id="L388"><a href="#L388" class="ln"> 388</a>     · nlinarith only [h2,h10,h7,hplain,hμbase,he]</span>
+<span id="L389"><a href="#L389" class="ln"> 389</a>     · nlinarith only [h3,h8.2,hqbase,hplain,hμbase,he]</span>
+<span id="L390"><a href="#L390" class="ln"> 390</a>     · nlinarith only [h4,h8.2,hqbase,hplain,hμbase,he]</span>
+<span id="L391"><a href="#L391" class="ln"> 391</a>     · nlinarith only [h5,h10,h7,h9,h8.1,hplain,hμbase,he]</span>
+<span id="L392"><a href="#L392" class="ln"> 392</a>     · nlinarith only [h6,h10,h7,h9,h8.1,hplain,hμbase,he]</span>
+<span id="L393"><a href="#L393" class="ln"> 393</a>   have hhubbound (u : U) : (hu u : ℝ)≤(q+2:ℝ)*base := by</span>
+<span id="L394"><a href="#L394" class="ln"> 394</a>     rw [hhuR]</span>
+<span id="L395"><a href="#L395" class="ln"> 395</a>     nlinarith only [(abs_le.mp (hbw u)).2,hplain,hμbase,he]</span>
+<span id="L396"><a href="#L396" class="ln"> 396</a>   refine ⟨J₀,Jₖ,L₀,Lₖ,hJ0,hJK,hL0,hLK,?_,?_,?_,?_,?_,?_⟩</span>
+<span id="L397"><a href="#L397" class="ln"> 397</a>   · intro v</span>
+<span id="L398"><a href="#L398" class="ln"> 398</a>     have h1 : (∑ x,(J₀ v x : ℤ))=ro v := by exact_mod_cast hJ0row v</span>
+<span id="L399"><a href="#L399" class="ln"> 399</a>     have h2 : (∑ x,(Jₖ v x : ℤ))=ko v := by exact_mod_cast hJKrow v</span>
+<span id="L400"><a href="#L400" class="ln"> 400</a>     have h3 : (∑ u,(L₀ v u : ℤ))=h v := by exact_mod_cast hL0row v</span>
+<span id="L401"><a href="#L401" class="ln"> 401</a>     have h4 : (∑ u,(Lₖ v u : ℤ))=a v := by exact_mod_cast hLKrow v</span>
+<span id="L402"><a href="#L402" class="ln"> 402</a>     rw [h1,h2,h3,h4]</span>
+<span id="L403"><a href="#L403" class="ln"> 403</a>     have hh := hop v</span>
+<span id="L404"><a href="#L404" class="ln"> 404</a>     push_cast at hh</span>
+<span id="L405"><a href="#L405" class="ln"> 405</a>     linarith</span>
+<span id="L406"><a href="#L406" class="ln"> 406</a>   · intro v</span>
+<span id="L407"><a href="#L407" class="ln"> 407</a>     have h1 : (∑ x,(J₀ x v : ℤ))=ri v := by exact_mod_cast hJ0col v</span>
+<span id="L408"><a href="#L408" class="ln"> 408</a>     have h2 : (∑ x,(Jₖ x v : ℤ))=ki v := by exact_mod_cast hJKcol v</span>
+<span id="L409"><a href="#L409" class="ln"> 409</a>     have h3 : (∑ u,(L₀ v u : ℤ))=h v := by exact_mod_cast hL0row v</span>
+<span id="L410"><a href="#L410" class="ln"> 410</a>     have h4 : (∑ u,(Lₖ v u : ℤ))=a v := by exact_mod_cast hLKrow v</span>
+<span id="L411"><a href="#L411" class="ln"> 411</a>     rw [h1,h2,h3,h4]</span>
+<span id="L412"><a href="#L412" class="ln"> 412</a>     have hh := hip v</span>
+<span id="L413"><a href="#L413" class="ln"> 413</a>     push_cast at hh</span>
+<span id="L414"><a href="#L414" class="ln"> 414</a>     linarith</span>
+<span id="L415"><a href="#L415" class="ln"> 415</a>   · intro v</span>
+<span id="L416"><a href="#L416" class="ln"> 416</a>     have h1 : (∑ x,(Jₖ x v : ℤ))=ki v := by exact_mod_cast hJKcol v</span>
+<span id="L417"><a href="#L417" class="ln"> 417</a>     have h2 : (∑ u,(Lₖ v u : ℤ))=a v := by exact_mod_cast hLKrow v</span>
+<span id="L418"><a href="#L418" class="ln"> 418</a>     rw [h1,h2];exact hik v</span>
+<span id="L419"><a href="#L419" class="ln"> 419</a>   · intro u</span>
+<span id="L420"><a href="#L420" class="ln"> 420</a>     have h1 : (∑ v,(L₀ v u : ℤ))=hu u := by exact_mod_cast hL0col u</span>
+<span id="L421"><a href="#L421" class="ln"> 421</a>     have h2 : (∑ v,(Lₖ v u : ℤ))=base := by exact_mod_cast hLKcol u</span>
+<span id="L422"><a href="#L422" class="ln"> 422</a>     rw [h1,h2];exact hiu u</span>
+<span id="L423"><a href="#L423" class="ln"> 423</a>   · intro v</span>
+<span id="L424"><a href="#L424" class="ln"> 424</a>     have h1 : (∑ x,(J₀ v x : ℝ))=ro v := by exact_mod_cast hJ0row v</span>
+<span id="L425"><a href="#L425" class="ln"> 425</a>     have h2 : (∑ x,(J₀ x v : ℝ))=ri v := by exact_mod_cast hJ0col v</span>
+<span id="L426"><a href="#L426" class="ln"> 426</a>     have h3 : (∑ x,(Jₖ v x : ℝ))=ko v := by exact_mod_cast hJKrow v</span>
+<span id="L427"><a href="#L427" class="ln"> 427</a>     have h4 : (∑ x,(Jₖ x v : ℝ))=ki v := by exact_mod_cast hJKcol v</span>
+<span id="L428"><a href="#L428" class="ln"> 428</a>     have h5 : (∑ u,(L₀ v u : ℝ))=h v := by exact_mod_cast hL0row v</span>
+<span id="L429"><a href="#L429" class="ln"> 429</a>     have h6 : (∑ u,(Lₖ v u : ℝ))=a v := by exact_mod_cast hLKrow v</span>
+<span id="L430"><a href="#L430" class="ln"> 430</a>     rw [h1,h2,h3,h4,h5,h6]</span>
+<span id="L431"><a href="#L431" class="ln"> 431</a>     exact ⟨(hbounds v).2.2.2.2.1,(hbounds v).2.2.2.2.2,(hbounds v).2.2.1,</span>
+<span id="L432"><a href="#L432" class="ln"> 432</a>       (hbounds v).2.2.2.1,(hbounds v).2.1,(hbounds v).1⟩</span>
+<span id="L433"><a href="#L433" class="ln"> 433</a>   · intro u</span>
+<span id="L434"><a href="#L434" class="ln"> 434</a>     have h1 : (∑ v,(L₀ v u : ℝ))=hu u := by exact_mod_cast hL0col u</span>
+<span id="L435"><a href="#L435" class="ln"> 435</a>     have h2 : (∑ v,(Lₖ v u : ℝ))=base := by exact_mod_cast hLKcol u</span>
+<span id="L436"><a href="#L436" class="ln"> 436</a>     rw [h1,h2]</span>
+<span id="L437"><a href="#L437" class="ln"> 437</a>     exact ⟨hhubbound u,by nlinarith only [hqbase,(Nat.cast_nonneg base : (0:ℝ)≤base)]⟩</span>
+<span id="L438"><a href="#L438" class="ln"> 438</a> </span>
+<span id="L439"><a href="#L439" class="ln"> 439</a> end Oberwolfach</span></pre></html>

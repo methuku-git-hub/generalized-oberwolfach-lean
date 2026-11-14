@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryNormalizedCycleVertexLoad.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryNormalizedCycleVertexLoad.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryAdmissibleCycleLoads</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Normalize the conflict-free part of the original fractional cycle</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> weighting using the parent degree parameter. The weights are unchanged. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 4000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem ordinary_normalized_admissible_vertex_load {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (P F:SimpleGraph V) (r:ℕ) (hr:2≤r) (hn:0&lt;Fintype.card V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (weight:OrdinaryCycle P r→ℝ) (hweight:∀ C,0≤weight C)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (B:ℝ) (hB:0≤B) (hb:∀ C,weight C≤B/(Fintype.card V:ℝ)^(r-2))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (L:ℝ) (hdeg:∀ v,(F.degree v:ℝ)≤L)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (he:∀ x y,(∑ C,if C.val.val.Adj x y then weight C else 0)=if P.Adj x y then 1 else 0)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (D ε:ℝ) (hD:0&lt;D) (hnear:∀ v,|(P.degree v:ℝ)-D|≤ε*Fintype.card V) (v:V):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     |(2/D)*(∑ C,if v∈C.val.val.support ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         (∀ x∈C.val.val.support,∀ y∈C.val.val.support,¬F.Adj x y) then weight C else 0)-1|≤</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (6*(r:ℝ)^4*B*L+ε*Fintype.card V)/D := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let S:ℝ:=∑ C,if v∈C.val.val.support ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀ x∈C.val.val.support,∀ y∈C.val.val.support,¬F.Adj x y) then weight C else 0</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hs:|S-(P.degree v:ℝ)/2|≤3*(r:ℝ)^4*B*L:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hh:=ordinary_admissible_cycle_vertex_load P F r hr hn weight hweight B hB hb L hdeg he v</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     convert hh using 1 &lt;;&gt; congr!</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have ha:=abs_le.mp hs</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hd:=abs_le.mp (hnear v)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hraw:|2*S-D|≤6*(r:ℝ)^4*B*L+ε*Fintype.card V:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     apply abs_le.mpr</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     constructor &lt;;&gt; linarith only [ha.1,ha.2,hd.1,hd.2]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have heq:(2/D)*S-1=(2*S-D)/D:=by field_simp</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   change |(2/D)*S-1|≤_</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   rw [heq,abs_div,abs_of_pos hD]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   exact div_le_div_of_nonneg_right hraw hD.le</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> end Oberwolfach</span></pre></html>

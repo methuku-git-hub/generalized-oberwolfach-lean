@@ -1,0 +1,131 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExpandedSeededReferenceRoots.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExpandedSeededReferenceRoots.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ExpandedPreparationSelectedFamiliesReference</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.CombinedPreparationAllRoots</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PhysicalOrdinarySeedBound</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedVariableHubSeedBound</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The original fixed seed formulas, retained reference property, and all</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> four balanced root estimates on the same enriched outcome. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 24000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem raw_expanded_seeded_balanced_reference_all_roots</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (K:ℕ) (d:ℕ) (hd:2≤d) (n:Fin K→ℕ) (hnlen:∀ i,1≤n i)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (B t:Fin K→ℝ) (hB:∀ i,0&lt;B i) (ht:∀ i,0&lt;t i)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (mK:ℕ) (hmK:3≤mK) (BK tK pstar:ℝ) (hBK:0&lt;BK) (htK:0&lt;tK) (hpstar:0&lt;pstar) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ N:ℕ,∀ (V:Type) [Fintype V] [LinearOrder V],</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     N≤Fintype.card V→∀ (S:Finset (Fin K)) (U Γ Color:Type) [Fintype U] [Fintype Γ] [Fintype Color] [DecidableEq U]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hm:0&lt;Fintype.card U) (hmn:Fintype.card U≤Fintype.card V) (hΓ:Fintype.card Γ≤2)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (G Z T:SimpleGraph V) (hTG:T≤G) (π:Equiv.Perm V) (I:Finset V) (J:Finset U) (hJ:J.Nonempty)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (p k p₂ k₂ u:ℝ) (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hnoshort:∀ x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x) (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (s:U→Color→ℝ) (hs:∀ u j,0≤s u j) (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (D τ AK:ℝ) (hDlo:(Fintype.card V:ℝ)/2≤D) (hDhi:D≤2*Fintype.card V)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hp₂lo:pstar≤p₂) (hk₂lo:pstar≤k₂)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (g:Γ) (j:Color)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hslo:∀ v,pstar≤s v j)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (η:{i:Fin K // i∈S}→U→ℝ) (hη0:∀ i v,0≤η i v) (hηhi:∀ i v,η i v≤1/s v j)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (lamO:∀ i:{i:Fin K // i∈S},OrdinaryCycle G (n i.val+2)→ℝ)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hlam:∀ i C,0≤lamO i C ∧ lamO i C≤B i.val/(Fintype.card V:ℝ)^(n i.val))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (lamK:(Fin (mK+1)→V)→ℝ)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hlamK:SuccessorSequenceWeightConditions G π (3*d) D τ AK BK lamK)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (ε:ℝ) (hreg:∀ x,|(G.degree x:ℝ)-D|≤ε*(Fintype.card V:ℝ))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hV:∀ i:{i:Fin K // i∈S},6*((n i.val+2:ℕ):ℝ)^4*B i.val*(2*(3*d))+ε*(Fintype.card V:ℝ)≤τ*D)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hR:∀ i:{i:Fin K // i∈S},5*((n i.val+2:ℕ):ℝ)^4*B i.val*(2*(3*d))/Fintype.card V≤τ)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (he:∀ i x y,(∑ C,if C.val.val.Adj x y then lamO i C else 0)=if G.Adj x y then 1 else 0)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hbal:∀ v,(mK:ℝ)*q v g+(∑ i,η i v)*s v j=s v j)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hqbal:(∑ v,q v g)=D*k₂) (hsbal:(∑ v,s v j)=D*p₂)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (F:RawMarkedOutcome V U Γ Color→Type) [∀ a,Fintype (F a)] (ν:∀ a,FiniteLaw (F a)) (Ref:(Σ a,F a)→Prop),</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ E:(Σ a,F a)→Prop,(99:ℝ)/100≤((FiniteLaw.pi (rawMarkedWheelLaw (V:=V) p k hp hk (by linarith) d hd q hq hQ s hs hS)).sigma ν).probability E→∃ y,Ref y ∧ E y)→</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let H₀:=fun (_:V) (_:U)=&gt;True</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let Hₖ:=fun (_:V) (_:U)=&gt;True</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let w:=fun (i:{i:Fin K // i∈S}) (W:OrderedOrdinaryWheel (U:=U) π (3*d) (n i.val+2))=&gt;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       η i W.2*physicalOrdinaryTupleWeight (π:=π) (b:=3*d) (hnlen i) (lamO i) W.1.val/</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         (((n i.val+2:ℕ):ℝ)*D*p₂^(n i.val+2)*(s W.2 j)^(n i.val+1))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let wK:=fun (i:Unit) (W:MarkedWheel (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd mK π (3*d) H₀ Hₖ)=&gt;</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       lamK W.1.val/(D*p₂^mK*k₂*(s W.2.val j)^mK)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let ρ:=markedExpandedPhysicalProbability p k p₂ k₂ u</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     let f:=fun (ω:∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e) e=&gt;rawExpandedMarkedCollapse e (ω e)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     let O:=fun z:(Σ ω:(∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e),F (f ω))=&gt;∀ i root,</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       |resourcePatternLoad orderedOrdinaryResources (w i) (fun _ _=&gt;true) root</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (orderedOrdinaryResourceState G π d g j (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))-</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         ∑ W,(if root∈orderedOrdinaryResources W then w i W else 0)*</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>           ∏ a∈orderedOrdinaryResources W\{root},rawMarkedWheelMarginal G π d p₂ k₂ q s g j (orderedOrdinaryResourceEmbedding a)|&lt;t i.val</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     let Kevent:=fun z:(Σ ω:(∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e),F (f ω))=&gt;∀ k root,</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       |typedMarkedPotentialLoad (wK k) (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) root-</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         ∑ W,(if root∈typedMarkedOccurrenceResources W then wK k W else 0)*</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>           ∏ a∈typedMarkedOccurrenceResources W\{root},rawMarkedWheelMarginal G π d p₂ k₂ q s g j a|&lt;tK</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     let LK:=fun z root=&gt;typedMarkedPotentialLoad (wK ()) (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) root</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     let LO:=fun z i root=&gt;resourcePatternLoad orderedOrdinaryResources (w i) (fun _ _=&gt;true) root</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (orderedOrdinaryResourceState G π d g j (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)));</span>
+<span id="L67"><a href="#L67" class="ln">  67</a> </span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     ∃ z,0&lt;(μ.sigma (fun ω=&gt;ν (f ω))).mass z ∧ Ref ⟨f z.1,z.2⟩ ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       expandedPhysicalDegreeGood G Z ρ (fun e=&gt;z.1 (Sum.inl e)) ∧</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       (∀ x y,x≠y→|(eligibleTwoPathCount T (sampledColourOrientation G (fun e=&gt;markedExpandedClass (z.1 (Sum.inl e))) 0) x y:ℝ)-</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         ((T.neighborFinset x∩T.neighborFinset y).card:ℝ)*((2*p+2*k+2*p₂+2*k₂+u)/2)^2|&lt;(Fintype.card V:ℝ)^(3/5:ℝ)) ∧</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       (∀ g a,|((rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) g a).card:ℝ)-(∑ u,q u g/(d:ℝ))|&lt;(Fintype.card V:ℝ)^(3/5:ℝ)) ∧</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       (∀ u g,|rawIntervalHubStartCount π d g (fun e=&gt;z.1 (Sum.inr e)) u-(Fintype.card V:ℝ)*q u g/d|&lt;</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         (Fintype.card V:ℝ)^(3/4:ℝ)/d) ∧</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       ((∀ w,|rawIntervalUnassignedHubCountOn π d (fun e=&gt;z.1 (Sum.inr e)) w I-(I.card:ℝ)*(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)) ∧</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>        (∀ v,|rawIntervalUnassignedColumnCount π d (fun e=&gt;z.1 (Sum.inr e)) v J-∑ w∈J,(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ))) ∧</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       ((∀ w,|rawIntervalUnassignedHubCountOn π d (fun e=&gt;z.1 (Sum.inr e)) w Finset.univ-(Fintype.card V:ℝ)*(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)) ∧</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>        (∀ v,|rawIntervalUnassignedColumnCount π d (fun e=&gt;z.1 (Sum.inr e)) v Finset.univ-∑ w,(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ))) ∧</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       (∀ x,|(((G.neighborFinset x∩I).filter (fun y=&gt;(z.1 (Sum.inl s(x,y))).1=4)).card:ℝ)-u*(G.neighborFinset x∩I).card|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)) ∧ O z ∧ Kevent z ∧</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       (∀ v w,|LK z (Sum.inr (false,v,w))+∑ i,LO z i (Sum.inr (v,w))-1|&lt;tK+(∑ i:{i:Fin K // i∈S},t i.val)+τ) ∧</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       (∀ x y,G.Adj x y→¬PermutationClose π (3*d) x y→</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>         |LK z (Sum.inl (Sum.inl (x,y)))+∑ i,LO z i (Sum.inl (x,y))-1|&lt;tK+(∑ i:{i:Fin K // i∈S},t i.val)+τ) ∧</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       (∀ v w,q w g≠0→|LK z (Sum.inr (true,v,w))-1|&lt;tK+τ) ∧</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       (∀ x y,G.Adj x (π y)→¬PermutationClose π (3*d) x y→|LK z (Sum.inl (Sum.inr (x,y)))-1|&lt;tK+τ) := by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   let BO:=fun i:Fin K=&gt;2*B i/pstar^(2*(n i+2))</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   let BM:ℝ:=2*BK/pstar^(2*mK+1)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hBO:∀ i,0&lt;BO i:=by intro i;have :=hB i;dsimp [BO];positivity</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hBM:0&lt;BM:=by dsimp [BM];positivity</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   obtain ⟨N,hFamilies⟩:=raw_expanded_selected_families_with_reference K Unit d hd (fun i=&gt;n i+1) (by intro i;have:=hnlen i;omega) BO t hBO ht mK hmK BM tK hBM htK</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   refine ⟨max N 1,?_⟩</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   intro V _ _ hn S U Γ Color _ _ _ _ hm hmn hΓ G Z T hTG π I J hJ p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum hnoshort q hq hQ s hs hS</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     D τ AK hDlo hDhi hp₂lo hk₂lo g j hslo η hη0 hηhi lamO hlam lamK hlamK ε hreg hV hR he hbal hqbal hsbal F _ ν Ref hRef H₀ Hₖ w wK ρ μ f O Kevent LK LO</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   have hnV:0&lt;Fintype.card V:=by omega</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   have hD:0&lt;D:=lt_of_lt_of_le (by exact_mod_cast (show (0:ℝ)&lt;(Fintype.card V:ℝ)/2 by positivity)) hDlo</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   have hp₂pos:0&lt;p₂:=hpstar.trans_le hp₂lo</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   have hk₂pos:0&lt;k₂:=hpstar.trans_le hk₂lo</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   have hp₂one:p₂≤1:=by linarith</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have hk₂one:k₂≤1:=by linarith</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hactive:2*p₂+2*k₂≤1:=by linarith</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   have hspos:∀ v,0&lt;s v j:=fun v=&gt;hpstar.trans_le (hslo v)</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   have hsone:∀ v c,s v c≤1:=by</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     intro v c</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     have hsingle:s v c≤∑ j,s v j:=Finset.single_le_sum (fun i _=&gt;hs v i) (Finset.mem_univ c)</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     have hQ0:0≤∑ g,q v g:=Finset.sum_nonneg (fun i _=&gt;hq v i)</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     have hfactor:0≤(1+1/(d:ℝ))*(∑ g,q v g):=mul_nonneg (by positivity) hQ0</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     have hh:=hS v</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     unfold intervalUncoveredProbability at hh</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     linarith</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   have hw:∀ i W,0≤w i W ∧ w i W≤BO i.val/(Fintype.card V:ℝ)^(n i.val+1):=by</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     intro i W</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     exact physicalOrdinary_seed_upper (P:=G) (π:=π) (b:=3*d) (hnlen i.val) hnV (lamO i) (fun C=&gt;(hlam i C).1) (B i.val) (hB i.val).le</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>       (fun C=&gt;(hlam i C).2) D p₂ pstar hDlo hDhi hpstar hp₂lo hp₂one (fun v=&gt;s v j) (η i)</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>       hslo (fun v=&gt;hsone v j) (hη0 i) (hηhi i) W</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   have hwK:∀ i W,0≤wK i W ∧ wK i W≤BM/(Fintype.card V:ℝ)^mK:=by</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     intro i W</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     exact marked_variable_hub_seed_upper G π mK (3*d) (by omega) D τ AK BK p₂ k₂ pstar hnV hDlo hDhi hpstar hp₂lo hk₂lo hp₂one hk₂one</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>       (fun v=&gt;s v j) hslo (fun v=&gt;hsone v j) hBK.le lamK hlamK W</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>   obtain ⟨z,hz,href,hgood⟩:=hFamilies V U Γ Color ((le_max_left _ _).trans hn) hmn hΓ G Z T hTG π I J hJ p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum q hq hQ s hs hS hnoshort S</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     w hw (fun _=&gt;g) (fun _=&gt;j) H₀ Hₖ wK hwK (fun _=&gt;g) (fun _=&gt;j) F ν Ref hRef</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>   obtain ⟨hdegree,hpath,hstart,hhub,hU1,hU2,hrim,hO,hK⟩:=hgood</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>   refine ⟨z,hz,href,hdegree,hpath,hstart,hhub,hU1,hU2,hrim,hO,hK,?_⟩</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>   let σ:=fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>   have htarget:=combined_preparation_all_ordinary_roots G π p₂ k₂ hp₂pos hk₂pos hactive d hd q hq hQ s hs hS hnoshort g j D τ ε hD hspos hnV</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     (fun i:{i:Fin K // i∈S}=&gt;n i.val) (fun i=&gt;hnlen i.val) η hη0 lamO (fun i C=&gt;(hlam i C).1) (fun i=&gt;B i.val) (fun i=&gt;(hB i.val).le) (fun i C=&gt;(hlam i C).2)</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     he hreg hV hR mK (by omega) AK BK lamK hlamK hbal hqbal hsbal σ tK (fun i=&gt;t i.val)</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>   dsimp only at htarget</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>   exact htarget (hK ()) hO</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a> end Oberwolfach</span></pre></html>

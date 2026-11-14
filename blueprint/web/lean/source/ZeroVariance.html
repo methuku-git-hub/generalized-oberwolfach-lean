@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ZeroVariance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ZeroVariance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.UniformExposure</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A zero exponential-moment variance gives equality on every outcome</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> of positive mass, not only almost surely. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem finiteLaw_exp_centered_le_one_constant</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {Ω : Type*} [Fintype Ω] (μ : FiniteLaw Ω) (X : Ω → ℝ)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (h : μ.expectation (fun ω =&gt; Real.exp (X ω - μ.expectation X)) ≤ 1)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (ω : Ω) (hω : 0 &lt; μ.mass ω) : X ω = μ.expectation X := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   let Z (x : Ω) := X x - μ.expectation X</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hz : μ.expectation Z = 0 := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     simp only [FiniteLaw.expectation, Z, mul_sub, Finset.sum_sub_distrib,</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       ← Finset.sum_mul, μ.total, one_mul, sub_self]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let Y (x : Ω) := Real.exp (Z x) - (Z x + 1)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hy (x : Ω) : 0 ≤ Y x := sub_nonneg.mpr (Real.add_one_le_exp _)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hsum : μ.expectation Y ≤ 0 := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     have he : μ.expectation Y = μ.expectation (fun x =&gt; Real.exp (Z x)) - (μ.expectation Z + 1) := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       simp only [FiniteLaw.expectation, Y, mul_sub, mul_add, mul_one,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         Finset.sum_sub_distrib, Finset.sum_add_distrib, μ.total]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     rw [he, hz]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     change μ.expectation (fun x =&gt; Real.exp (X x - μ.expectation X)) - (0 + 1) ≤ 0</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     linarith</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hs : μ.mass ω * Y ω ≤ 0 :=</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (Finset.single_le_sum (fun x _ =&gt; mul_nonneg (μ.nonneg x) (hy x)) (Finset.mem_univ ω)).trans hsum</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hY : Y ω ≤ 0 := nonpos_of_mul_nonpos_right hs hω</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have heq : Z ω = 0 := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     by_contra hn</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hh := Real.add_one_lt_exp hn</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     change Real.exp (Z ω) - (Z ω + 1) ≤ 0 at hY</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     linarith</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   exact sub_eq_zero.mp heq</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> </span>
+<span id="L38"><a href="#L38" class="ln">  38</a> theorem finiteLaw_zero_mgf_constant</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     {Ω : Type*} [Fintype Ω] (μ : FiniteLaw Ω) (X : Ω → ℝ)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hmgf : ∀ u, μ.expectation (fun ω =&gt; Real.exp (u * (X ω - μ.expectation X))) ≤</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       Real.exp (u ^ 2 * 0 / 8))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (ω : Ω) (hω : 0 &lt; μ.mass ω) : X ω = μ.expectation X := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   apply finiteLaw_exp_centered_le_one_constant μ X _ ω hω</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   simpa using hmgf 1</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> </span>
+<span id="L46"><a href="#L46" class="ln">  46</a> end Oberwolfach</span></pre></html>

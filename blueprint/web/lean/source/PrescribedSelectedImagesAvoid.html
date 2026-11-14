@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedSelectedImagesAvoid.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedSelectedImagesAvoid.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedEmbeddingGlue</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! New selected positions avoid the old image set when the prescribed</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> matching endpoints and new singleton labels do. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {X V:Type} [DecidableEq X] [DecidableEq V]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem prescribed_selected_images_avoid_old (A B:Finset X) (f g Φ:X→V) (Old C Z:Finset V)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hAB:A⊆B) (hinj:Set.InjOn Φ (↑B:Set X)) (hext:∀x∈A,g x=f x) (hsame:∀x∈B,Φ x=g x)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (himage:B.image g=A.image f∪C∪Z) (hOldC:Disjoint Old C) (hOldZ:Disjoint Old Z):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∀x∈B\A,Φ x∉Old := by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   intro x hx hOld</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hxB:x∈B:=(Finset.mem_sdiff.mp hx).1</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hxA:x∉A:=(Finset.mem_sdiff.mp hx).2</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hm:g x∈B.image g:=Finset.mem_image.mpr ⟨x,hxB,rfl⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   rw [himage] at hm</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   rcases Finset.mem_union.mp hm with hm|hz</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   · rcases Finset.mem_union.mp hm with ha|hc</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     · obtain ⟨y,hy,hxy⟩:=Finset.mem_image.mp ha</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       have hyB:y∈B:=hAB hy</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       have heq:Φ x=Φ y:=by rw [hsame x hxB,hsame y hyB,hext y hy];exact hxy.symm</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       have hxy&#x27;:x=y:=hinj hxB hyB heq</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       exact hxA (by simpa [hxy&#x27;] using hy)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     · have hold&#x27;:g x∈Old:=by simpa [hsame x hxB] using hOld</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       exact (Finset.disjoint_left.mp hOldC) hold&#x27; hc</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   · have hold&#x27;:g x∈Old:=by simpa [hsame x hxB] using hOld</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     exact (Finset.disjoint_left.mp hOldZ) hold&#x27; hz</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawAbsorberColumnLocalEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawAbsorberColumnLocalEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawIntervalAssignedLabelColumn</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawIntervalStartColumnCount</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.RawUnassignedColumnLocalEvent</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem raw_interval_absorber_column_local_event</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {V U Color:Type} [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (π:Equiv.Perm V) (d:ℕ) (hd:2≤d)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (q:U→Bool→ℝ) (hq:∀u g,0≤q u g) (hQ:∀u,∑g,q u g≤1/8)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (s:U→Color→ℝ) (hs:∀u j,0≤s u j) (hS:∀u,∑j,s u j≤ intervalUncoveredProbability d (∑g,q u g))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (A:Finset V) (J:Finset U) (t:ℝ) (ht:0&lt;t):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     let μ:=FiniteLaw.pi (rawIntervalFamilyLaw (V:=V) d hd q hq hQ s hs hS)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     1-8*(A.card:ℝ)*Real.exp (-2*t^2/(J.card:ℝ))≤</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       μ.probability (fun σ=&gt;∀v∈A,∀g,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         |rawIntervalAssignedLabelColumnCount π d σ v g J-∑u∈J,q u g|&lt;t ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         |rawIntervalStartColumnCount π d σ ((π^d).symm v) g J-∑u∈J,q u g/(d:ℝ)|&lt;t):=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   intro μ</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let T:=A.product (Finset.univ : Finset (Bool×Bool))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let E:=fun (z:V×(Bool×Bool)) (σ:RawIntervalFamilyOutcome V U Bool Color) =&gt;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     if z.2.2 then t≤|rawIntervalAssignedLabelColumnCount π d σ z.1 z.2.1 J-∑u∈J,q u z.2.1|</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     else t≤|rawIntervalStartColumnCount π d σ ((π^d).symm z.1) z.2.1 J-∑u∈J,q u z.2.1/(d:ℝ)|</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hh:=finiteLaw_common_event_lower μ T E</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (fun _=&gt;2*Real.exp (-2*t^2/(J.card:ℝ))) (by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       intro z hz</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       dsimp only [E]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       split</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       · have hh:=raw_interval_assigned_label_column_tail π d hd q hq hQ s hs hS z.1 z.2.1 J t ht.le</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         have hp (u:U):=(rawIntervalState_interval_probability π d hd (q u) (hq u) (hQ u) (s u) (hs u) (hS u) hnoshort z.1 z.2.1)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         simpa only [hp] using hh</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       · exact raw_interval_start_column_tail π d hd q hq hQ s hs hS hnoshort ((π^d).symm z.1) z.2.1 J t ht.le)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   simp only [Finset.sum_const,nsmul_eq_mul,not_le] at hh</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hh&#x27;:1-8*(A.card:ℝ)*Real.exp (-2*t^2/(J.card:ℝ)) ≤</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       μ.probability (fun σ=&gt;∀z∈T,¬E z σ):=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     convert hh using 1 &lt;;&gt; simp [T] &lt;;&gt; ring</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine hh&#x27;.trans ?_</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   apply finiteLaw_probability_mono</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   intro σ h v hv g</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have h₁:=h (v,(g,true)) (Finset.mem_product.mpr ⟨hv,Finset.mem_univ _⟩)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have h₂:=h (v,(g,false)) (Finset.mem_product.mpr ⟨hv,Finset.mem_univ _⟩)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   exact ⟨by simpa [E,not_le] using h₁, by simpa [E,not_le] using h₂⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> end Oberwolfach</span></pre></html>

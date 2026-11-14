@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TupleRetentionBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TupleRetentionBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RetentionOverlapBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The exact root-set estimates expressed for injective tuples. Repeated</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> vertices must be excluded explicitly before using the tuple length. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1800000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem conflicting_retention_probability_zero</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {V C J : Type*} [Fintype V] [Fintype C]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (G : SimpleGraph V) (μ : FiniteLaw (V → C×Bool)) (f : J → V) (c : C)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hbad : ∃ i j,G.Adj (f i) (f j)) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     μ.probability (fun σ=&gt;∀ j,coinRetainedColour G σ (f j)=some c)=0 := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   obtain ⟨i,j,hij⟩ := hbad</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hn (σ : V → C×Bool) : ¬∀ j,coinRetainedColour G σ (f j)=some c := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     intro h</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     exact coinRetainedColour_proper G σ hij c (h i) (h j)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   unfold FiniteLaw.probability</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   simp only [hn,ite_false,Finset.sum_const_zero]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> </span>
+<span id="L25"><a href="#L25" class="ln">  25</a> theorem equalized_tuple_retention_bounds</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     {V C J : Type*} [Fintype V] [DecidableEq V] [Fintype C] [Fintype J]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (G : SimpleGraph V) (L : V → Finset C) (hL : ∀ v,(L v).Nonempty)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     {l K B : ℕ} (hl : 1&lt;l) (hcard : ∀ v,(L v).card=l)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (f : J → V) (hfi : Function.Injective f)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hgood : ∀ i j,¬G.Adj (f i) (f j)) (c : C) (hc : ∀ j,c∈L (f j))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hbound : ∀ j,(colourNeighbourSet G L (f j) c).card≤K)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hpair : ∀ i j,i≠j →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (colourNeighbourSet G L (f i) c∩colourNeighbourSet G L (f j) c).card≤B)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hsmall : 2*((Fintype.card J)^2*B)≤l) :</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let p := (FiniteLaw.pi (fun u=&gt;(FiniteLaw.uniformOn (L u) (hL u)).withCoin</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (equalizationCoin G L l K u)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (equalizationCoin_bounds G L (by omega) K u))).probability</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (fun σ=&gt;∀ j,coinRetainedColour G σ (f j)=some c)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let b := (((1-1/(l : ℝ))^K)/(l : ℝ))^(Fintype.card J)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     b≤p ∧ p≤(1+2*(((Fintype.card J)^2*B : ℕ) : ℝ)/(l : ℝ))*b := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   classical</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let S := Finset.univ.image f</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hSc : S.card=Fintype.card J := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     rw [Finset.card_image_of_injective _ hfi,Finset.card_univ]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hS : ∀ u∈S,∀ v∈S,¬G.Adj u v := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     intro u hu v hv</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     obtain ⟨i,_,rfl⟩ := Finset.mem_image.mp hu</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     obtain ⟨j,_,rfl⟩ := Finset.mem_image.mp hv</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     exact hgood i j</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hcS : ∀ v∈S,c∈L v := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     intro v hv</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     obtain ⟨j,_,rfl⟩ := Finset.mem_image.mp hv</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     exact hc j</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hbS : ∀ v∈S,(colourNeighbourSet G L v c).card≤K := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     intro v hv</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     obtain ⟨j,_,rfl⟩ := Finset.mem_image.mp hv</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     exact hbound j</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hpS : ∀ u∈S,∀ v∈S,u≠v →</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (colourNeighbourSet G L u c∩colourNeighbourSet G L v c).card≤B := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     intro u hu v hv huv</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     obtain ⟨i,_,rfl⟩ := Finset.mem_image.mp hu</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     obtain ⟨j,_,rfl⟩ := Finset.mem_image.mp hv</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     exact hpair i j (fun he=&gt;huv (congrArg f he))</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hh := equalized_joint_retention_bounds G L hL hl hcard S hS c hcS hbS hpS</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (by simpa only [hSc] using hsmall)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hevent (σ : V → C×Bool) :</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (∀ v∈S,coinRetainedColour G σ v=some c) ↔</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         ∀ j,coinRetainedColour G σ (f j)=some c := by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     simp only [S,Finset.mem_image,Finset.mem_univ,true_and]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     constructor</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     · intro h j</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       exact h (f j) ⟨j,rfl⟩</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     · intro h v hv</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       obtain ⟨j,rfl⟩ := hv</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       exact h j</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   dsimp only at hh ⊢</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   rw [finiteLaw_probability_congr _ _ _ hevent,hSc] at hh</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   exact hh</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

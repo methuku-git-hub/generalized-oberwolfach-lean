@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPackingStageCombination.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPackingStageCombination.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedRowCoverPackings</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Combine hub and row stages using their actual physical rim graphs and</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> hub sets. Distinct auxiliary representations are never used to justify</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> physical edge disjointness. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 5000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U E T : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {tail head : E→V} {ktail khead : T→V} {H₀ HK : V→U→Prop}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {π : Equiv.Perm V} {m b n K : ℕ}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_packings_disjoint_of_rims_and_hubs (hm : 1≤m) (hb : 1≤b)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (M N : Finset (MarkedWheel tail head ktail khead m π b H₀ HK))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hrim : Disjoint (markedPackingRimGraph M) (markedPackingRimGraph N))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hhubs : ∀ W∈M,∀ Z∈N,W.2.val≠Z.2.val) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     Disjoint (M.biUnion markedWheelPhysicalResources) (N.biUnion markedWheelPhysicalResources) := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   intro e he hf</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   obtain ⟨W,hW,he⟩ := Finset.mem_biUnion.mp he</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   obtain ⟨Z,hZ,hf⟩ := Finset.mem_biUnion.mp hf</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   cases e with</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   | inr p=&gt;</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     exact hhubs W hW Z hZ (((markedWheelPhysicalResources_spoke W p.1 p.2).mp he).1.trans</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       ((markedWheelPhysicalResources_spoke Z p.1 p.2).mp hf).1.symm)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   | inl e=&gt;</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have he&#x27; := (markedWheelPhysicalResources_rim W e).mp he</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hf&#x27; := (markedWheelPhysicalResources_rim Z e).mp hf</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hcard : e.card=2 := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       obtain ⟨a,_,ha⟩ := Finset.mem_image.mp he&#x27;</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       rw [←ha]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       exact markedCycle_physical_edge_card tail head ktail khead m π b hm hb W.1 a</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     obtain ⟨x,y,hxy,rfl⟩ := Finset.card_eq_two.mp hcard</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact disjoint_graphs_no_common_edge _ _ hrim x y</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ⟨hxy,Finset.mem_biUnion.mpr ⟨W,hW,he&#x27;⟩⟩ ⟨hxy,Finset.mem_biUnion.mpr ⟨Z,hZ,hf&#x27;⟩⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem marked_hub_row_stages_combine (hm : 1≤m) (hb : 1≤b)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (M : Finset (MarkedWheel tail head ktail khead m π b H₀ HK)) (Z : Finset U)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hM : ∀ W∈M,∀ X∈M,W≠X→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources X))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hMhub : ∀ W∈M,W.2.val∈Z)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (C : Fin n→Finset (MarkedWheel tail head ktail khead m π b H₀ HK))</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (v : Fin n→V) (F : Finset V) (required : Fin n→Finset (Finset V⊕(V×U))) (Y : Fin n→Finset U)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hC : ∀ i,MarkedRowCover (C i) (v i) F (required i) (Y i) K)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hcross : ∀ i j,i≠j→Disjoint ((C i).biUnion markedWheelPhysicalResources) ((C j).biUnion markedWheelPhysicalResources))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hR : ∀ i,Disjoint (markedPackingRimGraph (C i)) (markedPackingRimGraph M))</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hY : ∀ i,Disjoint (Y i) Z) :</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let N := M∪Finset.univ.biUnion C</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (∀ W∈N,∀ X∈N,W≠X→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources X)) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     M.biUnion markedWheelPhysicalResources ∪ Finset.univ.biUnion required⊆N.biUnion markedWheelPhysicalResources := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   let N := M∪Finset.univ.biUnion C</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hMC (i) : Disjoint ((C i).biUnion markedWheelPhysicalResources) (M.biUnion markedWheelPhysicalResources) :=</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     marked_packings_disjoint_of_rims_and_hubs hm hb (C i) M (hR i)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (fun W hW X hX he=&gt;Finset.disjoint_left.mp (hY i) ((hC i).hubs W hW) (he ▸ hMhub X hX))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   refine ⟨?_,?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   · intro W hW X hX hne</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     rcases Finset.mem_union.mp hW with hW|hW &lt;;&gt; rcases Finset.mem_union.mp hX with hX|hX</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     · exact hM W hW X hX hne</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     · obtain ⟨j,_,hX⟩ := Finset.mem_biUnion.mp hX</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       exact (hMC j).symm.mono (resource_subset_union _ M W hW) (resource_subset_union _ (C j) X hX)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     · obtain ⟨i,_,hW⟩ := Finset.mem_biUnion.mp hW</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       exact (hMC i).mono (resource_subset_union _ (C i) W hW) (resource_subset_union _ M X hX)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     · obtain ⟨i,_,hW⟩ := Finset.mem_biUnion.mp hW</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       obtain ⟨j,_,hX⟩ := Finset.mem_biUnion.mp hX</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       by_cases hij : i=j</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       · subst j</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         exact (hC i).disjoint W hW X hX hne</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       · exact (hcross i j hij).mono (resource_subset_union _ (C i) W hW) (resource_subset_union _ (C j) X hX)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   · intro e he</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     rcases Finset.mem_union.mp he with he|he</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     · obtain ⟨W,hW,he⟩ := Finset.mem_biUnion.mp he</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       exact Finset.mem_biUnion.mpr ⟨W,Finset.mem_union_left _ hW,he⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     · obtain ⟨i,_,hi⟩ := Finset.mem_biUnion.mp he</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       obtain ⟨W,hW,he⟩ := Finset.mem_biUnion.mp ((hC i).covers hi)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       exact Finset.mem_biUnion.mpr ⟨W,Finset.mem_union_right _ (Finset.mem_biUnion.mpr ⟨i,Finset.mem_univ _,hW⟩),he⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> </span>
+<span id="L79"><a href="#L79" class="ln">  79</a> end Oberwolfach</span></pre></html>

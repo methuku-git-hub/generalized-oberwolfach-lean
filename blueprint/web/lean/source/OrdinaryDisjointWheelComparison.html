@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryDisjointWheelComparison.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryDisjointWheelComparison.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryAttachmentWheels</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryExactDecomposition</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrdinaryTotalDivisibility</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! A decomposable comparison graph with prescribed total edge counts.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> It consists of disjoint wheels, with harmless unused private zero labels</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> retained to match the finite attachment representation. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 6500000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {I W : Type} [Fintype I] [Fintype W] [DecidableEq I] [DecidableEq W]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> abbrev disjointWheelSpokes (z : W) : (I⊕(I×W)) → (Empty⊕I) → Prop :=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   ordinaryAttachmentSpokes (fun (_ : I) (_ : Empty) =&gt; False) z id</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> def disjointWheelSpokeEquiv (z : W) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (I×W) ≃ {e:(I⊕(I×W))×(Empty⊕I) // disjointWheelSpokes z e.1 e.2} := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let f : (I×W) → {e:(I⊕(I×W))×(Empty⊕I) // disjointWheelSpokes z e.1 e.2} := fun p =&gt;</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ⟨(attachmentWheelEmbedding z id p.1 p.2,.inr p.1),by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       by_cases h : p.2=z &lt;;&gt; simp [attachmentWheelEmbedding,disjointWheelSpokes,ordinaryAttachmentSpokes,h]⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   apply Equiv.ofBijective f</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   constructor</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · rintro ⟨i,w⟩ ⟨j,w&#x27;⟩ he</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have hij : i=j := Sum.inr.inj (congrArg (fun a =&gt; a.val.2) he)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     subst j</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hww : w=w&#x27; := (attachmentWheelEmbedding z id i).injective (congrArg (fun a =&gt; a.val.1) he)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     exact Prod.ext rfl hww</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · rintro ⟨⟨a,b⟩,h⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     cases b with</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     | inl b =&gt; exact b.elim</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     | inr i =&gt;</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       cases a with</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       | inl a =&gt;</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         change i=a at h</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         subst a</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         refine ⟨(i,z),?_⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         apply Subtype.ext</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         simp [f,attachmentWheelEmbedding]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       | inr p =&gt;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         rcases p with ⟨j,w⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         change w≠z ∧ j=i at h</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         obtain ⟨hw,hji⟩ := h</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         subst j</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         refine ⟨(i,w),?_⟩</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         apply Subtype.ext</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         simp [f,attachmentWheelEmbedding,hw]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> theorem disjointWheelSpokes_card (z : W) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     Fintype.card {e:(I⊕(I×W))×(Empty⊕I) // disjointWheelSpokes z e.1 e.2}=Fintype.card I*Fintype.card W := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   rw [←Fintype.card_congr (disjointWheelSpokeEquiv (I:=I) z),Fintype.card_prod]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> </span>
+<span id="L55"><a href="#L55" class="ln">  55</a> theorem disjoint_wheel_comparison (C : SimpleGraph W) (r : ℕ) (hC : IsEmbeddedCycle C r)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (z : W) (hfull : ∀ w,w∈C.support) (hW : Fintype.card W=r) :</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     let G := ordinaryAttachmentRim (⊥:SimpleGraph I) C z id</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     let H := disjointWheelSpokes (I:=I) z</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     HasOrdinaryWheelDecomposition G H r ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (∀ a,G.degree a=2*(Finset.univ.filter (H a)).card) ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (∀ b,r∣(Finset.univ.filter (fun a =&gt; H a b)).card) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     G.edgeFinset.card=Fintype.card I*r ∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     Fintype.card {e:(I⊕(I×W))×(Empty⊕I) // H e.1 e.2}=Fintype.card I*r := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   dsimp only</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hdec := ordinaryAttachment_extra_wheel_decomposition (V:=I) (U:=Empty) C hC z id hfull</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hbal := ordinary_wheel_decomposition_balance _ _ r hdec</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hcard : Fintype.card {e:(I⊕(I×W))×(Empty⊕I) // disjointWheelSpokes z e.1 e.2}=Fintype.card I*r := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     rw [disjointWheelSpokes_card,hW]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   exact ⟨hdec,hbal.1,hbal.2,(ordinary_balanced_total_edges _ _ hbal.1).trans hcard,hcard⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> </span>
+<span id="L71"><a href="#L71" class="ln">  71</a> end Oberwolfach</span></pre></html>

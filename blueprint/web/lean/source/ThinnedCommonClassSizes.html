@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ThinnedCommonClassSizes.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ThinnedCommonClassSizes.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ThinnedCommonClassGeometry</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Accurate class sizes are preserved in addition to the density needed</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> for greedy counts. Both estimates concern the very same vertex coins. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1800000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem thinnedCommonClass_size_event (ε : ℝ) (hε : 0&lt;ε) (d Q : ℕ) (hd : 2≤d) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ N : ℕ,1≤N ∧ ∀ (V U Γ Color : Type)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [LinearOrder V] [DecidableEq U],</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       N≤Fintype.card V → ∀ (π : Equiv.Perm V),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ (p k : ℝ) (hp : 0≤p) (hk : 0≤k) (hphys : 2*p+2*k≤1)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (θ : ℝ) (hθ : 0≤θ) (hθ1 : θ≤1) (g : Γ) (j : Color) (u u&#x27; : U),u≠u&#x27; →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     1-1/(Fintype.card V:ℝ)^Q≤</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (FiniteLaw.pi (thinnedMarkedLaw (rawMarkedWheelLaw p k hp hk hphys d hd q hq hQ s hs hS) θ hθ hθ1)).probability</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (fun σ=&gt;∀ b,|((thinnedCommonClass π d g j u u&#x27; σ b).card:ℝ)-</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>           (if b then q u g*q u&#x27; g else s u j*s u&#x27; j*θ)*Fintype.card V|≤ε*Fintype.card V) := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨N,hN⟩ := linear_deviation_failure_eventually_small 2 ((16*(d:ℝ)+14)^2) ε (by positivity) hε 0 Q</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   refine ⟨max N 1,le_max_right _ _,?_⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   intro V U Γ Color _ _ _ _ _ _ hnN π hnoshort p k hp hk hphys q hq hQ s hs hS θ hθ hθ1 g j u u&#x27; hu</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hn : 0&lt;Fintype.card V := by omega</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hnR : (0:ℝ)&lt;Fintype.card V := Nat.cast_pos.mpr hn</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hh := thinnedCommonClassCount_common_event π p k hp hk hphys d hd q hq hQ s hs hS hnoshort</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     θ hθ hθ1 g j u u&#x27; hu (fun _ : Unit=&gt;Finset.univ) hn (ε*Fintype.card V) (by positivity)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   simp only [Fintype.card_unique,Nat.cast_one,mul_one] at hh</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have ht := hN (Fintype.card V) (by omega) 2 ((16*(d:ℝ)+14)^2*Fintype.card V)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (by norm_num) (by simp) (by positivity) le_rfl</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   apply ((sub_le_sub_left ht 1).trans hh).trans</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   apply finiteLaw_probability_mono</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   intro σ hσ b</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hc := (hσ b ()).le</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   simpa only [thinnedCommonClassCount_card,Finset.card_univ,thinnedCommonClass] using hc</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> </span>
+<span id="L43"><a href="#L43" class="ln">  43</a> end Oberwolfach</span></pre></html>

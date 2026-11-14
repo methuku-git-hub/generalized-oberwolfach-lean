@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MixedMatchedHubCount.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MixedMatchedHubCount.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MixedHubIndicatorTest</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! In the selected matching, the weighted test sum is literally the number</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> of selected candidates of the specified family and hub. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 10000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {I V W U:Type} [Fintype I] [Fintype V] [Fintype W] [DecidableEq I]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   [DecidableEq V] [DecidableEq W] [DecidableEq U] {E:I→Type}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [∀i,Fintype (E i)] [∀i,DecidableEq (E i)]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem mixed_matched_family_hub_count</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (R:∀i,E i→Finset V) (e:W↪V) (w:∀i,E i→ℝ) (i:I)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hub:∀j,E j→U) (u:U) (S:Finset V) (r:ℕ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hS:∀c,(R i c∩S).card=if hub i c=u then r else 0)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (η s n err countErr γ:ℝ) (hη:0≤η) (hγ:0≤γ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hdeg:∀v∈restrictedResourceSubset e S,</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       |hypergraphWeightedDegree (restrictedResourceSet (R i) e) (fun c=&gt;w i c.val) v-η|≤err)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hcount:|((restrictedResourceSubset e S).card:ℝ)-s*n|≤countErr)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hweight:∀j c,0≤w j c)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (M:Finset (RestrictedResource (mixedCandidateResources R) e)):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let g:=mixedHubIndicator hub i u</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let mass:=∑c:RestrictedResource (mixedCandidateResources R) e,</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       g c.val.1 c.val.2*mixedCandidateWeight w c.val</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let actual:=∑c∈M,g c.val.1 c.val.2</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let error:=(restrictedResourceSubset e S).card*err+η*countErr</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (1-γ)*mass≤actual→actual≤(1+γ)*mass→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     |(r:ℝ)*((M.filter (fun c=&gt;c.val.1=i ∧ hub c.val.1 c.val.2=u)).card:ℝ)-η*s*n|</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ≤error+γ*(|η*s*n|+error):=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   intro g mass actual error hlow hup</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hc:actual=((M.filter (fun c=&gt;c.val.1=i ∧ hub c.val.1 c.val.2=u)).card:ℝ):=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     exact mixed_hub_indicator_sum_is_card Subtype.val hub i u M</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have h:=mixed_matched_hub_test_count_deviation R e w i g (hub i) u S r</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (mixed_hub_indicator_other_family hub i u) (mixed_hub_indicator_same_family hub i u) hS</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     η s n err countErr γ hη hγ hdeg hcount hweight (fun j c=&gt;(mixed_hub_indicator_nonnegative hub i u j c).1) M hlow hup</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   change |(r:ℝ)*actual-η*s*n|≤error+γ*(|η*s*n|+error) at h</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   rw [hc] at h</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   exact h</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

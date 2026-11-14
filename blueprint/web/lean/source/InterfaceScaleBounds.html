@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>InterfaceScaleBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>InterfaceScaleBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.IntervalResidualMap</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SectorBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Bounds in the common part size for degree marginals and common neighbours. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem degree_marginal_scale {q n δ d : ℝ} (hq : 2 ≤ q) (hn : 0 &lt; n)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (ht : q * n ≤ (2 * q - 1) * δ) (hd : δ ≤ d) (hdn : d ≤ n) :</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (1 / (2 * q - 1)) * n ≤ d / q ∧ d / q ≤ (1 / q) * n := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hq0 : 0 &lt; q := by linarith</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hf : 0 &lt; 2 * q - 1 := by linarith</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   constructor</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   · rw [one_div_mul_eq_div, div_le_div_iff₀ hf hq0]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     nlinarith [mul_le_mul_of_nonneg_left hd hf.le]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   · rw [one_div_mul_eq_div]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     exact div_le_div_of_nonneg_right hdn hq0.le</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem intervalCommon_scale {X Y Z : Type*} [Fintype Y]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (L : X → Y → Prop) (R : Y → Z → Prop) (q δ : ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hq : 2 ≤ q) (ht : q * Fintype.card Y ≤ (2 * q - 1) * δ)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hdL : ∀ x, δ ≤ (Finset.univ.filter (L x)).card)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hdR : ∀ z, δ ≤ (Finset.univ.filter (fun y =&gt; R y z)).card)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (x : X) (z : Z) :</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (1 / (2 * q - 1)) * Fintype.card Y ≤ (intervalCommon L R x z : ℝ) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (intervalCommon L R x z : ℝ) ≤ (1 : ℝ) * Fintype.card Y := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hf : 0 &lt; 2 * q - 1 := by linarith</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hc : ((Finset.univ.filter (L x)).card : ℝ) +</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (Finset.univ.filter (fun y =&gt; R y z)).card ≤</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (intervalCommon L R x z : ℝ) + Fintype.card Y := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     exact_mod_cast intervalCommon_lower L R x z</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   constructor</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · rw [one_div_mul_eq_div, div_le_iff₀ hf]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hd : 2 * δ ≤ (intervalCommon L R x z : ℝ) + Fintype.card Y := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       linarith [hdL x, hdR z]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     nlinarith [mul_le_mul_of_nonneg_left hd hf.le]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   · rw [one_mul]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     exact_mod_cast Finset.card_le_univ (Finset.univ.filter (fun y =&gt; L x y ∧ R y z))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

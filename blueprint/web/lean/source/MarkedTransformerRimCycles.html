@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedTransformerRimCycles.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedTransformerRimCycles.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedTransformerBetweenRootsPaths</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedTwoRootPathCycles</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PermutationConflictDegree</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedPathParent</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Construct the two directed cycles for a root rim arc and its image.</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> The common path is chosen from the actual oriented host before its new hub.</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> Its marked position is retained through the canonical coordinate change. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 10000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V E K:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a>  theorem marked_transformer_rim_cycles</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (tail head:E→V) (ktail khead:K→V) (π:Equiv.Perm V) (b l:ℕ) (hl:2≤l)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (v w v&#x27; w&#x27;:V) (j:Bool) (W Z:Finset V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hv:v∈Z) (hw:w∈Z) (hv&#x27;:v&#x27;∈Z) (hw&#x27;:w&#x27;∈Z)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hvw:¬PermutationClose π b v w) (hvw&#x27;:¬PermutationClose π b v&#x27; w&#x27;) (c:ℝ)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hroot:if j then (∃ e,ktail e=v∧khead e=w)∧(∃ e,ktail e=v&#x27;∧khead e=w&#x27;)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       else (∃ e,tail e=v∧head e=w)∧(∃ e,tail e=v&#x27;∧head e=w&#x27;))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hopen:c≤((Finset.univ.filter (fun a=&gt;(∃ e,tail e=w∧head e=a)∧(∃ e,tail e=w&#x27;∧head e=a))).card:ℝ))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hclose:c≤((Finset.univ.filter (fun a=&gt;(∃ e,tail e=a∧head e=v)∧(∃ e,tail e=a∧head e=v&#x27;))).card:ℝ))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hstep:∀ t:Bool,∀ x,c≤((Finset.univ.filter (fun a=&gt;if t then ∃ e,ktail e=x∧khead e=a else ∃ e,tail e=x∧head e=a)).card:ℝ))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hjoin:∀ x y,x≠y→c≤((Finset.univ.filter (fun a=&gt;(∃ e,tail e=x∧head e=a)∧(∃ e,tail e=a∧head e=y))).card:ℝ))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hbudget:W.card+((Z.card:ℝ)+l+4)*(2*b+1)&lt;c):</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∃ p:Fin (l+3)↪V,∃ C D:MarkedCycleTuple tail head ktail khead (l+4) π b,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ i,C.val i=Fin.cons (α:=fun _=&gt;V) v (Fin.cons w p) (canonicalMarkedRotation (if j then 0 else 3) i))∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ i,D.val i=Fin.cons (α:=fun _=&gt;V) v&#x27; (Fin.cons w&#x27; p) (canonicalMarkedRotation (if j then 0 else 3) i))∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i,p i∉W∧p i∉Z∧∀ z∈Z,¬PermutationClose π b (p i) z)∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       PermutationSeparated π b p:=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let F:=permutationConflictGraph π b</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hF:∀ x,(F.degree x:ℝ)≤2*b:=by intro x;exact_mod_cast permutationConflictGraph_degree_le π b x</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨p,ho,hcl,hpa,hsp,havoid,hsep⟩:=marked_transformer_between_roots_path F</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (fun x y=&gt;∃ e,tail e=x∧head e=y) (fun x y=&gt;∃ e,ktail e=x∧khead e=y)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (fun (_:V) (_:Unit)=&gt;True) (fun (_:V) (_:Unit)=&gt;True) w w&#x27; v v&#x27; () () j false W Z l hl</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (2*b) c (by positivity) hF</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (by simpa only [and_true] using hopen) (by simpa only [Bool.false_eq_true,ite_false,and_true] using hclose)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (by intro t x;simpa only [ite_self,and_true] using hstep t x)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (by intro x y hxy;simpa only [and_true] using hjoin x y hxy) hbudget</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hfree:PermutationSeparated π b p:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     intro i k hik hc</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact hsep i k ⟨fun h=&gt;hik (p.injective h),hc⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hout (i:Fin (l+3)) (z:V) (hz:z∈Z):¬PermutationClose π b (p i) z:=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     intro hc</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact (havoid i).2.2 z hz ⟨fun he=&gt;(havoid i).2.1 (he ▸ hz),hc⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hcons (x y:V) (hx:x∈Z) (hy:y∈Z) (hxy:¬PermutationClose π b x y):</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       PermutationSeparated π b (Fin.cons x (Fin.cons y p)):=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     apply permutationSeparated_cons</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     · apply permutationSeparated_cons π b y p hfree</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       intro i hc</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       exact hout i y hy ((permutationClose_symm π b y (p i)).mp hc)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     · intro i</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       refine Fin.cases ?_ (fun k=&gt;?_) i</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       · exact hxy</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       · intro hc</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         exact hout k x hx ((permutationClose_symm π b x (p k)).mp hc)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hr₁:if j then ∃ e,ktail e=v∧khead e=w else ∃ e,tail e=v∧head e=w:=by cases j &lt;;&gt; exact hroot.1</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hr₂:if j then ∃ e,ktail e=v&#x27;∧khead e=w&#x27; else ∃ e,tail e=v&#x27;∧head e=w&#x27;:=by cases j &lt;;&gt; exact hroot.2</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   obtain ⟨C,hC⟩:=marked_cycle_from_two_root_path tail head ktail khead (l+2) (by omega) π b j v w p</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (hcons v w hv hw hvw) hr₁ ho.1 hcl.1 hpa</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨D,hD⟩:=marked_cycle_from_two_root_path tail head ktail khead (l+2) (by omega) π b j v&#x27; w&#x27; p</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (hcons v&#x27; w&#x27; hv&#x27; hw&#x27; hvw&#x27;) hr₂ ho.2 hcl.2 hpa</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   exact ⟨p,C,D,hC,hD,fun i=&gt;⟨(havoid i).1,(havoid i).2.1,hout i⟩,hfree⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a> </span>
+<span id="L68"><a href="#L68" class="ln">  68</a> end Oberwolfach</span></pre></html>

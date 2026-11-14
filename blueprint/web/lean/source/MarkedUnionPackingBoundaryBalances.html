@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedUnionPackingBoundaryBalances.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedUnionPackingBoundaryBalances.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedOutsidePackingBoundaryBalances</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPackingPhysicalUnion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The actual boundary classes after the constructed pair of disjoint</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> packings inherit the three row balances and exact hub ratio. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 12000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem marked_union_packing_boundary_balances</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {V U Gamma Color:Type} [Fintype V] [LinearOrder V] [Fintype U] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [Fintype Gamma] [Fintype Color]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d m:ℕ) (σ:RawMarkedOutcome V U Gamma Color)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (H:Bool→V→U→Prop) (hH:∀ x u,¬(H false x u∧H true x u)) (X:Finset V) (Z:Finset U):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let E:=MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let K:=MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) true</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let tail:=fun e:E=&gt;e.val.1</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let head:=fun e:E=&gt;e.val.2</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let ktail:=fun e:K=&gt;e.val.1</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let khead:=fun e:K=&gt;e.val.2;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∀ M N:Finset (MarkedWheel tail head ktail khead m π (3*d) (H false) (H true)),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀ W∈M,∀ W&#x27;∈M,W≠W&#x27;→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources W&#x27;))→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀ W∈N,∀ W&#x27;∈N,W≠W&#x27;→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources W&#x27;))→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     Disjoint (M.biUnion markedWheelPhysicalResources) (N.biUnion markedWheelPhysicalResources)→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀ a:E⊕K,Sum.elim tail ktail a∉X→Sum.elim head khead a∉X→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       Sum.inl (markedPhysicalEdge tail head ktail khead π a)∈M.biUnion markedWheelPhysicalResources∪N.biUnion markedWheelPhysicalResources)→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ x u,x∉X→u∉Z→H false x u∨H true x u→Sum.inr (x,u)∈M.biUnion markedWheelPhysicalResources∪N.biUnion markedWheelPhysicalResources)→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     MarkedRemainderDivisible tail head ktail khead (H true) Finset.univ</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (Finset.univ.filter (fun s:V×U=&gt;H false s.1 s.2∨H true s.1 s.2)) m→</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let DR:=markedPackingRimGraph M⊔markedPackingRimGraph N</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let DS:=ordinaryPhysicalGraph (markedPackingRimGraph M) (markedPackingSpokes M)⊔</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       ordinaryPhysicalGraph (markedPackingRimGraph N) (markedPackingSpokes N)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let σ&#x27;:=rawMarkedDeleteRims σ DR.edgeFinset</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let H&#x27;:=markedDeletePhysicalSpokes H DS;</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∀ v,v∉X→</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       let A₀:=markedEndpointLabels P π d X (false,true,v) σ&#x27;</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       let A₁:=markedEndpointLabels P π d X (true,true,v) σ&#x27;</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       let X₀:=markedEndpointLabels P π d X (false,false,v) σ&#x27;</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       let X₁:=markedEndpointLabels P π d X (true,false,v) σ&#x27;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       let Y₀:=Z.filter (H&#x27; false v)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       let Y₁:=Z.filter (H&#x27; true v);</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       Disjoint Y₀ Y₁∧A₀.card+A₁.card=Y₀.card+Y₁.card∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       X₀.card+X₁.card=Y₀.card+Y₁.card∧A₁.card=Y₁.card) ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (∀ u,u∉Z→</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       let Y:=X.filter (fun x=&gt;(H false x u∨H true x u)∧¬DS.Adj (Sum.inl x) (Sum.inr u));</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (Y.filter (H false · u)).card=m*(Y.filter (H true · u)).card) :=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro E K tail head ktail khead M N hM hN hMN hArcs hSpokes hdiv</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hmatch:=marked_packing_union_is_matching M N hM hN hMN</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hR:∀ a:E⊕K,Sum.elim tail ktail a∉X→Sum.elim head khead a∉X→</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       Sum.inl (markedPhysicalEdge tail head ktail khead π a)∈(M∪N).biUnion markedWheelPhysicalResources:=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     simpa only [Finset.union_biUnion] using hArcs</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hS:∀ x u,x∉X→u∉Z→H false x u∨H true x u→Sum.inr (x,u)∈(M∪N).biUnion markedWheelPhysicalResources:=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     simpa only [Finset.union_biUnion] using hSpokes</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have h:=marked_outside_packing_boundary_balances P π d m σ H hH X Z (M∪N) hmatch hR hS hdiv</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   dsimp only at h ⊢</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hphys:=markedPackingPhysicalGraph_union M N</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hrim:=markedPackingRimGraph_union M N</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   simp only [hphys] at h</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   convert h using 1 &lt;;&gt; try simp only [hrim]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   all_goals congr!</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   all_goals exact hrim.symm</span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

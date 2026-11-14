@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongMixedRawRealizationDef.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongMixedRawRealizationDef.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongMixedRestrictedComponents</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> set_option autoImplicit false</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option maxHeartbeats 6000000</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> def longRawRealizeComponent</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d m:ℕ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool) (ℓ:Fin K→ℕ):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     let state:=typedMarkedResourceState (rawMarkedPairRims P π d raw) (rawMarkedPairSpokes π d raw g j)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     let e:{z // z∈bernoulliVertexSet state}↪_:=Function.Embedding.subtype _</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∀i,RestrictedResource (longRawSeedResources (U:=U) π d m ℓ i) e→</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       LongRawRealizedWheel P π d m raw g j ℓ i :=by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   intro state e i W</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   cases i with</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   | none =&gt; exact rawMarkedRealization P π d m raw g j (longRawMarkedComponent π d m ℓ e W)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   | some i =&gt; exact W.val</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> end Oberwolfach</span></pre></html>

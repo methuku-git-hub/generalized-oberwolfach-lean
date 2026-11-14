@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVortexAbsorberCompatibleScales.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVortexAbsorberCompatibleScales.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Vortex shrinkage and regularity tolerances can be chosen after the</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> absorber tolerance and the level weight margin. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem marked_vortex_absorber_compatible_scales</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (α βmax εBal εRef εAbs:ℝ) (hα:0&lt;α) (hβmax:0&lt;βmax)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (hBal:0&lt;εBal) (hRef:0&lt;εRef) (hAbs:0&lt;εAbs):</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     ∃εQ βQ:ℝ,0&lt;εQ ∧ εQ&lt;1/4 ∧ εQ≤εAbs ∧</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>       0&lt;βQ ∧ βQ≤1/4 ∧ βQ≤α/4 ∧ βQ≤βmax ∧ βQ≤εBal/4 ∧ βQ≤εRef/4 := by</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   let εQ:=min (1/8:ℝ) (εAbs/2)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   let βQ:=min (1/8:ℝ) (min (α/4) (min βmax (min (εBal/4) (εRef/4))))</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have he:0&lt;εQ:=by dsimp [εQ];positivity</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hb:0&lt;βQ:=by dsimp [βQ];positivity</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have he1:εQ≤1/8:=min_le_left _ _</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hea:εQ≤εAbs/2:=min_le_right _ _</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hb1:βQ≤1/8:=min_le_left _ _</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hba:βQ≤α/4:=(min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hbb:βQ≤βmax:=(min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hbc:βQ≤εBal/4:=(min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _)))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hbd:βQ≤εRef/4:=(min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _)))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   exact ⟨εQ,βQ,he,(by linarith),(by linarith),hb,(by linarith),hba,hbb,hbc,hbd⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> end Oberwolfach</span></pre></html>

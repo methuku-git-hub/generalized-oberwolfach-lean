@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualFinalPathEndpoints.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualFinalPathEndpoints.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResidualActualData</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Both endpoints of each actual final path are prescribed and belong to</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> the previously embedded and residual source domains. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem actual_final_path_endpoints_prescribed</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {X K J:Type} [Fintype X] [DecidableEq X] [DecidableEq K] [DecidableEq J]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {F:SimpleGraph X} (data:ActualResidualData (K:=K) (J:=J) F)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hF:F.IsRegularOfDegree 2) (i:{i // i∈data.s₁}):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     data.start (.inl i)∈data.prescribed ∧ data.finish (.inl i)∈data.prescribed ∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     data.start (.inl i)∈data.oldDomain ∧ data.finish (.inl i)∈data.oldDomain ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     data.start (.inl i)∈data.remaining ∧ data.finish (.inl i)∈data.remaining:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hs:data.start (.inl i)∈data.prescribed:=by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     apply Finset.mem_union_left</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     apply Finset.mem_biUnion.mpr</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     refine ⟨i.val,i.property,?_⟩</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     change (data.P i.val).getVert 2 ∈ {(data.P i.val).getVert 2,(data.P i.val).getVert (2+data.c*data.d)}</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     simp</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hf:data.finish (.inl i)∈data.prescribed:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     apply Finset.mem_union_left</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     apply Finset.mem_biUnion.mpr</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     refine ⟨i.val,i.property,?_⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     change (data.P i.val).getVert (2+data.c*data.d) ∈ {(data.P i.val).getVert 2,(data.P i.val).getVert (2+data.c*data.d)}</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     simp</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hsub:data.prescribed⊆data.remaining:=(data.graph_facts hF).2.1</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨hs,hf,?_,?_,hsub hs,hsub hf⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · exact Finset.mem_union_left _ (Finset.mem_union_left _ (Finset.mem_union_left _ hs))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · exact Finset.mem_union_left _ (Finset.mem_union_left _ (Finset.mem_union_left _ hf))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExpandedGroupedPartitionViaTransfer.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExpandedGroupedPartitionViaTransfer.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ExpandedBinaryColourProjection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.GroupedProtectedPartitionTransfer</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Transfer the protected binary-partition event to the original expanded</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> sample when both colour densities have a positive lower bound. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> local instance groupedExpandedFin (n:ℕ):DecidableEq (Fin n):=Classical.decEq _</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> local instance (priority := 2000) groupedExpandedTwo : DecidableEq (Fin 2):=instDecidableEqFin 2</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem expanded_grouped_partition_via_transfer_high_probability</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (α r ξ:ℝ) (hα:0&lt;α) (hr:0&lt;r) (hξ:0&lt;ξ) (B:ℕ):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃N:ℕ,∀n:ℕ,N≤n→∀(U Γ Color:Type) [Fintype U] [Fintype Γ] [Fintype Color] [DecidableEq U]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (P Z:SimpleGraph (Fin n)) (D:ℕ) (m:Fin 2→ℕ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (p k p₂ k₂ u:ℝ) (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (d:ℕ) (hd:2≤d) (q:U→Γ→ℝ) (hq:∀w g,0≤q w g) (hQ:∀w,∑g,q w g≤1/8)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (s:U→Color→ℝ) (hs:∀w j,0≤s w j) (hS:∀w,∑j,s w j≤ intervalUncoveredProbability d (∑g,q w g))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       {R:(∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Γ Color e)→Type}</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       [∀σ,Fintype (R σ)] (ν:∀σ,FiniteLaw (R σ)),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       P.IsRegularOfDegree D→Even D→(1/2+α)*n≤(D:ℝ)→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∑a,m a)=D/2→(∀a,expandedBinaryProbability p k p₂ k₂ u a/2*D=(m a:ℝ))→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀a,r≤expandedBinaryProbability p k p₂ k₂ u a)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀v,(Z.degree v:ℝ)≤α/100000*n)→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=Fin n) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       1-1/(n:ℝ)^10≤(μ.sigma ν).probability (fun z=&gt;</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         GroupedProtectedPartitionEvent P Z m B ξ (fun e=&gt;(expandedBinaryClass (z.1 (Sum.inl e))).1)):=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   obtain ⟨N,hN⟩:=grouped_protected_partition_transfer α r ξ hα hr hξ B</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   refine ⟨N,?_⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   intro n hn U Γ Color _ _ _ _ P Z D m p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS R _ ν hreg heven hmin hsize hm hrho hZ μ</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let ρ:=expandedBinaryProbability p k p₂ k₂ u</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let hρ:=expanded_binary_probability_nonneg p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let ht:=expanded_binary_probability_sum p k p₂ k₂ u</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hN&#x27;:=hN n hn</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hdec:instDecidableEqFin n=groupedExpandedFin n:=Subsingleton.elim _ _</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   try rw [hdec] at hN&#x27;</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   apply hN&#x27; P Z D m ρ hρ ht hreg heven hmin hsize hm hrho hZ (μ.sigma ν)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (fun z e=&gt;(expandedBinaryClass (z.1 (Sum.inl e))).1)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   intro E</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   exact expanded_binary_colour_probability_after_retention p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS ν E</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> end Oberwolfach</span></pre></html>

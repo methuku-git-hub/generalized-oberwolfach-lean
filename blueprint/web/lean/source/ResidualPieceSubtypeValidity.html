@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ResidualPieceSubtypeValidity.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ResidualPieceSubtypeValidity.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResidualPieceSubtypeLift</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Lifting a source piece preserves its shape and its directed order. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> variable {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem subtype_piece_validity_reflected (R:Finset V)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (q:PrescribedSourcePiece {x // x∈R}) (D:V→V→Prop)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (h:(q.map Subtype.val).OriginalValid D):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     q.Shape ∧ q.OriginalValid (fun x y=&gt;D x.1 y.1) := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   cases q with</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   | path xs =&gt;</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     have hn:xs.Nodup := List.Nodup.of_map Subtype.val h.1</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     have hc:List.IsChain (fun x y=&gt;D x.1 y.1) xs := (List.isChain_map Subtype.val).1 h.2</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     exact ⟨hn,hn,hc⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   | cycle a xs =&gt;</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have hn:(a::xs).Nodup := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       apply List.Nodup.of_map Subtype.val</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       simpa [PrescribedSourcePiece.map,PrescribedSourcePiece.OriginalValid] using h.1</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     have hl:3≤(a::xs).length := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       simpa [PrescribedSourcePiece.map,PrescribedSourcePiece.OriginalValid] using h.2.1</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     have hc:List.IsChain (fun x y=&gt;D x.1 y.1) ((a::xs)++[a]) := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       apply (List.isChain_map Subtype.val).1</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       simpa [PrescribedSourcePiece.map,PrescribedSourcePiece.OriginalValid,List.map_append] using h.2.2</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     exact ⟨⟨hn,hl⟩,hn,hl,hc⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> end Oberwolfach</span></pre></html>

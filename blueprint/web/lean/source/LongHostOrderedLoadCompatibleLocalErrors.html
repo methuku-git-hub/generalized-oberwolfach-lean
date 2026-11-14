@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongHostOrderedLoadCompatibleLocalErrors.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongHostOrderedLoadCompatibleLocalErrors.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongHostOrderedLoadCompatibleTheta</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> set_option autoImplicit false</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option maxHeartbeats 2000000</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> open scoped BigOperators</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] referenceWitnessFinDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local irreducible] HostMatchingVortexContinuation SuppliedVortexFixedSpacingEventWithInnerColumn HostVortexFixedSpacingEventConclusionWithFirstInnerColumnMatchingAndOrderedLocalRetentionRates</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem long_host_ordered_with_load_compatible_local_errors</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (L₀:ℕ) (αHost ρ₀:ℝ) (hαHost:0&lt;αHost) (hρ₀:0&lt;ρ₀):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃b α:ℝ,0&lt;b ∧ 0&lt;α ∧ α/16≤b ∧ (∀ρ:ℝ,ρ₀/4≤ρ→b≤(ρ/40000)/16) ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃m r k₀:ℕ,∃hm:7≤m,∃hLm:L₀≤m,4/(m:ℝ)≤b/2 ∧ ∃heven:Even (m+1),∃hr:2≤r,</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃hrm:r+4=m,∃hlen:r+4+1=(k₀+2)*2,</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∃hmarginHost:successorCycleRatio k₀+αHost/4≤1/2+αHost/2,</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃A BM:ℝ,∃hA:0&lt;A,∃hBM:0&lt;BM,</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃αRef γRich ω pstarRef kstar tstar:ℝ,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     αRef=αHost/2 ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃hαRef:0&lt;αRef,∃hγRich:0&lt;γRich,∃hγRich1:γRich≤1/2,∃hγcap:γRich≤αRef,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∃hmargin:successorCycleRatio k₀+αRef/2≤1/2+αRef,</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃hω:0&lt;ω,∃hpstar:0&lt;pstarRef,∃hkstar:0&lt;kstar,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃htstar:0&lt;tstar,∃htstar100:tstar≤1/100,∃htstar1:tstar≤1,</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃hωBound:4*ω≤ρ₀,∃hpstarBound:4*(m:ℝ)*pstarRef≤ρ₀*(1/100),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∃htm:tstar≤(1/100)/(m:ℝ),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ρ:ℝ,ρ₀≤ρ→kstar≤ρ*(1/100)/2 ∧ kstar≤ρ*((1/100)/(m:ℝ))/2) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀(Qpow:ℕ) (hQpow:0&lt;Qpow) (δ θMax:ℝ) (hδ:0&lt;δ) (hθMax:0&lt;θMax),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∃θ:ℝ,∃hθ:0&lt;θ,∃hθmax:θ≤1/100,θ≤θMax ∧ θ≤δ/32 ∧ 10*θ≤δ ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀(ζretMax:ℝ) (hζretMax:0&lt;ζretMax),</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∃βList:ℝ,0&lt;βList ∧ βList≤1 ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∃d K:ℕ,∃hd:2≤d,∃hdlarge:(r+4)+2≤d,∃hK:3≤K,∃hK5:5≤K,∃hinv:1/(d:ℝ)≤θ/1024,</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∃hcut:(1/((((r+4):ℕ):ℝ)+1))/(d:ℝ)≤θ,</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     5/(((((r+4):ℕ):ℝ)+1)*(d:ℝ)+5)+((((r+4):ℕ):ℝ)+1)*(d:ℝ)/(K:ℝ)≤θ/2 ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     1/(8*(d:ℝ))≤θ/2 ∧ 1/(4*(d:ℝ))≤(5/64:ℝ)*θ^2 ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∃N:ℕ,∀n:ℕ,N≤n→5*(n:ℝ)^(3/4:ℝ)≤(5*θ^2*ρ₀/1024)*n) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (∀(ε δ lamMax ζMax:ℝ),0&lt;ε→0&lt;δ→0&lt;lamMax→0&lt;ζMax→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∃lam ζList:ℝ,0&lt;lam ∧ lam≤θ ∧ lam≤lamMax ∧ lam≤δ*ε/32 ∧ 0&lt;ζList ∧ ζList≤ζMax ∧ ζList≤lam/3 ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       ∃NList:ℕ,∀n≥NList,</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (n:ℝ)^(3/4:ℝ)+2*(2*((3*d:ℕ):ℝ)+1)≤αHost*(ρ₀/200)^2*n ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         βList*n+(n:ℝ)^(3/4:ℝ)≤αHost*(ρ₀/200)^2*n*θ ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (lam+2*ζList)*n+(n:ℝ)/(8*(d:ℝ))+2*(n:ℝ)^(3/4:ℝ)/d≤βList*n) ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∃ζret:ℝ,∃hζret:0&lt;ζret,ζret≤min ζretMax (θ/4096) ∧ ∃Nret:ℕ,</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (∀n:ℕ,Nret≤n→∀q errOrd:ℝ,</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       q≤1/((((r+4):ℕ):ℝ)+1)→errOrd≤θ*n→</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (n:ℝ)*q/d+(((((r+4)+1)*d-1:ℕ):ℝ))*(2*((n:ℝ)^(3/4:ℝ)/d)+ζret*n)+errOrd≤4*θ*n) ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     ∃BO:Fin K→ℝ,∃hBO:∀i,0&lt;BO i,</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     ∃hαmargin:2*αRef≤αHost,</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     ∃htstarBound:tstar≤(1/100)/(((r+4):ℕ):ℝ),</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     ∃hkBound&#x27;:∀ρ:ℝ,ρ₀≤ρ→kstar≤ρ*(1/100)/2 ∧ kstar≤ρ*((1/100)/(((r+4):ℕ):ℝ))/2,</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     HostVortexFixedSpacingEventConclusionWithFirstInnerColumnMatchingAndOrderedLocalRetentionRates r k₀ Qpow hr hQpow hlen</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       αRef (1/100) ω γRich tstar kstar hαRef (by norm_num) (by norm_num) hω</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       hmargin hγRich hγRich1 hγcap htstar htstar1 htstar100 hkstar</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       K hK (by simpa only [hrm] using hm) θ ρ₀ hθ hθmax hρ₀ hωBound ζret hζret d hd hcut BM hBM BO hBO αHost A hαHost hαmargin htstarBound hkBound&#x27; :=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   obtain ⟨b,α,hb,hα,hαb,hρ,m,r,k₀,hm,hLm,hpath,heven,hr,hrm,hlen,hmarginHost,A,BM,hA,hBM,</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     αRef,γRich,ω,pstarRef,kstar,tstar,hEq,hαRef,hγRich,hγRich1,hγcap,hmargin,hω,hpstar,hkstar,</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     htstar,htstar100,htstar1,hωBound,hpstarBound,htm,hkBound,hLate⟩:=</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     long_host_ordered_with_load_compatible_theta L₀ αHost ρ₀ hαHost hρ₀</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   refine ⟨b,α,hb,hα,hαb,hρ,m,r,k₀,hm,hLm,hpath,heven,hr,hrm,hlen,hmarginHost,A,BM,hA,hBM,</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     αRef,γRich,ω,pstarRef,kstar,tstar,hEq,hαRef,hγRich,hγRich1,hγcap,hmargin,hω,hpstar,hkstar,</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     htstar,htstar100,htstar1,hωBound,hpstarBound,htm,hkBound,?_⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   intro Qpow hQpow δ θMax hδ hθMax</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   obtain ⟨θ,hθ,hθmax,hθcap,hθlocal,hθδ,hNext⟩:=hLate Qpow hQpow δ θMax hδ hθMax</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   refine ⟨θ,hθ,hθmax,hθcap,hθlocal,hθδ,?_⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   intro ζretMax hζretMax</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hcap:0&lt;min ζretMax (θ/4096):=by positivity</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   exact hNext (min ζretMax (θ/4096)) hcap</span>
+<span id="L68"><a href="#L68" class="ln">  68</a> end Oberwolfach</span></pre></html>

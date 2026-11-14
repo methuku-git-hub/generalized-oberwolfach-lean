@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawIntervalSpokeDegrees.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawIntervalSpokeDegrees.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawIntervalSpokeMatrix</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ConfigurationFailureMargins</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.GoodPlacementEvents</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Minimum degrees on both sides of the actual ordinary spoke sample,</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> with a common event and a threshold uniform over all marginal arrays. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 1000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem rawIntervalSpokeMatrix_degree_event</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (pstar ω : ℝ) (hpstar : 0&lt;pstar) (hω : 0&lt;ω) (d q₀ : ℕ) (hd : 2≤d) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∃ N : ℕ,∀ (V U Γ Color : Type)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [DecidableEq V] [DecidableEq U],</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       N≤Fintype.card V → ω*Fintype.card V≤(Fintype.card U:ℝ) → Fintype.card U≤Fintype.card V →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ (π : Equiv.Perm V)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (q : U → Γ → ℝ) (hq : ∀ u g,0≤q u g) (hQ : ∀ u,∑ g,q u g≤1/8)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (s : U → Color → ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (j : Color),(∀ x k,0&lt;k → k&lt;2*d+1 → (π^k) x≠x) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀ pH : ℝ,pstar≤pH → (∀ u,s u j=pH) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     1-1/(Fintype.card V:ℝ)^q₀≤</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (FiniteLaw.pi (rawIntervalFamilyLaw (V:=V) d hd q hq hQ s hs hS)).probability (fun σ=&gt;</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (∀ v : V,pstar*(Fintype.card U:ℝ)/2≤((∑ u,rawIntervalSpokeMatrix π d σ j v u:ℕ):ℝ)) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (∀ u : U,pstar*(Fintype.card V:ℝ)/2≤((∑ v,rawIntervalSpokeMatrix π d σ j v u:ℕ):ℝ))) := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let ε := min (pstar/4) (pstar*ω/4)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hε : 0&lt;ε := lt_min (by positivity) (by positivity)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨N,hN⟩ := linear_deviation_failure_eventually_small 1 ((4*(d:ℝ)+3)^2) ε</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (by positivity) hε 1 (q₀+1)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   refine ⟨max N 2,?_⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro V U Γ Color _ _ _ _ _ _ hnN hmlo hmhi π q hq hQ s hs hS j hnoshort pH hpH hj</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let n := Fintype.card V</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hn : 0&lt;n := by dsimp [n];omega</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hn0 : (0:ℝ)&lt;n := by exact_mod_cast hn</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hm0 : (0:ℝ)&lt;Fintype.card U := (mul_pos hω hn0).trans_le hmlo</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hm : 0&lt;Fintype.card U := by exact_mod_cast hm0</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hmhiR : (Fintype.card U:ℝ)≤n := by exact_mod_cast hmhi</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let μ := FiniteLaw.pi (rawIntervalFamilyLaw (V:=V) d hd q hq hQ s hs hS)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hrows := rawIntervalLabelCount_common_event π d hd q hq hQ s hs hS hnoshort hm j</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (fun v : V=&gt;({v}:Finset V))</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (by intro v x hx y hy hxy;simp only [Finset.mem_singleton] at hx hy;exact (hxy (hx.trans hy.symm)).elim)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (fun v=&gt;Finset.singleton_nonempty v) 1 (by omega) (by intro v;simp) (ε*n) (by positivity)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   simp only [Finset.card_singleton,pow_one,hj,Finset.sum_const,Finset.card_univ,nsmul_eq_mul,</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     Nat.cast_one,one_mul] at hrows</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hcols := rawIntervalNeighbourCount_common_event π d hd q hq hQ s hs hS hnoshort hn j</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (fun _ : U=&gt;(Finset.univ : Finset V)) (fun u : U=&gt;({u}:Finset U))</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (fun u=&gt;Finset.singleton_nonempty u) 1 (by omega) (by intro u;simp) (ε*n) (by positivity)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   simp only [Finset.card_univ,Finset.prod_singleton,hj,Nat.cast_one,one_mul] at hcols</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have htrow := hN n (by dsimp [n] at *;omega) n ((4*(d:ℝ)+3)^2*Fintype.card U)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     hn0.le (by simp) (by positivity) (mul_le_mul_of_nonneg_left hmhiR (by positivity))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have htcol := hN n (by dsimp [n] at *;omega) (Fintype.card U) ((4*(d:ℝ)+3)^2*n)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (by positivity) (by simpa using hmhiR) (by positivity) le_rfl</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hrprob : 1-1/(n:ℝ)^(q₀+1)≤μ.probability</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (fun σ=&gt;∀ v : V,|rawIntervalLabelCount π d σ j {v}-(Fintype.card U:ℝ)*pH|&lt;ε*n) :=</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (sub_le_sub_left htrow 1).trans hrows</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hcprob : 1-1/(n:ℝ)^(q₀+1)≤μ.probability</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (fun σ=&gt;∀ u : U,|rawIntervalNeighbourCount π d σ j Finset.univ {u}-(n:ℝ)*pH|&lt;ε*n) :=</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (sub_le_sub_left htcol 1).trans hcols</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hjoint := finiteLaw_good_intersection μ</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (fun σ=&gt;∀ v : V,|rawIntervalLabelCount π d σ j {v}-(Fintype.card U:ℝ)*pH|&lt;ε*n)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     _ (1/(n:ℝ)^(q₀+1)) hcprob</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hjoint&#x27; : 1-2/(n:ℝ)^(q₀+1)≤μ.probability</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (fun σ=&gt;(∀ v : V,|rawIntervalLabelCount π d σ j {v}-(Fintype.card U:ℝ)*pH|&lt;ε*n) ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         (∀ u : U,|rawIntervalNeighbourCount π d σ j Finset.univ {u}-(n:ℝ)*pH|&lt;ε*n)) := by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hh := (sub_le_sub_right hrprob (1/(n:ℝ)^(q₀+1))).trans hjoint</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     convert hh using 1 &lt;;&gt; ring</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hsum := scaled_inverse_power_le n q₀ hn 2 (by exact_mod_cast (show 2≤n by dsimp [n];omega))</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   apply ((sub_le_sub_left hsum 1).trans hjoint&#x27;).trans</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   apply finiteLaw_probability_mono</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   intro σ hσ</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   constructor</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   · intro v</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     rw [rawIntervalSpokeMatrix_row]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hh := (abs_lt.mp (hσ.1 v)).1</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     have hmul := mul_le_mul_of_nonneg_right hpH hm0.le</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     have hεω := mul_le_mul_of_nonneg_right (min_le_right (pstar/4) (pstar*ω/4)) hn0.le</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     have hscale := mul_le_mul_of_nonneg_left hmlo hpstar.le</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     dsimp only [ε] at hh</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     nlinarith only [hh,hmul,hεω,hscale,mul_pos hpstar hm0]</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   · intro u</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     rw [rawIntervalSpokeMatrix_col]</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     have hh := (abs_lt.mp (hσ.2 u)).1</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     have hmul := mul_le_mul_of_nonneg_right hpH hn0.le</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     have hεn := mul_le_mul_of_nonneg_right (min_le_left (pstar/4) (pstar*ω/4)) hn0.le</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     dsimp only [ε] at hh</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     nlinarith only [hh,hmul,hεn,mul_pos hpstar hn0]</span>
+<span id="L91"><a href="#L91" class="ln">  91</a> </span>
+<span id="L92"><a href="#L92" class="ln">  92</a> end Oberwolfach</span></pre></html>

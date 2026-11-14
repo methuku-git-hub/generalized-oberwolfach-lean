@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedMappedRealizationsRootPair.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedMappedRealizationsRootPair.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.IndexedMarkedRealizationRootPair</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.IndexedMarkedRealizationVertexMap</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! An actual edge-preserving vertex map supplies a marked transformer</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> input. The image may identify vertices; its edge occurrences remain</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> injective, as required by the host realisation. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 20000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V₀ U₀ V₁ U₁ V U E K A S:Type}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [Fintype V₀] [Fintype U₀] [Fintype V₁] [Fintype U₁] [Fintype A] [Fintype S]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [Fintype V] [Fintype U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     [DecidableEq V₀] [DecidableEq U₀] [DecidableEq V] [DecidableEq U]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b m:ℕ}</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem marked_mapped_realizations_root_pair</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (G:IndexedMarkedGraph V₀ U₀ A S) (G&#x27;:IndexedMarkedGraph V₁ U₁ A S) (hG:G.IsBalanced m)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (R:IndexedMarkedHostRealization G tail head ktail khead H₀ HK π b)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (T:IndexedMarkedHostRealization G&#x27; tail head ktail khead H₀ HK π b)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (f:V₀→V₁) (g:U₀→U₁) (he:G.map f g=G&#x27;)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hRi:Function.Injective R.rows) (hHi:Function.Injective R.hubs)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (B:Finset U) (hRB:R.hubSet⊆B) (hTB:T.hubSet⊆B)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hd:Disjoint R.rowSet T.rowSet) (hh:Disjoint R.hubSet T.hubSet)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hs:∀ v∈R.rowSet,∀ w∈T.rowSet,¬PermutationClose π b v w):</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∃ P:MarkedRootPair tail head ktail khead H₀ HK π b m A S,</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       P.source=R.resources∧P.image=T.resources∧P.R=R.rowSet∧P.R&#x27;=T.rowSet∧P.B=B:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let T&#x27;:=IndexedMarkedHostRealization.ofVertexMap G T f g he</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hrow:∀ v,T&#x27;.rows v∈T.rowSet:=fun v=&gt;T.row_mem (f v)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hhub:∀ u,T&#x27;.hubs u∈B:=fun u=&gt;hTB (T.hub_mem (g u))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hdiff:∀ s,R.hubs (G.hub s)≠T&#x27;.hubs (G.hub s):=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     intro s heq</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     exact Finset.disjoint_left.mp hh (R.hub_mem (G.hub s)) (heq.symm ▸ T.hub_mem (g (G.hub s)))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let P:=indexedMarkedRealizationRootPair G hG R T&#x27; hRi hHi R.rowSet T.rowSet B</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     R.row_mem hrow (fun u=&gt;hRB (R.hub_mem u)) hhub hd hs hdiff</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hp:=indexedMarkedRealizationRootPair_endpoints G hG R T&#x27; hRi hHi R.rowSet T.rowSet B</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     R.row_mem hrow (fun u=&gt;hRB (R.hub_mem u)) hhub hd hs hdiff</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨P,hp.1,?_,rfl,rfl,rfl⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   exact hp.2.trans (IndexedMarkedHostRealization.resources_ofVertexMap G T f g he)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> </span>
+<span id="L43"><a href="#L43" class="ln">  43</a> end Oberwolfach</span></pre></html>

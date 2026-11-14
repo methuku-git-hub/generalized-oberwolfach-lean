@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongAssignmentManuscriptTolerances.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongAssignmentManuscriptTolerances.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongAssignmentUniformTolerances</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A smaller fixed hub-count tolerance suffices simultaneously for the</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> ordinary assignment and the manuscript&#x27;s sharp test-mass estimate. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 3000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem long_assignment_manuscript_tolerances_exist</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (t₀ τ₀ Δ₀ C eps:ℝ) (ht₀:0&lt;t₀) (hτ₀:0&lt;τ₀) (hΔ₀:0&lt;Δ₀) (hC:0≤C) (heps:0&lt;eps):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃t₁ τ₁ Δ₁ ξ:ℝ,0&lt;t₁ ∧ t₁≤t₀ ∧ 0&lt;τ₁ ∧ τ₁≤τ₀ ∧ 0&lt;Δ₁ ∧ Δ₁≤Δ₀ ∧</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       0&lt;ξ ∧ ξ≤1/128 ∧ 4*ξ≤eps/2 ∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       ∀t τ x:ℝ,0≤t→t≤t₁→0≤τ→τ≤τ₁→0≤x→x≤Δ₁→</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>         0≤t+C*x+4*τ ∧ t+C*x+4*τ≤eps/2 :=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   obtain ⟨t₁,τ₁,Δ₁,ξ₀,ht,htle,hτ,hτle,hΔ,hΔle,hξ,_,hξeps,herror⟩:=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     long_assignment_uniform_tolerances_exist t₀ τ₀ Δ₀ C eps ht₀ hτ₀ hΔ₀ hC heps</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   let ξ:=min ξ₀ (1/128:ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hξpos:0&lt;ξ:=lt_min hξ (by norm_num)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hξ0:ξ≤ξ₀:=min_le_left _ _</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hξbound:ξ≤1/128:=min_le_right _ _</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hξeps&#x27;:4*ξ≤eps/2:=by linarith</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   exact ⟨t₁,τ₁,Δ₁,ξ,ht,htle,hτ,hτle,hΔ,hΔle,hξpos,hξbound,hξeps&#x27;,herror⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> end Oberwolfach</span></pre></html>

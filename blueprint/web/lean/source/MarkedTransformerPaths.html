@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedTransformerPaths.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedTransformerPaths.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedTransformerBetweenRootsPaths</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Actual shared paths for a marked spoke-edge or vertex-wheel pair.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> Both attachments see the two old roots. An internal marked head, if present,</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> has marked spokes at both hubs; all other free vertices have ordinary spokes. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 10000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a>  theorem marked_transformer_common_path (F:SimpleGraph V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (R₀ RK:V→V→Prop) (H₀ HK:V→U→Prop) (v v&#x27;:V) (u u&#x27;:U) (j:Bool)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (W Z:Finset V) (hv:v∈Z) (hv&#x27;:v&#x27;∈Z) (l:ℕ) (hl:2≤l)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (d c:ℝ) (hd:0≤d) (hF:∀ x,(F.degree x:ℝ)≤d)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hopen:c≤((Finset.univ.filter (fun a=&gt;R₀ v a∧R₀ v&#x27; a∧H₀ a u∧H₀ a u&#x27;)).card:ℝ))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hclose:c≤((Finset.univ.filter (fun a=&gt;(if j then RK a v∧RK a v&#x27; else R₀ a v∧R₀ a v&#x27;)∧H₀ a u∧H₀ a u&#x27;)).card:ℝ))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hstep:∀ t:Bool,∀ x,c≤((Finset.univ.filter (fun a=&gt;</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (if t then RK x a else R₀ x a)∧(if t then HK a u∧HK a u&#x27; else H₀ a u∧H₀ a u&#x27;))).card:ℝ))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hjoin:∀ x y,x≠y→c≤((Finset.univ.filter (fun a=&gt;R₀ x a∧R₀ a y∧H₀ a u∧H₀ a u&#x27;)).card:ℝ))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hbudget:W.card+((Z.card:ℝ)+l+4)*(d+1)&lt;c):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃ p:Fin (l+3)↪V,</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (R₀ v (p 0)∧R₀ v&#x27; (p 0))∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (if j then RK (p (Fin.last (l+2))) v∧RK (p (Fin.last (l+2))) v&#x27;</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>        else R₀ (p (Fin.last (l+2))) v∧R₀ (p (Fin.last (l+2))) v&#x27;)∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ i:Fin (l+2),if j=false∧i.val=1 then RK (p i.castSucc) (p i.succ)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         else R₀ (p i.castSucc) (p i.succ))∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ i,if j=false∧i.val=2 then HK (p i) u∧HK (p i) u&#x27;</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         else H₀ (p i) u∧H₀ (p i) u&#x27;)∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i,p i∉W∧p i∉Z∧∀ z∈Z,¬F.Adj (p i) z)∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       ∀ i k,¬F.Adj (p i) (p k):=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   exact marked_transformer_between_roots_path F R₀ RK H₀ HK v v&#x27; v v&#x27; u u&#x27; j j</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     W Z l hl d c hd hF hopen hclose hstep hjoin hbudget</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a> end Oberwolfach</span></pre></html>

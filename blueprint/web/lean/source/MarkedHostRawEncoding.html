@@ -1,0 +1,80 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHostRawEncoding.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHostRawEncoding.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedHostRimEncoding</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawMarkedPairRestriction</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Encoding a modified typed host keeps every original interval coordinate.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> On a protected inner row set the original physical coordinates can also be</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> kept exactly. The operation makes no assertion about a new probability law. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 12000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V W U Z E K Γ Color : Type}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [Fintype V] [Fintype W] [Fintype U] [Fintype Z] [Fintype Γ] [Fintype Color]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [LinearOrder V] [LinearOrder W] [DecidableEq U] [DecidableEq Z]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> def rawMarkedEncodeHost (tail head:E → V) (ktail khead:K → V) (π:Equiv.Perm V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (σ:RawMarkedOutcome V U Γ Color) (I:Finset V) : RawMarkedOutcome V U Γ Color</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   | Sum.inl e=&gt;if e.toFinset⊆I then σ (Sum.inl e) else markedHostRimEncoding tail head ktail khead π e</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   | Sum.inr e=&gt;σ (Sum.inr e)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem rawMarkedEncodeHost_spokes</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (tail head:E → V) (ktail khead:K → V) (π:Equiv.Perm V)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (σ:RawMarkedOutcome V U Γ Color) (I:Finset V) (d:ℕ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (g:Γ) (j:Color) (mark:Bool) (v:V) (u:U) :</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     rawMarkedPairSpokes π d (rawMarkedEncodeHost tail head ktail khead π σ I) g j mark v u ↔</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       rawMarkedPairSpokes π d σ g j mark v u := Iff.rfl</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem rawMarkedEncodeHost_inner_coordinates</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (tail head:E → V) (ktail khead:K → V) (π:Equiv.Perm V)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (σ:RawMarkedOutcome V U Γ Color) (I:Finset V) (e:Sym2 V) (he:e.toFinset⊆I) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     rawMarkedEncodeHost tail head ktail khead π σ I (Sum.inl e)=σ (Sum.inl e) := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   simp only [rawMarkedEncodeHost,ite_eq_left he]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> theorem rawMarkedEncodeHost_restrict</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (tail head:E → V) (ktail khead:K → V) (π:Equiv.Perm V)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (σ:RawMarkedOutcome V U Γ Color) (I:Finset V)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (f:W → V) (g:Z → U) (hf:∀ w,f w∈I) :</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     rawMarkedRestrictPair f g (rawMarkedEncodeHost tail head ktail khead π σ I)=</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       rawMarkedRestrictPair f g σ := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   funext c</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   cases c with</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   | inl e=&gt;</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     induction e using Sym2.ind with</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     | _ x y=&gt;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       change (if s(f x,f y).toFinset⊆I then σ (Sum.inl s(f x,f y)) else _) = _</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       rw [ite_eq_left (by simpa only [Sym2.toFinset_mk_eq,Finset.insert_subset_iff,Finset.singleton_subset_iff] using And.intro (hf x) (hf y))]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       rfl</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   | inr e=&gt;rfl</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> theorem rawMarkedEncodeHost_rims</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (tail head:E → V) (ktail khead:K → V)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hE:∀ e,¬PermutationClose π (3*d) (tail e) (head e)∧P.Adj (tail e) (head e))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (hK:∀ e,¬PermutationClose π (3*d) (ktail e) (khead e)∧P.Adj (ktail e) (π (khead e)))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (σ:RawMarkedOutcome V U Γ Color) (I:Finset V) (hI:∀ v,π v∈I↔v∈I)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (hAgree:∀ mark x y,x∈I → y∈I →</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (markedPhysicalRim P π (3*d) (fun e=&gt;σ (Sum.inl e)) mark x y=1 ↔</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (if mark then ∃ e:K,ktail e=x∧khead e=y else ∃ e:E,tail e=x∧head e=y)))</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (mark:Bool) (x y:V) :</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     markedPhysicalRim P π (3*d) (fun e=&gt;rawMarkedEncodeHost tail head ktail khead π σ I (Sum.inl e)) mark x y=1 ↔</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (if mark then ∃ e:K,ktail e=x∧khead e=y else ∃ e:E,tail e=x∧head e=y) := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hm : s(x,if mark then π y else y).toFinset⊆I ↔ x∈I∧y∈I := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     rw [Sym2.toFinset_mk_eq,Finset.insert_subset_iff,Finset.singleton_subset_iff]</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     cases mark &lt;;&gt; simp only [Bool.false_eq_true,↓reduceIte,hI]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   by_cases hin:x∈I∧y∈I</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   · rw [markedPhysicalRim_eq_one_iff]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hh:=hAgree mark x y hin.1 hin.2</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     rw [markedPhysicalRim_eq_one_iff] at hh</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     simpa only [rawMarkedEncodeHost,ite_eq_left (hm.mpr hin)] using hh</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   · rw [markedPhysicalRim_eq_one_iff]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have hh:=markedHostRimEncoding_arcs P π (3*d) tail head ktail khead hp hE hK mark x y</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     rw [markedPhysicalRim_eq_one_iff] at hh</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     simpa only [rawMarkedEncodeHost,ite_eq_right (fun hh=&gt;hin (hm.mp hh))] using hh</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> </span>
+<span id="L77"><a href="#L77" class="ln">  77</a> end Oberwolfach</span></pre></html>

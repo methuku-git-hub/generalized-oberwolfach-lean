@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EndpointFactorSelection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EndpointFactorSelection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointFactorGraphChoice</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SelectionCandidateBudget</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Select physical edge-disjoint local factors and retain their original</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> cycle identifiers. This deterministic step is used only after its robust</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> single-factor input has been constructed on the common sampling event. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 4500000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem select_endpoint_factors (p:ℝ) (hp:0&lt;p):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃ N:ℕ,∀ (V:Type) [Fintype V] [DecidableEq V],N≤Fintype.card V→</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∀ (L:ℕ) (Q F:SimpleGraph V) (S T Y:Fin L→Finset V) (hST:∀ i,Disjoint (S i) (T i)),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (∀ i j,i≠j→((Y i∩Y j).card:ℝ)≤p^2*Fintype.card V)→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∀ v,((Finset.univ.filter (fun i=&gt;v∈Y i)).card:ℝ)≤p*Fintype.card V)→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ i,∀ K:SimpleGraph V,K≤spanningRestriction Q (Y i)→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (∀ v,(K.degree v:ℝ)≤2*(p*Real.sqrt p*Fintype.card V)+</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         2*(Nat.ceil (4*(p*Real.sqrt p*Fintype.card V)):ℝ))→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ∃ D:Finset (EndpointTriangle Q F (S i) (T i)),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         ((∀ C∈D,∀ E∈D,C≠E→Disjoint (endpointTriangleVertices C) (endpointTriangleVertices E)) ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>           D.biUnion endpointTriangleVertices=Y i) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         endpointFactorGraph (hST i) D≤spanningRestriction Q (Y i) ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         (∀ v,(endpointFactorGraph (hST i) D).degree v≤2) ∧ Disjoint (endpointFactorGraph (hST i) D) K)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∃ D:∀ i,Finset (EndpointTriangle Q F (S i) (T i)),</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ i,(∀ C∈D i,∀ E∈D i,C≠E→Disjoint (endpointTriangleVertices C) (endpointTriangleVertices E)) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (D i).biUnion endpointTriangleVertices=Y i) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ i j,i≠j→Disjoint (endpointFactorGraph (hST i) (D i)) (endpointFactorGraph (hST j) (D j))) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       ∀ v,((⨆ i,endpointFactorGraph (hST i) (D i)).degree v:ℝ)≤2*(p*Fintype.card V):=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨N,hN,hselect⟩:=bounded_degree_selection_from_single_copy p hp</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   refine ⟨N,?_⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   intro V _ _ hn L Q F S T Y hST hinter hmem hsingle</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let family:Fin L→Set (SimpleGraph V):=fun i G=&gt;∃ D:Finset (EndpointTriangle Q F (S i) (T i)),</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ((∀ C∈D,∀ E∈D,C≠E→Disjoint (endpointTriangleVertices C) (endpointTriangleVertices E)) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       D.biUnion endpointTriangleVertices=Y i) ∧ endpointFactorGraph (hST i) D=G</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hchoice (i:Fin L) (K:SimpleGraph V) (hK:K≤spanningRestriction Q (Y i))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (hdeg:∀ v,(K.degree v:ℝ)≤(2:ℕ)*(p*Real.sqrt p*Fintype.card V)+</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (2:ℕ)*(Nat.ceil (4*(p*Real.sqrt p*Fintype.card V)):ℝ)):</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       ∃ G:SimpleGraph V,G∈family i ∧ G≤spanningRestriction Q (Y i) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (∀ v,G.degree v≤2) ∧ Disjoint G K:=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     obtain ⟨D,hD,hsub,hdegree,havoid⟩:=hsingle i K hK (by simpa only [Nat.cast_ofNat] using hdeg)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     exact ⟨endpointFactorGraph (hST i) D,⟨D,hD,rfl⟩,hsub,hdegree,havoid⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨G,hG,hdis,hdegree⟩:=hselect V hn L 2 Q Y family hinter hmem hchoice</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hrep (i:Fin L):∃ D:Finset (EndpointTriangle Q F (S i) (T i)),</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       ((∀ C∈D,∀ E∈D,C≠E→Disjoint (endpointTriangleVertices C) (endpointTriangleVertices E)) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         D.biUnion endpointTriangleVertices=Y i) ∧ endpointFactorGraph (hST i) D=G i:=(hG i).1</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   choose D hD using hrep</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨D,fun i=&gt;(hD i).1,?_,?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · intro i j hij;rw [(hD i).2,(hD j).2];exact hdis i j hij</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   · intro v</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have he:(⨆ i,endpointFactorGraph (hST i) (D i))=(⨆ i,G i):=iSup_congr (fun i=&gt;(hD i).2)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     rw [he]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     simpa only [Nat.cast_ofNat] using hdegree v</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> </span>
+<span id="L57"><a href="#L57" class="ln">  57</a> end Oberwolfach</span></pre></html>

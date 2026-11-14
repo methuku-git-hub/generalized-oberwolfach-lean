@@ -1,0 +1,34 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongAssignedSpokeFailureUniform.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongAssignedSpokeFailureUniform.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteSeedFailureMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A fixed linear hub-count tolerance makes the spoke-count failure</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> uniformly small before the vertex order and hub set are chosen. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 3000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem eventually_assigned_spoke_failure_below</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (d:ℕ) (ξ δ:ℝ) (hξ:0&lt;ξ) (hδ:0&lt;δ):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃N:ℕ,∀n:ℕ,N≤n→∀U:Type,[Fintype U]→Fintype.card U≤n→</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       4*(Fintype.card U:ℝ)*Real.exp</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>         (-2*(ξ*(n:ℝ))^2/((4*(d:ℝ)+3)^2*(n:ℝ)))&lt;δ :=by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   let c:ℝ:=2*ξ^2/(4*(d:ℝ)+3)^2</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hc:0&lt;c:=by dsimp [c]; positivity</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   obtain ⟨N,hN⟩:=eventually_any_polynomial_exponential_failure_below 4 c δ 1 hc hδ</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   refine ⟨max N 1,?_⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   intro n hn U _ hu</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hnN:N≤n:=(le_max_left _ _).trans hn</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hnpos:0&lt;(n:ℝ):=by exact_mod_cast (show 0&lt;n by omega)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hexp:-2*(ξ*(n:ℝ))^2/((4*(d:ℝ)+3)^2*(n:ℝ))= -c*(n:ℝ):=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     dsimp [c]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     field_simp</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     &lt;;&gt; ring</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   rw [hexp]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hcard:(Fintype.card U:ℝ)≤n:=by exact_mod_cast hu</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hmul:=mul_le_mul_of_nonneg_right hcard (Real.exp_nonneg (-c*(n:ℝ)))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hh:=hN n hnN</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   simp only [pow_one] at hh</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   nlinarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> end Oberwolfach</span></pre></html>

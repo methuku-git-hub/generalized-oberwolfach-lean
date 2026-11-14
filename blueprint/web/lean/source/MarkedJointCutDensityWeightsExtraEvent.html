@@ -1,0 +1,390 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedJointCutDensityWeightsExtraEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedJointCutDensityWeightsExtraEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedActualParentCutsTargetEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedActualParentSpokeAgreementEvent</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedActualParentFullNeighbourhoodEvent</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedActualNextActiveNonDeeperHubsRowsEvent</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedActualNextActiveNonDeeperHubsLoadEvent</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.MarkedJointParentWeightsOrderedSeparateScales</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> import Oberwolfach.MarkedActualNextActiveAllParentHubsConfigurationEvent</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> import Oberwolfach.MarkedJointActualReferenceActiveParentLoadOrdered</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> import Oberwolfach.MarkedJointActualReferenceActiveParentLoad</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> import Oberwolfach.MarkedActualJointBalanceWitness</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> import Oberwolfach.MarkedActualInnerBalanceWitness</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> import Oberwolfach.MarkedBalanceReferenceEventBudget</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> import Oberwolfach.MarkedActualInnerCutEvent</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> import Oberwolfach.MarkedActualParentConfigurationEvent</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> import Oberwolfach.MarkedActualParentCommonConfigurationEvent</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> /-! Reference, absorber, load and both balance estimates on one retained outcome. -/</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> set_option autoImplicit false</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> set_option maxHeartbeats 60000000</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> open scoped BigOperators</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> noncomputable section</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> namespace Oberwolfach</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem marked_joint_actual_reference_all_levels_with_extra_event</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (r h k₀:ℕ) (hr:2≤r) (hlen:r+4+1=(k₀+2)*2)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (α ρ₀ sstar tstar kstar:ℝ)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hα:0&lt;α) (hα1:α≤1) (hρ₀:0&lt;ρ₀) (hsstar:0&lt;sstar) (htstar:0&lt;tstar) (htstar1:tstar≤1)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (horder:tstar≤sstar) (hkstar:0&lt;kstar)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hmargin:successorCycleRatio k₀+α/4≤1/2+α/2)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     :</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∃ εAbs ζAbs δAbs:ℝ,0&lt;εAbs ∧ 0&lt;ζAbs ∧ 0&lt;δAbs ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∃ βconfig βCommon:ℝ,0&lt;βconfig ∧ 0&lt;βCommon ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∀ tolRef pstarRef ζActive τ tolLocal ζLocal τParent tolParent ζParent epsBal ζBal ζCut ζCfg rowErr:ℝ,</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     0&lt;tolRef→0&lt;pstarRef→pstarRef≤ρ₀*tstar/4→0&lt;ζActive→</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     0&lt;τ→0&lt;tolLocal→0&lt;ζLocal→0&lt;τParent→0&lt;tolParent→0&lt;ζParent→0&lt;epsBal→0&lt;ζBal→0&lt;ζCut→0&lt;ζCfg→0&lt;rowErr→</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∃ βmax:ℝ,0&lt;βmax ∧ ∀ ζCommon:ℝ,0&lt;ζCommon→</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∀ εref δref β ε:ℝ,</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     0&lt;εref→0&lt;δref→0≤β→β≤βmax→β≤εref/4→0&lt;ε→ε&lt;1/4→</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     ∀ ζWide ζRow:ℝ,0&lt;ζWide→0&lt;ζRow→∀ (d:ℕ) (hd:2≤d),∃ m₀:ℕ,1≤m₀ ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     ∀ size:ℕ,∃ a₀ b₀ e₀:ℕ,∀ f₀:ℕ,∃ n₀:ℕ,</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     ∀ (V U:Type) [Fintype V] [Fintype U] [LinearOrder V] [DecidableEq U]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (G:SimpleGraph V) (D m:ℕ),G.IsRegularOfDegree D→∀ (hn:0&lt;Fintype.card V),</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (1/2+α)*Fintype.card V≤(D:ℝ)→∀ (hρlo:ρ₀≤ initialIndexDensity U D) (hρhi:initialIndexDensity U D≤1),</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     m₀≤m→n₀≤Fintype.card V→m≤Fintype.card V→∀ (Q:Vortex U G D β ε m) (π:Equiv.Perm V)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (hpres:∀ i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i),</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (∀ x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)→∀ L:ℕ,L&lt;Q.length→</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     letI : Nonempty V:=Fintype.card_pos_iff.mp hn</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let W:=fun i=&gt;markedVortexVertexType Q i</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     let Z:=fun i=&gt;markedVortexHubType Q i</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let A:∀ i,Finset (W i):=fun i=&gt;Finset.univ\markedVortexInnerVertices Q i</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     let B:∀ i,Finset (Z i):=fun i=&gt;Finset.univ\markedVortexInnerHubs Q i</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     let X:=fun i=&gt;↥(A i)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     let f:=fun i=&gt;markedVortexActiveVertexEmbedding Q i</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     let g:=fun i=&gt;markedVortexActiveHubEmbedding Q i</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     let ρ:=fun i=&gt;markedVortexActivePermutation Q π hpres i</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     let Dactive:=fun i=&gt;2*((B i).card:ℝ)/initialIndexDensity U D</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     let pstarLocal:=ρ₀*sstar/(2*((r+4:ℕ):ℝ))</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     let fParent:=markedVortexVertexEmbedding Q</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     let gParent:=markedVortexHubEmbedding Q</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     let gWide:=markedVortexNonDeeperHubToPhysical Q</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     let ρParent:=markedVortexPermutation Q π hpres</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     let Dparent:=fun i=&gt;2*(Fintype.card (Z i):ℝ)/initialIndexDensity U D;</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     ∃ weightParent:∀ i,(Fin (r+4+1)→W i)→ℝ,</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     ∃ weight:∀ i,(Fin (r+4+1)→X i)→ℝ,</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (∀ i≤L,SuccessorSequenceWeightConditions (G.comap (fParent i)) (ρParent i) (3*d)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (Dparent i) τParent (successorWeightLower k₀ (α/4)) (successorWeightUpper k₀ (α/4)) (weightParent i)) ∧</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (∀ i≤L+1,SuccessorSequenceWeightConditions (G.comap (f i)) (ρ i) (3*d)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (Dactive i) τ (successorWeightLower k₀ (α/4)) (successorWeightUpper k₀ (α/4)) (weight i)) ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     ∀ (Γ Color:Type) [Fintype Γ] [Fintype Color] (s₀:ℝ) (hslo:sstar≤s₀) (hshi:s₀≤1/100),</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     let dens:=initialIndexDensity U D</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     let densities:=marked_seed_density_bounds (r+4) (by omega) dens s₀ ρ₀ sstar hρ₀ hsstar hρlo hρhi hslo hshi</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     let p:=dens*s₀/2</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     let kval:=p/((r+4:ℕ):ℝ);</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     kstar≤p→kstar≤kval→</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     ∀ (q:U→Γ→ℝ) (hq:∀ u a,0≤q u a) (hQ:∀ u,∑ a,q u a≤1/8)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a)) (a:Γ) (j:Color),</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       (∀ u,q u a=s₀/((r+4:ℕ):ℝ))→(∀ u,s u j=s₀)→tstar≤s₀/((r+4:ℕ):ℝ)→</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     let Eref:=MarkedReferenceActiveAbsorberProperty r h d (α/2) βconfig εref δref tolRef ζActive ζAbs tstar εAbs</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       size a₀ b₀ e₀ f₀ G D m β ε Q π hpres L s₀ p kval q s a j</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     let EParent:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       (∀ i≤L,∀ δ:ℝ,0≤δ→∀ (DR:SimpleGraph (W i)) (DS:SimpleGraph (W i⊕Z i)),</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>         (∀ x,(DR.degree x:ℝ)≤δ)→(∀ x,(DS.degree x:ℝ)≤δ)→</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>         MarkedPackingLoadsWithSpokes (G.comap (fParent i)) (ρParent i) d (r+4) (Dparent i) p kval s₀ (weightParent i) a j</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>           (Function.Embedding.refl (Z i)) (fun u=&gt;q (gParent i u)) (fun u=&gt;s (gParent i u))</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>           (τParent+tolParent+11*(((r+4:ℕ):ℝ)+1)^4*(2*successorWeightUpper k₀ (α/4)/pstarLocal^(2*(r+4)+1))*ζParent+</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>             33*(((r+4:ℕ):ℝ)+1)^4*(2*successorWeightUpper k₀ (α/4)/pstarLocal^(2*(r+4)+1))*δ/Fintype.card (W i))</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>           (rawMarkedDeleteRims (rawMarkedRestrictPair (fParent i) (gParent i) z.1) DR.edgeFinset)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>           (markedDeletePhysicalSpokes</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>             (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>               (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (fParent i x) (gParent i u)) DS)) ∧</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>         (∀ i≤L+1,MarkedLocalSpokeLoadsWithSpokes (G.comap (f i)) (ρ i) d (r+4) (Dactive i) p kval s₀ (weight i)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>         (τ+tolLocal+5*(((r+4:ℕ):ℝ)+1)^4*(2*successorWeightUpper k₀ (α/4)/pstarLocal^(2*(r+4)+1))*ζLocal)</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>         (rawMarkedRestrictPair (f i) (g i) z.1)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>         (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f i x) (g i u))) ∧ Eref z;</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     let fCut:=fun i=&gt;markedVortexVertexEmbedding Q (i+1)</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     let gCut:=fun i=&gt;markedVortexHubEmbedding Q (i+1)</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     let ρCut:=fun i=&gt;markedVortexPermutation Q π hpres (i+1)</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     let ECut:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;∀ i≤L,</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       MarkedCutFamiliesWithSpokes (G.comap (fCut i)) (ρCut i) d (α/2) p kval tstar ζCut</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>         (rawMarkedRestrictPair (fCut i) (gCut i) z.1)</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>         (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (fCut i x) (gCut i u));</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     let EConfig:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;∀ i≤L,</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       MarkedLocalConfigurationsWithSpokes r (G.comap (fParent i)) (ρParent i) d Finset.univ</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>         (markedLocalCycleCoefficient r (α/2) (tstar/2) kstar-(r+5:ℕ)*ζCfg)</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>         (markedLocalPathCoefficient r (α/2) (tstar/2) kstar-(r+4:ℕ)*ζCfg)</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>         (rawMarkedRestrictPair (fParent i) (gParent i) z.1)</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>         (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (fParent i x) (gParent i u));</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     let EActive:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;∀ i≤L,</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>       MarkedLocalConfigurationsWithSpokes r (G.comap (f (i+1))) (ρ (i+1)) d Finset.univ</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>         (markedLocalCycleCoefficient r (α/2) (tstar/2) kstar-(r+5:ℕ)*ζCfg)</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>         (markedLocalPathCoefficient r (α/2) (tstar/2) kstar-(r+4:ℕ)*ζCfg)</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>         (rawMarkedRestrictPair (f (i+1)) (gParent i) z.1)</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>         (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f (i+1) x) (gParent i u));</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     let EWide:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;∀ i≤L,</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>       MarkedLocalSpokeLoadsWithSpokes (G.comap (f (i+1))) (ρ (i+1)) d (r+4) (Dactive (i+1)) p kval s₀ (weight (i+1))</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>         (τ+tolLocal+5*(((r+4:ℕ):ℝ)+1)^4*(2*successorWeightUpper k₀ (α/4)/pstarLocal^(2*(r+4)+1))*(4/ε)*ζWide)</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>         (rawMarkedRestrictPair (f (i+1)) (gWide i) z.1)</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>         (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f (i+1) x) (gWide i u));</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     let ERow:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;∀ i≤L,</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>       MarkedRowsWithSpokes (G.comap (f (i+1))) (ρ (i+1)) d 1 Finset.univ p kval</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>         (fun u=&gt;q (gWide i u)) (fun u=&gt;s (gWide i u)) a j ((rowErr+ζRow)*Fintype.card (X (i+1)))</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>         (rawMarkedRestrictPair (f (i+1)) (gWide i) z.1)</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>         (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f (i+1) x) (gWide i u));</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     let ECommon:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;∀ i≤L,</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>       MarkedCommonConfigurationsWithSpokes r (G.comap (fParent i)) (ρParent i) d βCommon ζCommon</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>         (rawMarkedRestrictPair (fParent i) (gParent i) z.1)</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>         (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (fParent i x) (gParent i u));</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     let EFull:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;∀ i≤L,</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>       MarkedRowsWithSpokes (G.comap (fParent i)) (ρParent i) d (r+12) Finset.univ p kval</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>         (fun u=&gt;q (gParent i u)) (fun u=&gt;s (gParent i u)) a j</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>         ((tolRef+(r+12:ℕ)*ζActive)*Fintype.card (W i))</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>         (rawMarkedRestrictPair (fParent i) (gParent i) z.1)</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>         (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (fParent i x) (gParent i u)) ∧</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>       MarkedIndicesWithSpokes (ρParent i) d (r+12) Finset.univ</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>         (fun u=&gt;q (gParent i u)) (fun u=&gt;s (gParent i u)) a j</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>         ((tolRef+(r+12:ℕ)*ζActive)*Fintype.card (Z i))</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>         (rawMarkedRestrictPair (fParent i) (gParent i) z.1)</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>         (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (fParent i x) (gParent i u));</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>     let EAgreement:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;∀ i≤L,</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>       let ω:=rawMarkedRestrictPair (fParent i) (gParent i) z.1</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>       let H:=fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>         (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (fParent i x) (gParent i u);</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>       (∀ b x,(∑ u,if ¬(rawMarkedPairSpokes (ρParent i) d ω a j b x u↔H b x u) then (1:ℝ) else 0)≤ζActive*Fintype.card (Z i)) ∧</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>       (∀ b u,(∑ x,if ¬(rawMarkedPairSpokes (ρParent i) d ω a j b x u↔H b x u) then (1:ℝ) else 0)≤ζActive*Fintype.card (W i));</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>     let EActualCuts:=fun z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a=&gt;∀ i≤L,</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>       MarkedReferenceCutFamilies (G.comap (fParent i)) (ρParent i) d a j (α/8) p kval</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>         (s₀/((r+4:ℕ):ℝ)) (rawMarkedRestrictPair (fParent i) (gParent i) z.1);</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>     ∀ Extra:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a→Prop,</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>       99/100≤(rawMarkedRetentionLaw π d hd a p kval (densities.1.trans_le densities.2.1).le</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>         (densities.1.trans_le densities.2.2.1).le densities.2.2.2.2.2.2.2.2 q hq hQ s hs hS).probability Extra →</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>     ∃ z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a,</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>       0&lt;(rawMarkedRetentionLaw π d hd a p kval (densities.1.trans_le densities.2.1).le</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>         (densities.1.trans_le densities.2.2.1).le densities.2.2.2.2.2.2.2.2 q hq hQ s hs hS).mass z ∧ Extra z ∧</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>       MarkedActualVortexBalanceProperty Q π hpres d (r+4) L a j epsBal ζBal</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>         (markedVortexInnerVertices Q) (markedVortexInnerHubs Q) z ∧</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>       (L=0 ∨ MarkedActualVortexBalanceProperty Q π hpres d (r+4) (L-1) a j epsBal ζBal</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>         (markedVortexDeeperVertices Q) (markedVortexDeeperHubs Q) z) ∧ EActualCuts z ∧ EAgreement z ∧ EFull z ∧ ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z  :=by</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>   obtain ⟨βCommon,βcommon,hβCommon,hβcommon,hcommon⟩:=marked_actual_parent_common_configuration_event r (r+4) (by omega) (by omega)</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>     α ρ₀ sstar tstar kstar (1/100) 1 hα hα1 hρ₀ hsstar htstar htstar1 hkstar (by norm_num)</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>   obtain ⟨εAbs,ζAbs,δAbs,hεAbs,hζAbs,hδAbs,βconfig,hβconfig,hparent⟩:=</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>     marked_joint_actual_reference_active_parent_load_ordered_with_weights_separate_scales r h k₀ 1 hr hlen α ρ₀ sstar tstar kstar</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>       hα hα1 hρ₀ hsstar htstar htstar1 horder hkstar hmargin</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>   refine ⟨εAbs,ζAbs,δAbs,hεAbs,hζAbs,hδAbs,βconfig,βCommon,hβconfig,hβCommon,?_⟩</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a>   intro tolRef pstarRef ζActive τ tolLocal ζLocal τParent tolParent ζParent epsBal ζBal ζCut ζCfg rowErr</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>     htolRef hpstarRef hpstarRefBound hζActive hτ htolLocal hζLocal hτParent htolParent hζParent hepsBal hζBal hζCut hζCfg hrowErr</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>   obtain ⟨βparent,hβparent,hparent⟩:=hparent</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>       tolRef (1/100) 1 pstarRef ζActive τ tolLocal (1/100) 1 ζLocal τParent tolParent (1/100) 1 ζParent</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>       htolRef (by norm_num) hpstarRef hpstarRefBound hζActive hτ htolLocal (by norm_num) hζLocal hτParent htolParent (by norm_num) hζParent</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>   obtain ⟨βbalance,hβbalance,hbalance⟩:=marked_actual_joint_balance_witness (r+4) (by omega) α ρ₀ sstar tstar epsBal ζBal</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>     hα hρ₀ hsstar htstar hepsBal hζBal</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>   obtain ⟨βcut,hβcut,hcut⟩:=marked_actual_inner_cut_event (r+4) (by omega) α ρ₀ sstar tstar kstar (1/100) 1 ζCut</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>     hα hα1 hρ₀ hsstar htstar htstar1 hkstar (by norm_num) hζCut</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>   obtain ⟨βinner,hβinner,hinner⟩:=marked_actual_inner_balance_witness (r+4) (by omega) α ρ₀ sstar tstar epsBal ζBal</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a>     hα hρ₀ hsstar htstar hepsBal hζBal</span>
+<span id="L185"><a href="#L185" class="ln"> 185</a>   obtain ⟨βcfg,hβcfg,hcfg⟩:=marked_actual_parent_configuration_event r (r+4) (by omega) (by omega)</span>
+<span id="L186"><a href="#L186" class="ln"> 186</a>     α ρ₀ sstar tstar kstar (1/100) 1 ζCfg hα hα1 hρ₀ hsstar htstar htstar1 hkstar (by norm_num) hζCfg</span>
+<span id="L187"><a href="#L187" class="ln"> 187</a>   obtain ⟨βactive,hβactive,hactive⟩:=marked_actual_next_active_all_parent_hubs_configuration_event r (r+4) (by omega) (by omega)</span>
+<span id="L188"><a href="#L188" class="ln"> 188</a>     α ρ₀ sstar tstar kstar (1/100) 1 ζCfg hα hα1 hρ₀ hsstar htstar htstar1 hkstar (by norm_num) hζCfg</span>
+<span id="L189"><a href="#L189" class="ln"> 189</a>   have hUpper:0&lt;successorWeightUpper k₀ (α/4):=(successorWeightConstants_pos k₀ (α/4) (by positivity)).2</span>
+<span id="L190"><a href="#L190" class="ln"> 190</a>   obtain ⟨βwide,hβwide,hwide⟩:=marked_actual_next_active_nondeeper_hubs_load_event r (r+4) (by omega) (by omega)</span>
+<span id="L191"><a href="#L191" class="ln"> 191</a>     α ρ₀ sstar tstar kstar (1/100) 1 τ (successorWeightLower k₀ (α/4)) (successorWeightUpper k₀ (α/4)) tolLocal</span>
+<span id="L192"><a href="#L192" class="ln"> 192</a>     hα hα1 hρ₀ hsstar htstar htstar1 hkstar (by norm_num) hUpper htolLocal</span>
+<span id="L193"><a href="#L193" class="ln"> 193</a>   obtain ⟨βrow,hβrow,hrow⟩:=marked_actual_next_active_nondeeper_hubs_rows_event r (r+4) (by omega) (by omega)</span>
+<span id="L194"><a href="#L194" class="ln"> 194</a>     α ρ₀ sstar tstar kstar (1/100) 1 rowErr hα hα1 hρ₀ hsstar htstar htstar1 hkstar (by norm_num) hrowErr</span>
+<span id="L195"><a href="#L195" class="ln"> 195</a>   let βmax:=min βparent (min βbalance (min βcut (min βinner (min βcfg (min βcommon (min βactive (min βwide βrow)))))))</span>
+<span id="L196"><a href="#L196" class="ln"> 196</a>   let βcap:=min βmax (min (1/4) (α/8))</span>
+<span id="L197"><a href="#L197" class="ln"> 197</a>   refine ⟨βcap,by dsimp [βcap,βmax];positivity,?_⟩</span>
+<span id="L198"><a href="#L198" class="ln"> 198</a>   intro ζCommon hζCommon εref δref β ε hεref hδref hb hbcap hbε he he1 ζWide ζRow hζWide hζRow d hd</span>
+<span id="L199"><a href="#L199" class="ln"> 199</a>   have hbmax:β≤βmax:=hbcap.trans (min_le_left _ _)</span>
+<span id="L200"><a href="#L200" class="ln"> 200</a>   have hbquarter:β≤1/4:=hbcap.trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L201"><a href="#L201" class="ln"> 201</a>   have hbα:β≤α/8:=hbcap.trans ((min_le_right _ _).trans (min_le_right _ _))</span>
+<span id="L202"><a href="#L202" class="ln"> 202</a>   have hbparent:β≤βparent:=hbmax.trans (min_le_left _ _)</span>
+<span id="L203"><a href="#L203" class="ln"> 203</a>   have hbbalance:β≤βbalance:=hbmax.trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L204"><a href="#L204" class="ln"> 204</a>   have hbcut:β≤βcut:=hbmax.trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _)))</span>
+<span id="L205"><a href="#L205" class="ln"> 205</a>   have hbinner:β≤βinner:=hbmax.trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))))</span>
+<span id="L206"><a href="#L206" class="ln"> 206</a>   have hbcfg:β≤βcfg:=hbmax.trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _)))))</span>
+<span id="L207"><a href="#L207" class="ln"> 207</a>   have hbcommon:β≤βcommon:=hbmax.trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))))))</span>
+<span id="L208"><a href="#L208" class="ln"> 208</a>   have hbactive:β≤βactive:=hbmax.trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _)))))))</span>
+<span id="L209"><a href="#L209" class="ln"> 209</a>   have hbwide:β≤βwide:=hbmax.trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))))))))</span>
+<span id="L210"><a href="#L210" class="ln"> 210</a>   have hbrow:β≤βrow:=hbmax.trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _))))))))</span>
+<span id="L211"><a href="#L211" class="ln"> 211</a>   obtain ⟨mParent,hmParent,hparent⟩:=hparent εref δref (1/100) β ε hεref hδref (by norm_num) hb hbparent hbε he he1 d hd</span>
+<span id="L212"><a href="#L212" class="ln"> 212</a>   obtain ⟨NBalance,hNBalance,mBalance,hmBalance,hbalance⟩:=hbalance ε he he1.le d hd</span>
+<span id="L213"><a href="#L213" class="ln"> 213</a>   obtain ⟨NCut,hNCut,hcut⟩:=hcut d hd</span>
+<span id="L214"><a href="#L214" class="ln"> 214</a>   obtain ⟨mCut,hmCut,hcut⟩:=hcut ε he he1.le</span>
+<span id="L215"><a href="#L215" class="ln"> 215</a>   obtain ⟨NInner,hNInner,mInner,hmInner,hinner⟩:=hinner ε he he1.le d hd</span>
+<span id="L216"><a href="#L216" class="ln"> 216</a>   obtain ⟨NCfg,hNCfg,hcfg⟩:=hcfg d hd</span>
+<span id="L217"><a href="#L217" class="ln"> 217</a>   obtain ⟨mCfg,hmCfg,hcfg⟩:=hcfg ε he he1.le</span>
+<span id="L218"><a href="#L218" class="ln"> 218</a>   obtain ⟨NCommon,hNCommon,hcommon⟩:=hcommon ζCommon hζCommon d hd</span>
+<span id="L219"><a href="#L219" class="ln"> 219</a>   obtain ⟨mCommon,hmCommon,hcommon⟩:=hcommon ε he he1.le</span>
+<span id="L220"><a href="#L220" class="ln"> 220</a>   obtain ⟨NActive,mActive,hNActive,hmActive,hactive⟩:=hactive d hd ε he he1.le</span>
+<span id="L221"><a href="#L221" class="ln"> 221</a>   obtain ⟨NWide,mWide,hNWide,hmWide,hwide⟩:=hwide d hd ε he he1.le ζWide hζWide</span>
+<span id="L222"><a href="#L222" class="ln"> 222</a>   obtain ⟨NRow,mRow,hNRow,hmRow,hrow⟩:=hrow d hd ε he he1.le ζRow hζRow</span>
+<span id="L223"><a href="#L223" class="ln"> 223</a>   obtain ⟨mFull,hmFull,hfull⟩:=marked_actual_parent_full_neighbourhood_event (r+12) d hd β ε ρ₀ tolRef (1/100) 1 pstarRef ζActive</span>
+<span id="L224"><a href="#L224" class="ln"> 224</a>     hb hbquarter he he1 hρ₀ htolRef (by norm_num) hpstarRef hζActive</span>
+<span id="L225"><a href="#L225" class="ln"> 225</a>   obtain ⟨mAgree,hmAgree,hagree⟩:=marked_actual_parent_spoke_agreement_event d hd β ε ρ₀ 1 pstarRef ζActive</span>
+<span id="L226"><a href="#L226" class="ln"> 226</a>     hb hbquarter he he1 hρ₀ hpstarRef hζActive</span>
+<span id="L227"><a href="#L227" class="ln"> 227</a>   obtain ⟨mActual,hmActual,hactual⟩:=marked_actual_parent_cuts_target_event α ρ₀ tstar kstar (1/100)</span>
+<span id="L228"><a href="#L228" class="ln"> 228</a>     hα hα1 hρ₀ htstar htstar1 hkstar (by norm_num) β ε hb hbα hbquarter he he1 d hd</span>
+<span id="L229"><a href="#L229" class="ln"> 229</a>   let m₀:ℕ:=mActual + mAgree + mFull + mParent + mBalance + mCut + mInner + mCfg + mCommon + mActive + mWide + mRow + 1</span>
+<span id="L230"><a href="#L230" class="ln"> 230</a>   have hm₀:1≤m₀:=by dsimp [m₀];omega</span>
+<span id="L231"><a href="#L231" class="ln"> 231</a>   refine ⟨m₀,hm₀,?_⟩</span>
+<span id="L232"><a href="#L232" class="ln"> 232</a>   intro size</span>
+<span id="L233"><a href="#L233" class="ln"> 233</a>   obtain ⟨a₀,b₀,e₀,hparent⟩:=hparent size</span>
+<span id="L234"><a href="#L234" class="ln"> 234</a>   refine ⟨a₀,b₀,e₀,?_⟩</span>
+<span id="L235"><a href="#L235" class="ln"> 235</a>   intro f₀</span>
+<span id="L236"><a href="#L236" class="ln"> 236</a>   obtain ⟨nParent,hparent⟩:=hparent f₀</span>
+<span id="L237"><a href="#L237" class="ln"> 237</a>   let n₀:ℕ:=nParent + NBalance + NCut + NInner + NCfg + NCommon + NActive + NWide + NRow + 800</span>
+<span id="L238"><a href="#L238" class="ln"> 238</a>   refine ⟨n₀,?_⟩</span>
+<span id="L239"><a href="#L239" class="ln"> 239</a>   intro V U _ _ _ _ G D m hreg hn hD hρlo hρhi hm hnBound hmn Q π hpres hshort L hL W Z A B X f g ρ Dactive pstarLocal fParent gParent gWide ρParent Dparent</span>
+<span id="L240"><a href="#L240" class="ln"> 240</a>   letI : Nonempty V:=Fintype.card_pos_iff.mp hn</span>
+<span id="L241"><a href="#L241" class="ln"> 241</a>   have hmActual&#x27;:mActual≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L242"><a href="#L242" class="ln"> 242</a>   have hmAgree&#x27;:mAgree≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L243"><a href="#L243" class="ln"> 243</a>   have hmFull&#x27;:mFull≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L244"><a href="#L244" class="ln"> 244</a>   have hmParent&#x27;:mParent≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L245"><a href="#L245" class="ln"> 245</a>   have hmBalance&#x27;:mBalance≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L246"><a href="#L246" class="ln"> 246</a>   have hmCut&#x27;:mCut≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L247"><a href="#L247" class="ln"> 247</a>   have hmInner&#x27;:mInner≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L248"><a href="#L248" class="ln"> 248</a>   have hmCfg&#x27;:mCfg≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L249"><a href="#L249" class="ln"> 249</a>   have hmCommon&#x27;:mCommon≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L250"><a href="#L250" class="ln"> 250</a>   have hmActive&#x27;:mActive≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L251"><a href="#L251" class="ln"> 251</a>   have hmWide&#x27;:mWide≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L252"><a href="#L252" class="ln"> 252</a>   have hmRow&#x27;:mRow≤m:=by dsimp [m₀] at hm;omega</span>
+<span id="L253"><a href="#L253" class="ln"> 253</a>   have hnParent&#x27;:nParent≤Fintype.card V:=by dsimp [n₀] at hnBound;omega</span>
+<span id="L254"><a href="#L254" class="ln"> 254</a>   have hnBalance:NBalance≤Fintype.card V:=by dsimp [n₀] at hnBound;omega</span>
+<span id="L255"><a href="#L255" class="ln"> 255</a>   have hnCut:NCut≤Fintype.card V:=by dsimp [n₀] at hnBound;omega</span>
+<span id="L256"><a href="#L256" class="ln"> 256</a>   have hnInner:NInner≤Fintype.card V:=by dsimp [n₀] at hnBound;omega</span>
+<span id="L257"><a href="#L257" class="ln"> 257</a>   have hnCfg:NCfg≤Fintype.card V:=by dsimp [n₀] at hnBound;omega</span>
+<span id="L258"><a href="#L258" class="ln"> 258</a>   have hnCommon:NCommon≤Fintype.card V:=by dsimp [n₀] at hnBound;omega</span>
+<span id="L259"><a href="#L259" class="ln"> 259</a>   have hnActive:NActive≤Fintype.card V:=by dsimp [n₀] at hnBound;omega</span>
+<span id="L260"><a href="#L260" class="ln"> 260</a>   have hnWide:NWide≤Fintype.card V:=by dsimp [n₀] at hnBound;omega</span>
+<span id="L261"><a href="#L261" class="ln"> 261</a>   have hnRow:NRow≤Fintype.card V:=by dsimp [n₀] at hnBound;omega</span>
+<span id="L262"><a href="#L262" class="ln"> 262</a>   have hn800:800≤Fintype.card V:=by dsimp [n₀] at hnBound;omega</span>
+<span id="L263"><a href="#L263" class="ln"> 263</a>   obtain ⟨weightParent,weight,hwParent,hw,hparent⟩:=hparent V U G D m hreg hn hD hρlo hρhi hmParent&#x27; hnParent&#x27; hmn Q π hpres hshort L hL</span>
+<span id="L264"><a href="#L264" class="ln"> 264</a>   refine ⟨weightParent,weight,hwParent,hw,?_⟩</span>
+<span id="L265"><a href="#L265" class="ln"> 265</a>   intro Γ Color _ _ s₀ hslo hshi dens densities p kval hpmin hkmin q hq hQ s hs hS a j hq0 hs0 htlo Eref EParent fCut gCut ρCut ECut EConfig EActive EWide ERow ECommon EFull EAgreement EActualCuts Extra hExtraEvent</span>
+<span id="L266"><a href="#L266" class="ln"> 266</a>   let μ:=rawMarkedRetentionLaw π d hd a p kval (densities.1.trans_le densities.2.1).le</span>
+<span id="L267"><a href="#L267" class="ln"> 267</a>     (densities.1.trans_le densities.2.2.1).le densities.2.2.2.2.2.2.2.2 q hq hQ s hs hS</span>
+<span id="L268"><a href="#L268" class="ln"> 268</a>   have hp:=hparent Γ Color s₀ hslo hshi hpmin hkmin q hq hQ s hs hS a j hq0 hs0 htlo</span>
+<span id="L269"><a href="#L269" class="ln"> 269</a>   have hnpos:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn</span>
+<span id="L270"><a href="#L270" class="ln"> 270</a>   have hpow:(Fintype.card V:ℝ)^(-(1:ℝ))=1/(Fintype.card V:ℝ):=by</span>
+<span id="L271"><a href="#L271" class="ln"> 271</a>     rw [Real.rpow_neg hnpos.le,Real.rpow_one,one_div]</span>
+<span id="L272"><a href="#L272" class="ln"> 272</a>   have hbound:1-(1/10:ℝ)-5*(Fintype.card V:ℝ)^(-(1:ℝ))-9*(Fintype.card V:ℝ)^(-(1:ℝ))≤μ.probability EParent:=by</span>
+<span id="L273"><a href="#L273" class="ln"> 273</a>     change 1-(1/100:ℝ)-(Fintype.card V:ℝ)^(-(1:ℝ))-((1/100:ℝ)+(Fintype.card V:ℝ)^(-(1:ℝ))+((1/100:ℝ)+2*(1/100:ℝ)+2*(Fintype.card V:ℝ)^(-(1:ℝ))+2/(Fintype.card V:ℝ)^1))≤μ.probability EParent at hp</span>
+<span id="L274"><a href="#L274" class="ln"> 274</a>     rw [hpow] at hp ⊢</span>
+<span id="L275"><a href="#L275" class="ln"> 275</a>     have hnonneg:0≤1/(Fintype.card V:ℝ):=by positivity</span>
+<span id="L276"><a href="#L276" class="ln"> 276</a>     simp only [pow_one] at hp</span>
+<span id="L277"><a href="#L277" class="ln"> 277</a>     have htwo:(2:ℝ)/(Fintype.card V:ℝ)=2*(1/(Fintype.card V:ℝ)):=by ring</span>
+<span id="L278"><a href="#L278" class="ln"> 278</a>     rw [htwo] at hp</span>
+<span id="L279"><a href="#L279" class="ln"> 279</a>     linarith</span>
+<span id="L280"><a href="#L280" class="ln"> 280</a>   let errParent:ℝ:=1/10+5*(Fintype.card V:ℝ)^(-(1:ℝ))+9*(Fintype.card V:ℝ)^(-(1:ℝ))</span>
+<span id="L281"><a href="#L281" class="ln"> 281</a>   have hParentProb:1-errParent≤μ.probability EParent:=by dsimp [errParent];linarith only [hbound]</span>
+<span id="L282"><a href="#L282" class="ln"> 282</a>   have hCutProb:=hcut V U G D m β Q hreg hn hnCut hD hρlo hρhi hb hbcut hmCut&#x27; π hpres hshort L hL</span>
+<span id="L283"><a href="#L283" class="ln"> 283</a>     Γ Color s₀ hslo hshi hpmin hkmin q hq hQ s hs hS a j hq0 hs0 htlo EParent errParent hParentProb</span>
+<span id="L284"><a href="#L284" class="ln"> 284</a>   have hCutProb&#x27;:1-(1/100:ℝ)-(Fintype.card V:ℝ)^(-(1:ℝ))-errParent≤μ.probability (fun z=&gt;ECut z ∧ EParent z):=by exact hCutProb</span>
+<span id="L285"><a href="#L285" class="ln"> 285</a>   let errCut:ℝ:=(1/100:ℝ)+(Fintype.card V:ℝ)^(-(1:ℝ))+errParent</span>
+<span id="L286"><a href="#L286" class="ln"> 286</a>   have hCutBound:1-errCut≤μ.probability (fun z=&gt;ECut z ∧ EParent z):=by dsimp [errCut];linarith only [hCutProb&#x27;]</span>
+<span id="L287"><a href="#L287" class="ln"> 287</a>   have hCfgProb:=hcfg V U G D m β Q hreg hn hnCfg hD hρlo hρhi hb hbcfg hmCfg&#x27; π hpres hshort L hL</span>
+<span id="L288"><a href="#L288" class="ln"> 288</a>     Γ Color s₀ hslo hshi hpmin hkmin q hq hQ s hs hS a j hq0 hs0 htlo (fun z=&gt;ECut z ∧ EParent z) errCut hCutBound</span>
+<span id="L289"><a href="#L289" class="ln"> 289</a>   have hCfgProb&#x27;:1-(1/100:ℝ)-(Fintype.card V:ℝ)^(-(1:ℝ))-errCut≤μ.probability (fun z=&gt;EConfig z ∧ ECut z ∧ EParent z):=by exact hCfgProb</span>
+<span id="L290"><a href="#L290" class="ln"> 290</a>   let errCfg:ℝ:=(1/100:ℝ)+(Fintype.card V:ℝ)^(-(1:ℝ))+errCut</span>
+<span id="L291"><a href="#L291" class="ln"> 291</a>   have hCfgBound:1-errCfg≤μ.probability (fun z=&gt;EConfig z ∧ ECut z ∧ EParent z):=by dsimp [errCfg];linarith only [hCfgProb&#x27;]</span>
+<span id="L292"><a href="#L292" class="ln"> 292</a>   have hCommonProb:=hcommon V U G D m β Q hreg hn hnCommon hD hρlo hρhi hb hbcommon hmCommon&#x27; π hpres hshort L hL</span>
+<span id="L293"><a href="#L293" class="ln"> 293</a>     Γ Color s₀ hslo hshi hpmin hkmin q hq hQ s hs hS a j hq0 hs0 htlo (fun z=&gt;EConfig z ∧ ECut z ∧ EParent z) errCfg hCfgBound</span>
+<span id="L294"><a href="#L294" class="ln"> 294</a>   have hCommonProb&#x27;:1-(1/100:ℝ)-(Fintype.card V:ℝ)^(-(1:ℝ))-errCfg≤μ.probability (fun z=&gt;ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z):=by exact hCommonProb</span>
+<span id="L295"><a href="#L295" class="ln"> 295</a>   let errCommon:ℝ:=(1/100:ℝ)+(Fintype.card V:ℝ)^(-(1:ℝ))+errCfg</span>
+<span id="L296"><a href="#L296" class="ln"> 296</a>   have hCommonBound:1-errCommon≤μ.probability (fun z=&gt;ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z):=by dsimp [errCommon];linarith only [hCommonProb&#x27;]</span>
+<span id="L297"><a href="#L297" class="ln"> 297</a>   have hActiveProb:=hactive V U G D m β Q hreg hn hnActive hD hρlo hρhi hb hbactive hmActive&#x27; π hpres hshort L hL</span>
+<span id="L298"><a href="#L298" class="ln"> 298</a>     Γ Color s₀ hslo hshi hpmin hkmin q hq hQ s hs hS a j hq0 hs0 htlo (fun z=&gt;ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) errCommon hCommonBound</span>
+<span id="L299"><a href="#L299" class="ln"> 299</a>   have hActiveProb&#x27;:1-(1/100:ℝ)-(Fintype.card V:ℝ)^(-(1:ℝ))-errCommon≤μ.probability (fun z=&gt;EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z):=by exact hActiveProb</span>
+<span id="L300"><a href="#L300" class="ln"> 300</a>   let errActive:ℝ:=(1/100:ℝ)+(Fintype.card V:ℝ)^(-(1:ℝ))+errCommon</span>
+<span id="L301"><a href="#L301" class="ln"> 301</a>   have hActiveBound:1-errActive≤μ.probability (fun z=&gt;EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z):=by dsimp [errActive];linarith only [hActiveProb&#x27;]</span>
+<span id="L302"><a href="#L302" class="ln"> 302</a>   have hwNext:∀ i≤L,SuccessorSequenceWeightConditions (G.comap (f (i+1))) (ρ (i+1)) (3*d)</span>
+<span id="L303"><a href="#L303" class="ln"> 303</a>       (Dactive (i+1)) τ (successorWeightLower k₀ (α/4)) (successorWeightUpper k₀ (α/4)) (weight (i+1)):=by</span>
+<span id="L304"><a href="#L304" class="ln"> 304</a>     intro i hi</span>
+<span id="L305"><a href="#L305" class="ln"> 305</a>     exact hw (i+1) (by omega)</span>
+<span id="L306"><a href="#L306" class="ln"> 306</a>   have hWideProb:=hwide V U G D m β Q hreg hn hnWide hD hρlo hρhi hb hbwide hmWide&#x27; π hpres hshort L hL</span>
+<span id="L307"><a href="#L307" class="ln"> 307</a>     (fun i=&gt;weight (i+1)) hwNext Γ Color s₀ hslo hshi hpmin hkmin q hq hQ s hs hS a j hq0 hs0 htlo</span>
+<span id="L308"><a href="#L308" class="ln"> 308</a>     (fun z=&gt;EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) errActive hActiveBound</span>
+<span id="L309"><a href="#L309" class="ln"> 309</a>   have hWideProb&#x27;:1-(1/100:ℝ)-(Fintype.card V:ℝ)^(-(1:ℝ))-errActive≤μ.probability (fun z=&gt;EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z):=by exact hWideProb</span>
+<span id="L310"><a href="#L310" class="ln"> 310</a>   let errWide:ℝ:=(1/100:ℝ)+(Fintype.card V:ℝ)^(-(1:ℝ))+errActive</span>
+<span id="L311"><a href="#L311" class="ln"> 311</a>   have hWideBound:1-errWide≤μ.probability (fun z=&gt;EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z):=by dsimp [errWide];linarith only [hWideProb&#x27;]</span>
+<span id="L312"><a href="#L312" class="ln"> 312</a>   have hRowProb:=hrow V U G D m β Q hreg hn hnRow hD hρlo hρhi hb hbrow hmRow&#x27; π hpres hshort L hL</span>
+<span id="L313"><a href="#L313" class="ln"> 313</a>     Γ Color s₀ hslo hshi hpmin hkmin q hq hQ s hs hS a j hq0 hs0 htlo</span>
+<span id="L314"><a href="#L314" class="ln"> 314</a>     (fun z=&gt;EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) errWide hWideBound</span>
+<span id="L315"><a href="#L315" class="ln"> 315</a>   have hRowProb&#x27;:1-(1/100:ℝ)-(Fintype.card V:ℝ)^(-(1:ℝ))-errWide≤μ.probability (fun z=&gt;ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z):=by exact hRowProb</span>
+<span id="L316"><a href="#L316" class="ln"> 316</a>   let errRow:ℝ:=(1/100:ℝ)+(Fintype.card V:ℝ)^(-(1:ℝ))+errWide</span>
+<span id="L317"><a href="#L317" class="ln"> 317</a>   have hRowBound:1-errRow≤μ.probability (fun z=&gt;ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z):=by</span>
+<span id="L318"><a href="#L318" class="ln"> 318</a>     dsimp [errRow];linarith only [hRowProb&#x27;]</span>
+<span id="L319"><a href="#L319" class="ln"> 319</a>   have hDhalf:(Fintype.card V:ℝ)/2≤D:=by</span>
+<span id="L320"><a href="#L320" class="ln"> 320</a>     have hn0:(0:ℝ)≤Fintype.card V:=Nat.cast_nonneg _</span>
+<span id="L321"><a href="#L321" class="ln"> 321</a>     nlinarith [mul_nonneg hα.le hn0]</span>
+<span id="L322"><a href="#L322" class="ln"> 322</a>   have hmass:=marked_active_seed_mass_bound D ρ₀ tstar (s₀/((r+4:ℕ):ℝ)) pstarRef hρ₀ htstar hn hDhalf hρlo htlo hpstarRefBound</span>
+<span id="L323"><a href="#L323" class="ln"> 323</a>   have hFullProb:=hfull V U Γ Color G D m hreg hn hDhalf hρlo hρhi hmFull&#x27; hmn Q π hpres hshort L hL</span>
+<span id="L324"><a href="#L324" class="ln"> 324</a>     p kval (densities.1.trans_le densities.2.1).le (densities.1.trans_le densities.2.2.1).le densities.2.2.2.2.2.2.2.2</span>
+<span id="L325"><a href="#L325" class="ln"> 325</a>     q hq hQ s hs hS a j (s₀/((r+4:ℕ):ℝ)) hq0 hmass</span>
+<span id="L326"><a href="#L326" class="ln"> 326</a>     (fun z=&gt;ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) errRow hRowBound</span>
+<span id="L327"><a href="#L327" class="ln"> 327</a>   have hFullProb&#x27;:1-errRow-2*(1/100:ℝ)-2*(Fintype.card V:ℝ)^(-(1:ℝ))≤</span>
+<span id="L328"><a href="#L328" class="ln"> 328</a>       μ.probability (fun z=&gt;(ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z):=by exact hFullProb</span>
+<span id="L329"><a href="#L329" class="ln"> 329</a>   let errFull:ℝ:=errRow+2*(1/100:ℝ)+2*(Fintype.card V:ℝ)^(-(1:ℝ))</span>
+<span id="L330"><a href="#L330" class="ln"> 330</a>   have hFullBound:1-errFull≤μ.probability</span>
+<span id="L331"><a href="#L331" class="ln"> 331</a>       (fun z=&gt;(ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z):=by</span>
+<span id="L332"><a href="#L332" class="ln"> 332</a>     dsimp [errFull];linarith only [hFullProb&#x27;]</span>
+<span id="L333"><a href="#L333" class="ln"> 333</a>   have hAgreeProb:=hagree V U Γ Color G D m hreg hn hDhalf hρlo hρhi hmAgree&#x27; hmn Q π hpres hshort L hL</span>
+<span id="L334"><a href="#L334" class="ln"> 334</a>     p kval (densities.1.trans_le densities.2.1).le (densities.1.trans_le densities.2.2.1).le densities.2.2.2.2.2.2.2.2</span>
+<span id="L335"><a href="#L335" class="ln"> 335</a>     q hq hQ s hs hS a j (s₀/((r+4:ℕ):ℝ)) hq0 hmass</span>
+<span id="L336"><a href="#L336" class="ln"> 336</a>     (fun z=&gt;(ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z) errFull hFullBound</span>
+<span id="L337"><a href="#L337" class="ln"> 337</a>   have hAgreeProb&#x27;:1-errFull-(Fintype.card V:ℝ)^(-(1:ℝ))≤</span>
+<span id="L338"><a href="#L338" class="ln"> 338</a>       μ.probability (fun z=&gt;((ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z) ∧ EAgreement z):=by exact hAgreeProb</span>
+<span id="L339"><a href="#L339" class="ln"> 339</a>   let errAgree:ℝ:=errFull+(Fintype.card V:ℝ)^(-(1:ℝ))</span>
+<span id="L340"><a href="#L340" class="ln"> 340</a>   have hAgreeBound:1-errAgree≤μ.probability</span>
+<span id="L341"><a href="#L341" class="ln"> 341</a>       (fun z=&gt;((ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z) ∧ EAgreement z):=by</span>
+<span id="L342"><a href="#L342" class="ln"> 342</a>     dsimp [errAgree];linarith only [hAgreeProb&#x27;]</span>
+<span id="L343"><a href="#L343" class="ln"> 343</a>   have hc:(1:ℝ)≤(r+4:ℕ):=by exact_mod_cast (show 1≤r+4 by omega)</span>
+<span id="L344"><a href="#L344" class="ln"> 344</a>   have hcpos:0&lt;((r+4:ℕ):ℝ):=lt_of_lt_of_le (by norm_num) hc</span>
+<span id="L345"><a href="#L345" class="ln"> 345</a>   have hs0pos:0&lt;s₀:=hsstar.trans_le hslo</span>
+<span id="L346"><a href="#L346" class="ln"> 346</a>   have hts:s₀/((r+4:ℕ):ℝ)≤s₀:=by</span>
+<span id="L347"><a href="#L347" class="ln"> 347</a>     apply (div_le_iff₀ hcpos).2</span>
+<span id="L348"><a href="#L348" class="ln"> 348</a>     nlinarith</span>
+<span id="L349"><a href="#L349" class="ln"> 349</a>   have htone:s₀/((r+4:ℕ):ℝ)≤1:=by linarith</span>
+<span id="L350"><a href="#L350" class="ln"> 350</a>   have hActualProb:=hactual V U Γ Color G D m hreg hn hD hρlo hρhi hmActual&#x27; Q π hpres hshort L hL</span>
+<span id="L351"><a href="#L351" class="ln"> 351</a>     p kval (densities.1.trans_le densities.2.1).le (densities.1.trans_le densities.2.2.1).le densities.2.2.2.2.2.2.2.2</span>
+<span id="L352"><a href="#L352" class="ln"> 352</a>     hpmin hkmin q hq hQ s hs hS a j s₀ (s₀/((r+4:ℕ):ℝ)) hq0 hs0 (horder.trans hslo) htlo htone hts</span>
+<span id="L353"><a href="#L353" class="ln"> 353</a>     (fun z=&gt;((ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z) ∧ EAgreement z) errAgree hAgreeBound</span>
+<span id="L354"><a href="#L354" class="ln"> 354</a>   have hActualProb&#x27;:1-(1/100:ℝ)-errAgree≤</span>
+<span id="L355"><a href="#L355" class="ln"> 355</a>       μ.probability (fun z=&gt;EActualCuts z ∧ (((ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z) ∧ EAgreement z)):=by exact hActualProb</span>
+<span id="L356"><a href="#L356" class="ln"> 356</a>   have hn800r:(800:ℝ)≤Fintype.card V:=by exact_mod_cast hn800</span>
+<span id="L357"><a href="#L357" class="ln"> 357</a>   have hdiv:(23:ℝ)/(Fintype.card V:ℝ)≤23/800:=by apply (div_le_iff₀ hnpos).2;linarith</span>
+<span id="L358"><a href="#L358" class="ln"> 358</a>   have hExtra0:(77/100:ℝ)≤μ.probability (fun z=&gt;EActualCuts z ∧ (((ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z) ∧ EAgreement z)):=by</span>
+<span id="L359"><a href="#L359" class="ln"> 359</a>     dsimp [errAgree,errFull,errRow,errWide,errActive,errCommon,errCfg,errCut,errParent] at hActualProb&#x27;</span>
+<span id="L360"><a href="#L360" class="ln"> 360</a>     rw [hpow] at hActualProb&#x27;</span>
+<span id="L361"><a href="#L361" class="ln"> 361</a>     have heq:(23:ℝ)*(1/(Fintype.card V:ℝ))=23/(Fintype.card V:ℝ):=by ring</span>
+<span id="L362"><a href="#L362" class="ln"> 362</a>     rw [←heq] at hdiv</span>
+<span id="L363"><a href="#L363" class="ln"> 363</a>     linarith only [hActualProb&#x27;,hdiv]</span>
+<span id="L364"><a href="#L364" class="ln"> 364</a>   have hExtraProb:1-(1/100:ℝ)≤μ.probability Extra:=by linarith</span>
+<span id="L365"><a href="#L365" class="ln"> 365</a>   have hJoin:=finiteLaw_good_intersection μ</span>
+<span id="L366"><a href="#L366" class="ln"> 366</a>     (fun z=&gt;EActualCuts z ∧ (((ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z) ∧ EAgreement z))</span>
+<span id="L367"><a href="#L367" class="ln"> 367</a>     Extra (1/100) hExtraProb</span>
+<span id="L368"><a href="#L368" class="ln"> 368</a>   have hExtra:(3/4:ℝ)≤μ.probability (fun z=&gt;</span>
+<span id="L369"><a href="#L369" class="ln"> 369</a>       (EActualCuts z ∧ (((ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z) ∧ EAgreement z)) ∧ Extra z):=by</span>
+<span id="L370"><a href="#L370" class="ln"> 370</a>     linarith</span>
+<span id="L371"><a href="#L371" class="ln"> 371</a>   by_cases hzero:L=0</span>
+<span id="L372"><a href="#L372" class="ln"> 372</a>   · have hresult:=hinner V U G D m β Q hreg hn hnInner hD hρlo hρhi hb hbinner hmInner&#x27; π hpres hshort L hL</span>
+<span id="L373"><a href="#L373" class="ln"> 373</a>       Γ Color s₀ hslo hshi q hq hQ s hs hS a j hq0 hs0 htlo (fun z=&gt;(EActualCuts z ∧ (((ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z) ∧ EAgreement z)) ∧ Extra z) hExtra</span>
+<span id="L374"><a href="#L374" class="ln"> 374</a>     obtain ⟨z,hz,hi,⟨hactual,⟨⟨hrow,hwide,hactive,hcommon,hcfg,hc,hp⟩,hfull⟩,hagree⟩,hextra⟩:=hresult</span>
+<span id="L375"><a href="#L375" class="ln"> 375</a>     exact ⟨z,hz,hextra,hi,Or.inl hzero,hactual,hagree,hfull,hrow,hwide,hactive,hcommon,hcfg,hc,hp⟩</span>
+<span id="L376"><a href="#L376" class="ln"> 376</a>   · cases L with</span>
+<span id="L377"><a href="#L377" class="ln"> 377</a>     | zero =&gt; exact (hzero rfl).elim</span>
+<span id="L378"><a href="#L378" class="ln"> 378</a>     | succ jlevel =&gt;</span>
+<span id="L379"><a href="#L379" class="ln"> 379</a>       have hjlen:jlevel+1&lt;Q.length:=by omega</span>
+<span id="L380"><a href="#L380" class="ln"> 380</a>       have hresult:=hbalance V U G D m β Q hreg hn hnBalance hD hρlo hρhi hb hbbalance hmBalance&#x27; π hpres hshort jlevel hjlen</span>
+<span id="L381"><a href="#L381" class="ln"> 381</a>         Γ Color s₀ hslo hshi q hq hQ s hs hS a j hq0 hs0 htlo (fun z=&gt;(EActualCuts z ∧ (((ERow z ∧ EWide z ∧ EActive z ∧ ECommon z ∧ EConfig z ∧ ECut z ∧ EParent z) ∧ EFull z) ∧ EAgreement z)) ∧ Extra z) hExtra</span>
+<span id="L382"><a href="#L382" class="ln"> 382</a>       obtain ⟨z,hz,hi,hd,⟨hactual,⟨⟨hrow,hwide,hactive,hcommon,hcfg,hc,hp⟩,hfull⟩,hagree⟩,hextra⟩:=hresult</span>
+<span id="L383"><a href="#L383" class="ln"> 383</a>       refine ⟨z,hz,hextra,?_,?_,hactual,hagree,hfull,hrow,hwide,hactive,hcommon,hcfg,hc,hp⟩</span>
+<span id="L384"><a href="#L384" class="ln"> 384</a>       · simpa only [Nat.succ_eq_add_one] using hi</span>
+<span id="L385"><a href="#L385" class="ln"> 385</a>       · right</span>
+<span id="L386"><a href="#L386" class="ln"> 386</a>         simpa using hd</span>
+<span id="L387"><a href="#L387" class="ln"> 387</a> end Oberwolfach</span></pre></html>

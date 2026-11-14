@@ -1,0 +1,80 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LocalPairRestrictionScales.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LocalPairRestrictionScales.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CandidateAbsorberGroundRestriction</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PairRestrictionScales</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Pair-deletion losses measured on the actual local vertex set and</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> at its supplied scale; the ambient vertex count is irrelevant. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency true</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option synthInstance.maxSize 256</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 3800000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V C T : Type*} [Fintype V] [DecidableEq V] [Fintype C] [DecidableEq C]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [Fintype T] [DecidableEq T] {c : ℕ}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem candidate_absorber_ground_pair_loss_scale (hc : 2 ≤ c) (R : C → Finset V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (S : T → VertexAbsorberTemplate c) (X Y : Finset V) (J : ℕ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hJ : ∀ U : Finset V,Fintype.card {C₀ : C // R C₀=U} ≤ J)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (E : Finset (V×V)) (hE : ∀ e∈E,e.1≠e.2) (d : ℕ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hd : ∀ v∈X,(E.filter (fun e =&gt; v=e.1 ∨ v=e.2)).card ≤ d)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hsize : E.card ≤ Y.card) (k : ℝ) (hk : 0 ≤ k)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hY : (Y.card:ℝ) ≤ c*k) (hX : X.card=c) :</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     absorberGroundCount R S X Y ≤</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       absorberGroundCount (candidateResourceSet R</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         (fun C₀ =&gt; ∀ e : E,¬(e.val.1∈R C₀ ∧ e.val.2∈R C₀))) S X Y+</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       absorberPairDeletionCoefficient c J (Fintype.card T) d*k^(c*c-1) := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hh := candidate_absorber_ground_bounded_pair_loss hc R S X Y J hJ E hE d hd hsize</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   rw [hX] at hh</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   push_cast at hh</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   apply hh.trans</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   apply add_le_add le_rfl</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   calc</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     _ ≤ ((c*d*(c*c)+(c*c)^2):ℝ)*(Fintype.card T:ℝ)*(c:ℝ)^c*((c:ℝ)*k)^(c*c-1)*(J:ℝ)^(2*c+1) := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       gcongr</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     _ = _ := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       dsimp [absorberPairDeletionCoefficient]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       push_cast</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       rw [mul_pow]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       ring</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> theorem candidate_resource_induced_pair_degree (R : C → Finset V) (w : C → ℝ)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (E : Finset (V×V)) (Y : Finset V) (v : V) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     hypergraphWeightedDegree (candidateResourceSet R</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (fun C₀ =&gt; ∀ e : E,¬(e.val.1∈R C₀ ∧ e.val.2∈R C₀)))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (inducedResourceWeight (candidateResourceSet R</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         (fun C₀ =&gt; ∀ e : E,¬(e.val.1∈R C₀ ∧ e.val.2∈R C₀))) (fun D =&gt; w D.val) Y) v=</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       hypergraphWeightedDegree R (pairRestrictedResourceWeight R (inducedResourceWeight R w Y) E) v := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   let P := fun C₀ =&gt; ∀ e : E,¬(e.val.1∈R C₀ ∧ e.val.2∈R C₀)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   change hypergraphWeightedDegree (candidateResourceSet R P)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (fun D =&gt; inducedResourceWeight R w Y D.val) v=_</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   convert candidate_resource_degree R P (inducedResourceWeight R w Y) v using 1 &lt;;&gt; congr!</span>
+<span id="L53"><a href="#L53" class="ln">  53</a> </span>
+<span id="L54"><a href="#L54" class="ln">  54</a> theorem candidate_resource_local_pair_degree_loss_scale (R : C → Finset V) (c J : ℕ) (hc : 3 ≤ c)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hR : ∀ C₀,(R C₀).card=c) (hJ : ∀ U : Finset V,Fintype.card {C₀ : C // R C₀=U} ≤ J)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (w : C → ℝ) (B k u : ℝ) (hB : 0 ≤ B) (hk : 0 &lt; k) (hu : 0 ≤ u)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (Y : Finset V) (hY : (Y.card:ℝ) ≤ u*k)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (hw : ∀ C₀,0 ≤ w C₀ ∧ w C₀ ≤ B/k^(c-1))</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (E : Finset (V×V)) (hE : ∀ e∈E,e.1≠e.2) (v : V) (d : ℕ)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (hd : (E.filter (fun e =&gt; v=e.1 ∨ v=e.2)).card ≤ d) (hsize : E.card ≤ Y.card) :</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     0 ≤ hypergraphWeightedDegree R (inducedResourceWeight R w Y) v-</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       hypergraphWeightedDegree R (pairRestrictedResourceWeight R (inducedResourceWeight R w Y) E) v ∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     hypergraphWeightedDegree R (inducedResourceWeight R w Y) v-</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       hypergraphWeightedDegree R (pairRestrictedResourceWeight R (inducedResourceWeight R w Y) E) v ≤</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (((d:ℝ)+1)*(J:ℝ)*u^(c-2)*B)/k := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   obtain ⟨hlo,hhi⟩ := resource_bounded_pairs_degree_loss R c J hc hR hJ w (B/k^(c-1))</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (by positivity) hw Y E hE v d hd hsize</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   refine ⟨hlo,hhi.trans ?_⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   calc</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     _ ≤ ((d:ℝ)+1)*(J:ℝ)*(u*k)^(c-2)*(B/k^(c-1)) := by gcongr</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     _ = _ := by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       rw [mul_pow]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       have hp : k^(c-1)=k^(c-2)*k := by rw [← pow_succ];congr 1;omega</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       rw [hp]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       field_simp</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> </span>
+<span id="L77"><a href="#L77" class="ln">  77</a> end Oberwolfach</span></pre></html>

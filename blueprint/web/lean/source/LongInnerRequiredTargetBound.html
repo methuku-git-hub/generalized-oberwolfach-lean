@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongInnerRequiredTargetBound.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongInnerRequiredTargetBound.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.InnerRequiredRawCount</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongAssignedUnassignedUpper</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Bound each inner required target set from the common sample&#x27;s fixed-set</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> unassigned and retention tests, plus the unused-ordinary incidence bound. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 16000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem long_inner_required_targets_bound</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U] (hn:0&lt;n) (hK:0&lt;K)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (m d:ℕ) (hm:0&lt;m) (F:U→SimpleGraph (Fin n)) (hF:∀w,(F w).IsRegularOfDegree 2)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (θ:ℝ) (hθ:0≤θ) (hθ1:θ≤1) (π:Equiv.Perm (Fin n))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (σ:RawIntervalFamilyOutcome (Fin n) U Bool Bool) (t:ℕ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (J:StartRetentionOutcome (rawStartHubSet π d σ false) t)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (inner:Finset U) (vertices:Finset (Fin n)) (absorber occupied unused:U→Finset (Fin n))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (happrox:∀w x,rawIntervalFamilyState π d σ (x,w)=some (Sum.inl true)→x∈occupied w)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hordinary:∀w x,rawIntervalFamilyState π d σ (x,w)=some (Sum.inr true)→x∈occupied w ∨ x∈unused w)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (ζ:ℝ) (hrows:RetainedRestrictionGood π d σ false t (fun _:Unit=&gt;Finset.univ) (fun _:Unit=&gt;Finset.univ) ζ J)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hfixed:∀w,|rawIntervalUnassignedHubCountOn π d σ w vertices-</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (vertices.card:ℝ)*(1-(∑g,longAssignedIntervalProbability F hF K m θ w g)-</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         (∑j,longAssignedSpokeProbability F hF K m θ w j))|&lt;(n:ℝ)^(3/4:ℝ)):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀w,((innerRequiredTargets inner vertices (rawReservedSpokeList π d σ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (retainedFinalMarkedAt π d σ t J) absorber occupied w).card:ℝ)≤</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       2*θ*vertices.card+(n:ℝ)^(3/4:ℝ)+ζ*n+((unused w∩vertices).card:ℝ):=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   intro w</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hc:=inner_required_targets_count_from_raw_cover π d σ t J inner vertices absorber occupied unused happrox hordinary ζ hrows w</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hp:=long_assigned_unassigned_probability_at_most_two_theta hn hK m hm F hF θ hθ hθ1 w</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hh:rawIntervalUnassignedHubCountOn π d σ w vertices&lt;</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (vertices.card:ℝ)*(1-(∑g,longAssignedIntervalProbability F hF K m θ w g)-</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (∑j,longAssignedSpokeProbability F hF K m θ w j))+(n:ℝ)^(3/4:ℝ):=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hh:=(abs_lt.mp (hfixed w)).2</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     linarith</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hp&#x27;:(vertices.card:ℝ)*(1-(∑g,longAssignedIntervalProbability F hF K m θ w g)-</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∑j,longAssignedSpokeProbability F hF K m θ w j))≤(vertices.card:ℝ)*(2*θ):=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     mul_le_mul_of_nonneg_left hp (by positivity)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   simp only [Fintype.card_fin] at hc</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   nlinarith</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

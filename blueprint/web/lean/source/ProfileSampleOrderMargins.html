@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ProfileSampleOrderMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ProfileSampleOrderMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The bounded sample size is chosen after the fixed additional-set</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> size and before the ambient order or any forbidden graph is supplied. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency true</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 3000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem profile_sample_order_union_margin (c q N₀ : ℕ) (hc : 1 ≤ c)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (κv κr : ℝ) (hκv : 0 &lt; κv) (hκr : 0 &lt; κr) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ t : ℕ,N₀ ≤ t ∧ q ≤ t ∧ 4 ≤ t ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (2*Real.exp (-κv*t))*(c*(t+q):ℕ)+</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>         (2*Real.exp (-κr*t))*((c*(t+q):ℕ):ℝ)^c ≤ 1/4 := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   let κ := min κv κr</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hκ : 0 &lt; κ := lt_min hκv hκr</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let C := 4*((2:ℝ)*c)^c</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   obtain ⟨N,hN⟩ := eventually_stretchedExp_le_inv_pow C (c:ℝ) (c:=κ) (p:=1) hκ (by norm_num) 1</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let t := max (max N₀ q) (max N 4)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have ht₀ : N₀ ≤ t := (le_max_left _ _).trans (le_max_left _ _)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have htq : q ≤ t := (le_max_right _ _).trans (le_max_left _ _)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have htN : N ≤ t := (le_max_left _ _).trans (le_max_right _ _)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have ht4 : 4 ≤ t := (le_max_right _ _).trans (le_max_right _ _)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have htR : (4:ℝ) ≤ t := by exact_mod_cast ht4</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have htpos : (0:ℝ) &lt; t := by linarith</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have htqR : (q:ℝ) ≤ t := by exact_mod_cast htq</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hcR : (1:ℝ) ≤ c := by exact_mod_cast hc</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let M := ((c*(t+q):ℕ):ℝ)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hM : 1 ≤ M := by dsimp [M];push_cast;nlinarith [show (0:ℝ) ≤ q by positivity]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hMt : M ≤ (2:ℝ)*c*t := by dsimp [M];push_cast;nlinarith</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hMc : M ≤ M^c := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hh : M^1 ≤ M^c := pow_le_pow_right₀ hM hc</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     simpa only [pow_one] using hh</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hv : Real.exp (-κv*t) ≤ Real.exp (-κ*t) := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     apply Real.exp_le_exp.mpr</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hh := min_le_left κv κr</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     dsimp [κ]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     nlinarith</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hr : Real.exp (-κr*t) ≤ Real.exp (-κ*t) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     apply Real.exp_le_exp.mpr</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hh := min_le_right κv κr</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     dsimp [κ]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     nlinarith</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have htail : C*(t:ℝ)^c*Real.exp (-κ*t) ≤ 1/t := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     simpa only [Real.rpow_natCast,Real.rpow_one,pow_one] using hN t htN</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   refine ⟨t,ht₀,htq,ht4,?_⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   change (2*Real.exp (-κv*t))*M+(2*Real.exp (-κr*t))*M^c ≤ _</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   calc</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     _ ≤ 4*Real.exp (-κ*t)*M^c := by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       have hv&#x27; := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hv (show (0:ℝ) ≤ 2 by norm_num)) (show 0 ≤ M by linarith)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       have hr&#x27; := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hr (show (0:ℝ) ≤ 2 by norm_num)) (pow_nonneg (show 0 ≤ M by linarith) c)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       have hm&#x27; := mul_le_mul_of_nonneg_left hMc (show 0 ≤ 2*Real.exp (-κ*t) by positivity)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       linarith</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     _ ≤ 4*Real.exp (-κ*t)*(((2:ℝ)*c*t)^c) := mul_le_mul_of_nonneg_left</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (pow_le_pow_left₀ (le_trans (by norm_num) hM) hMt c) (by positivity)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     _ = C*(t:ℝ)^c*Real.exp (-κ*t) := by dsimp [C];rw [mul_pow];ring</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     _ ≤ 1/t := htail</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     _ ≤ 1/4 := (div_le_div_of_nonneg_left (by norm_num) (by norm_num) htR)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CommonNeighborhoodSubgraphPhysical.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CommonNeighborhoodSubgraphPhysical.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CommonNeighborhoodSubgraphFactors</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RootSeparatedFactorsAmbient</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Physical factor pair in a common neighbourhood after bounded-degree</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> edge deletions, with conflict-free vertices and at most one root per cycle. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 5000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem regular_subgraph_common_neighborhood_physical_factors (m:ℕ) (hm:2≤m) (α:ℝ)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hα:0&lt;α) (hα1:α≤1) (s:ℕ) (hdivs:(m+1)∣s):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ ξ:ℝ,0&lt;ξ ∧ ∃ k:ℕ,(m+1)∣k ∧ ∀ L t:ℝ,0≤L→0≤t→∃ N:ℕ,</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∀ (V:Type) [Fintype V] [DecidableEq V] (G Q F:SimpleGraph V) (D:ℕ),</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     G.IsRegularOfDegree D→Q≤G→(∀ v,((G\Q).degree v:ℝ)≤t)→(∀ v,(F.degree v:ℝ)≤L)→</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ (A₁ A₂ C T:Finset V),let B:=(A₁∩A₂)\C;</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     N≤B.card→T⊆B→T.card=s→(∀ x∈T,∀ y∈T,¬F.Adj x y)→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ((Finset.univ\A₁).card:ℝ)≤ξ*Fintype.card V→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ((Finset.univ\A₂).card:ℝ)≤ξ*Fintype.card V→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (C.card:ℝ)≤ξ*Fintype.card V→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     cycleThreshold (m+1)+α≤(D:ℝ)/Fintype.card V→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ S:Finset V,S⊆B ∧ S.card=k ∧ Disjoint S T ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ x∈S∪T,∀ y∈S∪T,¬F.Adj x y) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       ∃ M₁ M₂:Finset (OrdinaryCycle Q (m+1)),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         (∀ C∈M₁,∀ E∈M₁,C≠E→Disjoint (ordinaryCycleVertices Q (m+1) C) (ordinaryCycleVertices Q (m+1) E)) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         M₁.biUnion (ordinaryCycleVertices Q (m+1))=S∪T ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (∀ C∈M₂,∀ E∈M₂,C≠E→Disjoint (ordinaryCycleVertices Q (m+1) C) (ordinaryCycleVertices Q (m+1) E)) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         M₂.biUnion (ordinaryCycleVertices Q (m+1))=S ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         (∀ C∈M₁,∀ E∈M₂,Disjoint C.val.val.edgeFinset E.val.val.edgeFinset) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (∀ C∈M₁,(ordinaryCycleVertices Q (m+1) C∩T).card≤1):=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨ξ,hξ,k,hk,hbase⟩:=regular_subgraph_common_neighborhood_conflict_free_factors m hm α hα hα1 s hdivs</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   refine ⟨ξ,hξ,k,hk,?_⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   intro L t hL ht</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   obtain ⟨N,hN⟩:=hbase L t hL ht</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   refine ⟨N,?_⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   intro V _ _ G Q F D hreg hQ hdel hF A₁ A₂ C T B hB hTB hT hTfree h₁ h₂ hC hθ</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hp:=hN V G Q F D hreg hQ hdel hF A₁ A₂ C T hB hTB hT hTfree h₁ h₂ hC hθ</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   exact root_separated_factors_ambient Q F B T hTB (m+1) k hp</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

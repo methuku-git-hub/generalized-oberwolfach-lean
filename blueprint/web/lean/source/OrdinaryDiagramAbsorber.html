@@ -1,0 +1,88 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryDiagramAbsorber.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryDiagramAbsorber.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryDiagramAssemblyBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryCommonCycleProfiles</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Construct the four transformers of a host diagram and finish the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> absorber, with all size and exclusion conclusions. The only fractional input</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> is the fixed common-pair profile supplied before choosing the diagram. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 2048</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 30000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {Tpl:Type} [Fintype Tpl] [DecidableEq Tpl]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ordinary_diagram_absorber (r:ℕ) (hr:3≤r)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (Tpls:Tpl→VertexAbsorberTemplate r) (β a b B:ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hβ:0&lt;β) (ha:0&lt;a) (hb:0&lt;b) (hB:0&lt;B) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ η ε:ℝ,0&lt;η∧0&lt;ε∧ε≤β/4∧∀ M:ℕ,∃ a₀ b₀:ℕ,∀ f:ℕ,∀ d:ℝ,0≤d→∃ n₀:ℕ,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ (V U:Type) [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U],</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       n₀≤Fintype.card V→∀ (Q F:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (A Z W R₀:Finset V) (B₀ O:Finset U) (original:Finset (Sym2 V⊕(V×U))),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       A=Finset.univ\Z→(Z.card:ℝ)≤ε*Fintype.card V→W.card≤f→(B₀.card:ℝ)≤ε*Fintype.card V+f→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ v,(F.degree v:ℝ)≤d)→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ v w,β*Fintype.card V≤((Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ u u&#x27; v w,β*Fintype.card V≤(((Finset.univ.filter (fun a=&gt;H a u∧H a u&#x27;))∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (r=4→∀ v w x,β*Fintype.card V≤((Q.neighborFinset v∩Q.neighborFinset w∩Q.neighborFinset x).card:ℝ))→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (r=3→∀ w x y z,β*Fintype.card V≤((Finset.univ.filter (fun a=&gt;Q.Adj w a∧Q.Adj x a∧Q.Adj y a∧Q.Adj z a)).card:ℝ))→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (r=3→∀ u u&#x27; w x y z,β*Fintype.card V≤((Finset.univ.filter (fun a=&gt;H a u∧H a u&#x27;∧Q.Adj w a∧Q.Adj x a∧Q.Adj y a∧Q.Adj z a)).card:ℝ))→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ T:Finset V,T.card≤r+6→(∀ v∈T,∀ w∈T,¬F.Adj v w)→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         β*Fintype.card V≤((common Finset.univ T (fun v=&gt;Finset.univ.filter (H v))).card:ℝ))→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       OrdinaryCommonCycleProfiles Q F H r Tpls β a b B η→</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       OrdinaryHostDiagram r M Q F H original A W R₀ B₀ O→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       ∃ C:Finset (Sym2 V⊕(V×U)),</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         IsResourceAbsorber (ordinaryWheelResources (P:=Q) (F:=F) (Hbase:=H) (r:=r)) original C∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         C⊆ordinaryHostResources Q H∧(ordinaryResourceRows C).card≤a₀∧(ordinaryResourceHubs C).card≤b₀∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         ordinaryResourceRows C⊆R₀∪A∧(∀ v∈ordinaryResourceRows C,v∈W→v∈R₀)∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         (∀ u∈ordinaryResourceHubs C,u∈B₀→u∈O)∧Disjoint C (ordinaryRootResources W B₀) := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨η,ε,hη,hε,hεβ,hbase⟩:=ordinary_relative_four_transformer_absorber r hr Tpls β a b B hβ ha hb hB</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨η,ε,hη,hε,hεβ,?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   intro M</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   obtain ⟨t,ht,hbase⟩:=hbase (5*M)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   refine ⟨5*M+4*(5*M*r*(t+5*(5*M))),5*M+4*(5*M*(5*M+2)),?_⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   intro f d hd</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨n₀,hbase⟩:=hbase (f+5*M) d hd</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   refine ⟨n₀,?_⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro V U _ _ _ _ hn Q F H A Z W R₀ B₀ O original hA hZ hW hB₀ hF hcount hpair hthree hfour hspfour hhub P D</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let W&#x27;:=W∪D.rows</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   let B&#x27;:=B₀∪D.hubs</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   let L:=ordinaryRootResources D.rows B&#x27;</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hW&#x27;:W&#x27;.card≤f+5*M:=(Finset.card_union_le _ _).trans (Nat.add_le_add hW D.rows_card)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hB&#x27;:(B&#x27;.card:ℝ)≤ε*Fintype.card V+(f+5*M:ℕ):=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hh:(B&#x27;.card:ℝ)≤B₀.card+5*M:=by exact_mod_cast (Finset.card_union_le _ _).trans (Nat.add_le_add_left D.hubs_card _)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     push_cast</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     linarith only [hh,hB₀]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hne (j:Fin 4) (i:{u:U // ∃ v,(D.T j).K v u}):i.val≠(D.T j).ψ i.val:=</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (D.T j).disjointHubs _ i.property</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   let w:∀ j:Fin 4,∀ i:{u:U // ∃ v,(D.T j).K v u},</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       LocalOrdinaryCycle Q F (Finset.univ.filter (fun a=&gt;H a i.val∧H a ((D.T j).ψ i.val))) r→ℝ:=</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     fun j i=&gt;P.weight _ _ (hne j i)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hfirst:finiteFiveAt D.D 0=original∪D.extra:=by simpa [finiteFiveAt] using D.first</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hfinal:HasResourceDecomposition (ordinaryWheelResources (P:=Q) (F:=F) (Hbase:=H) (r:=r)) (finiteFiveAt D.D 4):=by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     simpa [finiteFiveAt] using D.last_decomp</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hD:∀ i,i≤4→finiteFiveAt D.D i⊆L:=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     intro i hi</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     rw [show finiteFiveAt D.D i=D.D ⟨i,by omega⟩ from finiteFiveAt_apply D.D ⟨i,by omega⟩]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     exact ordinaryRootResources_contains _ _ _ (D.Drows _) ((D.Dhubs _).trans Finset.subset_union_right)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   obtain ⟨K,hK,hKK,hKrows,hKhubs,habs⟩:=hbase V U hn (fun j=&gt;(D.T j).G) Q F (fun j=&gt;(D.T j).K) H</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (fun j=&gt;(D.T j).φ) (fun j=&gt;(D.T j).ψ) A Z D.rows W&#x27; B&#x27; L hA hZ</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     ((ordinaryRootResources_rows _ _).trans Finset.subset_union_right) (ordinaryRootResources_hubs _ _)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     Finset.subset_union_right D.rows_card hW&#x27; hB&#x27;</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (fun j=&gt;(D.T j).balance) (fun j=&gt;(D.T j).div) (fun j=&gt;(D.T j).column) (fun j=&gt;(D.T j).hubs)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (fun j=&gt;(D.T j).roots) (fun j=&gt;(D.T j).disjointRows) (fun j=&gt;(D.T j).disjointHubs)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (fun j=&gt;(D.T j).sourceRim) (fun j=&gt;(D.T j).targetRim) (fun j=&gt;(D.T j).rimInj) (fun j=&gt;(D.T j).spokeInj)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (fun j=&gt;(D.T j).hostSpokes) (fun j=&gt;(D.T j).hubRoots) (fun j=&gt;(D.T j).separation)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     hF hcount hpair hthree hfour hspfour hhub (fun j i=&gt;P.size _ _ (hne j i)) w</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     (fun j i=&gt;P.bounds _ _ (hne j i)) (fun j i=&gt;P.degree _ _ (hne j i)) (fun j i=&gt;P.absorbers _ _ (hne j i))</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (finiteFiveAt D.D) original D.extra hfirst D.first_disjoint D.extra_decomp hfinal</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     D.chain_endpoints D.chain_disjoint hD</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   refine ⟨ordinaryDiagramAbsorberEdges D K,?_,?_⟩</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   · simpa [ordinaryDiagramAbsorberEdges,finiteFiveAt] using habs</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   · exact ordinary_diagram_assembly_bounds D K _ _ (fun j=&gt;(hK j).2.1) (fun j=&gt;(hK j).2.2.1)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       (fun j=&gt;(hK j).2.2.2.1) (fun j=&gt;(hK j).2.2.2.2.1) (fun j=&gt;(hK j).2.2.2.2.2.2.2) hKrows hKhubs</span>
+<span id="L84"><a href="#L84" class="ln">  84</a> </span>
+<span id="L85"><a href="#L85" class="ln">  85</a> end Oberwolfach</span></pre></html>

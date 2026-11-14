@@ -1,0 +1,64 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedTwoStageCoverActiveProtection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedTwoStageCoverActiveProtection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFirstStarFilteredPacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedInnerFreePackingPreservesPair</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Sequential protection for the actual first star-filtered deletion and</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> an inner-resource-free deep packing. No property of the larger inner pair is</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> claimed for the first deletion. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 12000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_two_stage_cover_protects_active_pair</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d m:ℕ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (I T:Finset V) (J W:Finset U)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hI:∀ x,π x∈I↔x∈I) (hT:∀ x,π x∈T↔x∈T):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let E:=MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let K:=MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) true</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let tail:=fun e:E=&gt;e.val.1</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let head:=fun e:E=&gt;e.val.2</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let ktail:=fun e:K=&gt;e.val.1</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let khead:=fun e:K=&gt;e.val.2</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ (A₀:Finset (E⊕K)) (S₀:Finset (V×U))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (M:Finset (MarkedWheel tail head ktail khead m π (3*d) (H false) (H true)))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (R:Finset (Finset V⊕(V×U))),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (M.biUnion markedWheelPhysicalResources).filter (markedInnerResource I J)=</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       R.filter (markedStarResource T W)→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let A:=A₀.filter (fun a=&gt;Sum.elim tail ktail a∈T∨Sum.elim head khead a∈T)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let S:=S₀.filter (fun z=&gt;z.1∈T∨z.2∈W)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let FR:=markedSampleArcSetGraph P π d σ (A∪M.biUnion markedWheelArcs)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let FS:=markedFiniteSpokeGraph (S∪M.biUnion markedWheelSpokePairs)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let σ&#x27;:=rawMarkedDeleteRims σ FR.edgeFinset</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let H&#x27;:=markedDeletePhysicalSpokes H FS</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let E&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let K&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let tail&#x27;:=fun e:E&#x27;=&gt;e.val.1</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let head&#x27;:=fun e:E&#x27;=&gt;e.val.2</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let ktail&#x27;:=fun e:K&#x27;=&gt;e.val.1</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let khead&#x27;:=fun e:K&#x27;=&gt;e.val.2</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∀ (MD:Finset (MarkedWheel tail&#x27; head&#x27; ktail&#x27; khead&#x27; m π (3*d) (H&#x27; false) (H&#x27; true))),</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (MD.biUnion markedWheelPhysicalResources).filter (markedInnerResource I J)=∅→</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let σ&#x27;&#x27;:=rawMarkedDeleteRims σ&#x27; (markedPackingRimGraph MD).edgeFinset</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     let H&#x27;&#x27;:=markedDeletePhysicalSpokes H&#x27; (markedFiniteSpokeGraph (MD.biUnion markedWheelSpokePairs))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (∀ mark x y,x∈I\T→y∈I\T→</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (markedPhysicalRim P π (3*d) (fun e=&gt;σ (Sum.inl e)) mark x y=1 ↔</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>        markedPhysicalRim P π (3*d) (fun e=&gt;σ&#x27;&#x27; (Sum.inl e)) mark x y=1)) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (∀ j v u,v∈I\T→u∈J\W→(H j v u↔H&#x27;&#x27; j v u)) :=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   intro E K tail head ktail khead A₀ S₀ M R hM A S FR FS σ&#x27; H&#x27; E&#x27; K&#x27; tail&#x27; head&#x27; ktail&#x27; khead&#x27; MD hMD σ&#x27;&#x27; H&#x27;&#x27;</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   obtain ⟨hfirstR,hfirstS⟩:=marked_first_packing_star_filtered_preserves_active_typed_pair</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     P π d m σ H I T J W hI hT A₀ S₀ M R hM</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hforward:∀ x,x∈I→π x∈I:=fun x hx=&gt;(hI x).mpr hx</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   obtain ⟨hdeepR,hdeepS⟩:=marked_inner_free_packing_preserves_typed_pair P π d σ&#x27; H&#x27; I J hforward MD hMD</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   constructor</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   · intro mark x y hx hy</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     exact (hfirstR mark x y hx hy).trans (hdeepR mark x y (Finset.mem_sdiff.mp hx).1 (Finset.mem_sdiff.mp hy).1)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   · intro j v u hv hu</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     exact (hfirstS j v u hv hu).trans (hdeepS j v u (Finset.mem_sdiff.mp hv).1 (Finset.mem_sdiff.mp hu).1)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ShiftedTransformerHubIncidence.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ShiftedTransformerHubIncidence.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TransformerEndpointAssignments</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The shifted assignment of fresh rim-edge hubs has no repeated root</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> spoke, even when the root map is noninjective on vertices. Only the fact</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> that adjacent roots have distinct images is used. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 5000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a>  theorem shifted_hub_root_injective (G:SimpleGraph V) (h:G.edgeFinset↪U)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (σ:∀ v,Equiv.Perm (G.neighborSet v)) (φ:V→V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hφ:∀ v w,G.Adj v w→φ v≠φ w):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     Function.Injective (fun d:(Σ v,G.neighborSet v)=&gt;</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (φ d.1,h ⟨s(d.1,(σ d.1 d.2).val),SimpleGraph.mem_edgeFinset.mpr (σ d.1 d.2).property⟩)):=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   rintro ⟨v,w⟩ ⟨v&#x27;,w&#x27;⟩ he</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hv:φ v=φ v&#x27;:=(Prod.mk.inj he).1</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hed:=h.injective (Prod.mk.inj he).2</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hed&#x27;:s(v,(σ v w).val)=s(v&#x27;,(σ v&#x27; w&#x27;).val):=congrArg Subtype.val hed</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   rcases Sym2.eq_iff.mp hed&#x27; with ⟨hvv,hww⟩|⟨hvw,hwh⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   · subst v&#x27;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have hw:w=w&#x27;:=(σ v).injective (Subtype.ext hww)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     subst w&#x27;;rfl</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   · have hadj:G.Adj v v&#x27;:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       have ha:(σ v w).val∈G.neighborSet v:=(σ v w).property</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       change G.Adj v (σ v w).val at ha</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       simpa only [hwh] using ha</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     exact (hφ v v&#x27; hadj hv).elim</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> </span>
+<span id="L33"><a href="#L33" class="ln">  33</a>  theorem shifted_hub_avoids_own_path (G:SimpleGraph V) (h:G.edgeFinset↪U)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (σ:∀ v,Equiv.Perm (G.neighborSet v)) (hσ:∀ v w,σ v w≠w):</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∀ (v:V) (w:G.neighborSet v),</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       h ⟨s(v,(σ v w).val),SimpleGraph.mem_edgeFinset.mpr (σ v w).property⟩≠</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         h ⟨s(v,w.val),SimpleGraph.mem_edgeFinset.mpr w.property⟩:=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   intro v w he</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hh:=congrArg Subtype.val (h.injective he)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   exact hσ v w (Subtype.ext (sym2_fixed_endpoint_injective v hh))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

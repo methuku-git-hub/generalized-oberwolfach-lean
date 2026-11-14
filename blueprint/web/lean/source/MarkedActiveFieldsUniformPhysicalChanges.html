@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedActiveFieldsUniformPhysicalChanges.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedActiveFieldsUniformPhysicalChanges.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedDeepPerturbationSlack</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedLocalChangeDegreeScale</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedPhysicalChangesRestrict</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedReferenceDeepConfigurationsAfterChanges</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedLocalSpokeLoadSharedChanges</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! On the active vertex domain and the original non-deeper hub domain,</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> transfer local configurations and fixed-weight loads using one global</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> physical-change allowance. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 24000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_active_fields_uniform_physical_changes</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (r:ℕ) (α tstar kstar ζCfg η B pstar iota:ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hζCfg:0&lt;ζCfg) (hη:0&lt;η) (hB:0≤B) (hpstar:0&lt;pstar) (hi:0 &lt; iota):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃ ζcap:ℝ,0&lt;ζcap ∧ ∀ ζ:ℝ,0≤ζ→ζ≤ζcap→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ (V U W Z Γ Color:Type) [Fintype V] [Fintype U] [Fintype W] [Fintype Z]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       [Fintype Γ] [Fintype Color] [LinearOrder V] [LinearOrder W] [DecidableEq U] [DecidableEq Z],</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (f:W↪oV) (g:Z↪U) (π:Equiv.Perm V) (ρ:Equiv.Perm W)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (hcomm:∀ x,f (ρ x)=π (f x)) (P:SimpleGraph V) (d:ℕ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (D t τ A eps βrec p k s₀:ℝ) (weight:(Fin (r+4+1)→W)→ℝ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (σ σ&#x27;:RawMarkedOutcome V U Γ Color) (H H&#x27;:Bool→V→U→Prop)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (FR:SimpleGraph V) (FS:SimpleGraph (V⊕U)),</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     0&lt;Fintype.card W → iota*Fintype.card V≤(Fintype.card W:ℝ) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀ e,¬(rawMarkedPairRims P π d σ e↔rawMarkedPairRims P π d σ&#x27; e)→markedPairPhysical π e∈FR.edgeFinset) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ b v u,¬(H b v u↔H&#x27; b v u)→FS.Adj (Sum.inl v) (Sum.inr u)) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ v,(FR.degree v:ℝ)≤ζ*Fintype.card V) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∀ z,(FS.degree z:ℝ)≤ζ*Fintype.card V) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (∀ v u,¬(H false v u∧H true v u)) →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     3*βrec≤markedLocalCycleCoefficient r α (tstar/2) kstar-(r+5:ℕ)*ζCfg →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     3*βrec≤markedLocalPathCoefficient r α (tstar/2) kstar-(r+4:ℕ)*ζCfg →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     βrec≤t/4 → eps≤η/8 →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (Fintype.card W:ℝ)/2≤D → D≤2*Fintype.card W →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     pstar≤p → pstar≤k → pstar≤s₀ → p≤1 → k≤1 → s₀≤1 →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     SuccessorSequenceWeightConditions (P.comap f) ρ (3*d) D τ A B weight →</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let σloc:=rawMarkedRestrictPair f g σ</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let τloc:=rawMarkedRestrictPair f g σ&#x27;</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let Hloc:=fun b v u=&gt;H b (f v) (g u)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let Hloc&#x27;:=fun b v u=&gt;H&#x27; b (f v) (g u);</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     MarkedLocalConfigurationsWithSpokes r (P.comap f) ρ d Finset.univ</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (markedLocalCycleCoefficient r α (tstar/2) kstar-(r+5:ℕ)*(ζCfg/2))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (markedLocalPathCoefficient r α (tstar/2) kstar-(r+4:ℕ)*(ζCfg/2)) σloc Hloc →</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     MarkedLocalSpokeLoadsWithSpokes (P.comap f) ρ d (r+4) D p k s₀ weight eps σloc Hloc →</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     MarkedLocalConfigurationsWithSpokes r (P.comap f) ρ d Finset.univ (3*βrec) (3*βrec) τloc Hloc&#x27; ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     MarkedLocalSpokeLoadsWithSpokes (P.comap f) ρ d (r+4) D p k s₀ weight (η/4) τloc Hloc&#x27; := by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   obtain ⟨ζlocal,hζlocal,hbudget⟩:=marked_deep_perturbation_slack r α tstar kstar ζCfg η B pstar hζCfg hη hB hpstar</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let ζcap:=iota*ζlocal</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hcap:0&lt;ζcap:=mul_pos hi hζlocal</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   refine ⟨ζcap,hcap,?_⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   intro ζ hζ hζcap V U W Z Γ Color _ _ _ _ _ _ _ _ _ _ f g π ρ hcomm P d D t τ A eps βrec p k s₀ weight σ σ&#x27; H H&#x27; FR FS</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     hn hsize hR hS hFR hFS htypes hcycle hpath hβt heps hDlo hDhi hp hk hs hp1 hk1 hs1 hw σloc τloc Hloc Hloc&#x27; hcfg hload</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   let fg:W⊕Z↪V⊕U:=Function.Embedding.sumMap f.toEmbedding g</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   obtain ⟨hRloc,hSloc⟩:=marked_physical_changes_restrict f g π ρ hcomm P d σ σ&#x27; H H&#x27; FR FS hR hS</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   obtain ⟨hFRloc,hFSloc⟩:=marked_local_change_degree_scale f.toEmbedding fg FR FS iota ζ ζlocal hζlocal.le hsize hζcap hFR hFS</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   obtain ⟨hC,hP,hloadBudget⟩:=hbudget βrec t eps hcycle hpath heps</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hconf:=marked_reference_deep_configurations_after_changes r (P.comap f) ρ d _ _ βrec t ζlocal</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     σloc τloc Hloc Hloc&#x27; (FR.comap f) (FS.comap fg) hRloc hSloc hFRloc hFSloc</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (fun v u=&gt;htypes (f v) (g u)) hC hP hcfg</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hmin:min βrec (t/4)=βrec:=min_eq_left hβt</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   rw [hmin] at hconf</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hload&#x27;:=marked_local_spoke_loads_from_shared_changes (P.comap f) ρ d (r+4) (by omega) hn</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     D τ A B hDlo hDhi p k s₀ pstar hpstar hp hk hs hp1 hk1 hs1 hB weight hw eps ζlocal (η/4) hζlocal.le</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     σloc τloc Hloc Hloc&#x27; hload (FR.comap f) (FS.comap fg) hRloc hSloc hFRloc</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (fun z=&gt;hFSloc z) (by simpa only [Nat.cast_add,Nat.cast_ofNat] using hloadBudget)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   exact ⟨hconf,hload&#x27;⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> end Oberwolfach</span></pre></html>

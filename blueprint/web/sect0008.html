@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Finite categorical laws and sampling implications</title>
+<link rel="next" href="sect0009.html" title="Uniform fixed-size subsets and partitions" />
+<link rel="prev" href="sect0007.html" title="Prescribed degrees and the deterministic protected partition" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000009">7 Finite categorical laws and sampling implications</h1>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:finite-expectations">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">7.1</span>
+    <span class="lemma_thmtitle">Fixed root-omitted expectations</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0008.html#bp:finite-expectations">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0004.html#bp:omitted">Lemma 3.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.FiniteLaw" class="lean_decl">Oberwolfach.FiniteLaw</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.FiniteLaw.pi" class="lean_decl">Oberwolfach.FiniteLaw.pi</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_expectation_pattern" class="lean_decl">Oberwolfach.finiteLaw_expectation_pattern</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_expectation_omitted_root_sum" class="lean_decl">Oberwolfach.finiteLaw_expectation_omitted_root_sum</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For independent categorical coordinates with probability vectors \(p_e\), a prescribed pattern on \(F\) has probability \(\prod _{e\in F}p_e(s_e)\). For fixed coefficients, candidate families and omitted roots, </p>
+<div class="displaymath" id="a0000000086">
+  \[  \mathbb E\sum _{i\in C}w_i\prod _{e\in F_i\setminus R} \mathbf1_{\{ \sigma _e=s_{i,e}\} } =\sum _{i\in C}w_i\prod _{e\in F_i\setminus R}p_e(s_{i,e}).  \]
+</div>
+<p> The product law is explicitly defined and proved to have total mass one. No conditioning on root presence occurs. This does not prove the manuscript-specific identities for physical images or their influence counts. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:finite-projection">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">7.2</span>
+    <span class="lemma_thmtitle">Projection of one common event</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0008.html#bp:finite-projection">#</a>
+    
+    <a class="icon proof" href="sect0008.html#a0000000087"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.FiniteLaw.prod" class="lean_decl">Oberwolfach.FiniteLaw.prod</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_common_event_projection" class="lean_decl">Oberwolfach.finiteLaw_common_event_projection</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Let colours and auxiliary directions have independent finite laws. If a joint event \(E\) implies that every later admissible family admits its required construction, then the probability of the colour event expressing this universal conclusion is at least the probability of \(E\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000087">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Sum the product masses over the joint event. For each colour outcome its fibre contributes at most the colour’s mass; outside the universal colour event the fibre is empty. This preserves the quantifier over all later families on one event. It does not bound the probability of the joint event. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:categorical-concentration">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">7.3</span>
+    <span class="theorem_thmtitle">Concentration for the finite categorical product</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0008.html#bp:categorical-concentration">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0008.html#bp:finite-expectations">Lemma 7.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.boundedIndependentSum_tail" class="lean_decl">Oberwolfach.boundedIndependentSum_tail</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_pi_measure" class="lean_decl">Oberwolfach.finiteLaw_pi_measure</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_coordinate_independence" class="lean_decl">Oberwolfach.finiteLaw_coordinate_independence</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_bounded_coordinate_sum" class="lean_decl">Oberwolfach.finiteLaw_bounded_coordinate_sum</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.categoricalDirection_cut_tail" class="lean_decl">Oberwolfach.categoricalDirection_cut_tail</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    For independent finite coordinates \(\sigma _i\), and functions \(a_i\le X_i(\sigma _i)\le b_i\), </p>
+<div class="displaymath" id="a0000000088">
+  \[  \Pr \left(\left|\sum _i X_i-\sum _i\mathbb E X_i\right|\ge t\right) \le 2\exp \left(-\frac{2t^2}{\sum _i(b_i-a_i)^2}\right) \qquad (t\ge 0).  \]
+</div>
+<p> The explicit finite product is identified with the product probability measure, proving coordinate independence. The bound follows from mathlib’s proved subgaussian Hoeffding estimate, applied to the centred variables. In a raw directed-colour cut, one physical edge has one categorical colour–direction state. If both directions meet the cut, its two contributions are combined into one \([0,1]\)-valued variable; its expectation is the sum of the two corresponding \(\rho _a/2\) terms. This theorem does not yet establish the simultaneous cut event or its asymptotic failure bound required by the protected partition. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:bounded-differences">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">7.4</span>
+    <span class="theorem_thmtitle">Bounded differences and fixed weighted patterns</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0008.html#bp:bounded-differences">#</a>
+    
+    <a class="icon proof" href="sect0008.html#a0000000089"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0008.html#bp:finite-expectations">Lemma 7.1</a></li>
+          
+          <li><a href="sect0004.html#bp:weighted-stability">Lemma 3.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_boundedDifferences_mgf" class="lean_decl">Oberwolfach.finiteLaw_boundedDifferences_mgf</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_boundedDifferences" class="lean_decl">Oberwolfach.finiteLaw_boundedDifferences</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_zero_boundedDifferences" class="lean_decl">Oberwolfach.finiteLaw_zero_boundedDifferences</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_omitted_weighted_tail" class="lean_decl">Oberwolfach.finiteLaw_omitted_weighted_tail</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    Let \(X\) be a function of independent finite categorical coordinates. If changing only coordinate \(e\) changes \(X\) by at most \(b_e\ge 0\), then </p>
+<div class="displaymath" id="a0000000090">
+  \[  \mathbb E e^{u(X-\mathbb EX)}\le e^{u^2\sum _e b_e^2/8},\qquad \Pr (|X-\mathbb EX|\ge t)\le 2e^{-2t^2/\sum _e b_e^2}\quad (t\ge 0).  \]
+</div>
+<p> When all \(b_e=0\), \(X\) equals its expectation at every configuration. In particular, this applies to a fixed root-omitted weighted pattern sum with \(b_e\ge \sum _{i:e\in F_i\setminus R}w_i\). Its expectation is the exact product expression above; weights and omitted roots remain fixed. </p>
+<p><i class="itshape">Manuscript label:</i> thm:prelim:bounded-differences.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000089">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Induct on the number of coordinates. Averaging over the remaining coordinates changes the conditional mean by at most the first coordinate’s bound. The finite-variable Hoeffding exponential estimate controls this conditional mean; the induction hypothesis controls each conditional tail. Factoring the exponential and summing the product law gives the displayed moment bound. Apply the proved subgaussian tail inequality. Reindexing a finite coordinate set preserves its exact product law. The zero-influence case follows by changing coordinates one at a time. The weighted assertion uses the previously checked deterministic influence inequality. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:common-event-probability">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">7.5</span>
+    <span class="lemma_thmtitle">One event for all fixed tests</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0008.html#bp:common-event-probability">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0008.html#bp:bounded-differences">Theorem 7.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_union_bound" class="lean_decl">Oberwolfach.finiteLaw_union_bound</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_common_event_lower" class="lean_decl">Oberwolfach.finiteLaw_common_event_lower</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_common_event_exists" class="lean_decl">Oberwolfach.finiteLaw_common_event_exists</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_simultaneous_boundedDifferences" class="lean_decl">Oberwolfach.finiteLaw_simultaneous_boundedDifferences</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    If fixed bad events \(A_j\) have probabilities at most \(p_j\), then \(\Pr (\bigcap _j A_j^c)\ge 1-\sum _jp_j\). If the sum is less than one, a positive-mass outcome satisfies every test. Applying this to bounded differences keeps each test’s own tolerance and influence bounds. No independence between tests or uniformity over arbitrary outcome-dependent domains is assumed. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:random-orientation">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">7.6</span>
+    <span class="lemma_thmtitle">Fair orientations and simultaneous two-step paths</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0008.html#bp:random-orientation">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0008.html#bp:common-event-probability">Lemma 7.5</a></li>
+          
+          <li><a href="sect0007.html#bp:orientation-routing">Lemma 6.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sampledOrientation_physical" class="lean_decl">Oberwolfach.sampledOrientation_physical</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sampledOrientation_degree_tail" class="lean_decl">Oberwolfach.sampledOrientation_degree_tail</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sampledOrientation_twoPath_tail" class="lean_decl">Oberwolfach.sampledOrientation_twoPath_tail</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sampledOrientation_common_event" class="lean_decl">Oberwolfach.sampledOrientation_common_event</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sampledOrientation_balancing_event" class="lean_decl">Oberwolfach.sampledOrientation_balancing_event</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Sample one fair bit for each unordered vertex pair; bits on nonedges are unused. This gives exactly one direction to each edge. For a fixed eligibility graph \(E\subseteq G\), the number of directed paths \(x\to z\to y\) with both edges in \(E\) has mean \(|N_E(x)\cap N_E(y)|/4\). For \(x\ne y\), different choices of \(z\) use disjoint physical coordinate pairs. The probability of at most \(|N_E(x)\cap N_E(y)|/8\) such paths is at most \(2\exp (-|N_E(x)\cap N_E(y)|/64)\). The corresponding degree bounds and all pair bounds hold on one event with the explicit sum of their failure bounds. On this event, the routing conclusion holds for every later forbidden graph satisfying its degree bound. </p>
+<p><i class="itshape">Manuscript label:</i> clm:partition:balanced-orientation.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:balanced-orientation">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">7.7</span>
+    <span class="lemma_thmtitle">Balanced orientation on a common event</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0008.html#bp:balanced-orientation">#</a>
+    
+    <a class="icon proof" href="sect0008.html#a0000000091"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0008.html#bp:random-orientation">Lemma 7.6</a></li>
+          
+          <li><a href="sect0007.html#bp:orientation-routing">Lemma 6.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.orientationMatrix_degree" class="lean_decl">Oberwolfach.orientationMatrix_degree</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.balancedOrientation_highProbability" class="lean_decl">Oberwolfach.balancedOrientation_highProbability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.eventually_orientation_numeric" class="lean_decl">Oberwolfach.eventually_orientation_numeric</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.eventually_orientation_failure_small" class="lean_decl">Oberwolfach.eventually_orientation_failure_small</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For every \(\alpha {\gt}0\) there is \(N(\alpha )\) such that the following holds for every graph \(G\) of order \(n\ge N(\alpha )\) with even degrees and \(\delta (G)\ge (1/2+\alpha )n\). A fair independent orientation \(D_0\) has, with probability at least \(1-n^{-10}\), this property: for every later graph \(F\) with \(\Delta (F)\le \alpha n/100\), there is a balanced orientation \(D\) of \(G\) which changes at most \(4n^{4/5}\) incident edges at any vertex and changes no edge of \(F\). The order threshold precedes the vertex set, graph and forbidden graph. </p>
+<p><i class="itshape">Manuscript label:</i> clm:partition:balanced-orientation.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000091">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Minimum degree gives at least \(2\alpha n\) common neighbours for every pair. The checked orientation event has failure at most </p>
+<div class="displaymath" id="a0000000092">
+  \[  2n\exp (-2n^{1/5})+2n^2\exp (-\alpha n/32).  \]
+</div>
+<p> This is a valid weaker intermediate exponential estimate than the manuscript’s Chernoff estimate, with the same required final bound. The checked real-power asymptotics make it at most \(n^{-10}\). Set \(a=n^{3/5}\), \(\beta =\alpha /4\), \(f=\alpha n/100\) and \(L=\lceil n^{4/5}\rceil \). The proof includes all rounding inequalities, shows the routing margin for large \(n\), and proves \(a+2L\le 4n^{4/5}\). Evenness and the degree-sum identity supply the half-degree vector and its required total. The exact physical identity gives both the final indegree and outdegree. The forbidden graph is chosen after the event. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:graph-cuts">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">7.8</span>
+    <span class="lemma_thmtitle">The large-cut consequence of minimum degree</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0008.html#bp:graph-cuts">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.graphCut" class="lean_decl">Oberwolfach.graphCut</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.graphCut_eq_sum" class="lean_decl">Oberwolfach.graphCut_eq_sum</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.graphCut_symm" class="lean_decl">Oberwolfach.graphCut_symm</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.graphCut_lower_of_degrees" class="lean_decl">Oberwolfach.graphCut_lower_of_degrees</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.graphCut_large_of_minDegree" class="lean_decl">Oberwolfach.graphCut_large_of_minDegree</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Define \(e_G(S,T)=\sum _{x\in S}|N_G(x)\cap T|\), counting ordered pairs. If \(\delta (G)\ge (1/2+\alpha )n\) and \(|S|+|T|{\gt}(1-2\delta )n\), then </p>
+<div class="displaymath" id="a0000000093">
+  \[  e_G(S,T)\ge (\alpha -\delta )n\min \{ |S|,|T|\} .  \]
+</div>
+<p> The count is symmetric in \(S,T\). If \(T\) is the larger side, it has size greater than \((1/2-\delta )n\), and each vertex in \(S\) has at least \(\delta (G)+|T|-n\) neighbours in \(T\). Summation proves the inequality; the other case follows by symmetry. Overlapping sides retain both ordered occurrences of an edge when appropriate. </p>
+<p><i class="itshape">Manuscript label:</i> eq:family:raw-partition-cut.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:colour-cuts">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">7.9</span>
+    <span class="lemma_thmtitle">Simultaneous categorical directed-colour cuts</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0008.html#bp:colour-cuts">#</a>
+    
+    <a class="icon proof" href="sect0008.html#a0000000094"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0008.html#bp:graph-cuts">Lemma 7.8</a></li>
+          
+          <li><a href="sect0008.html#bp:bounded-differences">Theorem 7.4</a></li>
+          
+          <li><a href="sect0008.html#bp:common-event-probability">Lemma 7.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sampledColourOrientation_physical" class="lean_decl">Oberwolfach.sampledColourOrientation_physical</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sampledColourCut_tail" class="lean_decl">Oberwolfach.sampledColourCut_tail</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sampledColourCut_all_cuts" class="lean_decl">Oberwolfach.sampledColourCut_all_cuts</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sampledColourCut_quadratic_event" class="lean_decl">Oberwolfach.sampledColourCut_quadratic_event</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.eventually_allCuts_failure_small" class="lean_decl">Oberwolfach.eventually_allCuts_failure_small</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Give each unordered pair one categorical state \((a,b)\) of probability \(\rho _a/2\), where \(\rho _a\ge 0\) and \(\sum _a\rho _a=1\). On graph edges, \(a\) is the colour and \(b\) the direction. The colour classes partition the physical edges exactly. For fixed \(S,T\), their directed-colour count \(X_a(S,T)\) has expectation \(\rho _a e_G(S,T)/2\). For any fixed number of colours \(k\) and \(q{\gt}0\), there is \(N(k,q)\) such that, for every graph of order \(n\ge N(k,q)\) and every such profile, with probability at least \(1-n^{-10}\), </p>
+<div class="displaymath" id="a0000000095">
+  \[  \left|X_a(S,T)-\rho _a e_G(S,T)/2\right|{\lt}qn^2 \quad \text{for every }a,S,T.  \]
+</div>
+<p> The threshold precedes the vertex set, host and profile. This absolute quadratic tolerance controls large cuts; it does not replace the separate small-cut argument using vertex degrees in the partition proof. </p>
+<p><i class="itshape">Manuscript label:</i> eq:family:raw-partition-cut.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000094">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Write the ordered incidences as fixed singleton-coordinate patterns. Their exact expectation follows from the categorical law. The fibre of an unordered pair among ordered pairs has size at most two, proving a coordinate influence bound of two without assuming independent opposite arcs. Bounded differences gives a failure at most \(2\exp (-t^2/(2n^2))\). Sum over the \(k4^n\) colour–cut tests and put \(t=qn^2\). The proof verifies \(2k4^n\exp (-q^2n^2/2)\le n^{-10}\) for all sufficiently large \(n\). This supplies the simultaneous raw cut estimate; assembling the degree, protected-set, balancing and cut-loss events remains a separate obligation. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:protected-sampling">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">7.10</span>
+    <span class="lemma_thmtitle">Joint sampling event and exact marginal laws</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0008.html#bp:protected-sampling">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0008.html#bp:bounded-differences">Theorem 7.4</a></li>
+          
+          <li><a href="sect0008.html#bp:common-event-probability">Lemma 7.5</a></li>
+          
+          <li><a href="sect0008.html#bp:balanced-orientation">Lemma 7.7</a></li>
+          
+          <li><a href="sect0008.html#bp:colour-cuts">Lemma 7.9</a></li>
+          
+          <li><a href="sect0007.html#bp:protected-deterministic">Theorem 6.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.protectedSample_highProbability" class="lean_decl">Oberwolfach.protectedSample_highProbability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sampledColourDegrees_common_event" class="lean_decl">Oberwolfach.sampledColourDegrees_common_event</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.categoricalDirection_colour_probability" class="lean_decl">Oberwolfach.categoricalDirection_colour_probability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.categoricalDirection_direction_probability" class="lean_decl">Oberwolfach.categoricalDirection_direction_probability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_pi_restrict" class="lean_decl">Oberwolfach.finiteLaw_pi_restrict</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.eventually_partition_margins" class="lean_decl">Oberwolfach.eventually_partition_margins</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.matrixCut_large_of_degree_and_quadratic" class="lean_decl">Oberwolfach.matrixCut_large_of_degree_and_quadratic</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.protectedPartition_from_balancing" class="lean_decl">Oberwolfach.protectedPartition_from_balancing</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For each fixed inverse power, the raw incoming, outgoing and fixed-protected-graph colour degrees, all directed-colour cuts, and the balancing property hold on a single event with the asserted failure bound. The fixed protected graph precedes the sample. The balancing property quantifies over every later admissible forbidden graph on this same event. The colour and direction marginals equal the original categorical and fair-bit laws exactly. Restricting the full product to any fixed set of coordinates also gives exactly the product law on those coordinates; unused nonedge coordinates do not alter the physical-edge sampling law. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0007.html" title="Prescribed degrees and the deterministic protected partition"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0009.html" title="Uniform fixed-size subsets and partitions"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

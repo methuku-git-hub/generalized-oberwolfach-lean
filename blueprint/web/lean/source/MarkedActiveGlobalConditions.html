@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedActiveGlobalConditions.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedActiveGlobalConditions.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedActiveCoverDownLocal</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Exact global inputs of the active cover-down constructor. This is a</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> predicate on the actual typed host; it asserts no construction by itself. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> structure MarkedActiveGlobalConditions {V U E K:Type}</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     [Fintype V] [Fintype U] [Fintype E] [Fintype K] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (tail head:E→V) (ktail khead:K→V) (π:Equiv.Perm V) (d r:ℕ)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (H₀ HK:V→U→Prop)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (p D alpha beta Lsp bminus bplus omega eps eta0 delta0 deltaCut hCut:ℝ):Prop where</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   degree_lower : (Fintype.card V:ℝ)/2≤D</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   degree_upper : D≤2*Fintype.card V</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   ordinary_out : ∀ x,|occurrenceDegree tail x-p*D|≤eps*Fintype.card V</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   ordinary_in : ∀ x,|occurrenceDegree head x-p*D|≤eps*Fintype.card V</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   marked_out : ∀ x,|occurrenceDegree ktail x-p*D/(r+4:ℝ)|≤eps*Fintype.card V</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   marked_in : ∀ x,|occurrenceDegree khead x-p*D/(r+4:ℝ)|≤eps*Fintype.card V</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   two_step : ∀ x y,x≠y→4*alpha*p^2*Fintype.card V≤</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ((Finset.univ.filter (fun z=&gt;(∃ e,tail e=x∧head e=z)∧(∃ e,tail e=z∧head e=y))).card:ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   ordinary_cut : ∀ S T:Finset V,(1-2*min (alpha/16) (p/128))*Fintype.card V&lt;(S.card:ℝ)+T.card→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     4*(alpha*p/16)*Fintype.card V*min (S.card:ℝ) T.card≤</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       ((Finset.univ.filter (fun e=&gt;tail e∈S∧head e∈T)).card:ℝ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   compatible_hubs : ∀ C:MarkedCycleTuple tail head ktail khead (r+4) π (3*d),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     4*beta*Fintype.card V≤(Fintype.card {u // MarkedHubCompatible H₀ HK C.val u}:ℝ)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   hubs_lower : omega*Fintype.card V≤Fintype.card U</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   hubs_upper : Fintype.card U≤Fintype.card V</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   spoke_intersections : ∃ (ps qs:Bool→U→ℝ) (deltaSp Dexc:ℝ),</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ j,SparseIntersectionData (if j then HK else H₀) (ps j) (qs j) Lsp deltaSp Dexc)∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     deltaSp+Dexc/(Fintype.card V:ℝ)+1/(Fintype.card U:ℝ)≤delta0</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   common_cycles : ∀ u u&#x27;:U,u≠u&#x27;→4*beta*(Fintype.card V:ℝ)^(r+5)≤</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (Fintype.card (CommonMarkedCycle tail head ktail khead (r+4) π (3*d) H₀ HK u u&#x27;):ℝ)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   common_paths : ∀ j,∀ Q:BipartiteFourCycle (if j then HK else H₀),</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     4*beta*(Fintype.card V:ℝ)^(r+4)≤</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (Fintype.card (CanonicalCommonMarkedPath tail head ktail khead (r+4) π (3*d) H₀ HK</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ((markedRootOrder (r+4) j).symm 0) Q.val.1.1 Q.val.1.2 Q.val.2.1 Q.val.2.2):ℝ)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   seed_weights : ∃ ψ:MarkedWheel tail head ktail khead (r+4) π (3*d) H₀ HK→ℝ,</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ e,|markedWheelRimLoad ψ e-1|≤eta0)∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ j v u,|markedSpokeResidual ψ j v u|≤eta0)∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ W,bminus/(Fintype.card V:ℝ)^(r+4)≤ψ W∧ψ W≤bplus/(Fintype.card V:ℝ)^(r+4))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   ordinary_correction_cut : BipartiteLargeCut (occurrenceMultiplicity tail head) deltaCut (2*hCut)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   marked_correction_cut : BipartiteLargeCut (occurrenceMultiplicity ktail khead) deltaCut (2*hCut)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   ordinary_spoke_cut : BipartiteLargeCut (relationMultiplicity H₀) deltaCut (2*hCut)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   marked_spoke_cut : BipartiteLargeCut (relationMultiplicity HK) deltaCut (2*hCut)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> end Oberwolfach</span></pre></html>

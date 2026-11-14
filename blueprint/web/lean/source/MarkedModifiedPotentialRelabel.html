@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedModifiedPotentialRelabel.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedModifiedPotentialRelabel.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedRetainedPotentialLoadRelabel</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Relabel a possibly modified raw host and its typed spokes, preserving the</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> fixed potential-wheel weights and every root-omitted load. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 3500000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V W U Z Γ Color : Type} [Fintype V] [Fintype W] [Fintype U] [Fintype Z]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   [Fintype Γ] [Fintype Color] [LinearOrder V] [LinearOrder W] [DecidableEq U] [DecidableEq Z]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem marked_modified_potential_load_relabel</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (F : W ↪o V) (f : W ≃ V) (hf : ∀ w, f w = F w) (g : Z ≃ U)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (π : Equiv.Perm V) (ρ : Equiv.Perm W) (hc : ∀ w, f (ρ w) = π (f w))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (P : SimpleGraph V) (d m : ℕ) (σ : RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (w : MarkedWheel (Prod.fst : V×V→V) Prod.snd Prod.fst Prod.snd m π (3*d)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (fun _ _ =&gt; True) (fun _ _ =&gt; True) → ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (root : ((W×W)⊕(W×W))⊕(Bool×W×Z)) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let e := f.prodCongr f</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let M := markedWheelVertexEmbedding (m:=m) (b:=3*d) f.toEmbedding g.toEmbedding hc e e</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (fun _=&gt;rfl) (fun _=&gt;rfl) (fun _=&gt;rfl) (fun _=&gt;rfl)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (fun _ _ h=&gt;h) (fun _ _ h=&gt;h)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     typedMarkedPotentialLoad (fun W=&gt;w (M W))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (rawMarkedPairRims (P.comap F) ρ d (rawMarkedRestrictPair f g σ))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (fun b x u=&gt;H b (f x) (g u)) root =</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     typedMarkedPotentialLoad w (rawMarkedPairRims P π d σ) H</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (markedTypedResourceEquiv f g e e root) := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   intro e M</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have he : (f:W→V)=F := funext hf</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hcomm : ∀ x,F (ρ x)=π (F x) := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     intro x</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     simpa only [← he] using hc x</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hR : ∀ x, rawMarkedPairRims (P.comap F) ρ d (rawMarkedRestrictPair f g σ) x ↔</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       rawMarkedPairRims P π d σ (Sum.map e e x) := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     intro x</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     simpa only [e,Equiv.prodCongr_apply,he] using rawMarkedRestrictPair_rims F g π ρ hcomm P d σ x</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hH : ∀ b x u,H b (f x) (g u) ↔ H b (f x) (g u) := fun _ _ _=&gt;Iff.rfl</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hinjW : Function.Injective (fun a:W×W =&gt; (a.1,a.2)) := by intro x y h; cases x; cases y; simpa using h</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hinjV : Function.Injective (fun a:V×V =&gt; (a.1,a.2)) := by intro x y h; cases x; cases y; simpa using h</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   exact marked_typed_root_omitted_load_relabel f g hc e e</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (fun _=&gt;rfl) (fun _=&gt;rfl) (fun _=&gt;rfl) (fun _=&gt;rfl)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (fun _ _=&gt;Iff.rfl) (fun _ _=&gt;Iff.rfl) hinjW hinjW hinjV hinjV w _ _ _ H hR hH root</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> theorem marked_modified_parent_load_bound_relabel</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (F : W ↪o V) (f : W ≃ V) (hf : ∀ w, f w = F w) (g : Z ≃ U)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (π : Equiv.Perm V) (ρ : Equiv.Perm W) (hc : ∀ w, f (ρ w) = π (f w))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (P : SimpleGraph V) (d m : ℕ) (c : Γ) (j : Color)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (p k : ℝ) (q : U → Γ → ℝ) (s : U → Color → ℝ) (error : ℝ)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (σ : RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (w : MarkedWheel (Prod.fst : V×V→V) Prod.snd Prod.fst Prod.snd m π (3*d)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (fun _ _ =&gt; True) (fun _ _ =&gt; True) → ℝ) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     let e := f.prodCongr f</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     let M := markedWheelVertexEmbedding (m:=m) (b:=3*d) f.toEmbedding g.toEmbedding hc e e</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (fun _=&gt;rfl) (fun _=&gt;rfl) (fun _=&gt;rfl) (fun _=&gt;rfl)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (fun _ _ h=&gt;h) (fun _ _ h=&gt;h)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (∀ root,rawMarkedWheelMarginal P π d p k q s c j root≠0 →</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       |typedMarkedPotentialLoad w (rawMarkedPairRims P π d σ) H root-1|≤error) →</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     ∀ root,rawMarkedWheelMarginal (P.comap F) ρ d p k (fun u=&gt;q (g u)) (fun u=&gt;s (g u)) c j root≠0 →</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       |typedMarkedPotentialLoad (fun W=&gt;w (M W))</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (rawMarkedPairRims (P.comap F) ρ d (rawMarkedRestrictPair f g σ))</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (fun b x u=&gt;H b (f x) (g u)) root-1|≤error := by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   intro e M hparent root hroot</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hload := marked_modified_potential_load_relabel F f hf g π ρ hc P d m σ H w root</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   rw [hload]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   apply hparent</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hmarginal := raw_marked_marginal_relabel f.toEmbedding g π ρ hc P d p k q s c j root</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have he : (f.toEmbedding : W → V) = F := funext hf</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   rw [he] at hmarginal</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   intro hz</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   apply hroot</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   apply hmarginal.trans</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   cases root with</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   | inl root =&gt;</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     cases root with</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     | inl xy =&gt; cases xy; simpa [e, markedTypedResourceEquiv, hf] using hz</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     | inr xy =&gt; cases xy; simpa [e, markedTypedResourceEquiv, hf] using hz</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   | inr root =&gt;</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     rcases root with ⟨b,x,u⟩</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     simpa [e, markedTypedResourceEquiv, hf] using hz</span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

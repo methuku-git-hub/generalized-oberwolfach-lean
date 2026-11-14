@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FiniteTwoStepRestriction.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FiniteTwoStepRestriction.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BoundedMatrixVertexRestriction</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Exact two-step neighbourhood losses under vertex restriction and</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> changes to the two incident relations. All endpoints remain fixed. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V W:Type*} [Fintype V] [Fintype W] [DecidableEq V]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem relation_two_step_count_eq (R:V→V→Prop) (x y:V):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ((Finset.univ.filter (fun z=&gt;R x z∧R z y)).card:ℝ)=</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ∑ z,if R x z∧R z y then (1:ℝ) else 0:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   simp only [Finset.card_filter,Nat.cast_sum,Nat.cast_ite,Nat.cast_one,Nat.cast_zero]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem relation_two_step_vertex_restriction (f:W↪V) (R:V→V→Prop) (x y:W):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     |((Finset.univ.filter (fun z=&gt;R (f x) (f z)∧R (f z) (f y))).card:ℝ)-</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (Finset.univ.filter (fun z=&gt;R (f x) z∧R z (f y))).card|≤</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (Finset.univ\Finset.univ.image f).card:=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hh:=finite_bounded_sum_restriction (Finset.univ.image f) Finset.univ</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (Finset.subset_univ _) (fun z=&gt;if R (f x) z∧R z (f y) then (1:ℝ) else 0)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (by intro z _;split_ifs &lt;;&gt; norm_num)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   rw [Finset.sum_image (fun _ _ _ _ he=&gt;f.injective he)] at hh</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   simpa only [Finset.card_filter,Nat.cast_sum,Nat.cast_ite,Nat.cast_one,Nat.cast_zero] using hh</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem relation_two_step_changes (R Q:V→V→Prop) (x y:V) (δout δin:ℝ)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hout:(∑ z,if ¬(R x z↔Q x z) then (1:ℝ) else 0)≤δout)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hin:(∑ z,if ¬(R z y↔Q z y) then (1:ℝ) else 0)≤δin):</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     |((Finset.univ.filter (fun z=&gt;Q x z∧Q z y)).card:ℝ)-</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (Finset.univ.filter (fun z=&gt;R x z∧R z y)).card|≤δout+δin:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   rw [relation_two_step_count_eq,relation_two_step_count_eq]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   apply (finset_indicator_sum_change Finset.univ _ _).trans</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   calc</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     _ ≤ ∑ z,((if ¬(R x z↔Q x z) then (1:ℝ) else 0)+(if ¬(R z y↔Q z y) then (1:ℝ) else 0)):=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       apply Finset.sum_le_sum</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       intro z _</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       by_cases h1:R x z &lt;;&gt; by_cases h2:R z y &lt;;&gt; by_cases h3:Q x z &lt;;&gt; by_cases h4:Q z y &lt;;&gt;</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         norm_num [h1,h2,h3,h4]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     _ ≤ δout+δin:=by rw [Finset.sum_add_distrib];exact add_le_add hout hin</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> </span>
+<span id="L43"><a href="#L43" class="ln">  43</a> end Oberwolfach</span></pre></html>

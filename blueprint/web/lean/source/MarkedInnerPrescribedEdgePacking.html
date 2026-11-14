@@ -1,0 +1,148 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedInnerPrescribedEdgePacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedInnerPrescribedEdgePacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedInnerPrescribedRimPacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedInnerPrescribedSpokePacking</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedInnerResources</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedSpokeDeletionExtensions</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedFamilyRestrictionLift</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> /-! Cover prescribed outside edges through the inner pair. Rim wheels</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> use inner hubs, while the prescribed spokes have outside hubs. The spoke</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> stage deletes the actual rim edges of the first stage; its hub separation</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> ensures that the two stages cannot share a spoke. -/</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option autoImplicit false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> set_option maxHeartbeats 26000000</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> noncomputable section</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> namespace Oberwolfach</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> variable {V U E T:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     {tail head:E→V} {ktail khead:T→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b l:ℕ} {c ch:ℝ}</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> theorem marked_inner_prescribed_edge_packing</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hl:2≤l) (hb:1≤b) (hphys:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (X:Finset V) (Z:Finset U) (hX:∀ v,π v∈X↔v∈X)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (Nr Ns K Dr Ds:ℕ) (hK:0&lt;K)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (x y:Fin Nr→V) (tr:Fin Nr→Bool) (hx:∀ i,x i∉X) (hy:∀ i,y i∉X)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hsep:∀ i,¬PermutationClose π b (x i) (y i))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hroot:∀ i,markedArcPresent tail head ktail khead (tr i) (x i) (y i))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hedge:Function.Injective (fun i=&gt;if tr i then ({x i,π (y i)}:Finset V) else {x i,y i}))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hend:∀ a,(Finset.univ.filter (fun i=&gt;a=x i∨a=y i)).card≤Dr)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (z:Fin Ns→V) (u:Fin Ns→U) (ts:Fin Ns→Bool) (hz:∀ i,z i∉X) (hu:∀ i,u i∉Z)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hspoke:∀ i,if ts i then HK (z i) (u i) else H₀ (z i) (u i))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hspinj:Function.Injective (fun i=&gt;(z i,u i)))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hsrow:∀ a,(Finset.univ.filter (fun i=&gt;a=z i)).card≤Ds)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hscol:∀ v,(Finset.univ.filter (fun i=&gt;u i=v)).card≤Ds)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hstep:∀ u,∀ t x,c≤((X.filter (fun z=&gt;markedArcPresent tail head ktail khead t x z∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (if t then HK z u else H₀ z u))).card:ℝ))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hjoin:∀ u,∀ t x y,x≠(if t then π y else y)→c≤((X.filter (fun z=&gt;</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       markedArcPresent tail head ktail khead false x z∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       markedArcPresent tail head ktail khead t z y∧H₀ z u)).card:ℝ))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hhubs:∀ i,ch≤((Z.filter (fun v=&gt;H₀ (x i) v∧(if tr i then HK (y i) v else H₀ (y i) v))).card:ℝ))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hbudgetR:(Nr*(l+5):ℕ)/(K:ℝ)+(K*(l+5):ℕ)+(l+6)*(2*b+1)+8*(K+Dr:ℕ)&lt;c)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hbudgetU:Nr/(K:ℝ)+2*(K+Dr:ℕ)&lt;ch)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hbudgetS:(Ns*(l+5):ℕ)/(K:ℝ)+(Ds*(l+5):ℕ)+(l+6)*(2*b+1)+</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       8*(K+Ds:ℕ)+8*(K+Dr:ℕ)&lt;c):</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∃ R:Fin Nr→MarkedWheel tail head ktail khead (l+4) π b H₀ HK,</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     ∃ S:Fin Ns→MarkedWheel tail head ktail khead (l+4) π b H₀ HK,</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (∀ i,(markedWheelPhysicalResources (R i)).filter (markedInnerResource (Xᶜ) (Zᶜ))=</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         {Sum.inl (if tr i then ({x i,π (y i)}:Finset V) else {x i,y i})})∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∀ i,(markedWheelPhysicalResources (S i)).filter (markedInnerResource (Xᶜ) (Zᶜ))={Sum.inr (z i,u i)})∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀ i j,i≠j→Disjoint (markedWheelPhysicalResources (R i)) (markedWheelPhysicalResources (R j)))∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (∀ i j,i≠j→Disjoint (markedWheelPhysicalResources (S i)) (markedWheelPhysicalResources (S j)))∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (∀ i j,Disjoint (markedWheelPhysicalResources (R i)) (markedWheelPhysicalResources (S j)))∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (∀ a,(markedFamilyRim R).degree a≤4*(K+Dr))∧(∀ a,(markedFamilyRim S).degree a≤4*(K+Ds))∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (∀ a,(Finset.univ.filter (markedFamilySpokes R a)).card≤K+Dr)∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (∀ a,(Finset.univ.filter (markedFamilySpokes S a)).card≤K+Ds)∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (∀ v,(Finset.univ.filter (fun a=&gt;markedFamilySpokes R a v)).card≤K*(l+5))∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (∀ v,(Finset.univ.filter (fun a=&gt;markedFamilySpokes S a v)).card≤Ds*(l+5)):=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   obtain ⟨R,hR,hRR,hRcap,hRhub,hRdeg,hRrow,hRcol⟩:=marked_inner_prescribed_rim_wheel_packing hl hb hphys</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     X Z Nr K Dr hK x y tr hx hy hsep hroot hedge hend</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (fun v _=&gt;hstep v) (fun v _=&gt;hjoin v) hhubs hbudgetR hbudgetU</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   let D:=markedFamilyRim R</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   let PE:=fun e:E=&gt;¬D.Adj (tail e) (head e)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   let PK:=fun e:T=&gt;¬D.Adj (ktail e) (π (khead e))</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hD:∀ a,(D.degree a:ℝ)≤4*(K+Dr:ℕ):=by intro a;exact_mod_cast hRdeg a</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hext (v:U):=marked_inner_extension_counts_after_rim_deletion tail head ktail khead H₀ HK π X v c</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (hstep v) (hjoin v) D (4*(K+Dr:ℕ)) (by positivity) hD</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hbs:(Ns*((l+1)+4):ℕ)/(K:ℝ)+(Ds*((l+1)+4):ℕ)+</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (((l+1:ℕ):ℝ)+5)*(2*b+1)+8*(K+Ds:ℕ)&lt;c-2*(4*(K+Dr:ℕ)):=by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     push_cast at hbudgetS ⊢</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     ring_nf at hbudgetS ⊢</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     linarith only [hbudgetS]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨A,hA,hAA,hAcap,hAdeg,hArow,hAcol⟩:=marked_inner_prescribed_spoke_wheel_packing</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (tail:=fun e:{e:E//PE e}=&gt;tail e.val) (head:=fun e=&gt;head e.val)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (ktail:=fun e:{e:T//PK e}=&gt;ktail e.val) (khead:=fun e=&gt;khead e.val)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (by omega : 2≤l+1) hb X Ns K Ds hK z u ts hz hspoke hspinj hsrow hscol</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (fun i=&gt;(hext (u i)).1) (fun i=&gt;(hext (u i)).2) hbs</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   let S:=fun i=&gt;markedWheelToLarger PE PK (fun _ _ h=&gt;h) (fun _ _ h=&gt;h) (A i)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have hS (i:Fin Ns):(S i).1.val=(A i).1.val∧(S i).2.val=(A i).2.val∧</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       markedWheelPhysicalResources (S i)=markedWheelPhysicalResources (A i)∧</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       ∀ j,Disjoint (markedWheelPhysicalResources (R j)) (markedWheelPhysicalResources (S i)):=by</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     refine ⟨rfl,rfl,markedWheelToLarger_resources _ _ _ _ _,?_⟩</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     intro j</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     intro q hq hqS</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     rw [markedWheelToLarger_resources] at hqS</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     cases q with</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     | inl q=&gt;</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       rw [markedWheelPhysicalResources_rim] at hq hqS</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       have hc:q.card=2:=by</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>         obtain ⟨a,_,ha⟩:=Finset.mem_image.mp hq</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>         rw [←ha]</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>         exact markedCycle_physical_edge_card tail head ktail khead (l+4) π b (by omega) hb (R j).1 a</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>       obtain ⟨a,d,had,rfl⟩:=Finset.card_eq_two.mp hc</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       exact marked_cycle_rim_avoids_deleted_graph D (A i).1 a d hqS</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>         (SimpleGraph.iSup_adj.mpr ⟨j,had,hq⟩)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     | inr q=&gt;</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       rw [markedWheelPhysicalResources_spoke] at hq hqS</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>       have he:(R j).2.val=u i:=hq.1.trans (hqS.1.symm.trans (hA i).1)</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>       exact hu i (he ▸ (hR j).1)</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hSv (i):markedWheelRows (S i)=markedWheelRows (A i):=by</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     unfold markedWheelRows;rw [(hS i).1]</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   have hSu (i):(S i).2.val=(A i).2.val:=(hS i).2.1</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   have hSe (i):markedWheelPhysicalResources (S i)=markedWheelPhysicalResources (A i):=(hS i).2.2.1</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   have hSS:∀ i j,i≠j→Disjoint (markedWheelPhysicalResources (S i)) (markedWheelPhysicalResources (S j)):=by</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     intro i j hij;rw [hSe,hSe];exact hAA i j hij</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have hSrim:markedFamilyRim S=markedFamilyRim A:=by</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     apply iSup_congr</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     intro i</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     ext v w</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     have he:({v,w}:Finset V)∈markedCyclePhysicalEdges tail head ktail khead (l+4) π b (S i).1↔</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>         ({v,w}:Finset V)∈markedCyclePhysicalEdges _ _ _ _ (l+4) π b (A i).1:=by</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       have hh:=iff_of_eq (congrArg (fun F=&gt;Sum.inl ({v,w}:Finset V)∈F) (hSe i))</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>       simpa only [markedWheelPhysicalResources_rim] using hh</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     exact and_congr_right (fun _=&gt;he)</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   have hSsp (a:V) (v:U):markedFamilySpokes S a v↔markedFamilySpokes A a v:=by</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     simp only [markedFamilySpokes,hSu,hSv]</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>   have hI:∀ v,π v∈Xᶜ↔v∈Xᶜ:=by intro v;simpa only [Finset.mem_compl] using not_congr (hX v)</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>   refine ⟨R,S,?_,?_,hRR,hSS,fun i j=&gt;(hS j).2.2.2 i,hRdeg,?_,hRrow,?_,hRcol,?_⟩</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>   · intro i</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     refine marked_rim_root_inner_resources (Xᶜ) (Zᶜ) hI (R i) _ ?_ (hR i).2.1 (fun h=&gt;Finset.mem_compl.mp h (hR i).1) ?_</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     · cases ht:tr i &lt;;&gt; simp only [Bool.false_eq_true,ite_false,ite_true,Finset.insert_subset_iff,</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>         Finset.singleton_subset_iff,Finset.mem_compl,hX,hx i,hy i,not_false_eq_true,and_self]</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     · intro a ha hb</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>       exact (hR i).2.2.2 a (Finset.mem_compl.mp ha) (Finset.mem_compl.mp hb)</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>   · intro i</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     have hc:∀ a∈markedWheelRows (S i),a∈Xᶜ→a=z i:=by</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>       intro a ha hax</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>       rw [hSv] at ha</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>       rcases (hA i).2.2 a ha with h|h</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>       · exact h</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>       · exact (Finset.mem_compl.mp hax h).elim</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     have he:=marked_one_root_inner_resources (by omega) (Xᶜ) (Zᶜ) hI (S i) (z i)</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>       (Finset.mem_compl.mpr (hz i)) (by rw [hSv];exact (hA i).2.1)</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>       (by rw [hSu,(hA i).1];exact Finset.mem_compl.mpr (hu i)) hc</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     simpa only [hSu,(hA i).1] using he</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>   · intro a;rw [hSrim];exact hAdeg a</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>   · intro a</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     have he:Finset.univ.filter (markedFamilySpokes S a)=Finset.univ.filter (markedFamilySpokes A a):=by</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>       ext v;simp only [Finset.mem_filter,hSsp]</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>     rw [he];exact hArow a</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>   · intro v</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     have he:Finset.univ.filter (fun a=&gt;markedFamilySpokes S a v)=Finset.univ.filter (fun a=&gt;markedFamilySpokes A a v):=by</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>       ext a;simp only [Finset.mem_filter,hSsp]</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>     rw [he];exact hAcol v</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a> </span>
+<span id="L145"><a href="#L145" class="ln"> 145</a> end Oberwolfach</span></pre></html>

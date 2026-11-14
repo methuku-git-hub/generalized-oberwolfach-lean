@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongPreparationConcreteMarginals.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongPreparationConcreteMarginals.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongPreparationCoefficientBalance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The long preparation&#x27;s density and coefficient inputs follow from its</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> prescribed component fractions and the displayed lower bounds on marginals. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> open scoped BigOperators</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem long_preparation_concrete_marginals {U I:Type} [Fintype U] [Fintype I]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (D ρ c m θ pstar:ℝ) (hD:0&lt;D) (hρ:0&lt;ρ) (hc:0&lt;c) (hm:0≤m) (hθ:θ≤1)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hpstar:0&lt;pstar) (hpstarb:pstar≤1/4) (hpstarp:pstar≤ρ/8) (hpstark:pstar≤ρ/(6*c))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (a b:U→ℝ) (f:I→U→ℝ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (ha:∀ u,1/(3*c)≤a u) (hb:∀ u,1/4≤b u ∧ b u≤1) (hf:∀ i u,0≤f i u)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hsize:ρ*D/2≤(Fintype.card U:ℝ))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hdef:∀ u,b u=m*a u+(1-θ)*∑ i,f i u):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     let η:=fun i u=&gt;(1-θ)*f i u/b u</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let p:=(∑ u,b u)/D</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let k:=(∑ u,a u)/D;</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     pstar≤p ∧ pstar≤k ∧ (∀ u,pstar≤b u) ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ i u,0≤η i u ∧ η i u≤1/b u) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ u,m*a u+(∑ i,η i u)*b u=b u) ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∑ u,a u)=D*k ∧ (∑ u,b u)=D*p:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro η p k</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have ha0:∀ u,0≤a u:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     intro u</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have h:=ha u</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     have hc0:0≤1/(3*c):=by positivity</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     linarith</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hb0:∀ u,0&lt;b u ∧ b u≤1:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     intro u</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     constructor</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     · have h:=(hb u).1</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       linarith</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     · exact (hb u).2</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hdensity:=long_preparation_density_bounds D ρ c hD hρ hc a b ha (fun u=&gt;(hb u).1) hsize</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hcoeff:=long_preparation_coefficient_balance D m θ hD hm hθ a b f ha0 hb0 hf hdef</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   dsimp only at hcoeff</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   refine ⟨hpstarp.trans hdensity.1,hpstark.trans hdensity.2,?_,hcoeff.1,hcoeff.2.1,hcoeff.2.2.1,hcoeff.2.2.2⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   intro u</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   exact hpstarb.trans (hb u).1</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

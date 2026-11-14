@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongRawPhysicalResidualAfterDeletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongRawPhysicalResidualAfterDeletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PhysicalResidualAfterDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongRawSurvivingResourceState</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Specialization to the actual raw sample and physical deletion graph. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 8000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {n:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem long_raw_physical_residual_after_rim_deletion</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (P D:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d:ℕ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     let T:=bernoulliVertexSet (longRawHubState P π d raw g j)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     let S:=longRawSurvivingResources P π d raw g j D.edgeFinset</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     let f:=survivingResourceEmbedding S T (long_raw_surviving_resources_subset P π d raw g j D.edgeFinset)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let φ:=markedRawSampledPhysicalEmbedding P π d raw g j</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀covered:Finset S,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       physicalRimResidualGraph φ (covered.map f) ≤</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         physicalRimResidualGraph (f.trans φ) covered ⊔ D :=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   intro T S f φ covered</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   apply physical_rim_residual_after_deletion φ f D covered</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro w hw x y hφ hxy</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   change s(x,y)∈D.edgeSet</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   apply SimpleGraph.mem_edgeFinset.mp</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   by_contra he</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hs:w.val∈S:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     apply Finset.mem_filter.mpr</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     refine ⟨w.property,?_⟩</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     change (match typedResourcePhysical π ((markedResourceTypeEquiv (V:=Fin n) (U:=U)) w.val) with</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       | Sum.inl edge =&gt; edge∉D.edgeFinset</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       | Sum.inr _ =&gt; True)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     change typedResourcePhysical π ((markedResourceTypeEquiv (V:=Fin n) (U:=U)) w.val)=Sum.inl s(x,y) at hφ</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     rw [hφ]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     exact he</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   exact hw ⟨w.val,hs⟩ (Subtype.ext rfl)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FourSharpThreshold.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FourSharpThreshold.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FourBarrierDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ThresholdBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Divisible counterexamples establish the ordinary four-cycle threshold bound.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The graphs here have even degrees, but are not asserted to be regular. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem four_barrier_choose_odd (k : ℕ) : Odd ((4 * k + 7).choose 2) := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hh : 2 * (4 * k + 7).choose 2 = (4 * k + 7) * (4 * k + 6) := by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     rw [Nat.choose_two_right,</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       Nat.mul_div_cancel&#x27; (Nat.even_mul_pred_self (4 * k + 7)).two_dvd]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     congr 1</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   refine ⟨4 * k ^ 2 + 13 * k + 10, ?_⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   nlinarith</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> theorem four_barrier_edge_divisible (k : ℕ) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     4 ∣ 3 * (4 * k + 7) * (4 * k + 6) - 6 := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   refine ⟨12 * k ^ 2 + 39 * k + 30, ?_⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hh : 3 * (4 * k + 7) * (4 * k + 6) =</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       4 * (12 * k ^ 2 + 39 * k + 30) + 6 := by ring</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   omega</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem four_threshold_counterexample {d : ℝ} (hd : d &lt; 2 / 3) (N : ℕ) :</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∃ n ≥ N, ∃ G : SimpleGraph (Fin n), CycleDivisible G 4 ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ v, d * (n : ℝ) ≤ (G.degree v : ℝ)) ∧ ¬ HasCycleDecomposition G 4 := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hm : 0 &lt; 2 - 3 * d := by linarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let k := max (N + 1) ⌈(4 + |d|) / (2 - 3 * d)⌉₊</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let t := 4 * k + 7</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have ht : 6 ≤ t := by dsimp only [t]; omega</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hkN : N + 1 ≤ k := le_max_left _ _</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hkt : k ≤ t := by dsimp only [t]; omega</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hceil : (4 + |d|) / (2 - 3 * d) ≤ (t : ℝ) :=</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (Nat.le_ceil _).trans (by exact_mod_cast</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (show ⌈(4 + |d|) / (2 - 3 * d)⌉₊ ≤ t from (le_max_right _ _).trans hkt))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hmargin := (div_le_iff₀ hm).mp hceil</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨(t + t) + (t - 1), by omega, fourBarrierGraph ht, ?_, ?_, ?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   · constructor</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     · intro v</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       exact (fourBarrierGraph_degrees ht v).1</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     · rw [fourBarrierGraph_edge_card]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       have heq : t - 1 = 4 * k + 6 := by dsimp only [t]; omega</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       rw [heq]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       exact four_barrier_edge_divisible k</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   · intro v</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hdeg := (fourBarrierGraph_degrees ht v).2</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have hdeg&#x27; : (2 : ℝ) * t - 4 ≤ (fourBarrierGraph ht).degree v := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       have hh : ((2 * t - 4 : ℕ) : ℝ) ≤ (fourBarrierGraph ht).degree v := by exact_mod_cast hdeg</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       simpa only [Nat.cast_sub (by omega : 4 ≤ 2 * t), Nat.cast_mul, Nat.cast_ofNat] using hh</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     rw [Nat.cast_add, Nat.cast_add, Nat.cast_sub (by omega : 1 ≤ t), Nat.cast_one]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     nlinarith [neg_le_abs d]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   · exact fourBarrierGraph_no_decomposition ht (four_barrier_choose_odd k)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> </span>
+<span id="L57"><a href="#L57" class="ln">  57</a> theorem cycleThreshold_four_lower : (2 / 3 : ℝ) ≤ cycleThreshold 4 := by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   apply le_csInf (show {d | AdmissibleCycleBound 4 d}.Nonempty from ⟨1, one_admissible 4⟩)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   intro d hd</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   by_contra hnot</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   obtain ⟨N, hN⟩ := hd.2</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   obtain ⟨n, hn, G, hdiv, hdegree, hno⟩ :=</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     four_threshold_counterexample (lt_of_not_ge hnot) N</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   exact hno (hN n hn G hdiv hdegree)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a> </span>
+<span id="L66"><a href="#L66" class="ln">  66</a> end Oberwolfach</span></pre></html>

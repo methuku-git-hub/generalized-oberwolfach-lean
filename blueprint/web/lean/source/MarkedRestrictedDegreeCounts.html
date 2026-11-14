@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedRestrictedDegreeCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedRestrictedDegreeCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSampleArcs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ColourDegrees</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PermutationNeighbourCounts</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Restricted ordinary and marked in/out degrees, at any ambient root.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> The domain is fixed before the physical exposure. Every summand refers to</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> one actual physical coordinate; the incoming marked centre uses pi(x). -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 1800000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V : Type} [Fintype V] [LinearOrder V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> def markedDegreeEndpoints (π : Equiv.Perm V) (mark incoming : Bool) (x y : V) : V×V :=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   if incoming then (y,if mark then π x else x) else (x,if mark then π y else y)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> def markedDegreeDomain (P : SimpleGraph V) (π : Equiv.Perm V) (b : ℕ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (mark incoming : Bool) (x : V) (A : Finset V) : Finset V :=</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   A.filter (fun y=&gt;¬PermutationClose π b x y ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     P.Adj (markedDegreeEndpoints π mark incoming x y).1 (markedDegreeEndpoints π mark incoming x y).2)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> </span>
+<span id="L25"><a href="#L25" class="ln">  25</a> def markedRestrictedDegree (P : SimpleGraph V) (π : Equiv.Perm V) (b : ℕ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (σ : Sym2 V→Option (Bool×Bool)) (mark incoming : Bool) (x : V) (A : Finset V) : ℕ :=</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   ∑ y∈A,markedPhysicalRim P π b σ mark (if incoming then y else x) (if incoming then x else y)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem markedDegreeEdge_injective (π : Equiv.Perm V) (mark incoming : Bool) (x : V) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     Function.Injective (fun y=&gt;s((markedDegreeEndpoints π mark incoming x y).1,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (markedDegreeEndpoints π mark incoming x y).2)) := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   cases mark &lt;;&gt; cases incoming</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   · exact incidentPair_injective x</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   · intro y z h</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     change s(y,x)=s(z,x) at h</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     exact incidentPair_injective x (Sym2.eq_swap.trans (h.trans Sym2.eq_swap))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · intro y z h</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     exact π.injective (incidentPair_injective x h)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   · intro y z h</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     change s(y,π x)=s(z,π x) at h</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     exact incidentPair_injective (π x) (Sym2.eq_swap.trans (h.trans Sym2.eq_swap))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> </span>
+<span id="L43"><a href="#L43" class="ln">  43</a> theorem markedRestrictedDegree_patterns (P : SimpleGraph V) (π : Equiv.Perm V) (b : ℕ)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (σ : Sym2 V→Option (Bool×Bool)) (mark incoming : Bool) (x : V) (A : Finset V) :</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (markedRestrictedDegree P π b σ mark incoming x A:ℝ)=</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       ∑ y∈markedDegreeDomain P π b mark incoming x A,</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         patternValue {s((markedDegreeEndpoints π mark incoming x y).1,</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           (markedDegreeEndpoints π mark incoming x y).2)}</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           (fun _=&gt;some (mark,orientationBit (markedDegreeEndpoints π mark incoming x y).1</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>             (markedDegreeEndpoints π mark incoming x y).2)) σ := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   simp only [markedRestrictedDegree,markedDegreeDomain,Finset.sum_filter,Nat.cast_sum]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   apply Finset.sum_congr rfl</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   intro y hy</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   cases mark &lt;;&gt; cases incoming &lt;;&gt;</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     simp [markedDegreeEndpoints,markedPhysicalRim,permutationSeparatedMatrix,markedPhysicalOrientation,</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       patternValue,permutationClose_symm π b] &lt;;&gt; split_ifs &lt;;&gt; simp_all</span>
+<span id="L57"><a href="#L57" class="ln">  57</a> </span>
+<span id="L58"><a href="#L58" class="ln">  58</a> theorem markedRestrictedDegree_tail (P : SimpleGraph V) (π : Equiv.Perm V) (b : ℕ)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (p k : ℝ) (hp : 0≤p) (hk : 0≤k) (hsum : 2*p+2*k≤1)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (mark incoming : Bool) (x : V) (A : Finset V) (t : ℝ) (ht : 0≤t) :</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (FiniteLaw.pi (fun _ : Sym2 V=&gt;markedPhysicalLaw p k hp hk hsum)).probability</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (fun σ=&gt;t≤|(markedRestrictedDegree P π b σ mark incoming x A:ℝ)-</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         (if mark then k else p)*(markedDegreeDomain P π b mark incoming x A).card|)≤</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       2*Real.exp (-2*t^2/A.card) := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   let ends := markedDegreeEndpoints π mark incoming x</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hh := finiteLaw_singleton_patterns_tail_at_scale</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (fun _ : Sym2 V=&gt;markedPhysicalLaw p k hp hk hsum)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (markedDegreeDomain P π b mark incoming x A) (fun y=&gt;s((ends y).1,(ends y).2))</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (fun y _=&gt;some (mark,orientationBit (ends y).1 (ends y).2))</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (fun y hy z hz h=&gt;markedDegreeEdge_injective π mark incoming x h)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (n:=(A.card:ℝ)) (by exact_mod_cast Finset.card_filter_le A _) ht</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hmass (y : V) : (markedPhysicalLaw p k hp hk hsum).mass</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       (some (mark,orientationBit (ends y).1 (ends y).2))=if mark then k else p := by cases mark &lt;;&gt; rfl</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   simp only [hmass,Finset.sum_const,nsmul_eq_mul] at hh</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   dsimp [ends] at hh</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   simpa only [← markedRestrictedDegree_patterns P π b, mul_comm] using hh</span>
+<span id="L77"><a href="#L77" class="ln">  77</a> </span>
+<span id="L78"><a href="#L78" class="ln">  78</a> end Oberwolfach</span></pre></html>

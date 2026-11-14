@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawRetainedInnerUnassignedHighProbability.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawRetainedInnerUnassignedHighProbability.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawUnassignedAdaptiveHighProbability</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedExpandedRetainedProjection</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.RawMarkedRetention</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The fixed inner vertex set can be included in the same retained sample&#x27;s</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> unassigned-row tests, with arbitrarily small error probability. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 18000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem raw_retained_inner_unassigned_high_probability</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (d:ℕ) (hd:2≤d) (δ:ℝ) (hδ:0&lt;δ):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃N:ℕ,∀(V:Type) [Fintype V] [LinearOrder V] [Nonempty V],N≤Fintype.card V→</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀(U Γ Color:Type) [Fintype U] [DecidableEq U] [Fintype Γ] [Fintype Color],</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     Fintype.card U≤Fintype.card V→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀(π:Equiv.Perm V) (g₀:Γ) (p k:ℝ) (hp:0≤p) (hk:0≤k) (hphys:2*p+2*k≤1)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (q:U→Γ→ℝ) (hq:∀w g,0≤q w g) (hQ:∀w,(∑ g:Γ, q w g)≤1/8)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (s:U→Color→ℝ) (hs:∀w j,0≤s w j) (hS:∀w,(∑ j:Color, s w j)≤ intervalUncoveredProbability d (∑ g:Γ, q w g))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x) (vertices:Finset V),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     1-δ≤(rawMarkedRetentionLaw π d hd g₀ p k hp hk hphys q hq hQ s hs hS).probability (fun z=&gt;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       ∀w,|rawIntervalUnassignedHubCountOn π d (fun e=&gt;z.1 (Sum.inr e)) w vertices-</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (vertices.card:ℝ)*(1-(∑ g:Γ, q w g)-(∑ j:Color, s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)):=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   obtain ⟨N₀,hN₀⟩:=raw_unassigned_physical_adaptive_high_probability d hd δ hδ</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   refine ⟨max N₀ 1,?_⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   intro V _ _ _ hn U Γ Color _ _ _ _ hUV π g₀ p k hp hk hphys q hq hQ s hs hS hnoshort vertices</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hn0:0&lt;Fintype.card V:=by omega</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hI:Fintype.card Unit≤4*(Fintype.card V)^2:=by simp; nlinarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let F:=fun raw:RawMarkedOutcome V U Γ Color=&gt;StartRetentionOutcome</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) g₀)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) g₀))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let ν:=fun raw:RawMarkedOutcome V U Γ Color=&gt;startRetentionLaw</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) g₀)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) g₀)) (startRetentionMinimum_le _)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let E:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d g₀→Prop:=fun z=&gt;</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ∀w,|rawIntervalUnassignedHubCountOn π d (fun e=&gt;z.1 (Sum.inr e)) w vertices-</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (vertices.card:ℝ)*(1-(∑ g:Γ, q w g)-(∑ j:Color, s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hsum:2*p+2*k+2*(0:ℝ)+2*0+0≤1:=by linarith</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hp0:=hN₀ V (by omega) U Γ Color Unit hUV hI π p k 0 0 0 hp hk (by norm_num) (by norm_num) (by norm_num) hsum</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     q hq hQ s hs hS hnoshort (fun _ _=&gt;vertices) F ν</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hproj:=raw_expanded_marked_retained_projection_probability p k 0 0 0 hp hk (by norm_num) (by norm_num) (by norm_num) hsum d hd q hq hQ s hs hS F ν E</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   change 1-δ≤(rawMarkedRetentionLaw π d hd g₀ p k hp hk hphys q hq hQ s hs hS).probability E</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   unfold rawMarkedRetentionLaw</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   change 1-δ≤((FiniteLaw.pi (rawMarkedWheelLaw p k hp hk hphys d hd q hq hQ s hs hS)).sigma ν).probability E</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   rw [←hproj]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   simpa [E,rawExpandedMarkedCollapse] using hp0</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> end Oberwolfach</span></pre></html>

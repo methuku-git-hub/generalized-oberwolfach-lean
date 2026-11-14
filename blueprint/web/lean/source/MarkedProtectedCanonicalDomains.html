@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedProtectedCanonicalDomains.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedProtectedCanonicalDomains.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.InvariantPermutation</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedProtectedActiveGeometry</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The active complements and the remaining inner rows are actual</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> subtypes of the original vertex sets. Their embeddings and restricted</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> permutations are constructed, with exact images. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 8000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U:Type} [Fintype V] [Fintype U] [LinearOrder V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem marked_protected_canonical_domains</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (π:Equiv.Perm V) (I T:Finset V) (J W:Finset U)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hI:∀ x,π x∈I↔x∈I) (hT:∀ x,π x∈T↔x∈T):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     let A:Type:={x:V//x∉T}</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let B:Type:={u:U//u∉W}</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let C:Type:={x:V//x∈I\T};</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃ (f:A↪oV) (g:B↪U) (i:C↪oA) (ρA:Equiv.Perm A) (ρ:Equiv.Perm C),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ x,f (ρA x)=π (f x))∧(∀ x,i (ρ x)=ρA (i x))∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     Finset.univ.image f=Finset.univ\T∧Finset.univ.image g=Finset.univ\W∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let X:=Finset.univ.image i</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let Z:=Finset.univ.filter (fun u:B=&gt;g u∈J);</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     X.image f=I\T∧Z.image g=J\W∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀ x,f x∈I↔x∈X)∧(∀ u,g u∈J↔u∈Z)∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ x,ρA x∈X↔x∈X)∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀ x,(i.comp f) x=x.val)∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     Fintype.card A=Fintype.card V-T.card∧Fintype.card B=Fintype.card U-W.card∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     Fintype.card C=(I\T).card:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro A B C</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let f:A↪oV:=OrderEmbedding.subtype (fun x:V=&gt;x∉T)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   let g:B↪U:=Function.Embedding.subtype (fun u:U=&gt;u∉W)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let i:C↪oA:=</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     { toFun := fun x =&gt; ⟨x.val,(Finset.mem_sdiff.mp x.property).2⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       inj&#x27; := fun x y h =&gt; Subtype.ext (congrArg (fun z:A=&gt;z.val) h)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       map_rel_iff&#x27; := Iff.rfl }</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hAinv:∀ x,π x∈({x:V|x∉T}:Set V)↔x∈({x:V|x∉T}:Set V):=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     intro x;exact not_congr (hT x)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hCinv:∀ x,π x∈({x:V|x∈I\T}:Set V)↔x∈({x:V|x∈I\T}:Set V):=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     intro x;simp only [Set.mem_setOf_eq,Finset.mem_sdiff,hI,hT]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let ρA:=invariantSetPermutation π {x:V|x∉T} hAinv</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let ρ:=invariantSetPermutation π {x:V|x∈I\T} hCinv</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hf:∀ x,f (ρA x)=π (f x):=fun _=&gt;rfl</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hi:∀ x,i (ρ x)=ρA (i x):=fun _=&gt;Subtype.ext rfl</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have himg:Finset.univ.image f=Finset.univ\T:=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     ext x;simp only [Finset.mem_image,Finset.mem_univ,Finset.mem_sdiff,true_and]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact ⟨fun ⟨y,hy⟩=&gt;hy ▸ y.property,fun hx=&gt;⟨⟨x,hx⟩,rfl⟩⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have gimg:Finset.univ.image g=Finset.univ\W:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     ext u;simp only [Finset.mem_image,Finset.mem_univ,Finset.mem_sdiff,true_and]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     exact ⟨fun ⟨v,hv⟩=&gt;hv ▸ v.property,fun hu=&gt;⟨⟨u,hu⟩,rfl⟩⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   refine ⟨f,g,i,ρA,ρ,hf,hi,himg,gimg,?_⟩</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   intro X Z</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hx:∀ x:A,f x∈I↔x∈X:=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     intro x</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     constructor</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     · intro h</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       exact Finset.mem_image.mpr ⟨⟨x.val,Finset.mem_sdiff.mpr ⟨h,x.property⟩⟩,Finset.mem_univ _,Subtype.ext rfl⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     · intro h</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       obtain ⟨y,_,rfl⟩:=Finset.mem_image.mp h</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       exact (Finset.mem_sdiff.mp y.property).1</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hz:∀ u:B,g u∈J↔u∈Z:=by intro u;simp only [Z,Finset.mem_filter,Finset.mem_univ,true_and]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hXimage:X.image f=I\T:=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     ext x</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     constructor</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     · rintro h</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       obtain ⟨y,hy,rfl⟩:=Finset.mem_image.mp h</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       exact Finset.mem_sdiff.mpr ⟨(hx y).mpr hy,y.property⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · intro h</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       exact Finset.mem_image.mpr ⟨⟨x,(Finset.mem_sdiff.mp h).2⟩,(hx _).mp (Finset.mem_sdiff.mp h).1,rfl⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hZimage:Z.image g=J\W:=by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     ext u</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     constructor</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     · rintro h</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       obtain ⟨v,hv,rfl⟩:=Finset.mem_image.mp h</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       exact Finset.mem_sdiff.mpr ⟨(hz v).mpr hv,v.property⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     · intro h</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       exact Finset.mem_image.mpr ⟨⟨u,(Finset.mem_sdiff.mp h).2⟩,(hz _).mp (Finset.mem_sdiff.mp h).1,rfl⟩</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   refine ⟨hXimage,hZimage,hx,hz,?_,fun _=&gt;rfl,?_,?_,?_⟩</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   · intro x;rw [←hx,←hx,hf,hI]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   · have hh:=congrArg Finset.card himg</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     rw [Finset.card_image_of_injective _ f.injective,Finset.card_univ,</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       Finset.card_sdiff_of_subset (Finset.subset_univ T),Finset.card_univ] at hh</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     exact hh</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   · have hh:=congrArg Finset.card gimg</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     rw [Finset.card_image_of_injective _ g.injective,Finset.card_univ,</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       Finset.card_sdiff_of_subset (Finset.subset_univ W),Finset.card_univ] at hh</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     exact hh</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   · exact Fintype.card_coe (I\T)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a> </span>
+<span id="L91"><a href="#L91" class="ln">  91</a> end Oberwolfach</span></pre></html>

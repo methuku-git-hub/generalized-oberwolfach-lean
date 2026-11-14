@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryUniformSelectedDensity.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryUniformSelectedDensity.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteHighEventsCommon</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A selected-edge and selected-spoke density floor chosen before the</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> actual class density and reserved fraction. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem ordinary_uniform_selected_density_floor (ρ₀ s₀:ℝ)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (hρ₀:0&lt;ρ₀) (hρ₁:ρ₀≤1) (hs₀:0&lt;s₀) (hs₁:s₀≤1):</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     let pstar:=ρ₀*s₀/2;</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     0&lt;pstar ∧ pstar≤1 ∧ ∀ ρ s:ℝ,ρ₀≤ρ→ρ≤1→s₀/2≤s→s≤s₀→</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       pstar≤ρ*s ∧ ρ*s≤1 ∧ pstar≤s ∧ s≤1 := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   intro pstar</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hp:0&lt;pstar:=by dsimp [pstar];positivity</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hp1:pstar≤1:=by dsimp [pstar];nlinarith [mul_nonneg (by linarith:0≤1-ρ₀) hs₀.le]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   refine ⟨hp,hp1,?_⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   intro ρ s hρlo hρhi hslo hshi</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hs:0≤s:=by linarith</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hρ:0≤ρ:=by linarith</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hmul:=mul_le_mul_of_nonneg_right hρlo hs</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hsbound:=mul_le_mul_of_nonneg_left hslo hρ₀.le</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hupper:=mul_le_mul_of_nonneg_right hρhi hs</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hbase:=mul_le_mul_of_nonneg_right hρ₁ (show (0:ℝ)≤s₀/2 by positivity)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   dsimp [pstar]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   refine ⟨?_,?_,?_,?_⟩ &lt;;&gt; nlinarith</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> end Oberwolfach</span></pre></html>

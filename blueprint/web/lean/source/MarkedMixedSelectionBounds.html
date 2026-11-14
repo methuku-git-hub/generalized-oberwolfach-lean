@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedMixedSelectionBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedMixedSelectionBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedMixedBoundarySelection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedEndpointAssignmentIncidences</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.FiniteFibreCounts</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The actual mixed physical degree bound supplies both construction</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> budgets and the number of boundary paths. The paths may share a hub;</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> their occurrences are counted using disjoint selected spoke graphs. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 6000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E T J I:Type} [Fintype V] [Fintype U] [Fintype J] [Fintype I]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   [DecidableEq V] [DecidableEq U] [DecidableEq J] [DecidableEq I]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   {tail head:E→V} {ktail khead:T→V} {m b:ℕ} {π:Equiv.Perm V} {H₀ HK:V→U→Prop}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem marked_endpoint_assignment_total</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (A₀ A₁ X₀ X₁:I→Finset V) (Y₀ Y₁:I→Finset U)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (Q:∀ i,MarkedEndpointPairing (A₀ i) (A₁ i) (X₀ i) (X₁ i) (Y₀ i) (Y₁ i) H₀ HK π b)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hcross:∀ i j,i≠j→Disjoint (Q i).graph (Q j).graph)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (D:ℕ) (hD:∀ w,(⨆ i,(Q i).graph).degree w≤D):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     Fintype.card (Σ i,Y₀ i⊕Y₁ i)≤Fintype.card U*D := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   apply finite_fibre_card_bound (MarkedEndpointPairing.assignedHub Q) D</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   intro u</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hh:=(MarkedEndpointPairing.assigned_hub_occurrences Q hcross u).trans (hD (Sum.inr u))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   simpa only [Fintype.card_subtype] using hh</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem marked_mixed_selection_bounds (hub:J→U) (Y:J→Finset V)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (P:∀ j,MarkedHubFactorOn tail head ktail khead m π b H₀ HK (hub j) (Y j))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (A₀ A₁ X₀ X₁:I→Finset V) (Y₀ Y₁:I→Finset U)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (Q:∀ i,MarkedEndpointPairing (A₀ i) (A₁ i) (X₀ i) (X₁ i) (Y₀ i) (Y₁ i) H₀ HK π b)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (D:ℕ)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hcross:∀ i j:J⊕I,i≠j→Disjoint</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (Sum.elim (fun j=&gt;(P j).graph) (fun i=&gt;(Q i).graph) i)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (Sum.elim (fun j=&gt;(P j).graph) (fun i=&gt;(Q i).graph) j))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hD:∀ w,(⨆ i:J⊕I,Sum.elim (fun j=&gt;(P j).graph) (fun i=&gt;(Q i).graph) i).degree w≤D):</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∀ j k,j≠k→Disjoint (P j).rim (P k).rim)∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (∀ i j,i≠j→Disjoint (Q i).graph (Q j).graph)∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ v,(⨆ j,(P j).rim).degree v≤D)∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ w,(⨆ i,(Q i).graph).degree w≤D)∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     Fintype.card (Σ i,Y₀ i⊕Y₁ i)≤Fintype.card U*D := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let G:SimpleGraph (V⊕U):=⨆ i:J⊕I,Sum.elim (fun j=&gt;(P j).graph) (fun i=&gt;(Q i).graph) i</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hQcross:∀ i j,i≠j→Disjoint (Q i).graph (Q j).graph:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     intro i j hij</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     exact hcross (Sum.inr i) (Sum.inr j) (fun he=&gt;hij (Sum.inr.inj he))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hQle:(⨆ i,(Q i).graph)≤G:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     apply iSup_le</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     intro i</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     exact le_iSup_of_le (Sum.inr i) le_rfl</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hQdegree (w:V⊕U):(⨆ i,(Q i).graph).degree w≤D:=</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (SimpleGraph.degree_le_of_le hQle).trans (hD w)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hPle:(⨆ j,(P j).rim)≤G.comap (Sum.inl:V→V⊕U):=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     intro v z hvz</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     obtain ⟨j,hj⟩:=SimpleGraph.iSup_adj.mp hvz</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     change G.Adj (Sum.inl v) (Sum.inl z)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     apply SimpleGraph.iSup_adj.mpr</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     refine ⟨Sum.inl j,?_⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     change ((P j).rim.map (Sum.inl:V→V⊕U)).Adj _ _</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     rw [SimpleGraph.map_adj&#x27;]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact ⟨fun he=&gt;(P j).rim.ne_of_adj hj (Sum.inl.inj he),v,z,hj,rfl,rfl⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   refine ⟨?_,hQcross,?_,hQdegree,marked_endpoint_assignment_total A₀ A₁ X₀ X₁ Y₀ Y₁ Q hQcross D hQdegree⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   · intro j k hjk</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     apply disjoint_iff_inf_le.mpr</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     intro v z hvz</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hdis:=hcross (Sum.inl j) (Sum.inl k) (fun he=&gt;hjk (Sum.inl.inj he))</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     apply (disjoint_graphs_no_common_edge _ _ hdis (Sum.inl v) (Sum.inl z) _ _).elim</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     · change ((P j).rim.map (Sum.inl:V→V⊕U)).Adj _ _</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       rw [SimpleGraph.map_adj&#x27;]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       exact ⟨fun he=&gt;(P j).rim.ne_of_adj hvz.1 (Sum.inl.inj he),v,z,hvz.1,rfl,rfl⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     · change ((P k).rim.map (Sum.inl:V→V⊕U)).Adj _ _</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       rw [SimpleGraph.map_adj&#x27;]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       exact ⟨fun he=&gt;(P k).rim.ne_of_adj hvz.2 (Sum.inl.inj he),v,z,hvz.2,rfl,rfl⟩</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   · intro v</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     exact (SimpleGraph.degree_le_of_le hPle).trans</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       ((graph_comap_degree_le G ⟨Sum.inl,Sum.inl_injective⟩ v).trans (hD (Sum.inl v)))</span>
+<span id="L77"><a href="#L77" class="ln">  77</a> </span>
+<span id="L78"><a href="#L78" class="ln">  78</a> end Oberwolfach</span></pre></html>

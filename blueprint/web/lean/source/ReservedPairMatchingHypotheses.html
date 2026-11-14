@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ReservedPairMatchingHypotheses.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ReservedPairMatchingHypotheses.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ReservedPairAllowedHubs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Reserved-pair counts discharge the residual matching&#x27;s allowed-hub,</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> outer-hub and old-image shielding conditions. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem reserved_pair_matching_hypotheses</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {n:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (π:Equiv.Perm (Fin n)) (d:ℕ) (σ:RawIntervalFamilyOutcome (Fin n) U Bool Bool)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (inner:Finset U) (Old:U→Finset (Fin n))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hOld:∀u,Disjoint (rawReservedSpokeList π d σ u) (Old u))</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (Kbad:SimpleGraph (Fin n)) (Bad:Fin n→Finset U)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (α a t:ℝ) (hmargin:α*n+inner.card≤a-t)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hpair:∀x y,x≠y→a-t≤(((Finset.univ:Finset U).filter (fun u=&gt;</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       rawIntervalFamilyState π d σ (x,u)=some (Sum.inr false) ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       rawIntervalFamilyState π d σ (y,u)=some (Sum.inr false))).card:ℝ)):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let Lists:=rawReservedSpokeList π d σ</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let Lbad:=protectedPairEdgeHubs Lists inner</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀e,Disjoint (Lbad e) inner) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀u e v,e∈Kbad.edgeFinset→v∈e.toFinset→v∈Old u→u∈Lbad e→u∈Bad v) ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀e∈Kbad.edgeFinset,α*n≤((Lbad e).card:ℝ)):=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro Lists Lbad</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   obtain ⟨hout,hshield⟩:=protected_pair_edge_hubs_avoid_old_images Lists Old inner hOld</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   refine ⟨hout,?_,?_⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   · intro u e v he hv ho hu</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     exact False.elim (hshield u e v hv ho hu)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   · intro e he</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     induction e using Sym2.ind with</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     | _ x y =&gt;</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       have hxy:x≠y:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         intro h; subst y</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         exact Kbad.loopless.irrefl x (by simpa only [SimpleGraph.mem_edgeFinset,SimpleGraph.mem_edgeSet] using he)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       have hh:=reserved_pair_allowed_hubs_lower π d σ inner x y (a-t) (hpair x y hxy)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       change α*n≤((protectedPairEdgeHubs (rawReservedSpokeList π d σ) inner s(x,y)).card:ℝ)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       linarith</span>
+<span id="L38"><a href="#L38" class="ln">  38</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedProtectedInnerBudgets.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedProtectedInnerBudgets.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedProtectedLocalScale</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Numerical inputs for the actual inner profiles, including the change</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> 2 times the number of removed hubs divided by rho in the degree target. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 14000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem marked_protected_inner_budget_scale</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (r K h:ℕ) (omega kappa rho t zeta epsilon etaEnd a theta etaEmax:ℝ)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (ho:0&lt;omega) (hk:0&lt;kappa) (hrho:0&lt;rho) (ht:0&lt;t) (hz:0&lt;zeta)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (he:0&lt;epsilon) (hEnd:0&lt;etaEnd) (ha:0&lt;a) (hth:0&lt;theta) (hmax:0&lt;etaEmax):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ delta:ℝ,0&lt;delta∧∀ x:ℝ,0≤x→x≤delta→</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (4*K+3*r+50:ℝ)*x≤kappa/2∧24*x≤zeta*(omega/2)∧3*(r+5:ℝ)*x≤zeta*(omega/2)∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (1+h*(24+3*(r+5:ℝ)))*x≤epsilon*(omega/2)∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     2*(1+h*(24+3*(r+5:ℝ)))*x≤etaEnd*a/2∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (3+2/rho+h*(24+3*(r+5:ℝ)))*x≤t*omega/16∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     8*x≤theta∧(r+6:ℝ)*x≤theta/8∧(r+6:ℝ)*(96+3*(r+5:ℝ))*x≤theta/4∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     x≤etaEmax∧x≤omega/4∧x≤kappa:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   obtain ⟨delta,hd,hall⟩:=marked_protected_local_scale_exists r K h (omega/2) kappa t zeta epsilon</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     etaEnd a theta etaEmax (by positivity) hk ht hz he hEnd ha hth hmax</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   obtain ⟨b,hb,hbB⟩:=exists_pos_mul_lt (show 0&lt;t*omega/16 by positivity)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (3+2/rho+h*(24+3*(r+5:ℝ)))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   refine ⟨min delta b,lt_min hd hb,?_⟩</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   intro x hx hxd</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   obtain ⟨h0,h1,h2,h3,h4,_,h6,h7,h8,h9,h10,h11⟩:=hall x hx (hxd.trans (min_le_left _ _))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hC:0≤(3+2/rho+h*(24+3*(r+5:ℝ))):=by positivity</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hxB:=mul_le_mul_of_nonneg_left (hxd.trans (min_le_right _ _)) hC</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨h0,h1,h2,h3,h4,by nlinarith only [hxB,hbB],h6,h7,h8,h9,?_,h11⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   linarith only [h10]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem marked_protected_inner_error_budget</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (r h:ℕ) (rho omega t epsilon etaEnd a x n ambient nW nZ:ℝ)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hrho:0&lt;rho) (ho:0≤omega) (ht:0≤t) (he:0≤epsilon) (hEnd:0≤etaEnd) (ha:0≤a)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hx:0≤x) (hn:0≤n) (hambient:n/2≤ambient)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hW:omega*n/2≤nW) (hZ:omega*n/2≤nZ)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hExt:(1+h*(24+3*(r+5:ℝ)))*x≤epsilon*(omega/2))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hEndpoint:2*(1+h*(24+3*(r+5:ℝ)))*x≤etaEnd*a/2)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hGap:(3+2/rho+h*(24+3*(r+5:ℝ)))*x≤t*omega/16)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (etaE errR0 errI0 errParent removedRows removedHubs exceptional:ℝ)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hEta:0≤etaE) (hEtaMax:etaE≤x)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hR:errR0≤x*n) (hI:errI0≤x*n) (hP:errParent≤x*n)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hRows:removedRows≤x*n) (hHubs:removedHubs≤x*n)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (hException:exceptional≤t*omega*n/16):</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let errR:=errR0+h*(24*etaE*n+3*(r+5:ℝ)*etaE*n)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     let errI:=errI0+h*(6*etaE*n)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     let deltaParent:=errParent+removedRows+2*removedHubs/rho;</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     errR≤epsilon*nW∧errI≤epsilon*nZ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     2*errR≤etaEnd*(a*ambient)∧2*errI≤etaEnd*(a*ambient)∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     errR+exceptional+deltaParent≤t*omega*ambient/4∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     errI≤t*omega*ambient/4:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   intro errR errI deltaParent</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   let C:ℝ:=1+h*(24+3*(r+5:ℝ))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hhn:0≤(h:ℝ):=Nat.cast_nonneg _</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hrn:0≤(r:ℝ):=Nat.cast_nonneg _</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hEn:=mul_le_mul_of_nonneg_right hEtaMax hn</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hcoef:0≤h*(24+3*(r+5:ℝ)):=by positivity</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hmul:=mul_le_mul_of_nonneg_left hEn hcoef</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hER:errR≤C*x*n:=by dsimp [errR,C];nlinarith only [hR,hmul]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have h6coef:6*(h:ℝ)≤h*(24+3*(r+5:ℝ)):=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     nlinarith only [hhn,mul_nonneg hhn hrn]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hmulI:=mul_le_mul_of_nonneg_left hEn (show 0≤6*(h:ℝ) by positivity)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hcompare:=mul_le_mul_of_nonneg_right h6coef (show 0≤x*n by positivity)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hEI:errI≤C*x*n:=by dsimp [errI,C];nlinarith only [hI,hmulI,hcompare]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hLoss:=mul_le_mul_of_nonneg_left hHubs (show 0≤2/rho by positivity)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hDP:deltaParent≤(2+2/rho)*x*n:=by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     calc</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       deltaParent=errParent+removedRows+(2/rho)*removedHubs:=by dsimp [deltaParent];ring</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       _ ≤ x*n+x*n+(2/rho)*(x*n):=add_le_add (add_le_add hP hRows) hLoss</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       _ = (2+2/rho)*x*n:=by ring</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hExtn:=mul_le_mul_of_nonneg_right hExt hn</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hEndn:=mul_le_mul_of_nonneg_right hEndpoint hn</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hGapn:=mul_le_mul_of_nonneg_right hGap hn</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hW&#x27;:=mul_le_mul_of_nonneg_left hW he</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hZ&#x27;:=mul_le_mul_of_nonneg_left hZ he</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have hA&#x27;:=mul_le_mul_of_nonneg_left hambient (show 0≤etaEnd*a by positivity)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have hG&#x27;:=mul_le_mul_of_nonneg_left hambient (show 0≤t*omega by positivity)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hPos:0≤(2+2/rho)*x*n:=by positivity</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   change C*x*n≤epsilon*(omega/2)*n at hExtn</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   change 2*C*x*n≤(etaEnd*a/2)*n at hEndn</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have hGapn&#x27;:(C+2+2/rho)*x*n≤t*omega*n/16:=by</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     dsimp [C];nlinarith only [hGapn]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   refine ⟨by nlinarith only [hER,hExtn,hW&#x27;],by nlinarith only [hEI,hExtn,hZ&#x27;],</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     by nlinarith only [hER,hEndn,hA&#x27;],by nlinarith only [hEI,hEndn,hA&#x27;],</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     by nlinarith only [hER,hDP,hException,hGapn&#x27;,hG&#x27;],?_⟩</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have htw:0≤t*omega*n:=by positivity</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   nlinarith only [hEI,hGapn&#x27;,hG&#x27;,hPos,htw]</span>
+<span id="L88"><a href="#L88" class="ln">  88</a> </span>
+<span id="L89"><a href="#L89" class="ln">  89</a> theorem marked_protected_inner_exception_order</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     (t omega:ℝ) (ht:0&lt;t) (ho:0&lt;omega) (d:ℕ):</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     ∃ N:ℕ,1≤N∧∀ n:ℕ,N≤n→6*(d:ℝ)+1≤t*omega*n/16:=by</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   obtain ⟨N,hN⟩:=exists_nat_gt (max 1 (16*(6*(d:ℝ)+1)/(t*omega)))</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   have hN1:1&lt;(N:ℝ):=(le_max_left _ _).trans_lt hN</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   refine ⟨N,by exact_mod_cast hN1.le,?_⟩</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   intro n hn</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   have hn&#x27;:(N:ℝ)≤n:=by exact_mod_cast hn</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   have hh:16*(6*(d:ℝ)+1)/(t*omega)&lt;n:=(le_max_right _ _).trans_lt (hN.trans_le hn&#x27;)</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have hh&#x27;:16*(6*(d:ℝ)+1)&lt;(n:ℝ)*(t*omega):=(div_lt_iff₀ (by positivity)).mp hh</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   nlinarith only [hh&#x27;]</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a> </span>
+<span id="L101"><a href="#L101" class="ln"> 101</a> end Oberwolfach</span></pre></html>

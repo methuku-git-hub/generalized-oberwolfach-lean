@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryAssignedTriangleConcreteBridge.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryAssignedTriangleConcreteBridge.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryCombinedTriangleEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryAssignedClassRecipeValid</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Substitute the actual class probabilities into a generic common-event</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> estimate without altering the sample or the event. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 3000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option synthInstance.maxSize 32768</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> local instance (priority := high) triangleFiniteEquality0 (n:ℕ) : DecidableEq (Fin n) := Classical.decEq (Fin n)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem ordinary_actual_triangle_class_event_from_uniform_estimate</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {n:ℕ} (hn:0&lt;n) {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (Factors:U→SimpleGraph (Fin n)) (hFactors:∀w,(Factors w).IsRegularOfDegree 2)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (K:ℕ) (hK:0&lt;K) (i₀:Fin K) (rsv θfreq caux ρ D:ℝ) (d:ℕ) (hd:2≤d)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hs0:0≤rsv) (hs1:rsv≤1/100) (hθfreq:0&lt;θfreq) (hθfreq1:θfreq≤1/100) (hcaux:8≤caux)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hda:1/θfreq≤d) (hρ:0&lt;ρ) (hρ1:ρ≤1) (hD:0&lt;D) (hsize:ρ*D=2*(Fintype.card U:ℝ))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (S:Set ℕ) (hS:∀w,AllowedCycleLengths (Factors w) S)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hsclass:rsv≤1/(2*(K:ℝ))) (hclass:∀w,factorPreparationClass (Factors w) K=some i₀)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (k:ℕ) (P Conflict:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (θhost α pstar βP ηP ηH βH c B:ℝ) (weight:OrdinaryCycle P 3→ℝ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hpstar:0&lt;pstar) (hRlo:pstar≤ρ*rsv) (hRhi:ρ*rsv≤1)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hgeneric:∀ (q:U→Bool→ℝ) (hq:∀w j,0≤q w j) (hQ:∀w,∑j,q w j≤1/8)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (s:U→Bool→ℝ) (hs:∀w j,0≤s w j)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (hSc:∀w,∑j,s w j≤ intervalUncoveredProbability d (∑j,q w j)),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀w,s w false=rsv)→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       let μ:=FiniteLaw.pi (rawWheelLaw (V:=Fin n) (fun _=&gt;ρ*rsv)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (fun _=&gt;(hpstar.trans_le hRlo).le) (fun _=&gt;hRhi) d hd q hq hQ s hs hSc);</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       1-(1/(n:ℝ)+3/(n:ℝ)^2)≤μ.probability</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (ordinaryCombinedTriangleEvent d k P Conflict π θhost α pstar βP ηP ηH βH c B (ρ*rsv) rsv weight false)):</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let q:=ordinaryAssignedMarkedProbability Factors hFactors K θfreq caux</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let s:=ordinaryAssignedSpokeProbability Factors hFactors K i₀ rsv θfreq caux;</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∃ (hq:∀w j,0≤q w j) (hQ:∀w,∑j,q w j≤1/8)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (hs:∀w j,0≤s w j) (hSc:∀w,∑j,s w j≤ intervalUncoveredProbability d (∑j,q w j)),</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       let μ:=FiniteLaw.pi (rawWheelLaw (V:=Fin n) (fun _=&gt;ρ*rsv)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (fun _=&gt;(hpstar.trans_le hRlo).le) (fun _=&gt;hRhi) d hd q hq hQ s hs hSc);</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       1-(1/(n:ℝ)+3/(n:ℝ)^2)≤μ.probability</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         (ordinaryCombinedTriangleEvent d k P Conflict π θhost α pstar βP ηP ηH βH c B (ρ*rsv) rsv weight false) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   obtain ⟨hq,hQ,hs,hSc,hj⟩:=ordinary_assigned_class_recipe_valid hn Factors hFactors K hK i₀ rsv θfreq caux ρ D d hd</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     hs0 hs1 hθfreq hθfreq1 hcaux hda hρ hρ1 hD hsize S hS hsclass hclass</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   exact ⟨hq,hQ,hs,hSc,hgeneric _ hq hQ _ hs hSc hj⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> end Oberwolfach</span></pre></html>

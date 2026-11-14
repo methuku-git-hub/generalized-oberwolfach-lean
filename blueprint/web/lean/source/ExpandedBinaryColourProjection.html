@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExpandedBinaryColourProjection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExpandedBinaryColourProjection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ExpandedBinaryClassProjection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The grouped class colours alone retain their exact product law after</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> arbitrary dependent retention. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem expanded_binary_colour_probability_after_retention</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     [LinearOrder V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (p k p₂ k₂ u:ℝ) (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (d:ℕ) (hd:2≤d) (q:U→Γ→ℝ) (hq:∀u g,0≤q u g) (hQ:∀u,∑g,q u g≤1/8)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (s:U→Color→ℝ) (hs:∀u j,0≤s u j) (hS:∀u,∑j,s u j≤ intervalUncoveredProbability d (∑g,q u g))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {R:(∀e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e)→Type}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     [∀σ,Fintype (R σ)] (ν:∀σ,FiniteLaw (R σ)) (B:(Sym2 V→Fin 2)→Prop):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ((FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS)).sigma ν).probability</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (fun z=&gt;B (fun e=&gt;(expandedBinaryClass (z.1 (Sum.inl e))).1))=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (FiniteLaw.pi (fun _:Sym2 V=&gt;FiniteLaw.categorical (expandedBinaryProbability p k p₂ k₂ u)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (expanded_binary_probability_nonneg p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (expanded_binary_probability_sum p k p₂ k₂ u))).probability B:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   exact (expanded_binary_class_probability_after_retention p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS ν</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (fun σ=&gt;B (fun e=&gt;(σ e).1))).trans</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (categoricalDirection_colour_probability (expandedBinaryProbability p k p₂ k₂ u)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (expanded_binary_probability_nonneg p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (expanded_binary_probability_sum p k p₂ k₂ u) B)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> end Oberwolfach</span></pre></html>

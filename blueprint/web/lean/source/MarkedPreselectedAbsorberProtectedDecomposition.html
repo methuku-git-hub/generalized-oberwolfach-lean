@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPreselectedAbsorberProtectedDecomposition.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPreselectedAbsorberProtectedDecomposition.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReservedAbsorberAdaptiveDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedReservedDecompositionAfterDeletion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedSupportedReserveAvoidsInnerSubset</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedReservedAbsorberUniversalTransfer</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedReservedResourceDeletionProtection</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.MarkedSampleDeletedArcs</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> /-! One absorber is chosen before all later physical deletions. Whenever a</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> later deletion avoids its resources and the terminal spoke pair, the same</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> absorber works for every divisible terminal remainder of that later host. -/</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option autoImplicit false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> set_option synthInstance.maxSize 8192</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> set_option maxHeartbeats 30000000</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> noncomputable section</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> namespace Oberwolfach</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem marked_preselected_absorber_decomposes_and_avoids_inner_after_deletions</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d l size a₀ b₀ e₀ f:ℕ) (ε:ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let E:=MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let K:=MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) true</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let tail:=fun e:E=&gt;e.val.1</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let head:=fun e:E=&gt;e.val.2</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let ktail:=fun e:K=&gt;e.val.1</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let khead:=fun e:K=&gt;e.val.2;</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     MarkedReservedTerminalAbsorberProperty tail head ktail khead (H false) (H true) π (3*d) l size a₀ b₀ e₀ f ε→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∀ (X W:Finset V) (Z B:Finset U), X.card+Z.card≤size→X⊆W→Z⊆B→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (W.card:ℝ)≤ε*Fintype.card V+f→(B.card:ℝ)≤ε*Fintype.card V+f→</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∀ F₀:Finset (Finset V⊕(V×U)),F₀.card≤f→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∃ C:MarkedSupportedEdgeSet tail head ktail khead π U,</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       Disjoint C.edges F₀∧C.edges.card≤e₀∧C.rows.card≤a₀∧C.hubs.card≤b₀∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ e∈C.edges,¬MarkedOldResource tail head ktail khead π W B e)∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ (I:Finset V) (J:Finset U),(∀ x,π x∈I↔x∈I)→I⊆W→J⊆B→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         ∀ e∈C.edges,¬markedInnerResource I J e)∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       HasResourceDecomposition</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (fun Q:MarkedWheel tail head ktail khead (l+4) π (3*d) (H false) (H true)=&gt;markedWheelPhysicalResources Q) C.edges∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (∀ (DR:SimpleGraph V) (DS:SimpleGraph (V⊕U)),</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (∀ x y,Sum.inl ({x,y}:Finset V)∈C.edges→¬DR.Adj x y)→</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         (∀ v u,Sum.inr (v,u)∈C.edges→¬DS.Adj (Sum.inl v) (Sum.inr u) )→</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         let σ&#x27;:=rawMarkedDeleteRims σ DR.edgeFinset</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         let H&#x27;:=markedDeletePhysicalSpokes H DS</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         let E&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         let K&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true;</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         HasResourceDecomposition</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           (fun Q:MarkedWheel (fun e:E&#x27;=&gt;e.val.1) (fun e:E&#x27;=&gt;e.val.2)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>             (fun e:K&#x27;=&gt;e.val.1) (fun e:K&#x27;=&gt;e.val.2) (l+4) π (3*d) (H&#x27; false) (H&#x27; true)=&gt;markedWheelPhysicalResources Q) C.edges)∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       ∀ (DR:SimpleGraph V) (DS:SimpleGraph (V⊕U)),</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         (∀ x y,Sum.inl ({x,y}:Finset V)∈C.edges→¬DR.Adj x y)→</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         (∀ v u,Sum.inr (v,u)∈C.edges→¬DS.Adj (Sum.inl v) (Sum.inr u))→</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         (∀ v∈X,∀ u∈Z,¬DS.Adj (Sum.inl v) (Sum.inr u))→</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         let σ&#x27;:=rawMarkedDeleteRims σ DR.edgeFinset</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         let H&#x27;:=markedDeletePhysicalSpokes H DS</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         let E&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         let K&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         let t&#x27;:=fun e:E&#x27;=&gt;e.val.1</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         let h&#x27;:=fun e:E&#x27;=&gt;e.val.2</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         let kt&#x27;:=fun e:K&#x27;=&gt;e.val.1</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         let kh&#x27;:=fun e:K&#x27;=&gt;e.val.2;</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         ∀ (A:Finset (E&#x27;⊕K&#x27;)) (S:Finset (V×U)),</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         (∀ a∈A,Sum.elim t&#x27; kt&#x27; a∈X∧Sum.elim h&#x27; kh&#x27; a∈X)→</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         (∀ z∈S,z.1∈X∧z.2∈Z∧(H&#x27; false z.1 z.2∨H&#x27; true z.1 z.2))→</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         MarkedRemainderDivisible t&#x27; h&#x27; kt&#x27; kh&#x27; (H&#x27; true) A S (l+4)→</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         IsResourceAbsorber</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>           (fun Q:MarkedWheel t&#x27; h&#x27; kt&#x27; kh&#x27; (l+4) π (3*d) (H&#x27; false) (H&#x27; true)=&gt;markedWheelPhysicalResources Q)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>           (A.image (fun a=&gt;Sum.inl (markedPhysicalEdge t&#x27; h&#x27; kt&#x27; kh&#x27; π a))∪S.image Sum.inr) C.edges  :=by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   intro E K tail head ktail khead habs X W Z B hs hX hZ hW hB F₀ hF</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨C,hF₀,hCe,hCr,hCu,hCold,hCdec,htransfer⟩:=</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     marked_preselected_absorber_after_adaptive_deletions P π d l size a₀ b₀ e₀ f ε σ H habs X W Z B hs hX hZ hW hB F₀ hF</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   refine ⟨C,hF₀,hCe,hCr,hCu,hCold,?_,hCdec,?_,htransfer⟩</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   · intro I J hI hIW hJB</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     exact marked_supported_reserve_avoids_inner_subset C I W J B hI hIW hJB hCold</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   · intro DR DS hR hS σ&#x27; H&#x27; E&#x27; K&#x27;</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     exact marked_reserved_decomposition_after_avoiding_deletions P π d (l+4) σ H C.edges DR DS hR hS hCdec</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> end Oberwolfach</span></pre></html>

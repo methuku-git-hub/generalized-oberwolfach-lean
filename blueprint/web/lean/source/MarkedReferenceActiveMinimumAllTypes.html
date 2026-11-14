@@ -1,0 +1,64 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceActiveMinimumAllTypes.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceActiveMinimumAllTypes.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceLevelData</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A threshold chosen after the event&#x27;s minimum size, but before the level</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> objects, makes both fixed active domains large enough. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option synthInstance.maxSize 16384</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 12000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {Gamma Color:Type} [Fintype Gamma] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {r d N NI Kgeom:ℕ}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {gamma rho omega t p0 betaA aLoA BA kappa ξ thetaDeep alphaInner omegaInner</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   iota β aLo B η x omegaI hIcut deltaI etaBal:ℝ}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_active_minimum_threshold</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (θ iota omega:ℝ) (hθ:θ&lt;1) (hiota:0 &lt; iota) (homega:0 &lt; omega) (M:ℕ):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ N₀:ℕ,∀ (n:ℕ) (a b:ℝ),N₀≤n→iota*n≤a→ omega*a≤b →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (M:ℝ)≤(1-θ)*a ∧ (M:ℝ)≤(1-θ)*b:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let cI:ℝ:=(1-θ)*iota</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let cJ:ℝ:=(1-θ)*omega*iota</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hI:0&lt;cI:=by dsimp [cI]; positivity</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hJ:0&lt;cJ:=by dsimp [cJ]; positivity</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let c:=min cI cJ</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hc:0&lt;c:=lt_min hI hJ</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   obtain ⟨N₀,hN⟩:=exists_nat_gt ((M:ℝ)/c)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   refine ⟨N₀,?_⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   intro n a b hn hbase hJbase</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hn&#x27;:(N₀:ℝ)≤n:=by exact_mod_cast hn</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hm:(M:ℝ)≤c*(n:ℝ):=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hh:((M:ℝ)/c)&lt;(n:ℝ):=hN.trans_le hn&#x27;</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hh&#x27;:(M:ℝ)&lt;(n:ℝ)*c:=(div_lt_iff₀ hc).1 hh</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     nlinarith</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hcard:0≤(n:ℝ):=Nat.cast_nonneg _</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hmI:(M:ℝ)≤cI*(n:ℝ):=hm.trans (mul_le_mul_of_nonneg_right (min_le_left _ _) hcard)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hmJ:(M:ℝ)≤cJ*(n:ℝ):=hm.trans (mul_le_mul_of_nonneg_right (min_le_right _ _) hcard)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hθ0:0≤1-θ:=by linarith</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hIbound:=mul_le_mul_of_nonneg_left hbase hθ0</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hJbound:=mul_le_mul_of_nonneg_left hJbase hθ0</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hIomega:=mul_le_mul_of_nonneg_left hbase (mul_nonneg hθ0 (le_of_lt homega))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   constructor</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   · dsimp [cI] at hmI</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     nlinarith</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   · dsimp [cJ] at hmJ</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     nlinarith</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> </span>
+<span id="L47"><a href="#L47" class="ln">  47</a> theorem marked_reference_active_minimum_uniform_all_types</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (θ:ℝ) (hθ:θ&lt;1) (hiota:0 &lt; iota) (homega:0 &lt; omegaI) (M:ℕ):</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     ∃ N₀:ℕ,∀ (Gamma Color:Type) [Fintype Gamma] [Fintype Color]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (level:MarkedReferenceLevelData Gamma Color r d N NI Kgeom gamma rho omega t p0 betaA aLoA BA</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       kappa ξ thetaDeep alphaInner omegaInner iota β aLo B η x omegaI hIcut deltaI etaBal),</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     letI:Fintype level.VP:=level.inst7</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     N₀≤Fintype.card level.VP →</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (M:ℝ)≤(1-θ)*((level.I).card:ℝ) ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (M:ℝ)≤(1-θ)*((level.J).card:ℝ):=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   obtain ⟨N₀,hN⟩:=marked_active_minimum_threshold θ iota omegaI hθ hiota homega M</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   refine ⟨N₀,?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   intro Gamma Color _ _ level hn</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   letI:Fintype level.VP:=level.inst7</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   exact hN (Fintype.card level.VP) level.I.card level.J.card hn level.hIotaSize level.hJlow</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> end Oberwolfach</span></pre></html>

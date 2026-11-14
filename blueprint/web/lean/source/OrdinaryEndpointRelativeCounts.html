@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryEndpointRelativeCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryEndpointRelativeCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointRelativeCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Ordinary endpoint degrees and codegrees, with the original domain</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> normalisations. The index tests are imposed on independent sets only. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 4500000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U : Type*} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem ordinary_endpoint_counts_from_common (P R F : SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (A:Finset V) (B:Finset U) (x:V) (q s ε:ℝ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hRP:R≤P) (hFx:∀ v,R.Adj x v → ¬F.Adj x v)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hrow:∀ S:Finset V,∀ J:Finset U,S.card≤1 → J.card≤1 →</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       |((common (common A S (fun v=&gt;R.neighborFinset v)) J</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>         (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u))).card:ℝ)-</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>         q^S.card*s^J.card*(common A S (fun v=&gt;P.neighborFinset v)).card|≤ε*A.card)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hindex:∀ S:Finset V,S.card≤3 → (∀ v∈S,∀ w∈S,¬F.Adj v w) →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       |((common B S (fun v=&gt;Finset.univ.filter (H v))).card:ℝ)-s^S.card*B.card|≤ε*B.card) :</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let E:=A∩P.neighborFinset x</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let S:=A∩R.neighborFinset x</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let T:=B.filter (H x)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     |(S.card:ℝ)-q*E.card|≤ε*A.card ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     |(T.card:ℝ)-s*B.card|≤ε*B.card ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ v∈S,|((T.filter (H v)).card:ℝ)-s^2*B.card|≤ε*B.card) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀ u∈B,|((S.filter (fun v=&gt;H v u)).card:ℝ)-q*s*E.card|≤ε*A.card) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀ v∈S,∀ w∈S,v≠w → ¬F.Adj v w →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ((T.filter (fun u=&gt;H v u∧H w u)).card:ℝ)≤s^3*B.card+ε*B.card) := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   dsimp only</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hs (G:SimpleGraph V):common A ({x}:Finset V) (fun v=&gt;G.neighborFinset v)=A∩G.neighborFinset x:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ext a;simp [mem_common_iff]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have he (K:Finset V):common K (∅:Finset U) (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u))=K:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ext a;simp [mem_common_iff]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hi (Z:Finset V):common B Z (fun v=&gt;Finset.univ.filter (H v))=</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       B.filter (fun u=&gt;∀ v∈Z,H v u):=by ext u;simp [mem_common_iff]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hx (v:V) (hv:v∈A∩R.neighborFinset x):P.Adj x v:=hRP ((R.mem_neighborFinset x v).mp (Finset.mem_inter.mp hv).2)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hxv (v:V) (hv:v∈A∩R.neighborFinset x):x≠v:=(hx v hv).ne</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hf (v:V) (hv:v∈A∩R.neighborFinset x):¬F.Adj x v:=hFx v ((R.mem_neighborFinset x v).mp (Finset.mem_inter.mp hv).2)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   refine ⟨?_,?_,?_,?_,?_⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   · have hh:=hrow {x} ∅ (by simp) (by simp)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     simpa only [Finset.card_singleton,Finset.card_empty,pow_one,pow_zero,mul_one,he,hs] using hh</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   · have hh:=hindex {x} (by simp) (by intros v hv w hw;simp only [Finset.mem_singleton] at hv hw;subst v;subst w;exact F.loopless.irrefl x)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     simpa only [hi,Finset.mem_singleton,forall_eq,Finset.card_singleton,pow_one] using hh</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   · intro v hv</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hsep:∀ a∈({x,v}:Finset V),∀ b∈({x,v}:Finset V),¬F.Adj a b:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       intros a ha b hb hab</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       simp only [Finset.mem_insert,Finset.mem_singleton] at ha hb</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       rcases ha with rfl|rfl &lt;;&gt; rcases hb with rfl|rfl</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       · exact F.loopless.irrefl _ hab</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       · exact hf _ hv hab</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       · exact hf _ hv hab.symm</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       · exact F.loopless.irrefl _ hab</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hh:=hindex {x,v} (by simp [hxv v hv]) hsep</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hc:({x,v}:Finset V).card=2:=Finset.card_pair (hxv v hv)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have ht:(B.filter (fun u=&gt;∀ a∈({x,v}:Finset V),H a u))=(B.filter (H x)).filter (H v):=by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       ext u;simp;tauto</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     rw [hi,ht,hc] at hh</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     exact hh</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   · intro u hu</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hh:=hrow {x} {u} (by simp) (by simp)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     have ht:common (common A ({x}:Finset V) (fun v=&gt;R.neighborFinset v)) ({u}:Finset U)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u))=(A∩R.neighborFinset x).filter (fun v=&gt;H v u):=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         ext v;simp [mem_common_iff]</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     rw [ht,hs] at hh</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     simpa only [Finset.card_singleton,pow_one] using hh</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   · intro v hv w hw hvw hfw</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hsep:∀ a∈({x,v,w}:Finset V),∀ b∈({x,v,w}:Finset V),¬F.Adj a b:=by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       intros a ha b hb hab</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       simp only [Finset.mem_insert,Finset.mem_singleton] at ha hb</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       rcases ha with rfl|rfl|rfl &lt;;&gt; rcases hb with rfl|rfl|rfl</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       · exact F.loopless.irrefl _ hab</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       · exact hf _ hv hab</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       · exact hf _ hw hab</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       · exact hf _ hv hab.symm</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       · exact F.loopless.irrefl _ hab</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       · exact hfw hab</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       · exact hf _ hw hab.symm</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       · exact hfw hab.symm</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       · exact F.loopless.irrefl _ hab</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     have hc:({x,v,w}:Finset V).card=3:=by simp [hxv v hv,hxv w hw,hvw]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     have hh:=hindex {x,v,w} (by rw [hc]) hsep</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     have ht:(B.filter (fun u=&gt;∀ a∈({x,v,w}:Finset V),H a u))=</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       (B.filter (H x)).filter (fun u=&gt;H v u∧H w u):=by ext u;simp;tauto</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     rw [hi,ht,hc] at hh</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     linarith only [(abs_le.mp hh).2]</span>
+<span id="L88"><a href="#L88" class="ln">  88</a> </span>
+<span id="L89"><a href="#L89" class="ln">  89</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongReservedContinuationSeparatedScales.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongReservedContinuationSeparatedScales.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongSelectedListMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> set_option autoImplicit false</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> noncomputable section</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> namespace Oberwolfach</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> theorem long_reserved_continuation_separated_scales</span>
+<span id="L7"><a href="#L7" class="ln">   7</a>     (γ pstar:ℝ) (hγ:0&lt;γ) (hp:0&lt;pstar):</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     ∃β lamList ζList βfinal δ:ℝ,</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>       0&lt;β ∧ β≤1 ∧ 0&lt;lamList ∧ lamList≤1/100 ∧ 0&lt;ζList ∧</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>       0&lt;βfinal ∧ βfinal≤lamList/4 ∧ 0&lt;δ ∧ δ≤(βfinal/100)^2 ∧ δ≤1/100 ∧</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃dMin L₀:ℕ,</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       (∀m:ℕ,L₀≤m→4/(m:ℝ)≤δ/4 ∧ 1/(100*(m:ℝ))≤lamList/8) ∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       (∀m:ℕ,L₀≤m→∀ε η:ℝ,ε≤lamList/8→η≤lamList/8→</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>         βfinal+ε+1/(100*(m:ℝ))+η≤lamList) ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ∀d:ℕ,dMin≤d→2≤d→∃N:ℕ,∀n≥N,</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>         (n:ℝ)^(3/4:ℝ)+2*(2*((3*d:ℕ):ℝ)+1)≤γ*pstar^2*n ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>         β*n+(n:ℝ)^(3/4:ℝ)≤γ*pstar^2*n*(1/100:ℝ) ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>         (lamList+2*ζList)*n+(n:ℝ)/(8*(d:ℝ))+2*(n:ℝ)^(3/4:ℝ)/d≤β*n :=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   obtain ⟨β,lamList,ζList,hβ,hβ1,hlam,hlam1,hζ,dMin,hList⟩:=long_selected_list_margins (1/100) γ pstar (by norm_num) hγ hp</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let βfinal:=lamList/4</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let δ:=min ((βfinal/100)^2) (1/100:ℝ)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hβfinal:0&lt;βfinal:=by dsimp [βfinal];positivity</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hδ:0&lt;δ:=by dsimp [δ];positivity</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   obtain ⟨L₁,hL₁⟩:=exists_nat_gt (16/δ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   obtain ⟨L₂,hL₂⟩:=exists_nat_gt (8/(100*lamList))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let L₀:=max L₁ L₂</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hM:∀m:ℕ,L₀≤m→4/(m:ℝ)≤δ/4 ∧ 1/(100*(m:ℝ))≤lamList/8:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     intro m hm</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hm1:(16/δ)&lt;(m:ℝ):=lt_of_lt_of_le hL₁ (by exact_mod_cast (show L₁≤m by omega))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have hm2:(8/(100*lamList))&lt;(m:ℝ):=lt_of_lt_of_le hL₂ (by exact_mod_cast (show L₂≤m by omega))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hm0:0&lt;(m:ℝ):=lt_trans (by positivity : 0&lt;16/δ) hm1</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hp1:16&lt;δ*m:=by simpa only [mul_comm] using (div_lt_iff₀ hδ).mp hm1</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hp2:8&lt;(100*lamList)*m:=by simpa only [mul_comm] using (div_lt_iff₀ (by positivity : 0&lt;100*lamList)).mp hm2</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     constructor</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     · apply (div_le_iff₀ hm0).2; nlinarith</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     · apply (div_le_iff₀ (by positivity : 0&lt;100*(m:ℝ))).2; nlinarith</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   refine ⟨β,lamList,ζList,βfinal,δ,hβ,hβ1,hlam,hlam1,hζ,hβfinal,le_refl _,hδ,</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     min_le_left _ _,min_le_right _ _,dMin,L₀,hM,?_,hList⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   intro m hm ε η hε hη</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hh:=(hM m hm).2</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   dsimp [βfinal]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   linarith</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> end Oberwolfach</span></pre></html>

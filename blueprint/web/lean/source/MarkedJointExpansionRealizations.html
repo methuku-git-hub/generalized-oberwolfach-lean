@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedJointExpansionRealizations.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedJointExpansionRealizations.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFreshExpansionRealization</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteDependentSeparatedChoices</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.IndexedMarkedRealizationGeometry</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Simultaneous host realisations of finitely many expansions. The</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> construction proves disjoint rows, distinct hubs, and cross separation. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 4096</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 28000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E K A S I:Type} [Fintype V] [Fintype U] [Fintype A] [Fintype S] [Fintype I]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [DecidableEq V] [DecidableEq U] [DecidableEq A] [DecidableEq S] [DecidableEq I]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b l:ℕ} {c ch:ℝ}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem marked_joint_expansion_realizations</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (Q:MarkedHostExtensionCounts tail head ktail khead H₀ HK π b l c ch)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hl:2≤l) (V₀ U₀:I→Type) [∀ i,Fintype (V₀ i)] [∀ i,Fintype (U₀ i)]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     [∀ i,DecidableEq (V₀ i)] [∀ i,DecidableEq (U₀ i)]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (G:∀ i,IndexedMarkedGraph (V₀ i) (U₀ i) A S)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (M:ℕ) (hMr:∀ i,Fintype.card (V₀ i)+Fintype.card (A⊕S)*(l+5)≤M)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hMh:∀ i,Fintype.card (U₀ i)+Fintype.card (A⊕S)≤M)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (v₀:V) (W Z:Finset V) (B:Finset U)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hbudget:(W.card:ℝ)+(Z.card+(Fintype.card I+1)*M+l+16)*(2*b+1)&lt;c)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hB:(B.card:ℝ)+(Fintype.card I+1)*M&lt;ch):</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∃ R:∀ i,IndexedMarkedHostRealization (indexedMarkedExpansion (G i) (l+4) (by omega)) tail head ktail khead H₀ HK π b,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ i,Function.Injective (R i).rows∧Function.Injective (R i).hubs∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (∀ u,(R i).hubs u∉B)∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         (∀ v,(R i).rows v∉W∧(R i).rows v∉Z∧∀ z∈Z,¬PermutationClose π b ((R i).rows v) z)∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         PermutationSeparated π b (R i).rows)∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       ∀ i j,i≠j→Disjoint (R i).rowSet (R j).rowSet∧Disjoint (R i).hubSet (R j).hubSet∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         ∀ v∈(R i).rowSet,∀ w∈(R j).rowSet,¬PermutationClose π b v w:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let C:=fun i=&gt;IndexedMarkedHostRealization (indexedMarkedExpansion (G i) (l+4) (by omega)) tail head ktail khead H₀ HK π b</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let Good:∀ i,C i→Prop:=fun i R=&gt;Function.Injective R.rows∧Function.Injective R.hubs∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∀ v,R.rows v∉W)∧PermutationSeparated π b R.rows</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hchoose:∀ Z&#x27;:Finset V,∀ B&#x27;:Finset U,Z⊆Z&#x27;→B⊆B&#x27;→</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       Z&#x27;.card≤Z.card+Fintype.card I*M→B&#x27;.card≤B.card+Fintype.card I*M→∀ i:I,</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       ∃ R:C i,Good i R∧R.rowSet.card≤M∧R.hubSet.card≤M∧Disjoint R.rowSet Z&#x27;∧Disjoint R.hubSet B&#x27;∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         ∀ v∈R.rowSet,∀ w∈Z&#x27;,¬PermutationClose π b v w:=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     intro Z&#x27; B&#x27; hZZ hBB hZc hBc i</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hzc:(Z&#x27;.card:ℝ)≤Z.card+Fintype.card I*M:=by exact_mod_cast hZc</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have hbc:(B&#x27;.card:ℝ)≤B.card+Fintype.card I*M:=by exact_mod_cast hBc</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hmr:(Fintype.card (V₀ i):ℝ)+Fintype.card (A⊕S)*(l+5)≤M:=by exact_mod_cast hMr i</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hmh:(Fintype.card (U₀ i):ℝ)+Fintype.card (A⊕S)≤M:=by exact_mod_cast hMh i</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have hrow:(W.card:ℝ)+(Z&#x27;.card+Fintype.card (V₀ i)+Fintype.card (A⊕S)*(l+5)+l+16)*(2*b+1)&lt;c:=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       have hh:=mul_le_mul_of_nonneg_right (show (Z&#x27;.card:ℝ)+Fintype.card (V₀ i)+Fintype.card (A⊕S)*(l+5)+l+16≤</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>           Z.card+(Fintype.card I+1)*M+l+16 by nlinarith only [hzc,hmr]) (show 0≤(2*b+1:ℝ) by positivity)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       linarith only [hh,hbudget]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     obtain ⟨R,hRi,hHi,hHB,hav,hsep⟩:=marked_fresh_expansion_realization Q hl (G i) v₀ W Z&#x27; B&#x27; hp hrow</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (by nlinarith only [hbc,hmh,hB])</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     refine ⟨R,⟨hRi,hHi,fun v=&gt;(hav v).1,hsep⟩,?_,?_,?_,?_,?_⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     · exact R.rowSet_card.trans (by simpa only [Fintype.card_sum,Fintype.card_prod,Fintype.card_fin] using hMr i)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     · exact R.hubSet_card.trans (by simpa only [Fintype.card_sum] using hMh i)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     · apply Finset.disjoint_left.mpr</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       intro v hv hz;obtain ⟨x,_,rfl⟩:=Finset.mem_image.mp hv;exact (hav x).2.1 hz</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     · apply Finset.disjoint_left.mpr</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       intro u hu hb;obtain ⟨x,_,rfl⟩:=Finset.mem_image.mp hu;exact hHB x hb</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     · intro v hv z hz;obtain ⟨x,_,rfl⟩:=Finset.mem_image.mp hv;exact (hav x).2.2 z hz</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   obtain ⟨R,hR,hd⟩:=finite_dependent_separated_choices C π b (fun _ R=&gt;R.rowSet) (fun _ R=&gt;R.hubSet) Good Z B M M hchoose</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   refine ⟨R,?_,hd⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   intro i</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   refine ⟨(hR i).1.1,(hR i).1.2.1,?_,?_,(hR i).1.2.2.2⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   · intro u;exact Finset.disjoint_left.mp (hR i).2.2.2.2.1 ((R i).hub_mem u)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   · intro v</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     exact ⟨(hR i).1.2.2.1 v,Finset.disjoint_left.mp (hR i).2.2.2.1 ((R i).row_mem v),</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (hR i).2.2.2.2.2 _ ((R i).row_mem v)⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> </span>
+<span id="L71"><a href="#L71" class="ln">  71</a> end Oberwolfach</span></pre></html>

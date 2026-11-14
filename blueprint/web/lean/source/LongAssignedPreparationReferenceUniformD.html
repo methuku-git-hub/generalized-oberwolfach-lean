@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongAssignedPreparationReferenceUniformD.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongAssignedPreparationReferenceUniformD.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PreparationActualReferenceReadyUniformD</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongAssignedClassReservation</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PreparationActualPaddedFamilyWithMarginals</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedPreparationReferenceLength</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The actual factor-family sampling and weight inputs use a marked length</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> which also satisfies the all-level reference theorem&#x27;s density margin. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 25000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem long_assigned_preparation_actual_reference_ready_uniform_d (L₀:ℕ) (α:ℝ) (hα:0&lt;α):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃ m r k₀:ℕ,7≤m ∧ L₀≤m ∧ Even (m+1) ∧ 2≤r ∧ r+4=m ∧ r+4+1=(k₀+2)*2 ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       successorCycleRatio k₀+α/4≤1/2+α/2 ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ A BK:ℝ,0&lt;A ∧ 0&lt;BK ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ (K:ℕ),0&lt;K→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let nO:=fun i:Fin K=&gt;max 1 (i.val-1);</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ B:Fin K→ℝ,(∀ i,0&lt;B i) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (d:ℕ),2≤d→∀ τ:ℝ,0&lt;τ→∃ ε:ℝ,0&lt;ε ∧ ε≤τ/4 ∧ ∃ N:ℕ,0&lt;N ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ n:ℕ,N≤n→∀ (U:Type) [Fintype U]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (F:U→SimpleGraph (Fin n)) (hF:∀ u,(F u).IsRegularOfDegree 2)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (Allowed:Set ℕ) (hAllowed:Allowed.Nonempty) (hvalid:∀ r∈Allowed,3≤r)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (hS:∀ u,AllowedCycleLengths (F u) Allowed)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (θ ρ₀ ρ D:ℝ) (hθ:0&lt;θ) (hθmax:θ≤1/100) (hρ₀:0&lt;ρ₀)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (hρlo:ρ₀≤ρ) (hρ1:ρ≤1) (hD:0&lt;D) (hsize:ρ*D=2*Fintype.card U)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (hcut:(1/((m:ℝ)+1))/(d:ℝ)≤θ)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (hclass:∀u,factorPreparationClass (F u) K=none)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (G:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (hDlo:(Fintype.card (Fin n):ℝ)/2≤D) (hDhi:D≤2*Fintype.card (Fin n))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (hreg:∀ v,|(G.degree v:ℝ)-D|≤ε*Fintype.card (Fin n))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (hdeg:∀ v,(allowedThreshold Allowed+α)*Fintype.card (Fin n)≤(G.degree v:ℝ)),</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let fraction:=fun (u:U) (i:Fin K)=&gt;</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       ((Finset.univ.filter (fun v=&gt;longPreparationCycleClass (F u) (hF u) K v=some i)).card:ℝ)/n</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let S:=Finset.univ.filter (fun i=&gt;∃ u,θ/(100*(K:ℝ))≤fraction u i)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let f:=fun (i:Fin K) u=&gt;if θ/(100*(K:ℝ))≤fraction u i then fraction u i else 0</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let c:ℝ:=(m:ℝ)+1</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let t:ℝ:=(1/100)/(m:ℝ)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let a:=fun u=&gt;(1-θ)*(((Finset.univ.filter (fun v=&gt;longPreparationCycleClass (F u) (hF u) K v=none)).card:ℝ)/n)/c-t</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let b:=fun u=&gt;(m:ℝ)*a u+(1-θ)*∑ i,f i u</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let ηS:=fun (i:↥S) u=&gt;(1-θ)*f i.val u/b u</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let η:=padIndexedFunctions S (fun _=&gt;U) ηS</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let p₂:=(∑ u,b u)/D</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     let k₂:=(∑ u,a u)/D</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     let pstar:=min (1/4:ℝ) (min (ρ₀/8) (ρ₀/(6*c)))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let residual:=fun u=&gt;1-(1/100:ℝ)-t-a u-b u</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     let q:=fun (u:U) (j:Bool)=&gt;if j then a u else t</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let sco:=fun (u:U) (j:Bool)=&gt;if j then b u else (1/100:ℝ)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     let p₁:=ρ*(1/100:ℝ)/2</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     let k₁:=ρ*t/2</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     let udens:=2*(∑ u,residual u)/D</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     let floor:=min (1/100:ℝ) pstar;</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     ∃ w:∀ i:Fin K,OrdinaryCycle G (nO i+2)→ℝ,</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ∃ wK:(Fin (m+1)→Fin n)→ℝ,</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       0&lt;pstar ∧ pstar≤p₂ ∧ pstar≤k₂ ∧ (∀ u,pstar≤b u) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (∀ i u,η i u=(1-θ)*f i u/b u) ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (∀ i∉S,∀ u,η i u=0) ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       (∀ i u,0≤η i u ∧ η i u≤1/b u) ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (∀ u,(m:ℝ)*a u+(∑ i,η i u)*b u=b u) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (∑ u,a u)=D*k₂ ∧ (∑ u,b u)=D*p₂ ∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       0&lt;floor ∧ floor≤p₂ ∧ floor≤k₂ ∧ (∀ u j,floor≤sco u j) ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (∀ u,q u false=t ∧ q u true=a u ∧ sco u false=1/100 ∧ sco u true=b u) ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (∀ u j,0≤q u j) ∧ (∀ u,∑ j,q u j≤1/8) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (∀ u j,0≤sco u j) ∧ (∀ u,∑ j,sco u j ≤ intervalUncoveredProbability d (∑ j,q u j)) ∧</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       0≤p₁ ∧ 0≤k₁ ∧ 0≤udens ∧ 2*p₁+2*k₁+2*p₂+2*k₂+udens=ρ ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       2*p₁+2*k₁+2*p₂+2*k₂+udens≤1 ∧ k₁=p₁/(m:ℝ) ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (∀ i C,0≤w i C ∧ w i C≤B i/(Fintype.card (Fin n):ℝ)^(nO i)) ∧</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       (∀ i:↥S,∀ x y,(∑ C,if C.val.val.Adj x y then w i.val C else 0)=if G.Adj x y then 1 else 0) ∧</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       (∀ i∉S,∀ C,w i C=0) ∧</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       (∀ i:↥S,5*((nO i.val+2:ℕ):ℝ)^4*B i.val*(2*(3*d))/Fintype.card (Fin n)≤τ ∧</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>         6*((nO i.val+2:ℕ):ℝ)^4*B i.val*(2*(3*d))+ε*(Fintype.card (Fin n):ℝ)≤τ*D) ∧</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       SuccessorSequenceWeightConditions G π (3*d) D τ A BK wK :=by</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   obtain ⟨m,r,k₀,hm,hLm,heven,hr,hrm,hlen,hmargin,A,BK,hA,hBK,hcore⟩:=preparation_actual_reference_ready_uniform_d L₀ α hα</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   refine ⟨m,r,k₀,hm,hLm,heven,hr,hrm,hlen,hmargin,A,BK,hA,hBK,?_⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   intro K hK nO</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   obtain ⟨B,hB,hcore⟩:=hcore K hK</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   refine ⟨B,hB,?_⟩</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   intro d hd τ hτ</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have hcore:=hcore d hd</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   obtain ⟨ε,hε,hετ,N,hN,hcore⟩:=hcore τ hτ</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   refine ⟨ε,hε,hετ,N,hN,?_⟩</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   intro n hn U _ F hF Allowed hAllowed hvalid hS θ ρ₀ ρ D hθ hθmax hρ₀ hρlo hρ1 hD hsize hcut hclass G π hDlo hDhi hreg hdeg</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   have hnpos:0&lt;n:=by omega</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have hlong:=long_class_assigned_frequency hnpos F hF Allowed hS K hK hclass</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   exact hcore n hn U F hF Allowed hAllowed hvalid hS θ ρ₀ ρ D hθ hθmax hρ₀ hρlo hρ1 hD hsize hcut hlong G π hDlo hDhi hreg hdeg</span>
+<span id="L88"><a href="#L88" class="ln">  88</a> end Oberwolfach</span></pre></html>

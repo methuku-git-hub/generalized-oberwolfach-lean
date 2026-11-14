@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Uniform fixed-size subsets and partitions</title>
+<link rel="next" href="sect0010.html" title="The vortex construction" />
+<link rel="prev" href="sect0008.html" title="Finite categorical laws and sampling implications" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000010">8 Uniform fixed-size subsets and partitions</h1>
+<div class="definition_thmwrapper theorem-style-plain" id="bp:fixed-size-laws">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">8.1</span>
+    <span class="definition_thmtitle">The finite sample spaces</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0009.html#bp:fixed-size-laws">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.FixedSubset" class="lean_decl">Oberwolfach.FixedSubset</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.FixedPartition" class="lean_decl">Oberwolfach.FixedPartition</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.UniformSampleSpec" class="lean_decl">Oberwolfach.UniformSampleSpec</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.UniformSampleSpec.State" class="lean_decl">Oberwolfach.UniformSampleSpec.State</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.UniformSampleSpec.law" class="lean_decl">Oberwolfach.UniformSampleSpec.law</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.UniformSampleSpec.exchange" class="lean_decl">Oberwolfach.UniformSampleSpec.exchange</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.UniformSampleSpec.exposures" class="lean_decl">Oberwolfach.UniformSampleSpec.exposures</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   For a finite set \(V\) of size \(D\), the subset space consists of all \(r\)-subsets, where \(r\le D\). An ordered partition with prescribed sizes \(d_1,\ldots ,d_k\) is represented by a function \(c:V\to [k]\) with \(|c^{-1}(a)|=d_a\). The sum condition \(\sum _a d_a=D\) supplies a partition, including when some cells are empty. Each space has its uniform probability law. A transposition of two vertices either leaves the object unchanged or performs one exchange in the manuscript’s sense. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:fixed-size-pushforward">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">8.2</span>
+    <span class="lemma_thmtitle">Exact laws under ordering and forgetting order</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0009.html#bp:fixed-size-pushforward">#</a>
+    
+    <a class="icon proof" href="sect0009.html#a0000000096"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0009.html#bp:fixed-size-laws">Definition 8.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.orderedSample_cons_law" class="lean_decl">Oberwolfach.orderedSample_cons_law</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.orderedSampleRange_uniform" class="lean_decl">Oberwolfach.orderedSampleRange_uniform</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedPartition_uniform" class="lean_decl">Oberwolfach.fixedPartition_uniform</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedSubset_nonempty" class="lean_decl">Oberwolfach.fixedSubset_nonempty</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedPartition_nonempty" class="lean_decl">Oberwolfach.fixedPartition_nonempty</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    A uniform injection \([r]\to V\) has a uniform first label and, conditional on that label, a uniform continuation without replacement. Forgetting the order gives a uniform \(r\)-subset. Applying a uniform permutation to any one partition gives a uniform partition with the same cell sizes. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000096">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The first-label decomposition is an explicit equivalence, and its fibres have equal cardinality. The fibre of a subset is equivalent to the injections \([r]\to S\), so all subset fibres have equal cardinality. For partitions, bijections between corresponding cells give a permutation carrying any partition to any other. Composition by that permutation is a bijection between the corresponding fibres of the sampling map. All statements identify point masses of the actual finite laws. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:fixed-size-concentration">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">8.3</span>
+    <span class="theorem_thmtitle">Concentration for independent samples and partitions</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0009.html#bp:fixed-size-concentration">#</a>
+    
+    <a class="icon proof" href="sect0009.html#a0000000097"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0009.html#bp:fixed-size-laws">Definition 8.1</a></li>
+          
+          <li><a href="sect0009.html#bp:fixed-size-pushforward">Lemma 8.2</a></li>
+          
+          <li><a href="sect0008.html#bp:bounded-differences">Theorem 7.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.uniformSamples_mgf" class="lean_decl">Oberwolfach.uniformSamples_mgf</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.uniformSamples_absolute_tail" class="lean_decl">Oberwolfach.uniformSamples_absolute_tail</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.uniformSamples_one_sided_tails" class="lean_decl">Oberwolfach.uniformSamples_one_sided_tails</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.uniformSamples_zero_variance" class="lean_decl">Oberwolfach.uniformSamples_zero_variance</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    Let independent coordinates be uniform subsets or partitions as above. Suppose one exchange in coordinate \(i\) changes \(f\) by at most \(b_i\ge 0\). Put \(s_i=\min (r_i,D_i-r_i)\) for a subset and \(s_i=D_i\) for a partition, and put \(v=\sum _i s_i b_i^2\). Then </p>
+<div class="displaymath" id="a0000000098">
+  \[  \mathbb E\exp \bigl(t(f-\mathbb Ef)\bigr)\le \exp (t^2v/8) \quad (t\in \mathbb R).  \]
+</div>
+<p> For \(v{\gt}0\) and \(a\ge 0\), the two-sided tail is at most \(2\exp (-2a^2/v)\), and each one-sided tail is at most \(\exp (-2a^2/v)\). If \(v=0\), \(f\) equals its expectation at every outcome. </p>
+<p><i class="itshape">Manuscript label:</i> lem:simp:product-sampling.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000097">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Expose an ordered sample one label at a time. A transposition couples the continuations of any two next labels, and changes the completed object by at most one exchange. Hence the two conditional means differ by at most \(b_i\). Conditional Hoeffding bounds and induction give the exponential-moment estimate. Complementation of subsets gives the smaller exposure count. Uniform permutations give the partition estimate. A separate product induction adds the contributions of independent coordinates. Exponential Markov bounds give the tails. In the zero case, strictness of \(1+x\le e^x\) gives equality at every outcome of positive mass; all these uniform product laws have positive mass everywhere. No independent-inclusion law is substituted for sampling without replacement. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:subset-inclusion">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">8.4</span>
+    <span class="lemma_thmtitle">Exact subset inclusion and intersection means</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0009.html#bp:subset-inclusion">#</a>
+    
+    <a class="icon proof" href="sect0009.html#a0000000099"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0009.html#bp:fixed-size-laws">Definition 8.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedSubset_joint_inclusion" class="lean_decl">Oberwolfach.fixedSubset_joint_inclusion</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedSubset_joint_inclusion_le" class="lean_decl">Oberwolfach.fixedSubset_joint_inclusion_le</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedSubset_intersection_mean" class="lean_decl">Oberwolfach.fixedSubset_intersection_mean</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For a uniform \(r\)-subset \(S\) of an \(n\)-element set and a fixed set \(T\), </p>
+<div class="displaymath" id="a0000000100">
+  \[  \Pr (T\subseteq S)=\frac{\binom r{|T|}}{\binom n{|T|}} \le (r/n)^{|T|}.  \]
+</div>
+<p> For every fixed \(A\), \(\mathbb E|A\cap S|=|A|r/n\). The formulas include \(r=0\) and the empty ground set, with Lean’s zero-division convention in the latter case; then \(A=T=\varnothing \). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000099">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The fibre is counted by choosing the remaining elements outside \(T\). The factorial identity for binomial coefficients gives the displayed ratio. Expressing the ratio through descending factorials bounds each factor by \(r/n\). Summing the singleton probabilities gives the mean. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:chernoff">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">8.5</span>
+    <span class="theorem_thmtitle">Finite independent and hypergeometric Chernoff bounds</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0009.html#bp:chernoff">#</a>
+    
+    <a class="icon proof" href="sect0009.html#a0000000101"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0009.html#bp:subset-inclusion">Lemma 8.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_independent_chernoff" class="lean_decl">Oberwolfach.finiteLaw_independent_chernoff</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_independent_chernoff_large" class="lean_decl">Oberwolfach.finiteLaw_independent_chernoff_large</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedSubset_chernoff" class="lean_decl">Oberwolfach.fixedSubset_chernoff</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedSubset_chernoff_large" class="lean_decl">Oberwolfach.fixedSubset_chernoff_large</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.finiteLaw_nonnegative_zero_mean" class="lean_decl">Oberwolfach.finiteLaw_nonnegative_zero_mean</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedSubset_intersection_zero_mean" class="lean_decl">Oberwolfach.fixedSubset_intersection_zero_mean</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    Let \(X\) be either a sum of independent finite random variables in \([0,1]\) or \(|S\cap A|\) for a uniform fixed-size subset. Put \(a=\mathbb EX\). For \(0\le \varepsilon \le 1\), </p>
+<div class="displaymath" id="a0000000102">
+  \[  \Pr (|X-a|\ge \varepsilon a)\le 2e^{-\varepsilon ^2a/3}.  \]
+</div>
+<p> If \(a{\gt}0\) and \(t\ge a\), then \(\Pr (X\ge t)\le (ea/t)^t\). When \(a=0\), \(X=0\) at every outcome of positive mass. This covers finite random variables; it does not assert a new proof for arbitrary infinite probability spaces. </p>
+<p><i class="itshape">Manuscript label:</i> lem:prelim:chernoff.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000101">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Convexity gives \(\mathbb E e^{sX}\le \exp (a(e^s-1))\) for the independent sum. For a uniform subset, expand the generating function as a sum of joint-inclusion probabilities. The preceding lemma gives \(\mathbb E q^{|S\cap A|}\le (1+(r/n)(q-1))^{|A|}\) for \(q\ge 1\). For \(0{\lt}q{\lt}1\), apply this bound to the complement subset with parameter \(q^{-1}\), retaining the binomial expression until the two formulas are identified. Setting \(q=e^s\) proves the same exponential-moment bound for every real \(s\). Exponential Markov bounds and proved scalar entropy inequalities give both tails and the large-deviation bound. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:normalized-subset-counts">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">8.6</span>
+    <span class="lemma_thmtitle">Simultaneous normalized intersection counts</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0009.html#bp:normalized-subset-counts">#</a>
+    
+    <a class="icon proof" href="sect0009.html#a0000000103"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0009.html#bp:subset-inclusion">Lemma 8.4</a></li>
+          
+          <li><a href="sect0009.html#bp:fixed-size-concentration">Theorem 8.3</a></li>
+          
+          <li><a href="sect0008.html#bp:common-event-probability">Lemma 7.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.swap_subset_intersection_change" class="lean_decl">Oberwolfach.swap_subset_intersection_change</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedSubset_normalized_count_tail" class="lean_decl">Oberwolfach.fixedSubset_normalized_count_tail</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedSubset_simultaneous_normalized_counts" class="lean_decl">Oberwolfach.fixedSubset_simultaneous_normalized_counts</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedSubset_normalized_counts_exists" class="lean_decl">Oberwolfach.fixedSubset_normalized_counts_exists</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For a uniform \(r\)-subset \(S\) with \(r{\gt}0\) and fixed sets \(A_j\subseteq V\), </p>
+<div class="displaymath" id="a0000000104">
+  \[  \Pr \left(\forall j\in J:\left|\frac{|A_j\cap S|}{r} -\frac{|A_j|}{|V|}\right|{\lt}t\right) \ge 1-2|J|e^{-2rt^2}\qquad (t\ge 0).  \]
+</div>
+<p> The index type for \(j\) is arbitrary; it need not be a subset of \(V\). Thus these fixed tests may describe neighbourhoods of vertices outside the sampled domain. The graph-specific identification of the sets is still a caller obligation. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000103">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>A transposition adds at most one new element to a subset and removes at most one old element. Hence a fixed intersection count changes by at most one, and the normalized count changes by at most \(1/r\). Its mean is \(|A_j|/|V|\). The ordered-sample exposure bound with \(r\) steps gives the stated tail; a union bound gives the common event. If its displayed lower bound is positive, a successful subset exists. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0008.html" title="Finite categorical laws and sampling implications"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0010.html" title="The vortex construction"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

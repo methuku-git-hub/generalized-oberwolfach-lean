@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrderedOrdinaryLocality.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrderedOrdinaryLocality.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrderedOrdinaryWheelGeometry</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Locality of directed ordinary-edge and ordinary-spoke indicators. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 5000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V U:Type} [Fintype V] [Fintype U] [LinearOrder V] [DecidableEq U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   {r b:ℕ} {π:Equiv.Perm V}</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem orderedOrdinaryResourceEmbedding_injective:</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     Function.Injective (orderedOrdinaryResourceEmbedding (V:=V) (U:=U)):=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   intro a b h</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   cases a &lt;;&gt; cases b &lt;;&gt; simp_all [orderedOrdinaryResourceEmbedding,Prod.ext_iff]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem orderedOrdinaryResourceCoordinates_card (π:Equiv.Perm V) (d:ℕ) (a:(V×V)⊕(V×U)):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (orderedOrdinaryResourceCoordinates π d a).card≤8*d+6:=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   rawMarkedResourceCoordinates_card π d (orderedOrdinaryResourceEmbedding a)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem orderedOrdinaryResourceCoordinates_reverse_card (π:Equiv.Perm V) (d:ℕ) (e:RawWheelCoordinate V U):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (Finset.univ.filter (fun a:(V×V)⊕(V×U)=&gt;e∈orderedOrdinaryResourceCoordinates π d a)).card≤8*d+6:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let A:=Finset.univ.filter (fun a:(V×V)⊕(V×U)=&gt;e∈orderedOrdinaryResourceCoordinates π d a)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   let B:=Finset.univ.filter (fun a:((V×V)⊕(V×V))⊕(Bool×V×U)=&gt;e∈rawMarkedResourceCoordinates π d a)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hs:A.image orderedOrdinaryResourceEmbedding⊆B:=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     intro a ha</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     obtain ⟨x,hx,rfl⟩:=Finset.mem_image.mp ha</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     exact Finset.mem_filter.mpr ⟨Finset.mem_univ _,(Finset.mem_filter.mp hx).2⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   calc</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     _ = (A.image orderedOrdinaryResourceEmbedding).card := (Finset.card_image_of_injective _ orderedOrdinaryResourceEmbedding_injective).symm</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     _ ≤ B.card := Finset.card_le_card hs</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     _ ≤ 8*d+6 := rawMarkedResourceCoordinates_reverse_card π d e</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> theorem orderedOrdinaryResources_card (W:OrderedOrdinaryWheel (U:=U) π b r):</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (orderedOrdinaryResources W).card≤2*r:=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   unfold orderedOrdinaryResources</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hh:=Finset.card_union_le</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (Finset.univ.image (fun i:Fin r=&gt;(Sum.inl (W.1.val i,W.1.val (cycleNext i)):(V×V)⊕(V×U))))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (Finset.univ.image (fun i:Fin r=&gt;Sum.inr (W.1.val i,W.2)))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have h1:=Finset.card_image_le (s:=(Finset.univ:Finset (Fin r))) (f:=fun i=&gt;Sum.inl (α:=V×V) (β:=V×U) (W.1.val i,W.1.val (cycleNext i)))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have h2:=Finset.card_image_le (s:=(Finset.univ:Finset (Fin r))) (f:=fun i=&gt;Sum.inr (α:=V×V) (β:=V×U) (W.1.val i,W.2))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   simp only [Finset.card_univ,Fintype.card_fin] at h1 h2</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   omega</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> end Oberwolfach</span></pre></html>

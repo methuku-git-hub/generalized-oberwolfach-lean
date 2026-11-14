@@ -1,0 +1,2946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Whole-manuscript statement inventory</title>
+<link rel="next" href="sect0015.html" title="Marked capacities and the ordinary fractional-threshold bridge" />
+<link rel="prev" href="sect0013.html" title="Release criteria and scope" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000015">A Whole-manuscript statement inventory</h1>
+<p> This table indexes the 137 public statement and definition environments in the snapshot. The JSON inventory additionally records 33 proof-local claims, one background problem and all 133 proof environments. Inclusion is not a claim that a statement has been audited or formalised. Source line numbers refer to the archived snapshot. <small class="small"><table class="tabular">
+  <tr>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px; text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Source label </p>
+
+    </td>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px; text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Line </p>
+
+    </td>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px; text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Lean status </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px; text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>conj:gen_oberwolfach </p>
+
+    </td>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px; text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 228 </p>
+
+    </td>
+    <td  style="border-top-style:solid; border-top-color:black; border-top-width:1px; text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:new:prescribed-factor </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 342 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>cor:new:factor-consequences </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 357 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:main:resolution </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 384 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>doLpart:thm:main </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 425 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>conj:odd_cyclic_threshold </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 444 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:new:permutation-intervals </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 1934 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:typed-graph </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2324 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:prelim:bounded-differences </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2612 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Finite case checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:prelim:chernoff </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2631 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:simp:product-sampling </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2672 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:prelim:max-flow-min-cut </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2731 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Real case checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:prelim:prescribed-degrees </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2746 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Bipartite forms checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:prelim:hall </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2771 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:prelim:konig </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2780 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Multigraph theorem checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:pr:cut </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2790 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:pr:cut-stability </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2811 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:prelim:normalized-demands </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2828 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Bipartite forms checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:prelim:separation </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2863 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:prelim:caratheodory </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2877 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:prelim:brouwer </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2886 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:prelim:weighted-matching </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2901 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:weighted-resource-matching </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 2935 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>prop:four:lower </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3048 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:common:cycle-factor </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3127 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:common:fixed-length-path </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3154 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>prop:family:ordinary-preparation </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3187 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>prop:family:long-preparation </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3217 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:family:single-copy </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3247 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:family:partition </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3257 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Partition theorem checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:family:fixed-set </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3306 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:four:two-regular-fractional-threshold </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3568 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:four:DHLP-balanced </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3750 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:four:dense-spread </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3765 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:four:wheel-rounding </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3820 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>doLpart:lem:conditional-realization </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 3973 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>doLpart:cor:spread </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 4361 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>doLpart:thm:odd </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 4473 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:four:long-capacities </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 4636 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:four:zonotope </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 4863 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:four:random-regularization </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 4908 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:four:successor-kernel </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 4971 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:capacity:marked-numerical </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 5143 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:pr:rt1 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 5497 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:pr:marked-typicality </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 5640 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:pr:rt1-stability </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 5677 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Generic lemma checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>cor:cn:relative-typicality-large-cuts </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 5901 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:four:local-interval-law </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6015 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:interval:raw-law </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6062 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:interval:retention </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6090 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:pr:rt1-realisation </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6136 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:pr:marked-realisation </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6187 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:pr:wcodeg-realisation </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6296 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:four:sparse-alternating </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6345 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:completion:ordinary-host </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6551 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:ordinary-local-reference </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6580 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:completion:marked-host </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6611 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:completion:marked-sample </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6681 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:trimming-restrictions </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 6800 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:pr:wi-stability </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 7185 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Generic lemma checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:pr:wi-interactions </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 7288 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:four:edge-isolator </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 7404 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:pr:ordinary-wheel-weights </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 7497 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:marked:common-paths </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 7760 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:marked:wheel-estimates </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 7828 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:weights:marked-numerical </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 7883 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:marked:potential-loads </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 8096 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:four:typed-correction </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 8179 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:relative-ordinary-correction </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 8335 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:packing:ordinary-deletion-stability </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 8441 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:relative-ordinary-packing </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 8546 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:packing:marked-deletion-stability </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 8646 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:packing:marked-potential-stability </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 8718 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:relative-marked-packing </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 8774 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:bounded-degree-selection </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 9020 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:four:transformer </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 9129 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:four:absorber </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 9344 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:triangle-transformer-explicit </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 9500 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:triangle-absorber </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 9767 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:class-profile:data </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 9928 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:cycle:weight-absorber-estimates </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 9999 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:simp:profile-marginals </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 10031 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Finite-resource proof checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:simp:profile-factor </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 10111 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Finite-resource proof checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:simp:profile-finite-cleanup </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 10309 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:bernoulli-factor </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 10490 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:common:ordinary-weights </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 10691 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:new:ordinary-relative-absorber </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 10725 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:local:marked-hub-absorbers </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 11004 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:endpoints:assignment-graphs </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 11063 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:pairing:degree-cut-hall </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 11146 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:four:typed-pairing </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 11172 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:cuts-from-codegrees </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 11285 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:new:fresh-candidacy </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 11319 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:marked-endpoint-counts </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 11513 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:pr:ordinary-endpoints </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 11711 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:ordinary-local-factor </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 11802 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:marked-hub-factor </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 11986 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:triangle-endpoint-factor </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 12111 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:local-extensions </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 12273 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:marked-local-extensions </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 12356 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:marked-estimate-changes </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 12498 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:common:marked-estimates </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 12694 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:new:marked-relative-absorber </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 12755 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:four:common-neighbourhood-balancing </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 12818 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>prop:completion:ordinary-construction </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 13695 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>prop:completion:marked-construction </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 13756 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:completion:vortex </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 13826 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:writing:nested-pairs </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 13858 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:writing:shell-permutation </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 13929 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:completion:ordinary-local-estimates </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 13979 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:completion:ordinary-estimates </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 14029 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:ordinary-estimate-changes </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 14143 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:ordinary-cover-down </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 14249 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:family:completion:ordinary </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 15168 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:completion:marked-local-estimates </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 15379 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:completion:marked-estimates </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 15445 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:marked-cover-down </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 15615 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>thm:family:completion:marked </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 16819 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:ordinary-reference </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 17066 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:ordinary-reference-cuts </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 17421 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:marked-reference </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 17519 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:marked-reference-configurations </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 17698 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:completion:marked-reference-loads </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 17856 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:reconstruction:reserved-paths </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 20386 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:reconstruction:interval-assignment </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 20431 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:reconstruction:paths </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 20456 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:images:residual-structure </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 20554 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:images:residual-prescriptions </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 20641 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:simp:orientation-routing </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 20731 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Incidence form checked </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:marked-indegree-correction </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 20785 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>def:lists:extending </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 20857 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:prescribed-embedding </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 20870 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:prescribed-positions </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 20983 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:prescribed-edge-assignment </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 21068 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:list:raw </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 21145 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p>lem:new:ordinary-list-extensions </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> 21219 </p>
+
+    </td>
+    <td  style="text-align:left" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+  <tr>
+    <td  style="text-align:left; border-bottom-style:solid; border-bottom-color:black; border-bottom-width:1px" 
+        rowspan=""
+        colspan="">
+      <p>doLpart:prop:sharp </p>
+
+    </td>
+    <td  style="text-align:left; border-bottom-style:solid; border-bottom-color:black; border-bottom-width:1px" 
+        rowspan=""
+        colspan="">
+      <p> 25255 </p>
+
+    </td>
+    <td  style="text-align:left; border-bottom-style:solid; border-bottom-color:black; border-bottom-width:1px" 
+        rowspan=""
+        colspan="">
+      <p> Open </p>
+
+    </td>
+  </tr>
+</table>
+</small></p>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0013.html" title="Release criteria and scope"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0015.html" title="Marked capacities and the ordinary fractional-threshold bridge"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

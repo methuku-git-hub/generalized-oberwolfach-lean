@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AssignedEdgesCallerInputs.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AssignedEdgesCallerInputs.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EdgeAssignmentToPhysical</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedBadEdgeAssignments</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! List and endpoint-forbidden conditions give the exact disjointness</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> conditions required by the prescribed-position construction. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {V W:Type} [Fintype V] [Fintype W] [DecidableEq V] [DecidableEq W] [Nonempty W]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem assigned_edges_avoid_old_images (G:SimpleGraph V)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (f:{e:Sym2 V // e∈G.edgeFinset}→W) (orient:Sym2 V→V×V)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (horient:∀e∈G.edgeFinset,prescribedArcPhysical (orient e)=e)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (B:V→Finset W) (old:W→Finset V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hOld:∀v i,v∈old i→i∈B v)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hB:∀e,∀v∈e.1.toFinset,f e∉B v):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀i,Disjoint (old i) (prescribedMatchingEndpoints (prescribedAssignedArcs G (extendEdgeAssignment G f) orient i)) := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   intro i</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   intro v hvOld hvEnd</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   obtain ⟨a,ha,hva⟩:=Finset.mem_biUnion.mp hvEnd</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   obtain ⟨e,he,heq⟩:=Finset.mem_image.mp ha</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have heK:e∈G.edgeFinset:=(Finset.mem_filter.mp he).1</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hei:extendEdgeAssignment G f e=i:=(Finset.mem_filter.mp he).2</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hve:v∈e.toFinset:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     rw [←horient e heK]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     simp only [prescribedArcPhysical,Sym2.toFinset_mk_eq,Finset.mem_insert,Finset.mem_singleton]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     simpa [heq] using hva</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hf:f ⟨e,heK⟩=i:=by simpa [extend_edge_assignment_value G f e heK] using hei</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hb:=hB ⟨e,heK⟩ v hve</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   exact hb (by rw [hf];exact hOld v i hvOld)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> </span>
+<span id="L33"><a href="#L33" class="ln">  33</a> theorem assigned_edges_avoid_inner_indices (G:SimpleGraph V)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (f:{e:Sym2 V // e∈G.edgeFinset}→W) (orient:Sym2 V→V×V)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (L:Sym2 V→Finset W) (inner:Finset W)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hAllowed:∀e,f e∈L e.1) (hOutside:∀e∈G.edgeFinset,Disjoint (L e) inner):</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∀i,i∈inner→prescribedAssignedArcs G (extendEdgeAssignment G f) orient i=∅ := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   intro i hi</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   apply Finset.eq_empty_iff_forall_notMem.mpr</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   intro a ha</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   obtain ⟨e,he,heq⟩:=Finset.mem_image.mp ha</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have heK:e∈G.edgeFinset:=(Finset.mem_filter.mp he).1</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hei:extendEdgeAssignment G f e=i:=(Finset.mem_filter.mp he).2</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hf:f ⟨e,heK⟩=i:=by simpa [extend_edge_assignment_value G f e heK] using hei</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hL:f ⟨e,heK⟩∈L e:=hAllowed ⟨e,heK⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   rw [hf] at hL</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   exact (Finset.disjoint_left.mp (hOutside e heK)) hL hi</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> end Oberwolfach</span></pre></html>

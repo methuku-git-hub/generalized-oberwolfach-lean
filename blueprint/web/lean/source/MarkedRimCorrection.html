@@ -1,0 +1,147 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedRimCorrection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedRimCorrection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSignedCycleWeights</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedWheelLifts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedSpokeResiduals</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The first two stages of marked wheel correction, with the actual</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> numerical capacity theorem and compatible-hub lift. The unit balance and</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> arc separation conditions are derived, not inserted as additional inputs. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 2000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> universe u v w z</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_rim_correction_uniform_parameters (α p₀ : ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hα : 0&lt;α) (hαmax : α≤1) (hp₀ : 0&lt;p₀) (hp₀max : p₀≤1/2) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ c₀ : ℕ,∀ k : ℕ,c₀≤k+2 → ∀ β : ℝ,0&lt;β →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃ ε C : ℝ,0&lt;ε ∧ 0&lt;C ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ b : ℕ,∃ n₀ : ℕ,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (V : Type u) (E : Type v) (K : Type w) (U : Type z)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       [Fintype V] [Fintype E] [Fintype K] [Fintype U] [DecidableEq V] [DecidableEq U],</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∀ (tail head : E → V) (ktail khead : K → V) (π : Equiv.Perm V),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     Function.Injective (markedPhysicalEdge tail head ktail khead π) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ (p D : ℝ),p₀≤p → p≤1/2 → n₀≤Fintype.card V →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (Fintype.card V:ℝ)/2≤D → D≤2*Fintype.card V →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀ x,|occurrenceDegree tail x-p*D|≤ε*Fintype.card V) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀ x,|occurrenceDegree head x-p*D|≤ε*Fintype.card V) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ x,|occurrenceDegree ktail x-p*D/(k+1:ℝ)|≤ε*Fintype.card V) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ x,|occurrenceDegree khead x-p*D/(k+1:ℝ)|≤ε*Fintype.card V) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∀ x y,x≠y → α*p^2*Fintype.card V≤</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       ((Finset.univ.filter (fun z =&gt; (∃ e,tail e=x ∧ head e=z) ∧ (∃ e,tail e=z ∧ head e=y))).card:ℝ)) →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀ S T : Finset V,(1-2*min (α/16) (p/128))*Fintype.card V&lt;(S.card:ℝ)+T.card →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (α*p/16)*Fintype.card V*min (S.card:ℝ) T.card≤</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       ((Finset.univ.filter (fun e =&gt; tail e∈S ∧ head e∈T)).card:ℝ)) →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∀ H₀ Hₖ : V → U → Prop,</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∀ C&#x27; : MarkedCycleTuple tail head ktail khead (k+1) π b,</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       β*Fintype.card V≤(Fintype.card {u // MarkedHubCompatible H₀ Hₖ C&#x27;.val u}:ℝ)) →</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ v,occurrenceDegree (Sum.elim tail ktail) v=occurrenceDegree (Sum.elim head khead) v) →</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ v,occurrenceDegree khead v=∑ u,if Hₖ v u then (1:ℝ) else 0) →</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ v,occurrenceDegree (Sum.elim tail ktail) v=</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (∑ u,if H₀ v u then (1:ℝ) else 0)+(∑ u,if Hₖ v u then (1:ℝ) else 0)) →</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (∀ u,(∑ v,if H₀ v u then (1:ℝ) else 0)=(k+1:ℝ)*(∑ v,if Hₖ v u then (1:ℝ) else 0)) →</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     ∀ η : ℝ,0≤η → η&lt;1 →</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     ∀ ψ : MarkedWheel tail head ktail khead (k+1) π b H₀ Hₖ → ℝ,</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (∀ e,|markedWheelRimLoad ψ e-1|≤η) →</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     ∃ R : MarkedWheel tail head ktail khead (k+1) π b H₀ Hₖ → ℝ,</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀ e,markedWheelRimLoad R e=1-markedWheelRimLoad ψ e) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (∀ W&#x27;,|R W&#x27;|≤C*η/(Fintype.card V:ℝ)^(k+1)) ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (∀ j v u,|markedWheelSpokeLoad R j v u|≤(k+2)*C*η) := by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   obtain ⟨c₀,hc₀⟩ := marked_signed_cycle_weights_uniform_length.{u,v,w} α p₀ hα hαmax hp₀ hp₀max</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   refine ⟨c₀,?_⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   intro k hk β hβ</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   obtain ⟨ε,C,hε,hC,hcap⟩ := hc₀ k hk</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   refine ⟨ε,C/β,hε,by positivity,?_⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   intro b</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   obtain ⟨n₀,hn₀⟩ := hcap b</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   refine ⟨max 1 n₀,?_⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   intro V E K U _ _ _ _ _ _ tail head ktail khead π hphys p D hp hpmax hn hDlo hDhi hdo hdi hdko hdki htwo hcut H₀ Hₖ hhub hdir hK hout hcol η hη hηmax ψ herr</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hnpos : 0&lt;Fintype.card V := (show 0&lt;max 1 n₀ by omega).trans_le hn</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hn&#x27; : (0:ℝ)&lt;Fintype.card V := Nat.cast_pos.mpr hnpos</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   obtain ⟨hinj,hkinj⟩ := markedPhysicalEdge_endpoint_injections tail head ktail khead π hphys</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hunit := marked_unit_balance_of_spoke_degrees tail head ktail khead (k+1) H₀ Hₖ hdir hK hout (by simpa only [Nat.cast_add,Nat.cast_one] using hcol)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hsep (e : E⊕K) : ¬PermutationClose π b (Sum.elim tail ktail e) (Sum.elim head khead e) := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     apply markedWheelRimLoad_nonzero_separated (by omega : 1≤k+1) ψ e</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     intro he</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     have hh := herr e</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     rw [he] at hh</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     norm_num at hh</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     linarith</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   let zR : E⊕K → ℝ := (fun _ =&gt; 1)-markedWheelRimLoad ψ</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hzR : zR∈markedBalanceSubspace tail head ktail khead (k+1) :=</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     Submodule.sub_mem _ hunit (markedWheelRimLoad_balanced hinj hkinj ψ)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hzNorm : ‖zR‖≤η := by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     apply (pi_norm_le_iff_of_nonneg hη).mpr</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     intro e</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     simpa only [zR,Pi.sub_apply,Real.norm_eq_abs,abs_sub_comm] using herr e</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   obtain ⟨q,hq,he⟩ := hn₀ V E K tail head ktail khead hinj hkinj p D hp hpmax</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     ((le_max_right _ _).trans hn) hDlo hDhi hdo hdi hdko hdki htwo hcut π</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (fun e =&gt; hsep (Sum.inl e)) (fun e =&gt; hsep (Sum.inr e)) hunit zR hzR η hη hzNorm</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hhubpos (C&#x27; : MarkedCycleTuple tail head ktail khead (k+1) π b) :</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       0&lt;Fintype.card {u // MarkedHubCompatible H₀ Hₖ C&#x27;.val u} := by</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     have hh : (0:ℝ)&lt;β*Fintype.card V := by positivity</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     exact_mod_cast hh.trans_le (hhub C&#x27;)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   let R := markedWheelLift H₀ Hₖ q</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hRb (W&#x27; : MarkedWheel tail head ktail khead (k+1) π b H₀ Hₖ) :</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       |R W&#x27;|≤(C/β)*η/(Fintype.card V:ℝ)^(k+1) := by</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     have hh := markedWheelLift_bound (by omega : 1≤k+1) H₀ Hₖ q β (C*η) hβ (by positivity) hnpos</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>       hhub (fun C&#x27; =&gt; by simpa only [Nat.add_sub_cancel] using hq C&#x27;) W&#x27;</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     calc</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>       _ ≤ (C*η/β)/(Fintype.card V:ℝ)^(k+1) := hh</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       _ = _ := by ring</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   refine ⟨R,?_,hRb,?_⟩</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   · intro e</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     rw [show R=markedWheelLift H₀ Hₖ q from rfl,markedWheelLift_rim H₀ Hₖ q hhubpos e]</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     have hh := congrFun he e</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     simpa only [Finset.sum_apply,Pi.smul_apply,smul_eq_mul,zR,Pi.sub_apply] using hh</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   · intro j v u</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     have hh := markedWheelSpokeLoad_coefficient_bound R ((C/β)*η/(Fintype.card V:ℝ)^(k+1))</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       (by positivity) hRb j v u</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     calc</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>       _ ≤ ((C/β)*η/(Fintype.card V:ℝ)^(k+1))*((k+1+1)*(Fintype.card V:ℝ)^(k+1)) := by simpa only [Nat.cast_add,Nat.cast_one] using hh</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>       _ = _ := by field_simp;ring</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a> </span>
+<span id="L106"><a href="#L106" class="ln"> 106</a> theorem marked_rim_correction_uniform_length (α p₀ β : ℝ)</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     (hα : 0&lt;α) (hαmax : α≤1) (hp₀ : 0&lt;p₀) (hp₀max : p₀≤1/2) (hβ : 0&lt;β) :</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     ∃ c₀ : ℕ,∀ k : ℕ,c₀≤k+2 →</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     ∃ ε C : ℝ,0&lt;ε ∧ 0&lt;C ∧</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     ∀ b : ℕ,∃ n₀ : ℕ,</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     ∀ (V : Type u) (E : Type v) (K : Type w) (U : Type z)</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>       [Fintype V] [Fintype E] [Fintype K] [Fintype U] [DecidableEq V] [DecidableEq U],</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     ∀ (tail head : E → V) (ktail khead : K → V) (π : Equiv.Perm V),</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     Function.Injective (markedPhysicalEdge tail head ktail khead π) →</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     ∀ (p D : ℝ),p₀≤p → p≤1/2 → n₀≤Fintype.card V →</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     (Fintype.card V:ℝ)/2≤D → D≤2*Fintype.card V →</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     (∀ x,|occurrenceDegree tail x-p*D|≤ε*Fintype.card V) →</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     (∀ x,|occurrenceDegree head x-p*D|≤ε*Fintype.card V) →</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     (∀ x,|occurrenceDegree ktail x-p*D/(k+1:ℝ)|≤ε*Fintype.card V) →</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     (∀ x,|occurrenceDegree khead x-p*D/(k+1:ℝ)|≤ε*Fintype.card V) →</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     (∀ x y,x≠y → α*p^2*Fintype.card V≤</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>       ((Finset.univ.filter (fun z =&gt; (∃ e,tail e=x ∧ head e=z) ∧ (∃ e,tail e=z ∧ head e=y))).card:ℝ)) →</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     (∀ S T : Finset V,(1-2*min (α/16) (p/128))*Fintype.card V&lt;(S.card:ℝ)+T.card →</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>       (α*p/16)*Fintype.card V*min (S.card:ℝ) T.card≤</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>       ((Finset.univ.filter (fun e =&gt; tail e∈S ∧ head e∈T)).card:ℝ)) →</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     ∀ H₀ Hₖ : V → U → Prop,</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     (∀ C&#x27; : MarkedCycleTuple tail head ktail khead (k+1) π b,</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>       β*Fintype.card V≤(Fintype.card {u // MarkedHubCompatible H₀ Hₖ C&#x27;.val u}:ℝ)) →</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     (∀ v,occurrenceDegree (Sum.elim tail ktail) v=occurrenceDegree (Sum.elim head khead) v) →</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     (∀ v,occurrenceDegree khead v=∑ u,if Hₖ v u then (1:ℝ) else 0) →</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     (∀ v,occurrenceDegree (Sum.elim tail ktail) v=</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>       (∑ u,if H₀ v u then (1:ℝ) else 0)+(∑ u,if Hₖ v u then (1:ℝ) else 0)) →</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     (∀ u,(∑ v,if H₀ v u then (1:ℝ) else 0)=(k+1:ℝ)*(∑ v,if Hₖ v u then (1:ℝ) else 0)) →</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     ∀ η : ℝ,0≤η → η&lt;1 →</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     ∀ ψ : MarkedWheel tail head ktail khead (k+1) π b H₀ Hₖ → ℝ,</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     (∀ e,|markedWheelRimLoad ψ e-1|≤η) →</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     ∃ R : MarkedWheel tail head ktail khead (k+1) π b H₀ Hₖ → ℝ,</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>       (∀ e,markedWheelRimLoad R e=1-markedWheelRimLoad ψ e) ∧</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>       (∀ W&#x27;,|R W&#x27;|≤C*η/(Fintype.card V:ℝ)^(k+1)) ∧</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>       (∀ j v u,|markedWheelSpokeLoad R j v u|≤(k+2)*C*η) := by</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>   obtain ⟨c₀,hc₀⟩ := marked_rim_correction_uniform_parameters.{u,v,w,z} α p₀ hα hαmax hp₀ hp₀max</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>   exact ⟨c₀,fun k hk=&gt;hc₀ k hk β hβ⟩</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a> </span>
+<span id="L144"><a href="#L144" class="ln"> 144</a> end Oberwolfach</span></pre></html>

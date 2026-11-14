@@ -1,0 +1,103 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SparseCorrectionDemands.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SparseCorrectionDemands.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.IntegralDegreeSplitting</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Integer demands for simultaneous rim and spoke deletions. The signed</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> imbalance is retained exactly, and the two oriented demands have equal totals. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 1000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem balanced_half_degrees_real {V : Type*} [Fintype V] (g : V → ℕ)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (htotal : Even (∑ v,g v)) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ gp gm : V → ℕ,(∀ v,gp v+gm v=g v) ∧ (∑ v,gp v=∑ v,gm v) ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (∀ v,|(gp v : ℝ)-(g v : ℝ)/2|≤1/2) ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (∀ v,|(gm v : ℝ)-(g v : ℝ)/2|≤1/2) := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   obtain ⟨gp,gm,hs,ht,hd⟩ := balanced_integer_half_degrees g htotal</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   refine ⟨gp,gm,hs,ht,?_,?_⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   all_goals</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     intro v</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     have hv : |(gp v : ℝ)-(gm v : ℝ)|≤1 := by exact_mod_cast hd v</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     have hsum : (gp v : ℝ)+gm v=g v := by exact_mod_cast hs v</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     rw [abs_le] at hv ⊢</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     constructor &lt;;&gt; linarith [hv.1,hv.2]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> /-- Near-uniform demands, signed balance, and parity suffice to choose</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> both oriented rim demands. No graph existence assertion is assumed here. -/</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem signed_balanced_degree_demands {V : Type*} [Fintype V]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hn : 0&lt;Fintype.card V) (hv : V → ℕ) (b : V → ℤ)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hb : Even (∑ v,b v)) {T e : ℝ}</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (_he : 0≤e) (hmean : (∑ v,(hv v : ℝ))/Fintype.card V=T)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hh : ∀ v,|(hv v : ℝ)-T|≤1)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hbnd : ∀ v,|(b v : ℝ)|≤e)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hpos : e+2≤2*T) :</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∃ gp gm : V → ℕ,</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ v,(gp v : ℤ)+gm v=2*(hv v : ℤ)+b v) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∑ v,gp v=∑ v,gm v) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (|(∑ v,(gp v : ℝ))/Fintype.card V-T|≤e/2) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀ v,|(gp v : ℝ)-(∑ x,(gp x : ℝ))/Fintype.card V|≤3/2+e) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (∀ v,|(gm v : ℝ)-(∑ x,(gp x : ℝ))/Fintype.card V|≤3/2+e) := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   classical</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hnR : (0 : ℝ)&lt;Fintype.card V := by exact_mod_cast hn</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hz (v : V) : 0≤2*(hv v : ℤ)+b v := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hh&#x27; := (abs_le.mp (hh v)).1</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have hb&#x27; := (abs_le.mp (hbnd v)).1</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hr : (0 : ℝ)≤2*(hv v : ℝ)+b v := by linarith</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     exact_mod_cast hr</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let g (v : V) := (2*(hv v : ℤ)+b v).toNat</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hg (v : V) : (g v : ℤ)=2*(hv v : ℤ)+b v := Int.toNat_of_nonneg (hz v)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hgr (v : V) : (g v : ℝ)=2*(hv v : ℝ)+b v := by exact_mod_cast hg v</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hgeven : Even (∑ v,g v) := by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have hs : ((∑ v,g v : ℕ) : ℤ)=2*(∑ v,(hv v : ℤ))+(∑ v,b v) := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       push_cast</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       simp_rw [hg]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       rw [Finset.sum_add_distrib,← Finset.mul_sum]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hev : Even (((∑ v,g v : ℕ) : ℤ)) := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       rw [hs]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       exact (even_two_mul _).add hb</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact_mod_cast hev</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   obtain ⟨gp,gm,hs,ht,hp,hm⟩ := balanced_half_degrees_real g hgeven</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hsum : (∑ v,(gp v : ℝ))=(∑ v,(gm v : ℝ)) := by exact_mod_cast ht</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hsplit (v : V) : (gp v : ℝ)+gm v=2*(hv v : ℝ)+b v := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     rw [← hgr v]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     exact_mod_cast hs v</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have htot : 2*(∑ v,(gp v : ℝ))=2*(∑ v,(hv v : ℝ))+(∑ v,(b v : ℝ)) := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     calc</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       _ = (∑ v,(gp v : ℝ))+(∑ v,(gm v : ℝ)) := by rw [← hsum];ring</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       _ = ∑ v,((gp v : ℝ)+gm v) := (Finset.sum_add_distrib).symm</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       _ = _ := by simp_rw [hsplit];rw [Finset.sum_add_distrib,← Finset.mul_sum]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hbtotal : |∑ v,(b v : ℝ)|≤Fintype.card V*e := by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     calc</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       _ ≤ ∑ v,|(b v : ℝ)| := Finset.abs_sum_le_sum_abs _ _</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       _ ≤ ∑ _ : V,e := Finset.sum_le_sum (fun v _=&gt;hbnd v)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       _ = _ := by simp</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have havg : |(∑ v,(gp v : ℝ))/Fintype.card V-T|≤e/2 := by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     rw [abs_le] at hbtotal ⊢</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     have hmean&#x27; := (div_eq_iff (ne_of_gt hnR)).mp hmean</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     constructor</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     · have h&#x27; : (T-e/2)*Fintype.card V≤(∑ v,(gp v : ℝ)) := by nlinarith [hbtotal.1]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       have := (le_div_iff₀ hnR).mpr h&#x27;</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       linarith</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     · have h&#x27; : (∑ v,(gp v : ℝ))≤(T+e/2)*Fintype.card V := by nlinarith [hbtotal.2]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       have := (div_le_iff₀ hnR).mpr h&#x27;</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       linarith</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   refine ⟨gp,gm,?_,ht,havg,?_,?_⟩</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   · intro v</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     have hv&#x27; : (gp v : ℤ)+gm v=g v := by exact_mod_cast hs v</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     exact hv&#x27;.trans (hg v)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   all_goals</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     intro v</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     have hh&#x27; := abs_le.mp (hh v)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     have hb&#x27; := abs_le.mp (hbnd v)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     have ha&#x27; := abs_le.mp havg</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     have hp&#x27; := abs_le.mp (hp v)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     have hm&#x27; := abs_le.mp (hm v)</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     rw [hgr v] at hp&#x27; hm&#x27;</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     rw [abs_le]</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     constructor &lt;;&gt; linarith [hh&#x27;.1,hh&#x27;.2,hb&#x27;.1,hb&#x27;.2,ha&#x27;.1,ha&#x27;.2,hp&#x27;.1,hp&#x27;.2,hm&#x27;.1,hm&#x27;.2]</span>
+<span id="L99"><a href="#L99" class="ln">  99</a> </span>
+<span id="L100"><a href="#L100" class="ln"> 100</a> end Oberwolfach</span></pre></html>

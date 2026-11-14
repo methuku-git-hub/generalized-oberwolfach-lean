@@ -1,0 +1,128 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedRowCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedRowCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedRowResources</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Exact targets and deviation bounds for actual marked row counts.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The admissible domain is fixed before exposure and retains the original</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> outer set for its error normalization. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 2400000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U Γ Color : Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> def markedRowEligible (P : SimpleGraph V) (π : Equiv.Perm V) (b : ℕ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (a : Bool×Bool×V) (z : V) : Prop :=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   ¬PermutationClose π b a.2.2 z ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     Sum.elim (fun xy=&gt;P.Adj xy.1 xy.2) (fun xy=&gt;P.Adj xy.1 (π xy.2)) (markedRowRim a z)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> def markedRowDomain (P : SimpleGraph V) (π : Equiv.Perm V) (b : ℕ)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (A : Finset V) (S T : Finset (Bool×Bool×V)) : Finset V :=</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   A.filter (fun z=&gt;(∀ a∈S,markedRowEligible P π b a z) ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     Set.InjOn (fun a=&gt;markedPairPhysical π (markedRowRim a z)) S ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀ a∈T,Sum.elim (fun xy=&gt;P.Adj xy.1 xy.2) (fun xy=&gt;P.Adj xy.1 (π xy.2)) (markedRowRim a z)))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> def rawMarkedRowCount (P : SimpleGraph V) (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (C : Finset V) (S : Finset (Bool×Bool×V)) (J : Finset (Bool×U))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (g : Γ) (j : Color) (σ : RawMarkedOutcome V U Γ Color) : ℝ :=</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   ∑ z∈C,if (∀ a∈S,rawMarkedPairRims P π d σ (markedRowRim a z)) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ a∈J,rawMarkedPairSpokes π d σ g j a.1 z a.2) then 1 else 0</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> </span>
+<span id="L33"><a href="#L33" class="ln">  33</a> theorem rawMarkedRowCount_patterns (P : SimpleGraph V) (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (C : Finset V) (S : Finset (Bool×Bool×V)) (J : Finset (Bool×U))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (g : Γ) (j : Color) (σ : RawMarkedOutcome V U Γ Color) :</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     rawMarkedRowCount P π d C S J g j σ=</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       rawMarkedPatternSum P π d (fun z : C=&gt;markedRowResources S J z.val) (fun _=&gt;1) g j σ := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   unfold rawMarkedRowCount rawMarkedPatternSum supportedPatternSum</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   rw [Finset.sum_coe_sort C (fun z : V=&gt;(1:ℝ)*patternValue (markedRowResources S J z)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (fun _=&gt;true) (typedMarkedResourceState (rawMarkedPairRims P π d σ) (rawMarkedPairSpokes π d σ g j)))]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   apply Finset.sum_congr rfl</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   intro z hz</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   rw [one_mul,patternValue_indicator]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   congr 1</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   simp only [markedRowResources,Finset.forall_mem_union,Finset.forall_mem_image,</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     typedMarkedResourceState,Sum.elim_inl,Sum.elim_inr,decide_eq_true_eq]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> theorem markedRowRim_marginal (P : SimpleGraph V) (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (p k : ℝ) (q : U→Γ→ℝ) (s : U→Color→ℝ) (g : Γ) (j : Color)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (a : Bool×Bool×V) (z : V) (ha : markedRowEligible P π (3*d) a z) :</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     rawMarkedWheelMarginal P π d p k q s g j (Sum.inl (markedRowRim a z))=if a.1 then k else p := by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   obtain ⟨b,c,x⟩ := a</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   cases b &lt;;&gt; cases c &lt;;&gt;</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     simp only [markedRowEligible,markedRowRim,Bool.false_eq_true,ite_false,ite_true,</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       Sum.elim_inl,Sum.elim_inr] at ha ⊢ &lt;;&gt;</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     simp only [rawMarkedWheelMarginal,ha.1,ha.2,permutationClose_symm π (3*d),</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       not_false_eq_true,true_and,ite_true] &lt;;&gt;</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     simp only [show ¬PermutationClose π (3*d) z x from fun h=&gt;ha.1 ((permutationClose_symm π (3*d) z x).mp h),not_false_eq_true,and_self,ite_true]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a> </span>
+<span id="L60"><a href="#L60" class="ln">  60</a> theorem markedRowResources_target (P : SimpleGraph V) (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (p k : ℝ) (q : U→Γ→ℝ) (s : U→Color→ℝ) (g : Γ) (j : Color)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (S : Finset (Bool×Bool×V)) (J : Finset (Bool×U)) (z : V)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (hel : ∀ a∈S,markedRowEligible P π (3*d) a z)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (hphys : Set.InjOn (fun a=&gt;markedPairPhysical π (markedRowRim a z)) S) :</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (∏ e∈markedRowResources S J z,rawMarkedWheelMarginal P π d p k q s g j e)=</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (∏ a∈S,if a.1 then k else p)*(∏ a∈J,if a.1 then q a.2 g else s a.2 j) := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   unfold markedRowResources</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   rw [Finset.prod_union (by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     intro e he hf</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     obtain ⟨a,ha,he⟩ := Finset.mem_image.mp he</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     obtain ⟨b,hb,hf⟩ := Finset.mem_image.mp hf</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have hh := he.trans hf.symm</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     cases hh)]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   rw [Finset.prod_image (by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     intro a ha b hb he</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     exact hphys ha hb (congrArg (markedPairPhysical π) (Sum.inl.inj he)))]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   rw [Finset.prod_image (by</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     intro a ha b hb he</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     have he&#x27; := Sum.inr.inj he</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     exact Prod.ext (congrArg (fun e : Bool×V×U=&gt;e.1) he&#x27;)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       (congrArg (fun e : Bool×V×U=&gt;e.2.2) he&#x27;))]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   apply congrArg₂ (fun x y : ℝ=&gt;x*y)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   · exact Finset.prod_congr rfl (fun a ha=&gt;markedRowRim_marginal P π d p k q s g j a z (hel a ha))</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   · exact Finset.prod_congr rfl (fun a _=&gt;rfl)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a> </span>
+<span id="L87"><a href="#L87" class="ln">  87</a> theorem rawMarkedRowCount_tail</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     (P : SimpleGraph V) (π : Equiv.Perm V) (d : ℕ) (hd : 2≤d)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     (p k : ℝ) (hp : 0≤p) (hk : 0≤k) (hsum : 2*p+2*k≤1)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     (q : U→Γ→ℝ) (hq : ∀ u g,0≤q u g) (hQ : ∀ u,∑ g,q u g≤1/8)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     (hnoshort : ∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x)</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     (A : Finset V) (hA : A.Nonempty) (S T : Finset (Bool×Bool×V)) (J : Finset (Bool×U))</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     (hJ : Set.InjOn (fun a : Bool×U=&gt;a.2) J)</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     (h : ℕ) (hsize : S.card+J.card≤h) (g : Γ) (j : Color) (t : ℝ) (ht : 0&lt;t) :</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     (FiniteLaw.pi (rawMarkedWheelLaw p k hp hk hsum d hd q hq hQ s hs hS)).probability</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>       (fun σ=&gt;t≤|rawMarkedRowCount P π d (markedRowDomain P π (3*d) A S T) S J g j σ-</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>         (∏ a∈S,if a.1 then k else p)*(∏ a∈J,if a.1 then q a.2 g else s a.2 j)*</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>           (markedRowDomain P π (3*d) A S T).card|)≤</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       2*Real.exp (-2*t^2/((8*(d:ℝ)+6)^2*(2*((h:ℝ)+1)*A.card))) := by</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   let C := markedRowDomain P π (3*d) A S T</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   have hdom (z : C) := (Finset.mem_filter.mp z.property).2</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   have hdisj (z : C) := markedRowResources_disjoint π d S J z.val (hdom z).2.1 hJ</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have hh := rawMarkedPatternSum_tail P π p k hp hk hsum d hd q hq hQ s hs hS hnoshort</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     (fun z : C=&gt;markedRowResources S J z.val) (fun _=&gt;1) (by intro _;norm_num) (fun z a ha b hb hab=&gt;hdisj z a b ha hb hab) g j</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     2 ((h:ℝ)+1) A.card (by norm_num) (by positivity) (by exact_mod_cast hA.card_pos)</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     (by</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>       intro z</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       have hh := (markedRowResources_card S J z.val).trans hsize</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       have hh&#x27; : ((markedRowResources S J z.val).card:ℝ)≤h := by exact_mod_cast hh</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>       linarith)</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     (by</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>       simp only [Finset.sum_const,Finset.card_univ,nsmul_eq_mul,mul_one,Fintype.card_coe]</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>       exact_mod_cast Finset.card_filter_le A _)</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     (fun e=&gt;markedRowResources_load S J C e) t ht</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>   have hmean : (∑ z : C,(1:ℝ)*∏ e∈markedRowResources S J z.val,rawMarkedWheelMarginal P π d p k q s g j e)=</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>       (∏ a∈S,if a.1 then k else p)*(∏ a∈J,if a.1 then q a.2 g else s a.2 j)*C.card := by</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     simp_rw [one_mul,markedRowResources_target P π d p k q s g j S J _ (hdom _).1 (hdom _).2.1]</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     simp only [Finset.sum_const,Finset.card_univ,nsmul_eq_mul,Fintype.card_coe]</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     ring</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>   rw [hmean] at hh</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>   simpa only [rawMarkedRowCount_patterns,C] using hh</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a> </span>
+<span id="L125"><a href="#L125" class="ln"> 125</a> end Oberwolfach</span></pre></html>

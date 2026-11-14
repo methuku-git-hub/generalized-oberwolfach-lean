@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SelectedHubFactorWheels.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SelectedHubFactorWheels.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MappedFactorGraph</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.GraphSelectionDegrees</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrdinaryWheelFamilies</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.OrdinaryFactorWheels</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Convert the already selected factors into hub wheels without choosing</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> new factors or changing their parent candidate families. Spokes are required</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> only on the exact covered sets, not on their larger parent domains. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 4500000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U J:Type} [Fintype V] [Fintype U] [Fintype J]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   [DecidableEq V] [DecidableEq U] [DecidableEq J]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem selected_hub_factor_wheels (Q F:SimpleGraph V) (H:V→U→Prop) (r:ℕ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (T Y:J→Finset V) (u:J↪U)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (D:∀ j,Finset (LocalOrdinaryCycle Q F (T j) r))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hD:∀ j,∀ C∈D j,∀ C&#x27;∈D j,C≠C&#x27;→Disjoint (localOrdinaryVertices C) (localOrdinaryVertices C&#x27;))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hcover:∀ j,(D j).biUnion localOrdinaryVertices=Y j)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hH:∀ j,∀ v∈Y j,H v (u j))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hcross:∀ i j,i≠j→Disjoint (localOrdinaryFactorGraph (D i)) (localOrdinaryFactorGraph (D j))):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ W:(Σ j,D j)→OrdinaryWheel Q F H r,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ i,ordinaryWheelRim (W i)=i.2.val.val.val.val ∧ ordinaryWheelHub (W i)=u i.1) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       wheelFamilyRim W=(⨆ j,localOrdinaryFactorGraph (D j)) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ a z,wheelFamilySpokes W a z↔∃ j,u j=z ∧ a∈Y j) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ i j,i≠j→Disjoint (ordinaryWheelResources (W i)) (ordinaryWheelResources (W j))) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       HasOrdinaryWheelDecomposition (wheelFamilyRim W) (wheelFamilySpokes W) r:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hmem (j:J) (C:D j) (a:V) (ha:a∈C.val.val.val.val.support):a∈Y j:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     rw [←hcover j]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     exact Finset.mem_biUnion.mpr ⟨C.val,C.property,Set.mem_toFinset.mpr ha⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let W:(Σ j,D j)→OrdinaryWheel Q F H r:=fun i=&gt;</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ⟨(i.2.val.val,u i.1),⟨fun a ha=&gt;hH i.1 a (hmem i.1 i.2 a ha),i.2.val.property.2⟩⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hrim (i:Σ j,D j):ordinaryWheelRim (W i)=i.2.val.val.val.val:=rfl</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hhub (i:Σ j,D j):ordinaryWheelHub (W i)=u i.1:=rfl</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hdis (i j:Σ k,D k) (hne:i≠j):</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       Disjoint (ordinaryWheelResources (W i)) (ordinaryWheelResources (W j)):=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     by_cases hij:i.1=j.1</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     · rcases i with ⟨k,C⟩;rcases j with ⟨l,C&#x27;⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       dsimp only at hij;subst l</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       have hc:C.val≠C&#x27;.val:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         intro he;exact hne (congrArg (Sigma.mk k) (Subtype.ext he))</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       have hcc:=hD k C.val C.property C&#x27;.val C&#x27;.property hc</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       apply Finset.disjoint_left.mpr</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       intro e he hf</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       cases e with</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       | inl e=&gt;</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         rw [ordinaryWheelResources_rim] at he hf</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         induction e using Sym2.ind with</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         | _ a b=&gt;</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>           exact Finset.disjoint_left.mp hcc (Set.mem_toFinset.mpr he.mem_support_left)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>             (Set.mem_toFinset.mpr hf.mem_support_left)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       | inr az=&gt;</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         rw [ordinaryWheelResources_spoke] at he hf</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         exact Finset.disjoint_left.mp hcc (Set.mem_toFinset.mpr he.2) (Set.mem_toFinset.mpr hf.2)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     · apply Finset.disjoint_left.mpr</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       intro e he hf</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       cases e with</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       | inl e=&gt;</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         rw [ordinaryWheelResources_rim] at he hf</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         induction e using Sym2.ind with</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         | _ a b=&gt;</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>           have hi:(localOrdinaryFactorGraph (D i.1)).Adj a b:=</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>             (localOrdinaryFactorGraph_adj _ a b).mpr ⟨i.2.val,i.2.property,he⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>           have hj:(localOrdinaryFactorGraph (D j.1)).Adj a b:=</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>             (localOrdinaryFactorGraph_adj _ a b).mpr ⟨j.2.val,j.2.property,hf⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>           exact disjoint_graphs_no_common_edge _ _ (hcross i.1 j.1 hij) a b hi hj</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       | inr az=&gt;</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         rw [ordinaryWheelResources_spoke] at he hf</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         exact hij (u.injective ((hhub i).symm.trans (he.1.trans (hf.1.symm.trans (hhub j)))))</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   refine ⟨W,fun i=&gt;⟨hrim i,hhub i⟩,?_,?_,hdis,wheelFamily_decomposition W hdis⟩</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   · ext a b</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     simp only [wheelFamilyRim,SimpleGraph.iSup_adj,localOrdinaryFactorGraph_adj]</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     constructor</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     · rintro ⟨i,hi⟩;exact ⟨i.1,i.2.val,i.2.property,hi⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     · rintro ⟨j,C,hC,h⟩;exact ⟨⟨j,⟨C,hC⟩⟩,h⟩</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   · intro a z</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     constructor</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     · rintro ⟨i,hi,ha⟩</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       exact ⟨i.1,(hhub i).symm.trans hi,hmem i.1 i.2 a ha⟩</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     · rintro ⟨j,hj,ha⟩</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       rw [←hcover j] at ha</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       obtain ⟨C,hC,ha⟩:=Finset.mem_biUnion.mp ha</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       exact ⟨⟨j,⟨C,hC⟩⟩,hj,Set.mem_toFinset.mp ha⟩</span>
+<span id="L87"><a href="#L87" class="ln">  87</a> </span>
+<span id="L88"><a href="#L88" class="ln">  88</a> end Oberwolfach</span></pre></html>

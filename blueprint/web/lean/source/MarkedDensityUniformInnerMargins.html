@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedDensityUniformInnerMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedDensityUniformInnerMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedInnerFactorDeletionTolerance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedProtectedInnerBudgets</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Two cover-down choices made from fixed lower density bounds. Neither</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> choice changes a sampled profile or an actual degree target. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem marked_inner_factor_deletion_tolerance_uniform</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (r h:ℕ) (tstar beta eta C:ℝ) (ht:0&lt;tstar) (hb:0&lt;beta) (he:0&lt;eta) (hC:0≤C):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ zeta:ℝ,0&lt;zeta ∧ ∀ t:ℝ,tstar≤t→∀ zR zS:ℝ,0≤zR→0≤zS→zR≤zeta→zS≤zeta→</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     h*(zR+zS)≤t/4∧(r+5:ℝ)*(zR+zS)≤beta∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (r+7:ℝ)*zR+(r+4:ℝ)*zS≤beta∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     5*(r+5:ℝ)^4*C*(2*zR+zS)≤eta/2:=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   obtain ⟨zeta,hz,hbudget⟩:=marked_inner_factor_deletion_tolerance r h tstar beta eta C ht hb he hC</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   refine ⟨zeta,hz,?_⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   intro t hts zR zS hzR hzS hR hS</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   obtain ⟨h1,h2,h3,h4⟩:=hbudget zR zS hzR hzS hR hS</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   exact ⟨h1.trans (by linarith),h2,h3,h4⟩</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem marked_protected_inner_exception_order_uniform</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (tstar omegastar:ℝ) (ht:0&lt;tstar) (ho:0&lt;omegastar) (d:ℕ):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ N:ℕ,1≤N ∧ ∀ t omega:ℝ,tstar ≤ t → omegastar ≤ omega →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       ∀ n:ℕ,N≤n→6*(d:ℝ)+1≤t*omega*n/16:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   obtain ⟨N,hN,hbound⟩:=marked_protected_inner_exception_order tstar omegastar ht ho d</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   refine ⟨N,hN,?_⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   intro t omega hts hos n hn</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have ht0:0≤t:=ht.le.trans hts</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have ho0:0≤omegastar:=ho.le</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hprod:tstar*omegastar≤t*omega:=mul_le_mul hts hos ho0 ht0</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hh:=mul_le_mul_of_nonneg_right hprod (Nat.cast_nonneg n)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   exact (hbound n hn).trans (by linarith)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> theorem marked_protected_inner_budget_scale_uniform</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (r K h:ℕ) (omegastar kappa rhostar tstar zeta epsilon etaEnd astar theta etaEmax:ℝ)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (ho:0&lt;omegastar) (hk:0&lt;kappa) (hrho:0&lt;rhostar) (ht:0&lt;tstar) (hz:0&lt;zeta)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (he:0&lt;epsilon) (hEnd:0&lt;etaEnd) (ha:0&lt;astar) (hth:0&lt;theta) (hmax:0&lt;etaEmax):</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∃ delta:ℝ,0&lt;delta ∧ ∀ omega rho t a:ℝ,omegastar≤omega → rhostar≤rho → tstar≤t → astar≤a →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∀ x:ℝ,0≤x→x≤delta→</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (4*K+3*r+50:ℝ)*x≤kappa/2∧24*x≤zeta*(omega/2)∧3*(r+5:ℝ)*x≤zeta*(omega/2)∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (1+h*(24+3*(r+5:ℝ)))*x≤epsilon*(omega/2)∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     2*(1+h*(24+3*(r+5:ℝ)))*x≤etaEnd*a/2∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (3+2/rho+h*(24+3*(r+5:ℝ)))*x≤t*omega/16∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     8*x≤theta∧(r+6:ℝ)*x≤theta/8∧(r+6:ℝ)*(96+3*(r+5:ℝ))*x≤theta/4∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     x≤etaEmax∧x≤omega/4∧x≤kappa:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨δ,hδ,hbound⟩:=marked_protected_inner_budget_scale r K h omegastar kappa rhostar tstar zeta epsilon etaEnd astar theta etaEmax</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     ho hk hrho ht hz he hEnd ha hth hmax</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   refine ⟨δ,hδ,?_⟩</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   intro omega rho t a hω hρ ht&#x27; ha&#x27; x hx hxd</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   obtain ⟨b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11⟩:=hbound x hx hxd</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hω0:0≤omega:=ho.le.trans hω</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have ht0:0≤t:=ht.le.trans ht&#x27;</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have htω:tstar*omegastar≤t*omega:=mul_le_mul ht&#x27; hω ho.le ht0</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hρpos:0&lt;rho:=hrho.trans_le hρ</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hi:1/rho≤1/rhostar:=one_div_le_one_div_of_le hrho hρ</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hi2:2/rho≤2/rhostar:=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hh:=mul_le_mul_of_nonneg_left hi (show (0:ℝ)≤2 by norm_num)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     simpa only [mul_one_div] using hh</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hc:(3+2/rho+h*(24+3*(r+5:ℝ)))≤(3+2/rhostar+h*(24+3*(r+5:ℝ))):=by linarith only [hi2]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hxC:=mul_le_mul_of_nonneg_right hc hx</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hζω:=mul_le_mul_of_nonneg_left hω hz.le</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have heω:=mul_le_mul_of_nonneg_left hω he.le</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hEa:=mul_le_mul_of_nonneg_left ha&#x27; hEnd.le</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   refine ⟨b0,by nlinarith only [b1,hζω],by nlinarith only [b2,hζω],by nlinarith only [b3,heω],</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     by nlinarith only [b4,hEa],by nlinarith only [b5,hxC,htω],b6,b7,b8,b9,by linarith,b11⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a> </span>
+<span id="L66"><a href="#L66" class="ln">  66</a> end Oberwolfach</span></pre></html>

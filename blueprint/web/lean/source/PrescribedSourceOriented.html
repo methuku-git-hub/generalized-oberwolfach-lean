@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedSourceOriented.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedSourceOriented.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedPieceShape</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedPathArcUniqueness</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The arcs of a simple directed path or a directed cycle of length at</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> least three never contain both orientations of one physical edge. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {X:Type} [DecidableEq X]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem prescribed_nodup_path_no_reverse:</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∀ xs:List X,xs.Nodup→∀ x y,(x,y)∈prescribedDirectedPathEdges xs→(y,x)∉prescribedDirectedPathEdges xs := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   intro xs</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   induction xs with</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   | nil =&gt; intro hn x y h;simp [prescribedDirectedPathEdges] at h</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   | cons a xs ih =&gt;</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     cases xs with</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     | nil =&gt; intro hn x y h;simp [prescribedDirectedPathEdges] at h</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     | cons b bs =&gt;</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       intro hn x y hxy hyx</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       have ha: a∉b::bs:=(List.nodup_cons.mp hn).1</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       have hn&#x27;:(b::bs).Nodup:=(List.nodup_cons.mp hn).2</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       simp only [prescribedDirectedPathEdges,Finset.mem_insert,Prod.mk.injEq] at hxy hyx</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       rcases hxy with ⟨hxa,hyb⟩|hxy</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       · subst x</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         subst y</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         rcases hyx with ⟨h1,h2⟩|hyx</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         · exact ha (by simp [h1])</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         · exact ha (prescribed_directed_path_edge_endpoints _ (b,a) hyx).2</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       · rcases hyx with ⟨h1,h2⟩|hyx</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         · have hx:a∈b::bs:=by simpa [h1] using (prescribed_directed_path_edge_endpoints _ (x,y) hxy).2</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>           exact ha hx</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         · exact ih hn&#x27; x y hxy hyx</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> theorem prescribed_piece_no_reverse (p:PrescribedSourcePiece X) (hp:p.Shape):</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∀ x y,(x,y)∈p.arcs→(y,x)∉p.arcs := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   cases p with</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   | path xs =&gt;exact prescribed_nodup_path_no_reverse xs hp</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   | cycle a xs =&gt;</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     cases xs with</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     | nil =&gt;have hh:=hp.2;norm_num at hh</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     | cons b bs =&gt;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       cases bs with</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       | nil =&gt;have hh:=hp.2;norm_num at hh</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       | cons c cs =&gt;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         intro x y hxy hyx</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         have hn:(a::b::c::cs).Nodup:=hp.1</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         have ha:a∉b::c::cs:=(List.nodup_cons.mp hn).1</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         have htail:(b::c::cs).Nodup:=(List.nodup_cons.mp hn).2</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         have htail&#x27;:((b::c::cs)++[a]).Nodup:=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>           exact List.Nodup.append htail (by simp) (by simpa [List.disjoint_left] using ha)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         change (x,y)∈insert (a,b) (prescribedDirectedPathEdges ((b::c::cs)++[a])) at hxy</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         change (y,x)∈insert (a,b) (prescribedDirectedPathEdges ((b::c::cs)++[a])) at hyx</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         simp only [Finset.mem_insert,Prod.mk.injEq] at hxy hyx</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         rcases hxy with ⟨hxa,hyb⟩|hxy</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         · subst x</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>           subst y</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           rcases hyx with ⟨h1,h2⟩|hyx</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>           · exact ha (by simp [h1])</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>           · have hbc:(b,c)∈prescribedDirectedPathEdges ((b::c::cs)++[a]):=by simp [prescribedDirectedPathEdges]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>             have huniq:=prescribed_path_unique_successor ((b::c::cs)++[a]) ((List.dropLast_sublist _).nodup htail&#x27;) b a c hyx hbc</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>             exact ha (by simp [huniq])</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         · rcases hyx with ⟨h1,h2⟩|hyx</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>           · have hbc:(b,c)∈prescribedDirectedPathEdges ((b::c::cs)++[a]):=by simp [prescribedDirectedPathEdges]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>             have hxy&#x27;:(b,a)∈prescribedDirectedPathEdges ((b::c::cs)++[a]):=by simpa [h1,h2] using hxy</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>             have huniq:=prescribed_path_unique_successor ((b::c::cs)++[a]) ((List.dropLast_sublist _).nodup htail&#x27;) b a c hxy&#x27; hbc</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>             exact ha (by simp [huniq])</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>           · exact prescribed_nodup_path_no_reverse _ htail&#x27; x y hxy hyx</span>
+<span id="L69"><a href="#L69" class="ln">  69</a> end Oberwolfach</span></pre></html>

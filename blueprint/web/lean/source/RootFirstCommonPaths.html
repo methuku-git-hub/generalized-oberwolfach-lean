@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RootFirstCommonPaths.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RootFirstCommonPaths.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RootFirstMarkedCycles</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Common-path tuples with the manuscript&#x27;s root-first order. Their</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> coordinates and the four separately supplied root spokes are unchanged. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 1500000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U E K : Type*} {tail head : E → V} {ktail khead : K → V}</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {m : ℕ} {π : Equiv.Perm V} {b : ℕ} {H₀ Hₖ : V → U → Prop}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def rootFirstSpokeType (m : ℕ) (j : Bool) (t : Fin (m+1)) : Bool :=</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   decide (t=if j then 0 else 3)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem markedRootOrder_position_type (m : ℕ) (j : Bool) (t : Fin (m+1)) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     markedPositionType ((markedRootOrder m j).symm t)=rootFirstSpokeType m j t := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have he : (markedRootOrder m j).symm t=0 ↔ t=markedRootOrder m j 0 := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     constructor</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     · intro h</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       have hh := congrArg (markedRootOrder m j) h</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       simpa only [Equiv.apply_symm_apply] using hh</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     · intro h</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       rw [h,Equiv.symm_apply_apply]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   unfold markedPositionType rootFirstSpokeType</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   simp only [he]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   cases j</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   · rw [markedRootOrder_marked_head];rfl</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · rfl</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> abbrev RootFirstCommonMarkedPath (tail head : E → V) (ktail khead : K → V)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (m : ℕ) (π : Equiv.Perm V) (b : ℕ) (H₀ Hₖ : V → U → Prop)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (j : Bool) (v v&#x27; : V) (u u&#x27; : U) :=</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   {z : Fin m → V //</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     IsRootFirstMarkedCycle tail head ktail khead m π b</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (if j then Fin.last m else 2) (Fin.cases v z) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     IsRootFirstMarkedCycle tail head ktail khead m π b</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (if j then Fin.last m else 2) (Fin.cases v&#x27; z) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     ∀ l : Fin m,</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (if rootFirstSpokeType m j l.succ then Hₖ (z l) u else H₀ (z l) u) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (if rootFirstSpokeType m j l.succ then Hₖ (z l) u&#x27; else H₀ (z l) u&#x27;)}</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> </span>
+<span id="L44"><a href="#L44" class="ln">  44</a> def rootFirstCommonMarkedPathEquiv (j : Bool) (v v&#x27; : V) (u u&#x27; : U) :</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     RootFirstCommonMarkedPath tail head ktail khead m π b H₀ Hₖ j v v&#x27; u u&#x27; ≃</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       OrderedCommonMarkedPath tail head ktail khead m π b H₀ Hₖ</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         (markedRootOrder m j) v v&#x27; u u&#x27; :=</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   Equiv.subtypeEquivRight (fun z=&gt;by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     simp only [rootedCycleOrder_marked_iff,markedRootOrder_position_type])</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> theorem rootFirstCommonMarkedPath_card_le [Fintype V]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hm : 3&lt;m+1) (j : Bool) (v v&#x27; : V) (u u&#x27; : U)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hroot : (if j then Hₖ v u else H₀ v u) ∧ (if j then Hₖ v u&#x27; else H₀ v u&#x27;) ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (if j then Hₖ v&#x27; u else H₀ v&#x27; u) ∧ (if j then Hₖ v&#x27; u&#x27; else H₀ v&#x27; u&#x27;)) :</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m π b H₀ Hₖ j v v&#x27; u u&#x27;)≤</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       Fintype.card (MarkedReplacementPair tail head ktail khead m π b H₀ Hₖ</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         ((markedRootOrder m j).symm 0) v v&#x27; u u&#x27;) := by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   rw [Fintype.card_congr (rootFirstCommonMarkedPathEquiv j v v&#x27; u u&#x27;)]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   apply orderedCommonMarkedPath_card_le</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   simpa only [markedRootOrder_type m hm j] using hroot</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> theorem rootFirstCommonMarkedPath_labels (j : Bool) (v v&#x27; : V) (u u&#x27; : U)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (z : RootFirstCommonMarkedPath tail head ktail khead m π b H₀ Hₖ j v v&#x27; u u&#x27;) :</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     Function.Injective z.val ∧ (∀ l,z.val l≠v ∧ z.val l≠v&#x27;) := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hv := permutationSeparated_injective π b _ z.property.1.1</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hv&#x27; := permutationSeparated_injective π b _ z.property.2.1.1</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   constructor</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   · intro l k he</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     apply Fin.succ_injective</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     exact hv he</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   · intro l</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     constructor</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     · intro he</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       have hh := hv (show Fin.cases (motive:=fun _=&gt;V) v z.val l.succ=Fin.cases (motive:=fun _=&gt;V) v z.val 0 from he)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       exact Fin.succ_ne_zero l hh</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     · intro he</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       have hh := hv&#x27; (show Fin.cases (motive:=fun _=&gt;V) v&#x27; z.val l.succ=Fin.cases (motive:=fun _=&gt;V) v&#x27; z.val 0 from he)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       exact Fin.succ_ne_zero l hh</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

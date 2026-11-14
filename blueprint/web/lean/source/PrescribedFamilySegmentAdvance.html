@@ -1,0 +1,144 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedFamilySegmentAdvance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedFamilySegmentAdvance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedFamilyOneEndedAdvance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedFamilyTwoEndedAdvance</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PrescribedFamilyFreePathAdvance</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.PrescribedPathScheduleChain</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.PrescribedPathScheduleEdgeForms</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.PrescribedTargetPathChains</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> /-! Embed a nonempty scheduled source-path segment and add exactly its edges</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> while preserving the family state. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {I X V:Type} [Fintype I] [Fintype X] [Fintype V] [DecidableEq I] [DecidableEq X] [DecidableEq V]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem prescribed_family_segment_advance</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (st:PrescribedFamilyState I X V) (QV:I→Finset X) (Q:I→SimpleGraph X)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (A₀:I→Finset X) (ψ:I→X→V) (E₀:I→Finset (Sym2 V)) (J:SimpleGraph V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (β δ:ℝ) (hβ:0&lt;β) (hβ1:β≤1) (hδ:0&lt;δ) (hδbound:δ≤(β/100)^2)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hnβ:100/β≤(Fintype.card V:ℝ)) (hn:2/Real.sqrt δ≤(Fintype.card V:ℝ))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hI:(Fintype.card I:ℝ)≤Fintype.card V)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hQsize:∀ i,((QV i).card:ℝ)≤δ*Fintype.card V) (hQdegree:∀ i x,(Q i).degree x≤2)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hold:∀ v,((Finset.univ.filter (fun i=&gt;∃ x,x∈A₀ i ∧ ψ i x=v)).card:ℝ)≤δ*Fintype.card V)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hJ:∀ v,(J.degree v:ℝ)≤δ*Fintype.card V)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hvalid:st.Valid QV Q A₀ ψ E₀ J (Real.sqrt δ*Fintype.card V))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (k:I) (seg:PrescribedPathSegment X) (hnodup:seg.free.Nodup) (hne:seg.free≠[])</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hleft:∀ a,seg.left=some a→a∈st.assigned k)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hright:∀ b,seg.right=some b→b∈st.assigned k)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hdistinct:∀ a b,seg.left=some a→seg.right=some b→a≠b)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hfree:∀ x∈seg.free,x∉st.assigned k) (hsubset:∀ x∈seg.free,x∈QV k)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (Dsrc:X→X→Prop) (Fsrc:SimpleGraph X) (hDQ:∀ x y,Dsrc x y→(Q k).Adj x y)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hchain:List.IsChain (fun x y=&gt;Dsrc x y ∧ ¬Fsrc.Adj x y) (prescribedPathSegmentVertices seg))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (D:V→V→Prop) (L:Finset V) (hext:IsExtendingList D L β):</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∃ st&#x27;:PrescribedFamilyState I X V,</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       st&#x27;.Valid QV Q A₀ ψ E₀ J (Real.sqrt δ*Fintype.card V) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       st&#x27;.assigned=Function.update st.assigned k (st.assigned k∪seg.free.toFinset) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       st&#x27;.sourceEdges=Function.update st.sourceEdges k</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (st.sourceEdges k∪prescribedOrderedPathEdges (prescribedPathSegmentVertices seg)) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (∀ i x,x∈st.assigned i→st&#x27;.vertexMap i x=st.vertexMap i x) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀ x∈seg.free,st&#x27;.vertexMap k x∈L) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       List.IsChain D ((prescribedPathSegmentVertices seg).map (st&#x27;.vertexMap k)) := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   rcases seg with ⟨left,as,right⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   cases left with</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   | none =&gt;</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     cases right with</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     | none =&gt;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       have hlen:1≤as.length:=by cases as with | nil =&gt; contradiction | cons =&gt; simp</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       have hs:=prescribed_path_segment_free_path Dsrc Fsrc ⟨none,as,none⟩ rfl rfl hne hchain</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       obtain ⟨g,F,hv,hpres,hpath,hlist⟩:=prescribed_family_free_path_advance st QV Q A₀ ψ E₀ J β δ hβ hβ1 hδ hδbound</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         hnβ hn hI hQsize hQdegree hold hJ hvalid k as hnodup hlen hfree hsubset Dsrc Fsrc hDQ hs D L hext</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       let es:=prescribedFreePathPhysicalEdges as</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       let add:=es.image (Sym2.map g)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       let st&#x27;:PrescribedFamilyState I X V:=⟨Function.update st.assigned k (st.assigned k∪as.toFinset),</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         Function.update st.vertexMap k g,st.freeOccurrences∪({k}:Finset I).product as.toFinset,</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         Function.update st.sourceEdges k (st.sourceEdges k∪es),</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         Function.update st.physicalEdges k (st.physicalEdges k∪add),</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         Function.update st.newEdges k (st.newEdges k∪add)⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       refine ⟨st&#x27;,hv,rfl,?_,?_,?_,?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       · simp [st&#x27;,es,prescribedPathSegmentVertices,prescribed_ordered_free_path_edges]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       · intro i x hx</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         by_cases hi:i=k</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         · subst i;simpa [st&#x27;] using hpres x hx</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         · simp [st&#x27;,Function.update_of_ne hi]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       · intro x hx</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         simpa [st&#x27;] using hlist x hx</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       · simpa [st&#x27;,prescribedPathSegmentVertices,List.cons_append] using (prescribed_target_free_chain g D F as hpath)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     | some b =&gt;</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       have hs:=prescribed_path_segment_right_path Dsrc Fsrc ⟨none,as,some b⟩ b rfl rfl hchain</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       have hrevfree:∀ x∈as.reverse,x∉st.assigned k:=by simpa using hfree</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       have hrevsub:∀ x∈as.reverse,x∈QV k:=by simpa using hsubset</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       have hrevnodup:as.reverse.Nodup:=by simpa using (List.nodup_reverse.mpr hnodup)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       obtain ⟨g,F,hv,hpres,hpath,hlist⟩:=prescribed_family_one_ended_advance st QV Q A₀ ψ E₀ J β δ hβ hβ1 hδ hδbound</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>         hnβ hn hI hQsize hQdegree hold hJ hvalid k b as.reverse hrevnodup (hright b rfl)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         hrevfree hrevsub Dsrc Fsrc false hDQ hs D L hext</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       let es:=prescribedOneSidedPhysicalEdges b as.reverse</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       let add:=es.image (Sym2.map g)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       let st&#x27;:PrescribedFamilyState I X V:=⟨Function.update st.assigned k (st.assigned k∪as.reverse.toFinset),</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>         Function.update st.vertexMap k g,st.freeOccurrences∪({k}:Finset I).product as.reverse.toFinset,</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>         Function.update st.sourceEdges k (st.sourceEdges k∪es),</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>         Function.update st.physicalEdges k (st.physicalEdges k∪add),</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>         Function.update st.newEdges k (st.newEdges k∪add)⟩</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       refine ⟨st&#x27;,hv,?_,?_,?_,?_,?_⟩</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       · simp [st&#x27;]</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       · simp [st&#x27;,es,prescribedPathSegmentVertices,prescribed_ordered_right_sided_edges]</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       · intro i x hx</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>         by_cases hi:i=k</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>         · subst i;simpa [st&#x27;] using hpres x hx</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>         · simp [st&#x27;,Function.update_of_ne hi]</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>       · intro x hx</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>         simpa [st&#x27;] using hlist x (by simpa using hx)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>       · simpa [st&#x27;,prescribedPathSegmentVertices] using (prescribed_target_right_chain g D F b as hpath)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a> </span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   | some a =&gt;</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     cases right with</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     | none =&gt;</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       have hs:=prescribed_path_segment_left_path Dsrc Fsrc ⟨some a,as,none⟩ a rfl rfl hchain</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>       obtain ⟨g,F,hv,hpres,hpath,hlist⟩:=prescribed_family_one_ended_advance st QV Q A₀ ψ E₀ J β δ hβ hβ1 hδ hδbound</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>         hnβ hn hI hQsize hQdegree hold hJ hvalid k a as hnodup (hleft a rfl) hfree hsubset Dsrc Fsrc true hDQ hs D L hext</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>       let es:=prescribedOneSidedPhysicalEdges a as</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>       let add:=es.image (Sym2.map g)</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       let st&#x27;:PrescribedFamilyState I X V:=⟨Function.update st.assigned k (st.assigned k∪as.toFinset),</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>         Function.update st.vertexMap k g,st.freeOccurrences∪({k}:Finset I).product as.toFinset,</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>         Function.update st.sourceEdges k (st.sourceEdges k∪es),</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>         Function.update st.physicalEdges k (st.physicalEdges k∪add),</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>         Function.update st.newEdges k (st.newEdges k∪add)⟩</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       refine ⟨st&#x27;,hv,rfl,?_,?_,?_,?_⟩</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>       · simp [st&#x27;,es,prescribedPathSegmentVertices,prescribed_ordered_one_sided_edges]</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>       · intro i x hx</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>         by_cases hi:i=k</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>         · subst i;simpa [st&#x27;] using hpres x hx</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>         · simp [st&#x27;,Function.update_of_ne hi]</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>       · intro x hx</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>         simpa [st&#x27;] using hlist x hx</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>       · simpa [st&#x27;,prescribedPathSegmentVertices,List.cons_append] using (prescribed_target_left_chain g D F a as hpath)</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a> </span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     | some b =&gt;</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>       have hlen:1≤as.length:=by cases as with | nil =&gt; contradiction | cons =&gt; simp</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>       have hs:=prescribed_path_segment_two_path Dsrc Fsrc ⟨some a,as,some b⟩ a b rfl rfl hchain</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>       obtain ⟨g,F,hv,hpres,hpath,hlist⟩:=prescribed_family_two_ended_advance st QV Q A₀ ψ E₀ J β δ hβ hβ1 hδ hδbound</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>         hnβ hn hI hQsize hQdegree hold hJ hvalid k a b as hnodup hlen (hleft a rfl) (hright b rfl)</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>         (hdistinct a b rfl rfl) hfree hsubset Dsrc Fsrc hDQ hs D L hext</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>       let es:=prescribedPathPhysicalEdges a b as</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>       let add:=es.image (Sym2.map g)</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>       let st&#x27;:PrescribedFamilyState I X V:=⟨Function.update st.assigned k (st.assigned k∪as.toFinset),</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>         Function.update st.vertexMap k g,st.freeOccurrences∪({k}:Finset I).product as.toFinset,</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>         Function.update st.sourceEdges k (st.sourceEdges k∪es),</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>         Function.update st.physicalEdges k (st.physicalEdges k∪add),</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>         Function.update st.newEdges k (st.newEdges k∪add)⟩</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>       refine ⟨st&#x27;,hv,rfl,?_,?_,?_,?_⟩</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>       · have he:=prescribed_ordered_two_sided_edges as a b</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>         simp only [List.cons_append] at he</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>         simpa [st&#x27;,es,prescribedPathSegmentVertices,he]</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>       · intro i x hx</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>         by_cases hi:i=k</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>         · subst i;simpa [st&#x27;] using hpres x hx</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>         · simp [st&#x27;,Function.update_of_ne hi]</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>       · intro x hx</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>         simpa [st&#x27;] using hlist x hx</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>       · simpa [st&#x27;,prescribedPathSegmentVertices,List.cons_append] using (prescribed_target_two_chain g D F a b as hpath)</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a> </span>
+<span id="L141"><a href="#L141" class="ln"> 141</a> end Oberwolfach</span></pre></html>

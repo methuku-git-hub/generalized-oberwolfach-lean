@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReservedModifiedHostTerminalCompletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReservedModifiedHostTerminalCompletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReservedTerminalAbsorberAmbient</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedFixedTerminalCompletion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! A reserved marked absorber completes a later modified typed host.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The absorber is chosen before that host and its covering packing. The</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> sampled host is required only on the terminal pair, and the reserved</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> absorber itself must be retained. The modified host may have other edges</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> absent from the sampled host. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 20000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U E K:Type} [Fintype V] [Fintype U] [Fintype E] [Fintype K]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   [DecidableEq V] [DecidableEq U] [DecidableEq E] [DecidableEq K]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem marked_reserved_terminal_completion_in_modified_subhost</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (tail head:E→V) (ktail khead:K→V) (H₀ HK:V→U→Prop) (π:Equiv.Perm V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hH:∀ v u,¬(H₀ v u∧HK v u))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (PE:E→Prop) (PK:K→Prop) (PS:V×U→Prop) (b l s a₀ b₀ e₀ f:ℕ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (ε:ℝ) (habs:MarkedReservedTerminalAbsorberProperty</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (fun e:{e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (fun e:{e // PK e}=&gt;ktail e.val) (fun e=&gt;khead e.val)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (fun v u=&gt;H₀ v u∧PS (v,u)) (fun v u=&gt;HK v u∧PS (v,u)) π b l s a₀ b₀ e₀ f ε)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (X:Finset V) (Z:Finset U) (hs:X.card+Z.card≤s)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (W:Finset V) (B:Finset U) (hXW:X⊆W) (hZB:Z⊆B)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hW:(W.card:ℝ)≤ε*Fintype.card V+f) (hB:(B.card:ℝ)≤ε*Fintype.card V+f)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (F₀:Finset (Finset V⊕(V×U))) (hF:F₀.card≤f):</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∃ C:MarkedSupportedEdgeSet</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (fun e:{e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (fun e:{e // PK e}=&gt;ktail e.val) (fun e=&gt;khead e.val) π U,</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       Disjoint C.edges F₀∧C.edges.card≤e₀∧C.rows.card≤a₀∧C.hubs.card≤b₀∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ e∈C.edges,¬MarkedOldResource</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         (fun e:{e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (fun e:{e // PK e}=&gt;ktail e.val) (fun e=&gt;khead e.val) π W B e)∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       HasResourceDecomposition</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (fun W:MarkedWheel tail head ktail khead (l+4) π b H₀ HK=&gt;markedWheelPhysicalResources W) C.edges∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       ∀ (RE:E→Prop) (RK:K→Prop) (RS:V×U→Prop),</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         C.edges⊆markedSubhostResources tail head ktail khead π H₀ HK RE RK RS→</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (∀ a:E⊕K,Sum.elim RE RK a→Sum.elim tail ktail a∈X→Sum.elim head khead a∈X→Sum.elim PE PK a)→</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         (∀ z:V×U,(H₀ z.1 z.2∨HK z.1 z.2)→RS z→z.1∈X→z.2∈Z→PS z)→</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         MarkedRemainderDivisible tail head ktail khead HK</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>           (Finset.univ.filter (Sum.elim RE RK))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>           (Finset.univ.filter (fun z:V×U=&gt;(H₀ z.1 z.2∨HK z.1 z.2)∧RS z)) (l+4)→</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         ∀ M:Finset (MarkedWheel tail head ktail khead (l+4) π b H₀ HK),</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           (∀ W∈M,∀ W&#x27;∈M,W≠W&#x27;→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources W&#x27;))→</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           Disjoint C.edges (M.biUnion markedWheelPhysicalResources)→</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>           M.biUnion markedWheelPhysicalResources⊆markedSubhostResources tail head ktail khead π H₀ HK RE RK RS→</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>           (∀ a:E⊕K,Sum.elim RE RK a→Sum.elim tail ktail a∉X∨Sum.elim head khead a∉X→</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>             Sum.inl (markedPhysicalEdge tail head ktail khead π a)∈C.edges∪M.biUnion markedWheelPhysicalResources)→</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>           (∀ z:V×U,(H₀ z.1 z.2∨HK z.1 z.2)→RS z→z.1∉X∨z.2∉Z→</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>             Sum.inr z∈C.edges∪M.biUnion markedWheelPhysicalResources)→</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>           HasResourceDecomposition</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>             (fun W:MarkedWheel (fun e:{e // RE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>               (fun e:{e // RK e}=&gt;ktail e.val) (fun e=&gt;khead e.val) (l+4) π b</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>               (fun v u=&gt;H₀ v u∧RS (v,u)) (fun v u=&gt;HK v u∧RS (v,u))=&gt;markedWheelPhysicalResources W)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>             (markedSubhostResources tail head ktail khead π H₀ HK RE RK RS):=by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   obtain ⟨C,hCF,hCe,hCr,hCu,hCold,hCdec,hCabs⟩:=marked_reserved_terminal_absorber_in_ambient_host</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     tail head ktail khead H₀ HK π PE PK PS b l s a₀ b₀ e₀ f ε habs X Z hs W B hXW hZB hW hB F₀ hF</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   refine ⟨C,hCF,hCe,hCr,hCu,hCold,hCdec,?_⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   intro RE RK RS hCR hinnerA hinnerS hdiv M hM hCM hMR hcoverA hcoverS</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   let A₀:=Finset.univ.filter (fun a:E⊕K=&gt;Sum.elim PE PK a∧Sum.elim tail ktail a∈X∧Sum.elim head khead a∈X)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   let S₀:=Finset.univ.filter (fun z:V×U=&gt;(H₀ z.1 z.2∨HK z.1 z.2)∧PS z∧z.1∈X∧z.2∈Z)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   let A:=Finset.univ.filter (Sum.elim RE RK)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   let S:=Finset.univ.filter (fun z:V×U=&gt;(H₀ z.1 z.2∨HK z.1 z.2)∧RS z)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have habs&#x27;:∀ A&#x27;⊆A₀,∀ S&#x27;⊆S₀,MarkedRemainderDivisible tail head ktail khead HK A&#x27; S&#x27; (l+4)→</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       HasResourceDecomposition</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         (fun W:MarkedWheel tail head ktail khead (l+4) π b H₀ HK=&gt;markedWheelPhysicalResources W)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         (C.edges∪(A&#x27;.image (fun a=&gt;Sum.inl (markedPhysicalEdge tail head ktail khead π a))∪S&#x27;.image Sum.inr)):=by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     intro A&#x27; hA&#x27; S&#x27; hS&#x27; hd</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     exact hCabs A&#x27; S&#x27; (fun a ha=&gt;(Finset.mem_filter.mp (hA&#x27; ha)).2)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       (fun z hz=&gt;(Finset.mem_filter.mp (hS&#x27; hz)).2) hd</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hiA:∀ a∈A,Sum.elim tail ktail a∈X→Sum.elim head khead a∈X→a∈A₀:=by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     intro a ha hx hy</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     exact Finset.mem_filter.mpr ⟨Finset.mem_univ _,hinnerA a (Finset.mem_filter.mp ha).2 hx hy,hx,hy⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hiS:∀ z∈S,z.1∈X→z.2∈Z→z∈S₀:=by</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     intro z hz hx hu</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     obtain ⟨hh,hr⟩:=(Finset.mem_filter.mp hz).2</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     exact Finset.mem_filter.mpr ⟨Finset.mem_univ _,hh,hinnerS z hh hr hx hu,hx,hu⟩</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hdone:=marked_fixed_terminal_completion hp hH X Z A₀ A S₀ S C.edges hCdec habs&#x27; hdiv hiA hiS hCR</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     M hM hCM hMR (fun a ha hx=&gt;hcoverA a (Finset.mem_filter.mp ha).2 hx)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     (fun z hz hx=&gt;hcoverS z (Finset.mem_filter.mp hz).2.1 (Finset.mem_filter.mp hz).2.2 hx)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   exact marked_decomposition_restrict_to_subhost hp RE RK RS _ (Finset.Subset.refl _) hdone</span>
+<span id="L86"><a href="#L86" class="ln">  86</a> </span>
+<span id="L87"><a href="#L87" class="ln">  87</a> end Oberwolfach</span></pre></html>

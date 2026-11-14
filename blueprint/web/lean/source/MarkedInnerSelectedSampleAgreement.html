@@ -1,0 +1,78 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedInnerSelectedSampleAgreement.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedInnerSelectedSampleAgreement.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFinitePhysicalDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Equality of the typed physical state on each edge of the fixed inner</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set transfers the full selected sample there, with its original direction. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 7000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V U Γ Color:Type} [Fintype V] [LinearOrder V] [Fintype U] [DecidableEq U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   [Fintype Γ] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem marked_inner_full_selected_sample_agreement</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (I:Finset V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (σ τ:RawMarkedOutcome V U Γ Color)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hAgree:∀x∈I,∀y∈I,σ (Sum.inl s(x,y))=τ (Sum.inl s(x,y))):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀x∈I,∀y∈I,(markedSampleArcSetGraph P π d σ Finset.univ).Adj x y→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (markedSampleArcSetGraph P π d τ Finset.univ).Adj x y:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   intro x hx y hy h</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hxy:({x,y}:Finset V)⊆I:=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     intro v hv</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     simp only [Finset.mem_insert,Finset.mem_singleton] at hv</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     rcases hv with rfl|rfl &lt;;&gt; assumption</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   change x≠y ∧ ({x,y}:Finset V)∈</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     Finset.univ.image (markedPhysicalEdge (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) false=&gt;e.val.1)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (fun e=&gt;e.val.2) (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) true=&gt;e.val.1) (fun e=&gt;e.val.2) π) at h</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨z,_,hz⟩:=Finset.mem_image.mp h.2</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   cases z with</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   | inl z =&gt;</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let u:=z.val.1</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let v:=z.val.2</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hp:({u,v}:Finset V)={x,y}:=hz</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hu:u∈I:=hxy (hp ▸ (by simp: u∈({u,v}:Finset V)))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hv:v∈I:=hxy (hp ▸ (by simp: v∈({u,v}:Finset V)))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hr:markedPhysicalRim P π (3*d) (fun e=&gt;τ (Sum.inl e)) false u v=1:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       have hh:=(markedPhysicalRim_eq_one_iff P π (3*d) _ false u v).mp z.property</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       apply (markedPhysicalRim_eq_one_iff P π (3*d) _ false u v).mpr</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       refine ⟨hh.1,hh.2.1,?_⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       change τ (Sum.inl s(u,v))=some (false,orientationBit u v)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       rw [←hAgree u hu v hv]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       exact hh.2.2</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let z&#x27;:MarkedSampleArc P π (3*d) (fun e=&gt;τ (Sum.inl e)) false:=⟨(u,v),hr⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hm:s(u,v)∈(markedSampleArcSetGraph P π d τ Finset.univ).edgeFinset:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       simpa only [Sum.elim_inl] using</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         (markedSampleArcSetGraph_coordinate P π d τ Finset.univ (Sum.inl z&#x27;)).mpr (Finset.mem_univ _)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have heq:s(u,v)=s(x,y):=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       apply Sym2.eq_iff.mpr</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       apply Set.pair_eq_pair_iff.mp</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       simpa only [Finset.coe_pair] using congrArg (fun S:Finset V=&gt;(S:Set V)) hp</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     rw [heq] at hm</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     exact SimpleGraph.mem_edgeFinset.mp hm</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   | inr z =&gt;</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     let u:=z.val.1</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     let v:=z.val.2</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hp:({u,π v}:Finset V)={x,y}:=hz</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hu:u∈I:=hxy (hp ▸ (by simp: u∈({u,π v}:Finset V)))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hv:π v∈I:=hxy (hp ▸ (by simp: π v∈({u,π v}:Finset V)))</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hr:markedPhysicalRim P π (3*d) (fun e=&gt;τ (Sum.inl e)) true u v=1:=by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       have hh:=(markedPhysicalRim_eq_one_iff P π (3*d) _ true u v).mp z.property</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       apply (markedPhysicalRim_eq_one_iff P π (3*d) _ true u v).mpr</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       refine ⟨hh.1,hh.2.1,?_⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       change τ (Sum.inl s(u,π v))=some (true,orientationBit u (π v))</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       rw [←hAgree u hu (π v) hv]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       exact hh.2.2</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     let z&#x27;:MarkedSampleArc P π (3*d) (fun e=&gt;τ (Sum.inl e)) true:=⟨(u,v),hr⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hm:s(u,π v)∈(markedSampleArcSetGraph P π d τ Finset.univ).edgeFinset:=by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       simpa only [Sum.elim_inr,z&#x27;] using</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         (markedSampleArcSetGraph_coordinate P π d τ Finset.univ (Sum.inr z&#x27;)).mpr (Finset.mem_univ _)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have heq:s(u,π v)=s(x,y):=by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       apply Sym2.eq_iff.mpr</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       apply Set.pair_eq_pair_iff.mp</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       simpa only [Finset.coe_pair] using congrArg (fun S:Finset V=&gt;(S:Set V)) hp</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     rw [heq] at hm</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     exact SimpleGraph.mem_edgeFinset.mp hm</span>
+<span id="L75"><a href="#L75" class="ln">  75</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PackedPhysicalSpokePositions.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PackedPhysicalSpokePositions.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ActualSelectedPackingPositions</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The manuscript&#x27;s selected positions, defined using physical covered spokes,</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> coincide with the positions whose marked wheel has that interval root. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 16000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> def packedPhysicalSpokePositions</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {V U E L:Type} [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (tail head:E→V) (ktail khead:L→V) (m b d:ℕ) (π:Equiv.Perm V) (H₀ Hₖ:V→U→Prop)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ Hₖ)) (hub:U) (a:V):Finset ℕ:=</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   (Finset.range d).filter (fun j=&gt;∃W∈M,Sum.inr ((π^j) a,hub)∈markedWheelPhysicalResources W)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem packed_physical_spoke_positions_eq_marked_roots</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     {V U E L:Type} [Fintype V] [DecidableEq V] [DecidableEq U]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (tail head:E→V) (ktail khead:L→V) (m b d:ℕ) (π:Equiv.Perm V) (H₀ Hₖ:V→U→Prop)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ Hₖ)) (hub:U) (a:V)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (Ord:Finset V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hOrd:∀W∈M,W.2.val=hub→∀i:Fin (m+1),i.val≠0→W.1.val i∈Ord)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (havoid:Disjoint (permutationWindow π 0 d a) Ord):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     packedPhysicalSpokePositions tail head ktail khead m b d π H₀ Hₖ M hub a=</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       packedMarkedPositions tail head ktail khead m b d π H₀ Hₖ M hub a:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   classical</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   ext j</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   simp only [packedPhysicalSpokePositions,packedMarkedPositions,Finset.mem_filter]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   constructor</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · rintro ⟨hj,W,hW,hw⟩</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hsp:W.2.val=hub ∧ (π^j) a∈Finset.univ.image W.1.val:=</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (markedWheelPhysicalResources_spoke W ((π^j) a) hub).mp hw</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     obtain ⟨i,_,hi⟩:=Finset.mem_image.mp hsp.2</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hzero:i.val=0:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       by_contra hn</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       have ho:(π^j) a∈Ord:=by rw [←hi];exact hOrd W hW hsp.1 i hn</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       have hw&#x27;:(π^j) a∈permutationWindow π 0 d a:=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         rw [permutationWindow_mem_iff]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         simp only [zero_add,pow_zero,Equiv.refl_apply]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         exact ⟨⟨j,by have hh:=Finset.mem_range.mp hj;omega⟩,rfl⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       exact Finset.disjoint_left.mp havoid hw&#x27; ho</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hi0:i=0:=Fin.ext (by simpa using hzero)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     subst i</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     exact ⟨hj,W,hW,hsp.1,hi⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   · rintro ⟨hj,W,hW,hh,hi⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     refine ⟨hj,W,hW,?_⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     apply (markedWheelPhysicalResources_spoke W ((π^j) a) hub).mpr</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact ⟨hh,Finset.mem_image.mpr ⟨0,Finset.mem_univ _,hi⟩⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> end Oberwolfach</span></pre></html>

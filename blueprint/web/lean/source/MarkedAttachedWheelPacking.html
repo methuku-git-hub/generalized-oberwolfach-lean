@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedAttachedWheelPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedAttachedWheelPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedAttachmentWheelFamilies</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedCrossFamilyPacking</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedRootGraphSupport</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.ResourceFamilyIndicators</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Wheels with a single old row have no old rim edge. Distinct fresh hubs</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> then make the entire attached family a physical packing. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 18000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E K I:Type} [Fintype V] [Fintype I] [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b m:ℕ}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_one_old_position_no_old_arc (hm:0&lt;m)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (C:MarkedCycleTuple tail head ktail khead m π b) (k:Fin (m+1))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (Z:Finset V) (hnew:∀ t,t≠k→C.val t∉Z):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ t,¬(C.val t∈Z∧C.val (finRotate (m+1) t)∈Z):=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   intro t ht</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have ht₀:t=k:=by by_contra h;exact hnew t h ht.1</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have ht₁:finRotate (m+1) t=k:=by by_contra h;exact hnew _ h ht.2</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   exact finRotate_ne_self_of_pos hm t (ht₀.trans ht₁.symm)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem marked_wheel_without_old_resources</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (C:MarkedWheel tail head ktail khead m π b H₀ HK) (Z:Finset V) (B:Finset U)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hnoarc:∀ k,¬(C.1.val k∈Z∧C.1.val (finRotate (m+1) k)∈Z)) (hB:C.2.val∉B):</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀ e∈markedWheelPhysicalResources C,¬MarkedOldResource tail head ktail khead π Z B e:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro e he hold</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   cases e with</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   | inl e=&gt;</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     obtain ⟨a,ha,hat,hah⟩:=hold</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     obtain ⟨k,_,hk⟩:=Finset.mem_image.mp ((markedWheelPhysicalResources_rim C e).mp he)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hka:=hp (hk.trans ha.symm)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have ends:=markedCycleTypedEdge_endpoints tail head ktail khead m π b C.1 k</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     rw [hka] at ends</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact hnoarc k ⟨ends.1 ▸ hat,ends.2 ▸ hah⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   | inr vu=&gt;</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hh:=((markedWheelPhysicalResources_spoke C vu.1 vu.2).mp he).1</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     exact hB (hh.symm ▸ hold.2)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> </span>
+<span id="L44"><a href="#L44" class="ln">  44</a> theorem marked_attached_wheels_pack</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π)) (hm:0&lt;m)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (C:I→MarkedWheel tail head ktail khead m π b H₀ HK) (k:I→Fin (m+1))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (Z:Finset V) (hroot:∀ i,(C i).1.val (k i)∈Z)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hnew:∀ i t,t≠k i→(C i).1.val t∉Z)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hhub:Function.Injective (fun i=&gt;(C i).2.val))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hdis:∀ i j,i≠j→Disjoint ((Finset.univ.filter (·≠k i)).image (C i).1.val)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       ((Finset.univ.filter (·≠k j)).image (C j).1.val)):</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     ∀ i j,i≠j→Disjoint (markedWheelPhysicalResources (C i)) (markedWheelPhysicalResources (C j)):=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   intro i j hij</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   apply marked_wheels_disjoint_of_shared_labels hp (C i) (C j) Z ?_</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (marked_one_old_position_no_old_arc hm (C j).1 (k j) Z (hnew j))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (fun _ _ _ he=&gt;hij (hhub he))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   intro t t&#x27; he</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   by_cases ht:t=k i</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   · subst t;exact he ▸ hroot i</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   by_cases ht&#x27;:t&#x27;=k j</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   · subst t&#x27;;exact hroot j</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   exact False.elim (Finset.disjoint_left.mp (hdis i j hij)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (Finset.mem_image.mpr ⟨t,Finset.mem_filter.mpr ⟨Finset.mem_univ _,ht⟩,rfl⟩)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (Finset.mem_image.mpr ⟨t&#x27;,Finset.mem_filter.mpr ⟨Finset.mem_univ _,ht&#x27;⟩,he.symm⟩))</span>
+<span id="L65"><a href="#L65" class="ln">  65</a> </span>
+<span id="L66"><a href="#L66" class="ln">  66</a> theorem marked_attached_wheel_disjoint_old_graph {A S:Type} [Fintype A] [Fintype S]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π)) (hm:0&lt;m)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (C:MarkedWheel tail head ktail khead m π b H₀ HK) (k:Fin (m+1)) (Z:Finset V) (B:Finset U)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (hnew:∀ t,t≠k→C.1.val t∉Z) (hB:C.2.val∉B)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (src dst:A→V) (row:S→V) (jr:A→Bool) (hub:S→U)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (hr:∀ a,src a∈Z∧dst a∈Z) (hs:∀ s,row s∈Z∧hub s∈B)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (ha:∀ a,if jr a then ∃ e,ktail e=src a∧khead e=dst a else ∃ e,tail e=src a∧head e=dst a):</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     Disjoint (markedWheelPhysicalResources C) (markedRootGraphResources π src dst row jr hub):=by</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   intro e he hf</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   exact marked_wheel_without_old_resources hp C Z B</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     (marked_one_old_position_no_old_arc hm C.1 k Z hnew) hB e he</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (marked_root_graph_old_supported src dst row jr hub Z B hr hs ha e hf).1</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

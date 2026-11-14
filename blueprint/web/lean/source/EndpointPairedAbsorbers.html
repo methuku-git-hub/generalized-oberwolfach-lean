@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EndpointPairedAbsorbers.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EndpointPairedAbsorbers.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointPathTriangles</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PairedAbsorberCounts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrdinaryLocalAbsorbers</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Actual paired absorbers for endpoint triangles. The base triangle avoids</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> all prescribed row conflicts, so each later row-root pair is nonconflicting.</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> There is no assumption that the two prescribed row roots avoid each other. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option synthInstance.maxSize 256</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 4000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem endpoint_paired_absorber_count (Q F : SimpleGraph V) (S T : Finset V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hST : Disjoint S T) (γ L : ℝ) (hγ : 0&lt;γ) (hL : 0≤L)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hF : ∀ v,(F.degree v:ℝ)≤L)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hcommon : EndpointNeighbourCounts Q F S T (γ*Fintype.card V))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hbudget : 6*(L+1)≤γ/2*Fintype.card V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hnb : 18≤ordinaryLocalCountCoeff 2 γ*Fintype.card V)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hnp : 48≤ordinaryLocalCountCoeff 2 γ*Fintype.card V)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (x : Fin 3→V) (hx : Function.Injective x)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hxclass : ∀ i,x i∈endpointBaseClass S T i.val) :</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (ordinaryLocalCountCoeff 2 γ/2)^4*(Fintype.card V:ℝ)^9≤</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       Fintype.card (LabelledCycleRecord (endpointTriangleVertices (Q:=Q) (F:=F) (S:=S) (T:=T))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (pairedAbsorberTemplate 3).val (Finset.univ.image x)) := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let n : ℝ := Fintype.card V</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let a := γ/2*n</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let β := ordinaryLocalCountCoeff 2 γ</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let W := Finset.univ.image x</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hW : W.card=3 := by rw [Finset.card_image_of_injective _ hx];simp</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let Base := fun f : Fin 3→V=&gt;ClassSparseGreedyGood Q F (endpointBaseClass S T) W allPreviousLabels f</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let Path := fun y : Fin 3→V=&gt;fun i : ℕ=&gt;fun f : Fin 2→V=&gt;</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∃ hi : i&lt;3,ClassSparseGreedyGood Q F (endpointPathClass S T (decide (i=0))) {x ⟨i,hi⟩,y ⟨i,hi⟩}</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (endpointPathRequirements (x ⟨i,hi⟩) (y ⟨i,hi⟩)) f</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have ha : 0≤a := by dsimp [a,n];positivity</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hbase0 := endpoint_base_count Q F S T W hST L (γ*n) a hL ha hF hcommon (by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rw [hW];dsimp [a];norm_num;linarith only [hbudget])</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hbase : β*n^3≤Fintype.card {f // Base f} := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hh := mul_le_mul_of_nonneg_right (min_le_left ((γ/2)^3) ((γ/2)^2))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (pow_nonneg (show 0≤n by dsimp [n];positivity) 3)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have he : a^3=(γ/2)^3*n^3 := mul_pow _ _ _</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact hh.trans (he ▸ hbase0)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hpath (y : Fin 3→V) (hy : Base y) (i : ℕ) (hi : i&lt;3) :</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       β*n^2≤Fintype.card {f // Path y i f} := by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let j : Fin 3 := ⟨i,hi⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hxy : x j≠y j := fun h=&gt;(hy.2.1 j).2 (Finset.mem_image.mpr ⟨j,Finset.mem_univ _,h⟩)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have hFxy : ¬F.Adj (x j) (y j) := fun h=&gt;hy.2.2.2.1 j (x j)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (Finset.mem_image.mpr ⟨j,Finset.mem_univ _,rfl⟩) h.symm</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have hxj : x j∈if decide (i=0) then T else S := by simpa [endpointBaseClass,j] using hxclass j</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hyj : y j∈if decide (i=0) then T else S := by simpa [endpointBaseClass,j] using (hy.2.1 j).1</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hh := endpoint_path_count Q F S T L (γ*n) a hL ha hF hcommon</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (by dsimp [a];nlinarith only [hbudget,hL]) (decide (i=0)) (x j) (y j) hxy hFxy hxj hyj</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hβ := mul_le_mul_of_nonneg_right (min_le_right ((γ/2)^3) ((γ/2)^2))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (pow_nonneg (show 0≤n by dsimp [n];positivity) 2)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have he : a^2=(γ/2)^2*n^2 := mul_pow _ _ _</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hc := hβ.trans (he ▸ hh)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hiff (f : Fin 2→V) : Path y i f ↔ ClassSparseGreedyGood Q F</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (endpointPathClass S T (decide (i=0))) {x j,y j} (endpointPathRequirements (x j) (y j)) f := by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       constructor</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       · rintro ⟨hi&#x27;,hf⟩;exact hf</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       · intro hf;exact ⟨hi,hf⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     exact hc.trans_eq (by exact_mod_cast (Fintype.card_congr (Equiv.subtypeEquivRight hiff)).symm)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   apply paired_absorber_abundance (endpointTriangleVertices (Q:=Q) (F:=F) (S:=S) (T:=T)) (m:=2) (by norm_num)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     x hx Base Path β (ordinaryLocalCountCoeff_pos 2 γ hγ)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (fun y hy=&gt;hy.1) (fun y hy=&gt;endpoint_base_tuple Q F S T W hST y hy)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (fun y hy _ i f hf=&gt;?_) (fun y _ _ i _ f hf=&gt;?_) hbase</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (fun y hy _ i hi=&gt;by convert hpath y hy i hi using 1 &lt;;&gt; congr!) (by norm_num at *;exact hnb) (by norm_num at *;exact hnp)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   · obtain ⟨hi,hf⟩ := hf</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     have hxj : x i∈if decide (i.val=0) then T else S := by simpa [endpointBaseClass] using hxclass i</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have hyj : y i∈if decide (i.val=0) then T else S := by simpa [endpointBaseClass] using (hy.2.1 i).1</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     exact ⟨endpoint_path_triangle Q F S T hST _ (x i) (y i) (y i) (by simp) hyj f hf,</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       endpoint_path_triangle Q F S T hST _ (x i) (y i) (x i) (by simp) hxj f hf⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   · obtain ⟨hi,hf⟩ := hf</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     exact hf.1</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> </span>
+<span id="L79"><a href="#L79" class="ln">  79</a> end Oberwolfach</span></pre></html>

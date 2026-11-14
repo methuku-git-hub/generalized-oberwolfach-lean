@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryRootWheelApplication.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryRootWheelApplication.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SparseRootWheels</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryLocalExtensions</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The source ordinary local-extension hypotheses produce a physical</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> wheel through prescribed root edges. The vertex-exclusion allowance and</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> common-neighbour tolerance are fixed before the conflict radius. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 512</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 4500000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem ordinary_root_wheels_from_local_extensions (r : ℕ) (hr : 4≤r) (α ρ₀ s₀ : ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hα : 0&lt;α) (hρ₀ : 0&lt;ρ₀) (hρ₀1 : ρ₀≤1) (hs₀ : 0&lt;s₀) (hs₀1 : s₀≤1) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∃ θ ε₀ : ℝ,0&lt;θ ∧ 0&lt;ε₀ ∧ ∀ d : ℕ,∃ N : ℕ,</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       ∀ (V U : Type) [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U],</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       ∀ (P R : SimpleGraph V) (H : V→U→Prop) (π : Equiv.Perm V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         (A : Finset V) (B : Finset U) (ρ s ε : ℝ),N≤A.card →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       ρ₀≤ρ → s₀≤s → ε≤ε₀ →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀ v,(cycleThreshold r+α)*A.card≤((A∩P.neighborFinset v).card:ℝ)) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀ X : Finset V,∀ J : Finset U,X.card≤ordinaryExtensionRootBound r → J.card≤2 →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         (ρ*s)^X.card*s^J.card*((common A X (fun v=&gt;(P\permutationConflictGraph π (3*d)).neighborFinset v)).card:ℝ)-ε*A.card≤</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>           ((common (common A X (fun v=&gt;R.neighborFinset v)) J</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>             (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u))).card:ℝ)) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ X : Finset V,X.card≤r+6 →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (∀ v∈X,∀ w∈X,¬(permutationConflictGraph π (3*d)).Adj v w) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (s^X.card-ε)*B.card≤((common B X (fun v=&gt;Finset.univ.filter (H v))).card:ℝ)) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ∀ (W : Finset V),W.card≤θ*A.card → ∀ (x v w : V) (u:U),v≠w →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       R.Adj x v → R.Adj x w → H x u → H v u → H w u →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ a∈({x,v,w}:Finset V),∀ b∈({x,v,w}:Finset V),¬(permutationConflictGraph π (3*d)).Adj a b) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       ∃ C : OrdinaryWheel R (permutationConflictGraph π (3*d)) H r,ordinaryWheelHub C=u ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         (ordinaryWheelRim C).Adj x v ∧ (ordinaryWheelRim C).Adj x w ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         (∀ a∈(ordinaryWheelRim C).support,a∈({x,v,w}:Finset V) ∨ a∈A∧a∉W) := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨β,ε₀,hβ,hε,hN⟩:=ordinary_local_extensions r (by omega) α ρ₀ s₀ hα hρ₀ hρ₀1 hs₀ hs₀1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   refine ⟨β/4,ε₀,by positivity,hε,?_⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   intro d</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨N₀,hN₀⟩:=hN d</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   obtain ⟨N₁,hN₁⟩:=exists_nat_gt (4*((r:ℝ)+3)*(6*d+1)/β)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   refine ⟨max N₀ (max N₁ 1),?_⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   intro V U _ _ _ _ P R H π A B ρ s ε hn hρ hs hε&#x27; hdeg hrows hindices W hW x v w u hvw hxv hxw hHx hHv hHw hFroot</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hAN : N₀≤A.card:=(le_max_left _ _).trans hn</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hN₁A : (N₁:ℝ)≤A.card:=Nat.cast_le.mpr (by omega)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hAbig : 4*((r:ℝ)+3)*(6*d+1)&lt;β*A.card:=by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hh:=(div_lt_iff₀ hβ).mp (hN₁.trans_le hN₁A)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     nlinarith only [hh]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hApos : (0:ℝ)&lt;A.card:=by exact_mod_cast (show 0&lt;A.card by omega)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hext:=((hN₀ V U P R H π A B ρ s ε hAN hρ hs hε&#x27; hdeg hrows hindices).1)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   let T:=A∩Finset.univ.filter (fun a=&gt;H a u)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hcount (a b:V) : β*A.card≤((T∩R.neighborFinset a∩R.neighborFinset b).card:ℝ):=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have hh:=hext {a,b} {u} (Finset.card_le_two.trans (by unfold ordinaryExtensionRootBound;split_ifs &lt;;&gt; omega)) (by simp)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have he : common (common A {a,b} (fun v=&gt;R.neighborFinset v)) {u}</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u))=T∩R.neighborFinset a∩R.neighborFinset b:=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       ext z</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       simp only [common,Finset.mem_filter,Finset.mem_inter,Finset.mem_insert,Finset.mem_singleton,</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         forall_eq_or_imp,forall_eq,Finset.mem_univ,true_and,T]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       tauto</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     rw [he] at hh</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     exact hh</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hF (a:V) : ((permutationConflictGraph π (3*d)).degree a:ℝ)≤6*d:=by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hh:=permutationConflictGraph_degree_le π (3*d) a</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     exact_mod_cast (show (permutationConflictGraph π (3*d)).degree a≤6*d by omega)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨C,hCu,hCxv,hCxw,hCs⟩:=ordinary_root_wheel_from_common_counts R (permutationConflictGraph π (3*d)) H T W x v w u hvw hxv hxw hFroot</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     ⟨hHx,hHv,hHw⟩ (fun a ha=&gt;(Finset.mem_filter.mp (Finset.mem_inter.mp ha).2).2)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     r hr (6*d) (β*A.card) (by positivity) hF hcount (by nlinarith only [hW,hAbig,mul_pos hβ hApos])</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   refine ⟨C,hCu,hCxv,hCxw,?_⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   intro a ha</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   rcases hCs a ha with ha&#x27;|ha&#x27;</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · exact Or.inl ha&#x27;</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   · exact Or.inr ⟨(Finset.mem_inter.mp ha&#x27;.1).1,ha&#x27;.2⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> </span>
+<span id="L73"><a href="#L73" class="ln">  73</a> end Oberwolfach</span></pre></html>

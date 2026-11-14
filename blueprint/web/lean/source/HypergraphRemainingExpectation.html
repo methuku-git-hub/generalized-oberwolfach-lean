@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>HypergraphRemainingExpectation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>HypergraphRemainingExpectation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ColourLawSupport</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RemainingColourExpectation</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Remaining colour degrees in the actual hypergraph colouring law.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The deterministic comparison retains the original resource colour degrees. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 2400000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem hypergraph_remaining_colour_expectation</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {V E C : Type*} [Fintype E] [Fintype C]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (R : E → Finset V) (L : E → Finset C) (hL : ∀ e,(L e).Nonempty)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     {l k B s : ℕ} (hl : 1&lt;l) (hcard : ∀ e,(L e).card=l)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hsize : ∀ e,(R e).card≤k)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hcodeg : ∀ v w,v≠w → (Finset.univ.filter (fun e=&gt;v∈R e ∧ w∈R e)).card≤B)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hdegree : ∀ v c,(hypergraphColourClique R L v c).card≤s) (hsl : s≤l)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (U : Finset E) (Q : E → Finset V) (c : C)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hsmall : ∀ e∈U,2*((Q e).card^2*(k^2*B))≤l) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let G := hypergraphLineGraph R</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let μ := FiniteLaw.pi (fun e=&gt;(FiniteLaw.uniformOn (L e) (hL e)).withCoin</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (equalizationCoin G L l (k*s) e)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (equalizationCoin_bounds G L (by omega) (k*s) e))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let ρ := (1-1/(l : ℝ))^(k*s)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let r := ρ/(l : ℝ)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     |μ.expectation (fun σ=&gt;((remainingColourVertices G U Q (hypergraphVertexClique R) c σ).card : ℝ))-</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ∑ e∈U,(1-ρ)*(∏ v∈Q e,(1-((hypergraphColourClique R L v c).card : ℝ)*r))|≤</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (U.card : ℝ)*(1/(l : ℝ)+ρ*(2/(l : ℝ)+2*((k*s : ℕ) : ℝ)/((l : ℝ)*((l : ℝ)-1))))+</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ∑ e∈U,(2 : ℝ)^(Q e).card*((((Q e).card^2*(2*k^2+k+2)*B : ℕ)) : ℝ)/(l : ℝ) := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   classical</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   dsimp only</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let G := hypergraphLineGraph R</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let μ := FiniteLaw.pi (fun e=&gt;(FiniteLaw.uniformOn (L e) (hL e)).withCoin</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (equalizationCoin G L l (k*s) e)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (equalizationCoin_bounds G L (by omega : 0&lt;l) (k*s) e))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   let ρ := (1-1/(l : ℝ))^(k*s)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let r := ρ/(l : ℝ)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let A := fun e σ=&gt;∀ v∈Q e,∀ f∈hypergraphVertexClique R v,coinRetainedColour G σ f≠some c</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let p := fun e=&gt;∏ v∈Q e,(1-((hypergraphColourClique R L v c).card : ℝ)*r)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let ε := fun e=&gt;(2 : ℝ)^(Q e).card*((((Q e).card^2*(2*k^2+k+2)*B : ℕ)) : ℝ)/(l : ℝ)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hρ := equalized_retention_rate_bounds (by omega : 0&lt;l) (k*s)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hbase := remainingColourVertices_expectation G L hL hl hcard</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (fun e b=&gt;hypergraph_colour_neighbour_degree R L hsize b (fun v=&gt;hdegree v b) e)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     U Q (hypergraphVertexClique R) c</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hprob (e : E) (he : e∈U) : |μ.probability (A e)-p e|≤ε e :=</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     hypergraph_resource_colour_avoidance R L hL hl hcard hsize hcodeg c</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (fun v=&gt;hdegree v c) hsl (Q e) (hsmall e he)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hcomp : |(∑ e∈U,(1-ρ)*μ.probability (A e))-(∑ e∈U,(1-ρ)*p e)|≤∑ e∈U,ε e := by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     rw [← Finset.sum_sub_distrib]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     apply (Finset.abs_sum_le_sum_abs _ _).trans</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     apply Finset.sum_le_sum</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     intro e he</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     rw [← mul_sub,abs_mul,abs_of_nonneg (sub_nonneg.mpr hρ.2)]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     calc</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       _ ≤ (1-ρ)*ε e := mul_le_mul_of_nonneg_left (hprob e he) (sub_nonneg.mpr hρ.2)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       _ ≤ ε e := mul_le_of_le_one_left (by dsimp [ε]; positivity) (by dsimp [ρ]; linarith [hρ.1])</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   calc</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     _ ≤ |μ.expectation (fun σ=&gt;((remainingColourVertices G U Q (hypergraphVertexClique R) c σ).card : ℝ))-</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         (∑ e∈U,(1-ρ)*μ.probability (A e))|+</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         |(∑ e∈U,(1-ρ)*μ.probability (A e))-(∑ e∈U,(1-ρ)*p e)| := abs_sub_le _ _ _</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     _ ≤ _ := add_le_add hbase hcomp</span>
+<span id="L65"><a href="#L65" class="ln">  65</a> </span>
+<span id="L66"><a href="#L66" class="ln">  66</a> end Oberwolfach</span></pre></html>

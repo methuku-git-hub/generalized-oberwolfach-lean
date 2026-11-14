@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FirstVortexSourceResidualUpper.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FirstVortexSourceResidualUpper.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongSelectedAlignedSourceCapacityUpper</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongAlignedResidualUpperPrepared</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 3000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> local instance firstVortexSourceResidualUpperFin (n:ℕ):DecidableEq (Fin n):=selectedAlignedSourceWithLoadFin n</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem first_vortex_source_residual_upper</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (m d:ℕ) (hm:0&lt;m) (hd:m+2≤d) (θ:ℝ) (hθ:0&lt;θ) (hθmax:θ≤1/100)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (ζret:ℝ) (N:ℕ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hN:∀n:ℕ,N≤n→∀q errOrd:ℝ,</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       q≤1/((m:ℝ)+1)→errOrd≤θ*n→</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (n:ℝ)*q/d+(((m+1)*d-1:ℕ):ℝ)*(2*((n:ℝ)^(3/4:ℝ)/d)+ζret*n)+errOrd≤4*θ*n):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀n K:ℕ,N≤n→0&lt;n→3≤K→∀(U:Type) [Fintype U] [DecidableEq U]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (σE:∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Bool Bool e)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (Del:Finset (Sym2 (Fin n))) (t:ℕ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (Jret:StartRetentionOutcome (rawStartHubSet π d</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (fun e=&gt;rawExpandedApproximateCollapse (Sum.inr e) (σE (Sum.inr e))) false) t),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let ℓ:=fun i:Fin K=&gt;longPaddedSeedExponent i+2</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let raw:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=&gt;rawExpandedApproximateCollapse e (σE e)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let σ:=fun e=&gt;raw (Sum.inr e)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let R:=mixedCandidateResources (longRawSeedResources (U:=U) π d m ℓ)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let T:=bernoulliVertexSet (longRawHubState P π d raw true true)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let S:=longRawSurvivingResources P π d raw true true Del</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let hST:=long_raw_surviving_resources_subset P π d raw true true Del</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let q:=survivingCandidateEmbedding R S T hST</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let Q:=restrictedResourceSet R (Function.Embedding.subtype (·∈S))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀(M:Finset (RestrictedResource R (Function.Embedding.subtype (·∈S))))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (F:U→SimpleGraph (Fin n)) (hF:∀w,(F w).IsRegularOfDegree 2)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (eps lam a γ:ℝ) (heps0:0≤eps) (hγ:0≤γ) (hlam:0≤lam) (hlamθ:lam≤θ)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hepsAssign:3*eps≤lam*(θ/(100*(K:ℝ)^2))) (ha:a≤lam/(10*(d:ℝ))) (hγcap:γ≤lam/(10*(d:ℝ)))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hdisj:∀c∈M,∀c&#x27;∈M,c≠c&#x27;→Disjoint (Q c) (Q c&#x27;))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hmatch:∀i,((longRawIncidenceSet S i\M.biUnion Q).card:ℝ)≤max (a*n) (γ*(longRawIncidenceSet S i).card))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hcounts:∀w g,|rawIntervalHubStartCount π d g σ w-</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (n:ℝ)*longAssignedIntervalProbability F hF K m θ w g/(d:ℝ)|&lt;(n:ℝ)^(3/4:ℝ)/(d:ℝ))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hgood:RetainedRestrictionGood π d σ false t (fun _:Unit=&gt;Finset.univ) (fun _:Unit=&gt;Finset.univ) ζret Jret)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hsourceCount:LongMatchingSourceCountWitness F hF π d m ℓ θ eps T (M.map q))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (H:Finset U) (A:Finset (Fin n)) (Kbad Used:SimpleGraph (Fin n)) (absorber:U→Finset (Fin n)) (δ ρ₀:ℝ)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hU:0&lt;Fintype.card U) (Extra:(U→Finset (Fin n))→Finset (Sym2 (Fin n))→Prop),</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     LongSelectedAlignedSourceWithLoadMatchingCapacity hU F P π d m ℓ raw t Jret σE H A Kbad Used absorber δ Extra ρ₀ (M.map q) →</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     LongSelectedAlignedSourceWithMatchingCapacityUpper hU F P π d m ℓ raw t Jret σE H A Kbad Used absorber δ Extra ρ₀ θ (M.map q) :=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   intro n K hnN hn hK U _ _ P π σE hnoshort Del t Jret ℓ raw σ R T S hST q Q M F hF eps lam a γ heps0 hγ hlam hlamθ hepsAssign ha hγcap hdisj hmatch hcounts hgood hsourceCount H A Kbad Used absorber δ ρ₀ hU Extra hsource</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   letI:Nonempty U:=Fintype.card_pos_iff.mp hU</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   rcases hsource with ⟨Dsrc,orig,hPair,hValid,hUnion,hArcs,E,hAlign,hLate,ext,inner,ψ,assign,data,hprops,hload,pieces,hpieceEdge,hpieceArc,Pack,hOldDisj,hOldPack,hApprox,hSelected,hassign,hsize,hUsed,hExtra,hcapacity⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hUpper0:=long_aligned_residual_upper_from_prepared_matching m d hm hd θ hθ hθmax ζret N hN n K hnN hn hK</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hdec : alignedResidualUpperPreparedFin n = firstVortexSourceResidualUpperFin n := Subsingleton.elim _ _</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hdecK : alignedResidualUpperPreparedFin K = firstVortexSourceResidualUpperFin K := Subsingleton.elim _ _</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   try rw [hdec] at hUpper0</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   try rw [hdecK] at hUpper0</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hUpper:∀w,((data w).remaining.card:ℝ)≤10*θ*n:=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     intro w</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     rcases hprops w with ⟨hc,hd&#x27;,hs1,hEmbed,_,_,_,_,_,_,_,_,hs2,ht,hT,hlen,_,_,_⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hpositions:∀x:{x:Fin n // rawIntervalColouredStart π d (fun e=&gt;raw (Sum.inr (w,e))) x true},</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       (data w).T (.inr x)=packedPhysicalSpokePositions _ _ _ _ m (3*d) d π</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (rawMarkedPairSpokes π d raw true true false) (rawMarkedPairSpokes π d raw true true true)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         (longRawMarkedWheelsAtHub P π d m ℓ raw true true (M.map q) w) w x.val:=by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       intro x</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       simpa only [retainedAndRawIntervalRoot] using hT (.inr x)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     exact hUpper0 U F hF P π raw hnoshort t Jret hgood Del M hdisj w assign hassign hsize (data w) hc hd&#x27; hs1 hs2 eps heps0 (hcounts w) ht hEmbed hlen hsourceCount a γ lam hγ hlam hlamθ hepsAssign ha hγcap hmatch hpositions</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   refine ⟨Dsrc,orig,hPair,hValid,hUnion,hArcs,E,hAlign,hLate,ext,inner,ψ,assign,data,hprops,hload,pieces,hpieceEdge,hpieceArc,Pack,hOldDisj,hOldPack,hApprox,hSelected,hassign,hsize,hUsed,hExtra,hcapacity,?_⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   exact hUpper</span>
+<span id="L68"><a href="#L68" class="ln">  68</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,85 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryRobustLocalFactor.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryRobustLocalFactor.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryLocalDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryRelativeLocalFactor</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The ordinary local factor survives every realised rim deletion of</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> small maximum degree. Constants precede the graph, the fixed coefficients,</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> and the deletion; no separate event is chosen for each deletion. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 512</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 3500000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ordinary_robust_local_factor (m : ℕ) (hm : 2≤m) (α p b B : ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hα : 0&lt;α) (hp : 0&lt;p) (hp1 : p≤1) (hb : 0&lt;b) (hB : 0≤B) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ θ : ℝ,0&lt;θ ∧ ∃ N : ℕ,</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       ∀ (V : Type) [Fintype V] [DecidableEq V],N≤Fintype.card V →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ∀ (P Q F : SimpleGraph V) (T : Finset V) (j : ℕ) (q s : ℝ),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       Q≤P → j≤2 → p≤q → p≤s →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀ v,(ordinaryLocalBaseDegree m+α)*Fintype.card V≤(P.degree v:ℝ)) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀ v,(F.degree v:ℝ)≤θ*Fintype.card V) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ S : Finset V,S.card≤ordinaryLocalRootBound m →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         q^S.card*s^j*((common Finset.univ S (fun x=&gt;(P\F).neighborFinset x)).card:ℝ)-</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>           θ*Fintype.card V≤((common T S (fun x=&gt;Q.neighborFinset x)).card:ℝ)) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (m+1)∣T.card → ∀ φ : OrdinaryCycle P (m+1)→ℝ,</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ C,b/(Fintype.card V:ℝ)^m≤φ C ∧ φ C≤B/(Fintype.card V:ℝ)^m) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ v,|ordinaryLocalPotential P Q F T φ v-1|≤θ) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ∀ D : SimpleGraph V,(∀ v,(D.degree v:ℝ)≤θ*Fintype.card V) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       HasResourceDecomposition (localOrdinaryVertices (Q:=Q\D) (F:=F) (T:=T) (r:=m+1)) T := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨ε₀,η,hε₀,hη,N,hfactor⟩:=ordinary_relative_local_factor m hm α p b B hα hp hp1 hb hB</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   let C : ℝ:=3*(m+1:ℝ)^4*B</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hC : 0≤C:=by dsimp [C];positivity</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let θ:=min (ε₀/4) (η/(1+C))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hθ : 0&lt;θ:=lt_min (by positivity) (div_pos hη (by linarith))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hθε : 4*θ≤ε₀:=by have hh:=min_le_left (ε₀/4) (η/(1+C));dsimp only [θ];linarith only [hh]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hθη : (1+C)*θ≤η:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hh:=min_le_right (ε₀/4) (η/(1+C))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hc:= (le_div_iff₀ (show 0&lt;1+C by linarith only [hC])).mp hh</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     dsimp only [θ];nlinarith only [hc]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   refine ⟨θ,hθ,max N 1,?_⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   intro V _ _ hn P Q F T j q s hQP hj hq hs hP hF hrel hdiv φ hφ hpotential D hD</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hnV : 0&lt;Fintype.card V:=by have h:=(le_max_right N 1).trans hn;omega</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hnR : (0:ℝ)&lt;Fintype.card V:=Nat.cast_pos.mpr hnV</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hθle : θ≤ε₀:=by linarith only [hθε,hθ]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hQD : Q\D≤P:=sdiff_le.trans hQP</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let wt : LocalOrdinaryCycle (Q\D) F T (m+1)→ℝ:=fun C=&gt;φ (localOrdinaryParent hQD C)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   apply hfactor V ((le_max_left N 1).trans hn) P (Q\D) F T j q s (4*θ) hj hq hs hθε hP</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (fun v=&gt;(hF v).trans (mul_le_mul_of_nonneg_right hθle hnR.le)) ?_ hdiv wt</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (fun C=&gt;hφ _) ?_</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   · intro S hS</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hroot : ordinaryLocalRootBound m≤3:=by unfold ordinaryLocalRootBound;split_ifs &lt;;&gt; omega</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hS3 : (S.card:ℝ)≤3:=by exact_mod_cast hS.trans hroot</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hdel : |((common T S (fun v=&gt;(Q\D).neighborFinset v)).card:ℝ)-</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         (common T S (fun v=&gt;Q.neighborFinset v)).card|≤S.card*(θ*Fintype.card V) := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       convert ordinary_common_sdiff_bound Q D T S (θ*Fintype.card V) hD using 1 &lt;;&gt; congr!</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hrel&#x27; : q^S.card*s^j*((common Finset.univ S (fun x=&gt;(P\F).neighborFinset x)).card:ℝ)-</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         θ*Fintype.card V≤((common T S (fun x=&gt;Q.neighborFinset x)).card:ℝ) := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       convert hrel S hS using 1 &lt;;&gt; congr!</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     suffices hnew : q^S.card*s^j*((common Finset.univ S (fun x=&gt;(P\F).neighborFinset x)).card:ℝ)-</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         (4*θ)*Fintype.card V≤((common T S (fun x=&gt;(Q\D).neighborFinset x)).card:ℝ) by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       convert hnew using 1 &lt;;&gt; congr!</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     have hlow:=(abs_le.mp hdel).1</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have hcost:=mul_le_mul_of_nonneg_right hS3 (mul_nonneg hθ.le hnR.le)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     nlinarith only [hrel&#x27;,hlow,hcost]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   · intro v hv</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     have hφ0 : ∀ C,0≤φ C:=fun C=&gt;(div_pos hb (pow_pos hnR _)).le.trans (hφ C).1</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hloss:=ordinaryLocalPotential_sdiff_bound P Q F D T (by omega) hnV φ hφ0 B</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       (θ*Fintype.card V) hB (by simpa using fun C=&gt;(hφ C).2) hD v</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have he : 3*(m+1:ℝ)^4*B*(θ*Fintype.card V)/Fintype.card V=C*θ:=by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       dsimp [C];field_simp [ne_of_gt hnR] &lt;;&gt; ring</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have hcast : ((m+1:ℕ):ℝ)=(m+1:ℝ):=by norm_cast</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     rw [hcast,he] at hloss</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     have hpot:=target_stability hloss (hpotential v)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     have heq:=ordinaryLocalPotential_present P (Q\D) F T hQD φ v hv</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     rw [heq,abs_sub_comm] at hpot</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hpot&#x27; : |1-hypergraphWeightedDegree localOrdinaryVertices wt v|≤θ+C*θ := by</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       convert hpot using 1 &lt;;&gt; congr!</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     exact hpot&#x27;.trans (by nlinarith only [hθη])</span>
+<span id="L81"><a href="#L81" class="ln">  81</a> </span>
+<span id="L82"><a href="#L82" class="ln">  82</a> end Oberwolfach</span></pre></html>

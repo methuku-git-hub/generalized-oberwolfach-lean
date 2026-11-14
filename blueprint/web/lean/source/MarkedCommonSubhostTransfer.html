@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedCommonSubhostTransfer.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedCommonSubhostTransfer.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedCommonSubhostAgreement</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedDecompositionHostTransfer</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Every typed arc, spoke and wheel of the common subhost transfers to</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> each of the two hosts without changing any physical resource. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 12000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem marked_common_subhost_transfer_to_later</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d m:ℕ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (σ τ:RawMarkedOutcome V U Γ Color) (H H&#x27;:Bool→V→U→Prop)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (DR:SimpleGraph V) (DS:SimpleGraph (V⊕U))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hrim:∀ mark x y,markedPhysicalRim P π (3*d) (fun e=&gt;rawMarkedDeleteRims σ DR.edgeFinset (Sum.inl e)) mark x y=1→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       markedPhysicalRim P π (3*d) (fun e=&gt;τ (Sum.inl e)) mark x y=1)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hsp:∀ b v u,markedDeletePhysicalSpokes H DS b v u→H&#x27; b v u):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let E:=MarkedSampleArc P π (3*d) (fun e=&gt;rawMarkedDeleteRims σ DR.edgeFinset (Sum.inl e)) false</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let K:=MarkedSampleArc P π (3*d) (fun e=&gt;rawMarkedDeleteRims σ DR.edgeFinset (Sum.inl e)) true</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let E&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;τ (Sum.inl e)) false</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let K&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;τ (Sum.inl e)) true</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let tail:=fun e:E=&gt;e.val.1</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let head:=fun e:E=&gt;e.val.2</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let ktail:=fun e:K=&gt;e.val.1</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let khead:=fun e:K=&gt;e.val.2</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let tail&#x27;:=fun e:E&#x27;=&gt;e.val.1</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let head&#x27;:=fun e:E&#x27;=&gt;e.val.2</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let ktail&#x27;:=fun e:K&#x27;=&gt;e.val.1</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let khead&#x27;:=fun e:K&#x27;=&gt;e.val.2;</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∀ C L:Finset (Finset V⊕(V×U)),</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       IsResourceAbsorber</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         (fun W:MarkedWheel tail head ktail khead m π (3*d)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>           (markedDeletePhysicalSpokes H DS false) (markedDeletePhysicalSpokes H DS true)=&gt;markedWheelPhysicalResources W) L C →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       IsResourceAbsorber</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         (fun W:MarkedWheel tail&#x27; head&#x27; ktail&#x27; khead&#x27; m π (3*d) (H&#x27; false) (H&#x27; true)=&gt;markedWheelPhysicalResources W) L C :=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   intro E K E&#x27; K&#x27; tail head ktail khead tail&#x27; head&#x27; ktail&#x27; khead&#x27; C L habs</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   apply marked_absorber_transfer_on_resources</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (tail&#x27;:=tail&#x27;) (head&#x27;:=head&#x27;) (ktail&#x27;:=ktail&#x27;) (khead&#x27;:=khead&#x27;)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (H₀:=markedDeletePhysicalSpokes H DS false) (HK:=markedDeletePhysicalSpokes H DS true)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (H₀&#x27;:=H&#x27; false) (HK&#x27;:=H&#x27; true) (π:=π) (m:=m) (b:=3*d) C L</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   · intro e _</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     exact ⟨⟨e.val,hrim false e.val.1 e.val.2 e.property⟩,rfl,rfl⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   · intro e _</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact ⟨⟨e.val,hrim true e.val.1 e.val.2 e.property⟩,rfl,rfl⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   · intro v u _ hv</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     exact hsp false v u hv</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · intro v u _ hv</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact hsp true v u hv</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   · exact habs</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> end Oberwolfach</span></pre></html>

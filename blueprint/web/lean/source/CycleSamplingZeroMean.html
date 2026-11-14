@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CycleSamplingZeroMean.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CycleSamplingZeroMean.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CycleIndependentSampling</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A fixed test family with zero sampling mean is empty on every</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> positive-probability outcome of the original independent law. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 4000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {C:Type} [Fintype C] [DecidableEq C]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem independent_cycle_count_zero_mean</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (p:C→ℝ) (hp:∀ c,0≤p c) (hp1:∀ c,p c≤1) (A:C→Prop)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hzero:(∑ c,if A c then p c else 0)=0) (σ:C→Bool)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hσ:0&lt;(FiniteLaw.pi (fun c=&gt;FiniteLaw.retentionCoin (p c) (hp c) (hp1 c))).mass σ):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     independentCycleCount A σ=0 := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   let μ:=FiniteLaw.pi (fun c=&gt;FiniteLaw.retentionCoin (p c) (hp c) (hp1 c))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hnon:∀ ω,0 ≤ independentCycleCount A ω:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     intro ω;unfold independentCycleCount</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     exact Finset.sum_nonneg (fun c _=&gt;by split_ifs &lt;;&gt; norm_num)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hE:μ.expectation (independentCycleCount A)=0:=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     rw [independent_cycle_count_expectation];exact hzero</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   exact finiteLaw_nonnegative_zero_mean μ (independentCycleCount A) hnon hE σ hσ</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> end Oberwolfach</span></pre></html>

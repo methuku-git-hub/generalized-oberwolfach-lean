@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TypedMarkedForbiddenSetCost.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TypedMarkedForbiddenSetCost.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TypedMarkedVertexExclusionWeights</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ResourceCandidateExceptionalCost</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Removing fixed row and hub sets has a cost proportional to their</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> cardinalities at every root outside those sets. All candidates and weights</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> are still those of the original potential universe. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 8000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E K:Type} [Fintype V] [Fintype U] [Fintype E] [Fintype K]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   [DecidableEq V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   {tail head:E→V} {ktail khead:K→V} {m b:ℕ} {π:Equiv.Perm V} {H₀ HK:V→U→Prop}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem typedMarked_forbidden_set_weight (hm:2≤m)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hn:0&lt;Fintype.card V) (hu:Fintype.card U≤Fintype.card V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (w:MarkedWheel tail head ktail khead m π b H₀ HK→ℝ) (B:ℝ) (hB:0≤B)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hw0:∀ W,0≤w W) (hw:∀ W,w W≤B/(Fintype.card V:ℝ)^m)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (T:Finset V) (Z:Finset U) (e:(E⊕K)⊕(Bool×V×U))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (he:Sum.elim (fun a=&gt;Sum.elim tail ktail a∉T∧Sum.elim head khead a∉T)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (fun s=&gt;s.2.1∉T∧s.2.2∉Z) e):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∑ W,if e∈typedMarkedOccurrenceResources W∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       ((∃ x∈T,x∈Set.range W.1.val)∨W.2.val∈Z) then w W else 0)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       ≤((T.card:ℝ)+Z.card)*((m:ℝ)+1)^3*B/Fintype.card V:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let Q:=fun z:V⊕U=&gt;fun W:MarkedWheel tail head ktail khead m π b H₀ HK=&gt;</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     Sum.elim (fun x=&gt;x∈Set.range W.1.val) (fun u=&gt;W.2.val=u) z</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hbad (W:MarkedWheel tail head ktail khead m π b H₀ HK):</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∃ z∈T.disjSum Z,Q z W)↔(∃ x∈T,x∈Set.range W.1.val)∨W.2.val∈Z:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     constructor</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     · rintro ⟨z,hz,hQ⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       cases z with</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       | inl x=&gt;exact Or.inl ⟨x,by simpa only [Finset.inl_mem_disjSum] using hz,hQ⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       | inr u=&gt;exact Or.inr (hQ ▸ (by simpa only [Finset.inr_mem_disjSum] using hz))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     · rintro (⟨x,hx,hC⟩|hU)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       · exact ⟨Sum.inl x,by simpa using hx,hC⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       · exact ⟨Sum.inr W.2.val,by simpa using hU,rfl⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hunion:=finite_weighted_exception_union (T.disjSum Z) w hw0</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (fun W=&gt;e∈typedMarkedOccurrenceResources W) Q</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have heq:(∑ W,if e∈typedMarkedOccurrenceResources W∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       ((∃ x∈T,x∈Set.range W.1.val)∨W.2.val∈Z) then w W else 0)=</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       ∑ W,if e∈typedMarkedOccurrenceResources W∧(∃ z∈T.disjSum Z,Q z W) then w W else 0:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     apply Finset.sum_congr rfl</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     intro W _</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     by_cases h:e∈typedMarkedOccurrenceResources W∧((∃ x∈T,x∈Set.range W.1.val)∨W.2.val∈Z)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     · rw [if_pos h,if_pos ⟨h.1,(hbad W).mpr h.2⟩]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     · rw [if_neg h,if_neg (fun hh=&gt;h ⟨hh.1,(hbad W).mp hh.2⟩)]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   rw [heq]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hunion&#x27; : (∑ W,if e∈typedMarkedOccurrenceResources W∧(∃ z∈T.disjSum Z,Q z W) then w W else 0)≤</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       ∑ z∈T.disjSum Z,∑ W,if e∈typedMarkedOccurrenceResources W∧Q z W then w W else 0:=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     convert hunion using 1 &lt;;&gt; congr!</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   apply hunion&#x27;.trans</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have h23:((m:ℝ)+1)^2*B/Fintype.card V≤((m:ℝ)+1)^3*B/Fintype.card V:=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     apply div_le_div_of_nonneg_right _ (Nat.cast_nonneg _)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     apply mul_le_mul_of_nonneg_right _ hB</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     exact pow_le_pow_right₀ (show (1:ℝ)≤(m:ℝ)+1 by linarith [show (0:ℝ)≤m from Nat.cast_nonneg m]) (by omega)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hterm:∀ z∈T.disjSum Z,(∑ W,if e∈typedMarkedOccurrenceResources W∧Q z W then w W else 0)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       ≤((m:ℝ)+1)^3*B/Fintype.card V:=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     intro z hz</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     cases e with</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     | inl a=&gt;</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       cases z with</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       | inl x=&gt;</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         have hx:x∈T:=by simpa only [Finset.inl_mem_disjSum] using hz</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         have hnot:x∉({Sum.elim tail ktail a,Sum.elim head khead a}:Finset V):=by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>           simp only [Finset.mem_insert,Finset.mem_singleton,not_or]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>           exact ⟨fun h=&gt;he.1 (h ▸ hx),fun h=&gt;he.2 (h ▸ hx)⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         simpa only [typedMarkedOccurrenceResources_rim,Q,Sum.elim_inl] using</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>           canonical_marked_rim_extra_row_weight hm hn hu w B hB hw a x hnot</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       | inr u=&gt;</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>         simpa only [typedMarkedOccurrenceResources_rim,Q,Sum.elim_inr] using</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>           (canonical_marked_rim_fixed_hub_weight (by omega) hn w B hB hw a u).trans h23</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     | inr s=&gt;</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       cases z with</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       | inl x=&gt;</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>         have hx:x∈T:=by simpa only [Finset.inl_mem_disjSum] using hz</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>         have hne:x≠s.2.1:=fun h=&gt;he.1 (h ▸ hx)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>         convert (typedMarked_spoke_extra_row_weight (by omega) hn w B hB hw0 hw s.1 s.2.1 x hne s.2.2).trans h23 using 1 &lt;;&gt; congr!</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       | inr u=&gt;</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>         have hz:u∈Z:=by simpa only [Finset.inr_mem_disjSum] using hz</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>         have hne:u≠s.2.2:=fun h=&gt;he.2 (h ▸ hz)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>         have hz0 : (∑ W,if Sum.inr s∈typedMarkedOccurrenceResources W∧Q (Sum.inr u) W then w W else 0)=0:=by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>           convert typedMarked_spoke_other_hub_weight_zero w s.1 s.2.1 s.2.2 u hne using 1 &lt;;&gt; congr!</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>         rw [hz0]</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>         positivity</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hsum:=Finset.sum_le_sum hterm</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   simpa only [Finset.sum_const,nsmul_eq_mul,Finset.card_disjSum,Nat.cast_add,mul_div_assoc,mul_assoc] using hsum</span>
+<span id="L90"><a href="#L90" class="ln">  90</a> </span>
+<span id="L91"><a href="#L91" class="ln">  91</a> end Oberwolfach</span></pre></html>

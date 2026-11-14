@@ -1,0 +1,62 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PositiveOrdinaryCycleWeights.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PositiveOrdinaryCycleWeights.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryCycleApproximation</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryPositiveScales</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Positive bounded ordinary cycle weights. The constants and order threshold</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> are chosen before the graph and before its supplied edge-load vector. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem positive_ordinary_cycle_weights (r : ℕ) (hr : 3≤r) (α : ℝ) (hα : 0&lt;α) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ ε c C : ℝ,0&lt;ε ∧ 0&lt;c ∧ 0&lt;C ∧ ∃ N : ℕ,0&lt;N ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ∀ (V : Type) [Fintype V] [DecidableEq V],N≤Fintype.card V →</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ∀ G : SimpleGraph V,</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>         (∀ v,(cycleThreshold r+α)*Fintype.card V≤(G.degree v:ℝ)) →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       ∀ w : G.edgeSet → ℝ,‖w-(fun _ =&gt; (1:ℝ))‖≤ε →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       ∃ a : OrdinaryCycle G r → ℝ,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         (∀ D,c/(Fintype.card V:ℝ)^(r-2)≤a D ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>           a D≤C/(Fintype.card V:ℝ)^(r-2)) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>         (∑ D,a D • ordinaryCycleIncidence G r D)=w := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let κ := min (1/2:ℝ) (α/32)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hκ : 0&lt;κ := lt_min (by norm_num) (by positivity)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hκ1 : κ≤1 := (min_le_left _ _).trans (by norm_num)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hκα : κ≤α/16 := (min_le_right _ _).trans (by linarith)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨N₀,hN₀⟩ := ordinary_cycle_approximation_at_size r hr α hα</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   obtain ⟨m,hm₀,hm4,hmroots,hmerr⟩ := ordinary_positive_sample_size N₀ α κ hα hκ</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let c := κ/(4*(r:ℝ)^2)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let C := c+4*(m:ℝ)^(r-2)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hr&#x27; : (0:ℝ)&lt;r := Nat.cast_pos.mpr (by omega)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hc : 0&lt;c := by dsimp [c];positivity</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hC : 0&lt;C := by dsimp [C];positivity</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   refine ⟨κ/4,c,C,by positivity,hc,hC,m,by omega,?_⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro V _ _ hn G hdeg w hw</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨a,ha,he⟩ := exact_positive_ordinary_cycle_weights G r (by omega) (by omega)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     w κ (8*m*Real.exp (-α^2*m/32)) (4*(m:ℝ)^(r-2)) hκ hmerr hw</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (fun w&#x27; hw&#x27; =&gt; hN₀ m hm₀ hm4 hmroots V hn G hdeg κ hκ.le hκ1 hκα w&#x27; hw&#x27;)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   exact ⟨a,fun D =&gt; ⟨(ha D).2.1,(ha D).2.2⟩,he⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem positive_ordinary_fractional_cycle_weights (r : ℕ) (hr : 3≤r) (α : ℝ) (hα : 0&lt;α) :</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     ∃ c C : ℝ,0&lt;c ∧ 0&lt;C ∧ ∃ N : ℕ,0&lt;N ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       ∀ (V : Type) [Fintype V] [DecidableEq V],N≤Fintype.card V →</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       ∀ G : SimpleGraph V,</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         (∀ v,(cycleThreshold r+α)*Fintype.card V≤(G.degree v:ℝ)) →</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       ∃ a : OrdinaryCycle G r → ℝ,</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         (∀ D,c/(Fintype.card V:ℝ)^(r-2)≤a D ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           a D≤C/(Fintype.card V:ℝ)^(r-2)) ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         (∀ e : G.edgeSet,∑ D,a D*ordinaryCycleIncidence G r D e=1) := by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   obtain ⟨ε,c,C,hε,hc,hC,N,hN,hh⟩ := positive_ordinary_cycle_weights r hr α hα</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   refine ⟨c,C,hc,hC,N,hN,?_⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   intro V _ _ hn G hdeg</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   obtain ⟨a,ha,he⟩ := hh V hn G hdeg (fun _ =&gt; 1) (by simpa using hε.le)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   refine ⟨a,ha,?_⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   intro e</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have h := congrFun he e</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   simpa only [Finset.sum_apply,Pi.smul_apply,smul_eq_mul] using h</span>
+<span id="L58"><a href="#L58" class="ln">  58</a> </span>
+<span id="L59"><a href="#L59" class="ln">  59</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RetainedCoefficientPadding.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RetainedCoefficientPadding.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FixedLengthPadding</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The fixed-index padding reproduces the original coefficient at every</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> hub, including zero coefficients of unretained lengths. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> open scoped BigOperators</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem retained_coefficient_padding {I U:Type} [Fintype I] [DecidableEq I] [Fintype U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (fraction:U→I→ℝ) (threshold θ:ℝ) (b:U→ℝ):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     let S:=Finset.univ.filter (fun i=&gt;∃ u,threshold≤fraction u i)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     let f:=fun i u=&gt;if threshold≤fraction u i then fraction u i else 0</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     let ηS:=fun (i:↥S) u=&gt;(1-θ)*f i.val u/b u;</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∀ i u,padIndexedFunctions S (fun _=&gt;U) ηS i u=(1-θ)*f i u/b u:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   intro S f ηS i u</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   by_cases hi:i∈S</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   · simpa [ηS] using pad_indexed_functions_on S (fun _=&gt;U) ηS ⟨i,hi⟩ u</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   · have hf:¬threshold≤fraction u i:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       intro hh</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       apply hi</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       exact Finset.mem_filter.mpr ⟨Finset.mem_univ i,u,hh⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     rw [pad_indexed_functions_off S (fun _=&gt;U) ηS i hi u]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     simp [f,hf]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> end Oberwolfach</span></pre></html>

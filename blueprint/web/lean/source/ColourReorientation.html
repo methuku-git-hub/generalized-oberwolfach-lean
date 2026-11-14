@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ColourReorientation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ColourReorientation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ColourRestriction</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Cut losses after an orientation change and exclusion of protected</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> physical edges. The excluded edge count is a realised count. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def excludeGraph {V : Type*} (F : SimpleGraph V) (M : V → V → ℕ) (x y : V) : ℕ :=</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   if F.Adj x y then 0 else M x y</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem sampledColourDegree_eq_sum {V : Type*} [Fintype V] {k : ℕ}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (F : SimpleGraph V) (c : Sym2 V → Fin k) (a : Fin k) (x : V) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     sampledColourDegree F c a x = ∑ y, if F.Adj x y ∧ c s(x,y) = a then 1 else 0 := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   rw [sampledColourDegree, Finset.card_filter]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hh : F.neighborFinset x = Finset.univ.filter (F.Adj x) := by ext y; simp</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   rw [hh, Finset.sum_filter]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   apply Finset.sum_congr rfl</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   intro y _</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   by_cases hf : F.Adj x y &lt;;&gt; by_cases hc : c s(x,y) = a &lt;;&gt; simp [hf, hc]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem edgeColourGraph_degree {V : Type*} [Fintype V] {k : ℕ}</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (F : SimpleGraph V) (c : Sym2 V → Fin k) (a : Fin k) (x : V) :</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (edgeColourGraph F c a).degree x = sampledColourDegree F c a x := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   unfold SimpleGraph.degree sampledColourDegree</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   congr 1</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   ext y</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   simp [edgeColourGraph]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> theorem sampledColourDegree_sup_le {V : Type*} [Fintype V] {k : ℕ}</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (Z A : SimpleGraph V) (c : Sym2 V → Fin k) (a : Fin k) (x : V) :</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     sampledColourDegree (Z ⊔ A) c a x ≤ sampledColourDegree Z c a x + A.degree x := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   rw [sampledColourDegree_eq_sum, sampledColourDegree_eq_sum]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hdeg : (∑ y, if A.Adj x y then 1 else 0 : ℕ) = A.degree x := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     rw [← Finset.card_filter, SimpleGraph.degree]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     congr 1</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     ext y</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     simp</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   rw [← hdeg, ← Finset.sum_add_distrib]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   apply Finset.sum_le_sum</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro y _</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   by_cases hz : Z.Adj x y &lt;;&gt; by_cases ha : A.Adj x y &lt;;&gt;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     by_cases hc : c s(x,y) = a &lt;;&gt; simp [SimpleGraph.sup_adj, hz, ha, hc]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> theorem graph_sup_degree_le {V : Type*} [Fintype V] (Z A : SimpleGraph V) (x : V) :</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (Z ⊔ A).degree x ≤ Z.degree x + A.degree x := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   rw [SimpleGraph.degree, SimpleGraph.neighborFinset_sup]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   exact Finset.card_union_le _ _</span>
+<span id="L53"><a href="#L53" class="ln">  53</a> </span>
+<span id="L54"><a href="#L54" class="ln">  54</a> theorem colourReorientation_cut_loss</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     {V : Type*} [Fintype V] {k : ℕ}</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (c : Sym2 V → Fin k) (M N : V → V → ℕ) (F : SimpleGraph V)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (hM : ∀ x y, M x y ≤ 1)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     {b : ℝ} {f : Fin k → ℝ}</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (hchange : ∀ x, ((Finset.univ.filter (fun y =&gt; M x y ≠ N x y ∨ M y x ≠ N y x)).card : ℝ) ≤ b)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (hforbid : ∀ a x, (sampledColourDegree F c a x : ℝ) ≤ f a)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (a : Fin k) (S T : Finset V) :</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (matrixCut (colourRestriction c M a) S T : ℝ) -</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (f a + b) * min (S.card : ℝ) T.card ≤</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (matrixCut (excludeGraph F (colourRestriction c N a)) S T : ℝ) := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   let W (x y : V) :=</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (if F.Adj x y ∧ c s(x,y) = a then 1 else 0 : ℕ) +</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (if M x y ≠ N x y ∨ M y x ≠ N y x then 1 else 0 : ℕ)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hpoint (x y : V) : colourRestriction c M a x y ≤</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       excludeGraph F (colourRestriction c N a) x y + W x y := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     have hm := hM x y</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     by_cases hc : c s(x,y) = a</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     · by_cases hf : F.Adj x y</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       · simp [colourRestriction, excludeGraph, W, hc, hf]; omega</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       · by_cases he : M x y = N x y</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>         · simp [colourRestriction, excludeGraph, W, hc, hf, he]</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>         · simp [colourRestriction, excludeGraph, W, hc, hf, he]; omega</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     · simp [colourRestriction, W, hc]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hrow (x : V) : ((∑ y, W x y : ℕ) : ℝ) ≤ f a + b := by</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     dsimp [W]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     rw [Finset.sum_add_distrib, Nat.cast_add, ← sampledColourDegree_eq_sum,</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       ← Finset.card_filter]</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     exact add_le_add (hforbid a x) (hchange x)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   have hsym (x y : V) : W x y = W y x := by</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     simp only [W, F.adj_comm, Sym2.eq_swap, or_comm]</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   apply matrixCut_loss_bound _ _ W hpoint hrow</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   intro y</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   simpa only [hsym] using hrow y</span>
+<span id="L88"><a href="#L88" class="ln">  88</a> </span>
+<span id="L89"><a href="#L89" class="ln">  89</a> end Oberwolfach</span></pre></html>

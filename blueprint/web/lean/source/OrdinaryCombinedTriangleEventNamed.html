@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryCombinedTriangleEventNamed.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryCombinedTriangleEventNamed.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryCombinedTriangleEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> set_option autoImplicit false</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option maxHeartbeats 6000000</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option synthInstance.maxSize 32768</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem ordinary_full_host_and_triangle_inputs_named</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (d:ℕ) (hd:2≤d) (θ α pstar ω βP ηP ηH L:ℝ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hθ:cycleThreshold 3≤θ) (hα:0&lt;α) (hα1:α≤1) (hθ1:θ+α/2≤1)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hpstar:0&lt;pstar) (hpstar1:pstar≤1) (hω:0&lt;ω)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hβP:0&lt;βP) (hβmax:βP≤2*(min (α/2) (1/4))*pstar^4*pstar^4)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hβhub:βP≤ω*pstar^9/4) (hηP:0&lt;ηP) (hηH:0&lt;ηH) (hL:0≤L):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃ (k:ℕ) (βH c B ε:ℝ),5≤k ∧ 0&lt;βH ∧ 0&lt;c ∧ 0&lt;B ∧ 0&lt;ε ∧ ∃ N:ℕ,</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ (V:Type) [Fintype V] [LinearOrder V],N≤Fintype.card V →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ P:SimpleGraph V,(∀ v,(θ+α)*Fintype.card V≤(P.degree v:ℝ)) →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ weight:OrdinaryCycle P 3→ℝ,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (∀ C,c/(Fintype.card V:ℝ)^(3-2)≤weight C ∧ weight C≤B/(Fintype.card V:ℝ)^(3-2)) ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (∀ x y,(∑ C,if C.val.val.Adj x y then weight C else 0)=if P.Adj x y then 1 else 0) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (U Γ Color:Type) [Fintype U] [Fintype Γ] [Fintype Color] [DecidableEq U],</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ω*Fintype.card V≤(Fintype.card U:ℝ) → Fintype.card U≤Fintype.card V →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∀ (F:SimpleGraph V) (π:Equiv.Perm V),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ v,(F.degree v:ℝ)≤L) → permutationConflictGraph π (3*d)≤F →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀ pR pH D₀:ℝ,∀ hRlo:pstar≤pR,∀ hRhi:pR≤1,pstar≤pH→pH≤1→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (Fintype.card V:ℝ)/2≤D₀→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ v,|(P.degree v:ℝ)-D₀|≤ε*Fintype.card V) → pR*D₀=2*(Fintype.card U:ℝ)*pH →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀ (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (hS:∀ u,∑ j,s u j ≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (j:Color),(∀ u,s u j=pH) →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let μ:=FiniteLaw.pi (rawWheelLaw (fun _:Sym2 V=&gt;pR) (fun _=&gt;(hpstar.trans_le hRlo).le) (fun _=&gt;hRhi) d hd q hq hQ s hs hS)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     1-(1/(Fintype.card V:ℝ)+3/(Fintype.card V:ℝ)^2)≤</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       μ.probability (ordinaryCombinedTriangleEvent d k P F π θ α pstar βP ηP ηH βH c B pR pH weight j) := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   obtain ⟨k,βH,c,B,ε,hk,hβH,hc,hB,hε,N,hbase⟩:=ordinary_full_host_and_triangle_inputs_common</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     d hd θ α pstar ω βP ηP ηH L hθ hα hα1 hθ1 hpstar hpstar1 hω</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     hβP hβmax hβhub hηP hηH hL</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨k,βH,c,B,ε,hk,hβH,hc,hB,hε,N,?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   intro V _ _ hn P hP</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   obtain ⟨weight,hw,hedge,hbase⟩:=hbase V hn P hP</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   refine ⟨weight,hw,hedge,?_⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   intro U Γ Color _ _ _ _ hUlo hUhi F π hFdeg hF hπ pR pH D₀ hRlo hRhi hHlo hHhi hDlo hreg hbal q hq hQ s hs hS j hj μ</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have h:=hbase U Γ Color hUlo hUhi F π hFdeg hF hπ pR pH D₀ hRlo hRhi hHlo hHhi hDlo hreg hbal q hq hQ s hs hS j hj</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   dsimp only [μ,ordinaryCombinedTriangleEvent]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   exact h</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> end Oberwolfach</span></pre></html>

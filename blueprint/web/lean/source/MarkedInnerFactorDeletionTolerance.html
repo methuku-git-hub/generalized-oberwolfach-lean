@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedInnerFactorDeletionTolerance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedInnerFactorDeletionTolerance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Tactic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The inner factor tolerance is fixed before the earlier packing&#x27;s</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> permitted deletion. Each smaller deletion tolerance remains valid. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_inner_factor_deletion_tolerance</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (r h:ℕ) (t beta eta C:ℝ) (ht:0&lt;t) (hb:0&lt;beta) (he:0&lt;eta) (hC:0≤C):</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     ∃ zeta:ℝ,0&lt;zeta∧∀ zR zS:ℝ,0≤zR→0≤zS→zR≤zeta→zS≤zeta→</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     h*(zR+zS)≤t/4∧(r+5:ℝ)*(zR+zS)≤beta∧</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (r+7:ℝ)*zR+(r+4:ℝ)*zS≤beta∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     5*(r+5:ℝ)^4*C*(2*zR+zS)≤eta/2:=by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   obtain ⟨a,ha,haB⟩:=exists_pos_mul_lt (show 0&lt;t/4 by positivity) (2*(h:ℝ))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   obtain ⟨b,hb&#x27;,hbB⟩:=exists_pos_mul_lt hb (2*(r:ℝ)+12)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   obtain ⟨c,hc,hcB⟩:=exists_pos_mul_lt (show 0&lt;eta/2 by positivity) (15*(r+5:ℝ)^4*C)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   refine ⟨min a (min b c),lt_min ha (lt_min hb&#x27; hc),?_⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   intro zR zS hzR hzS hR hS</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hRa:=hR.trans (min_le_left _ _)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hSa:=hS.trans (min_le_left _ _)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hRb:=hR.trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hSb:=hS.trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hRc:=hR.trans ((min_le_right _ _).trans (min_le_right _ _))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hSc:=hS.trans ((min_le_right _ _).trans (min_le_right _ _))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hh:0≤(h:ℝ):=Nat.cast_nonneg _</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hr:0≤(r:ℝ):=Nat.cast_nonneg _</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hRa&#x27;:=mul_le_mul_of_nonneg_left hRa hh</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hSa&#x27;:=mul_le_mul_of_nonneg_left hSa hh</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hRb5:=mul_le_mul_of_nonneg_left hRb (show 0≤(r+5:ℝ) by positivity)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hSb5:=mul_le_mul_of_nonneg_left hSb (show 0≤(r+5:ℝ) by positivity)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hRb7:=mul_le_mul_of_nonneg_left hRb (show 0≤(r+7:ℝ) by positivity)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hSb4:=mul_le_mul_of_nonneg_left hSb (show 0≤(r+4:ℝ) by positivity)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hRc&#x27;:=mul_le_mul_of_nonneg_left hRc (show 0≤10*(r+5:ℝ)^4*C by positivity)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hSc&#x27;:=mul_le_mul_of_nonneg_left hSc (show 0≤5*(r+5:ℝ)^4*C by positivity)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   exact ⟨by nlinarith only [hRa&#x27;,hSa&#x27;,haB],by nlinarith only [hRb5,hSb5,hbB,hb&#x27;],</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     by nlinarith only [hRb7,hSb4,hbB,hb&#x27;],by nlinarith only [hRc&#x27;,hSc&#x27;,hcB]⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> </span>
+<span id="L38"><a href="#L38" class="ln">  38</a> end Oberwolfach</span></pre></html>

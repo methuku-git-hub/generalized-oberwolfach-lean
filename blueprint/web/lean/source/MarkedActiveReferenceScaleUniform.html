@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedActiveReferenceScaleUniform.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedActiveReferenceScaleUniform.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedActiveReferenceScale</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A single accuracy works for all later actual density parameters above</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> fixed positive lower bounds. The actual parameters remain in every bound. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_active_reference_scale_uniform</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (r h:ℕ) (omega₀ gamma p0 beta epsA deltaSp eta0 Bbar rho₀ deltaCut₀ hcut₀:ℝ)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (ho:0&lt;omega₀) (hg:0&lt;gamma) (hp:0&lt;p0) (hb:0&lt;beta) (he:0&lt;epsA)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hs:0&lt;deltaSp) (heta:0&lt;eta0) (hB:0≤Bbar) (hrho:0&lt;rho₀)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hdc:0&lt;deltaCut₀) (hhc:0&lt;hcut₀):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ kappa0:ℝ,0&lt;kappa0 ∧ ∀ omega rho deltaCut hcut:ℝ,</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     omega₀≤omega → rho₀≤rho → deltaCut₀≤deltaCut → hcut₀≤hcut →</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∀ kappa:ℝ,0≤kappa→kappa≤kappa0→</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     8*kappa≤epsA∧3*kappa≤gamma*p0^2∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     8*(r+5:ℝ)*kappa≤12*beta∧(1+2*(r+5:ℝ))*kappa≤28*beta∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     2*(2+2*(h:ℝ))*kappa≤deltaSp∧2*(2+(h:ℝ))*kappa≤deltaSp*p0^2*omega∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (1+2*(r+5:ℝ)^3*Bbar+66*(r+5:ℝ)^4*Bbar)*kappa≤eta0∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     kappa≤min (gamma/128) (p0/128)∧2*kappa≤gamma*p0/8∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     kappa≤deltaCut*omega/2∧(1+2/omega)*kappa≤14*hcut∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     kappa≤1/4∧kappa≤gamma*rho/16∧kappa≤omega/2∧kappa≤gamma/4:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   obtain ⟨κ,hκ,hscale⟩:=marked_active_reference_scale_exists r h omega₀ gamma p0 beta epsA deltaSp eta0 Bbar rho₀ deltaCut₀ hcut₀</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ho hg hp hb he hs heta hB hrho hdc hhc</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   refine ⟨κ,hκ,?_⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   intro omega rho deltaCut hcut hω hρ hδ hh kappa hk hkk</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14⟩:=hscale kappa hk hkk</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have homega:0&lt;omega:=ho.trans_le hω</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hδprod:deltaCut₀*omega₀≤deltaCut*omega:=mul_le_mul hδ hω ho.le (hdc.le.trans hδ)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hi:1/omega≤1/omega₀:=one_div_le_one_div_of_le ho hω</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hi2:2/omega≤2/omega₀:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hh:=mul_le_mul_of_nonneg_left hi (show (0:ℝ)≤2 by norm_num)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     simpa only [mul_one_div] using hh</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hbcoef:1+2/omega≤1+2/omega₀:=by linarith only [hi2]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hcoef:=mul_le_mul_of_nonneg_right hbcoef hk</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hpω:=mul_le_mul_of_nonneg_left hω (show 0≤deltaSp*p0^2 by positivity)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hgρ:=mul_le_mul_of_nonneg_left hρ hg.le</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   refine ⟨b0,b1,b2,b3,b4,by nlinarith only [b5,hpω],b6,b7,b8,</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     by nlinarith only [b9,hδprod],by nlinarith only [b10,hcoef,hh],b11,</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     by nlinarith only [b12,hgρ],by linarith,b14⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

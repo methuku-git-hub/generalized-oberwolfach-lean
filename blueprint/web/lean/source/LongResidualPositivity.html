@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongResidualPositivity.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongResidualPositivity.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongCapacityIntervalAssembly</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ResidualPathPositivity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Positivity needed for the pointwise cancellation follows from the original</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> transition product and the proved reserve bound, even when an input transport</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> matrix has zero entries. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem long_residual_system_positive {X : Type*} [Fintype X]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (a : ℕ → X → X → ℝ) (d : ℕ → X → ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (ha : ∀ i x y, 0 ≤ a i x y) (hd : ∀ i x, 0 &lt; d i x)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hrow : ∀ i x, ∑ y, a i x y=d i x)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hcol : ∀ i y, ∑ x, a i x y=d (i+1) y)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (s L : Fin 3 → ℕ) (hL : ∀ i, 0 &lt; L i)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hbd : ∀ i x, d (s i+L i) x=d (s (finRotate 3 i)) x)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hT : ∀ i x z, 0 &lt; transitionWalk (capacityTransition a d) (s i) (L i) x z)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hres : ∀ (Q : transportProduct (threeIntervalMarginal (intervalDegrees d s L)) (finRotate 3))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       i j x y, pathEdgeLoad (longCapacityReserve a d s L Q i) j x y ≤ (11/27)*a (s i+j.val) x y) :</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∀ Q i x z, 0 &lt; threeIntervalResidualSystem (intervalCapacities a s L) (intervalDegrees d s L)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (longCapacityReserve a d s L) Q i x z := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let R := capacityTransition a d</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let A := intervalCapacities a s L</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let D := intervalDegrees d s L</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let ρ := longCapacityReserve a d s L</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hR := capacityTransition_isTransition a d ha hd hrow</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hD (i : Fin 3) (j : Fin (L i+1)) (x : X) : 0 &lt; D i j x := hd _ _</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hA (i : Fin 3) (j : Fin (L i)) (x y : X) : 0 ≤ A i j x y := ha _ _ _</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hAr (i : Fin 3) (j : Fin (L i)) (x : X) : (∑ y, A i j x y)=D i j.castSucc x := hrow _ _</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hAc (i : Fin 3) (j : Fin (L i)) (y : X) : (∑ x, A i j x y)=D i j.succ y := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     simpa only [A,D,intervalCapacities,intervalDegrees,Fin.val_succ,Nat.add_assoc] using hcol (s i+j.val) y</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   intro Q i x z</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hQ : Q.val i ∈ transportMatrices (fun x =&gt; D i 0 x/3) (fun z =&gt; D i (Fin.last (L i)) z/3) := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hh := Q.property i (Set.mem_univ i)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     change Q.val i ∈ transportMatrices (fun x =&gt; d (s i) x/3) (fun z =&gt; d (s (finRotate 3 i)) z/3) at hh</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     simpa only [D,intervalDegrees,Fin.val_zero,Nat.add_zero,Fin.val_last,hbd] using hh</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hρ0 (p : Fin (L i+1) → X) : 0 ≤ ρ Q i p :=</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     reservedPathWeight_nonneg R hR (s i) (L i) (Q.val i) hQ.1 p</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hρend (x z : X) : (∑ p, if p 0=x ∧ p (Fin.last (L i))=z then ρ Q i p else 0)=Q.val i x z :=</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     reservedPathWeight_endpoints R (s i) (L i) (Q.val i) (hT i) x z</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hpkg := halfResidualPathWeight_properties (hL i) (A i) (D i) (ρ Q i) (Q.val i)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hA i) (hD i) (hAr i) (hAc i) hρ0 (hres Q i) hρend hQ</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨p,hpx,hpz,hpath⟩ := positive_transition_path_exists R hR (s i) (L i) x z (hT i x z)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have haPath (j : Fin (L i)) : 0 &lt; A i j (p j.castSucc) (p j.succ) := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hh := hpath j</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     change 0 &lt; a (s i+j.val) (p j.castSucc) (p j.succ) / d (s i+j.val) (p j.castSucc) at hh</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     exact (div_pos_iff_of_pos_right (hd _ _)).mp hh</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hpos := halfResidualPathWeight_pos (hL i) (A i) (D i) (ρ Q i)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hA i) (hD i) (hAr i) (hAc i) hρ0 (hres Q i) p haPath</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   exact pathEndpointMatrix_pos_of_path _ hpkg.1 x z p ⟨hpx,hpz⟩ hpos</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> </span>
+<span id="L56"><a href="#L56" class="ln">  56</a> end Oberwolfach</span></pre></html>

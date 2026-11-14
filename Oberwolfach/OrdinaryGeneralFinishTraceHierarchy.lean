@@ -1,0 +1,62 @@
+module
+
+public import Oberwolfach.OrdinaryBoundaryCompletionTraceBudget
+public import Oberwolfach.OrdinaryBoundarySmallDensityChoice
+
+@[expose] public section
+/-! The fresh density, selection errors, cleanup scales and endpoint
+completion capacity can be chosen in a compatible order using the full
+protected-inner extension coefficient. -/
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency true
+set_option maxHeartbeats 12000000
+noncomputable section
+namespace Oberwolfach
+
+theorem ordinary_general_finish_trace_hierarchy (m:ℕ) (β κ ζ rate:ℝ)
+    (hβ:0<β) (hκ:0<κ) (hζ:0<ζ) (hrate:0<rate):
+    ∃k p ε τ ν:ℝ,0<k ∧ 0<p ∧ 0<ε ∧ 0<τ ∧ 0<ν ∧
+      p≤1 ∧ p≤4*ζ*min (κ/2) 1 ∧ 20*Real.sqrt (2*p)≤ζ*min (κ/2) 1/2 ∧
+      ε≤p^2/4 ∧ τ+ν≤p^2/4 ∧ ν≤ζ*min (κ/2) 1*p/4 ∧ 2*p≤k^2 ∧ ν≤k^2 ∧
+      ∀δ φ:ℝ,0≤δ→0≤φ→δ≤k^2→φ≤k^2→∃N:ℕ,
+        ∀n:ℕ,N≤n→2≤ζ*min (κ/2) 1*p*n/4 ∧
+          ∀(D:ℕ) (Lconf:ℝ),(D:ℝ)≤δ*n→Lconf≤φ*n→
+          ∃K:ℕ,0<K ∧ (K:ℝ)≤k*n+1 ∧
+            ((n*D*(m+1):ℕ):ℝ)/(K:ℝ)+(((m+1:ℕ):ℝ)+3)*(Lconf+1)+
+            2*(2*((2*p)*n)+2*((K+D:ℕ):ℝ))+(D:ℝ)+((D*(m+1):ℕ):ℝ)+3*D < β*n-3*(ν*n) ∧
+          ν*n+2*((2*p)*n)+((3*(K+D)+D*(m+1):ℕ):ℝ)≤rate*n:=by
+  let κ₀:=min (κ/2) 1
+  have hκ₀:0<κ₀:=lt_min (by positivity) (by norm_num)
+  obtain ⟨k,hk,hk1,hcap⟩:=ordinary_boundary_completion_trace_budget m β rate hβ hrate
+  obtain ⟨p,hp,hp1,hpmax,hpk,hpsqrt⟩:=ordinary_boundary_small_density_choice κ₀ ζ (k^2/2)
+    hκ₀ hζ (by positivity)
+  let ε:=p^2/8
+  let τ:=min (p^2/16) (min (ζ*κ₀*p/16) (k^2/4))
+  let ν:=τ
+  have hε:0<ε:=by dsimp [ε];positivity
+  have hτ:0<τ:=by dsimp [τ];positivity
+  have hν:0<ν:=hτ
+  have hτp:τ≤p^2/16:=min_le_left _ _
+  have hτκ:τ≤ζ*κ₀*p/16:=(min_le_right _ _).trans (min_le_left _ _)
+  have hτk:τ≤k^2/4:=(min_le_right _ _).trans (min_le_right _ _)
+  have hεbound:ε≤p^2/4:=by dsimp [ε];nlinarith [sq_nonneg p]
+  have hsum:τ+ν≤p^2/4:=by dsimp [ν];nlinarith only [hτp,sq_nonneg p]
+  have hνbound:ν≤ζ*κ₀*p/4:=by dsimp [ν];nlinarith [mul_pos (mul_pos hζ hκ₀) hp]
+  have hpk2:2*p≤k^2:=by linarith
+  have hνk:ν≤k^2:=by dsimp [ν];nlinarith [sq_nonneg k]
+  refine ⟨k,p,ε,τ,ν,hk,hp,hε,hτ,hν,hp1,hpk,hpsqrt,hεbound,hsum,hνbound,hpk2,hνk,?_⟩
+  intro δ φ hδ hφ hδk hφk
+  obtain ⟨Ncap,hNcap⟩:=hcap δ φ (2*p) ν hδ hφ (by positivity) hν.le hδk hφk hpk2 hνk
+  let N:=max Ncap ⌈8/(ζ*κ₀*p)⌉₊
+  refine ⟨N,?_⟩
+  intro n hn
+  have hden:0<ζ*κ₀*p:=mul_pos (mul_pos hζ hκ₀) hp
+  have hnsize:8/(ζ*κ₀*p)≤(n:ℝ):=
+    (Nat.le_ceil _).trans (by exact_mod_cast (show ⌈8/(ζ*κ₀*p)⌉₊≤n from (le_max_right _ _).trans hn))
+  have horder:2≤ζ*κ₀*p*n/4:=by
+    have hh:8≤(n:ℝ)*(ζ*κ₀*p):=(div_le_iff₀ hden).mp hnsize
+    nlinarith only [hh]
+  refine ⟨horder,?_⟩
+  intro D Lconf hD hL
+  exact hNcap n ((le_max_left _ _).trans hn) D Lconf (ν*n) hD hL le_rfl
+end Oberwolfach

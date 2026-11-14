@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ProfileInducedSampling.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ProfileInducedSampling.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ProfileSubsetExchange</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.InducedResourceWeights</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.UniformProfileConcentration</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Fixed-size, classwise sampling of the original weighted resources.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> An external vertex is retained explicitly in Z. The bound depends on</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> the sampled ground size, not the size of the ambient graph. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 4000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {s : ℕ} {V : Fin s → Type*} [∀ i,Fintype (V i)]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {W C : Type*} [Fintype W] [DecidableEq W] [Fintype C]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem profile_induced_degree_exchange (e : (Σ i,V i) ↪ W)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (R : C → Finset W) (c J : ℕ) (hc : 2 ≤ c)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hR : ∀ C₀,(R C₀).card=c) (hJ : ∀ A : Finset W,Fintype.card {C₀ : C // R C₀=A} ≤ J)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (w : C → ℝ) (B : ℝ) (hB : 0 ≤ B) (hw : ∀ C₀,0 ≤ w C₀ ∧ w C₀ ≤ B)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (Z : Finset W) (v : W) (hv : v∈Z) {m : Fin s → ℕ}</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (σ τ : ∀ i,FixedSubset (V i) (m i)) (i : Fin s)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hagree : ∀ j,j≠i → σ j=τ j) (x y : V i)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (he : τ i=fixedSubsetMap (Equiv.swap x y) (σ i)) :</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     |hypergraphWeightedDegree R (inducedResourceWeight R w (Z∪(profileRootSet σ).map e)) v-</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       hypergraphWeightedDegree R (inducedResourceWeight R w (Z∪(profileRootSet τ).map e)) v| ≤</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       2*(J:ℝ)*(Z.card+(∑ j,m j)+1:ℕ)^(c-2)*B := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hh := induced_resource_degree_exchange R c J hc hR hJ w B hB hw</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (Z∪(profileRootSet σ).map e) (Z∪(profileRootSet τ).map e) v</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (Finset.mem_union_left _ hv) (Finset.mem_union_left _ hv)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hb := profileSample_exchange_card_bounds e Z σ τ i hagree x y he</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hsum : (((Z∪(profileRootSet σ).map e)\(Z∪(profileRootSet τ).map e)).card+</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       ((Z∪(profileRootSet τ).map e)\(Z∪(profileRootSet σ).map e)).card:ℕ) ≤ 2 := by omega</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hr : (((Z∪(profileRootSet σ).map e)\(Z∪(profileRootSet τ).map e)).card+</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       ((Z∪(profileRootSet τ).map e)\(Z∪(profileRootSet σ).map e)).card:ℝ) ≤ 2 := by exact_mod_cast hsum</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hp : (((Z∪(profileRootSet σ).map e)∪(Z∪(profileRootSet τ).map e)).card:ℝ)^(c-2) ≤</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (Z.card+(∑ j,m j)+1:ℕ)^(c-2) := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     apply pow_le_pow_left₀ (Nat.cast_nonneg _)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     exact_mod_cast hb.2.2</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   apply hh.trans</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   push_cast at hp ⊢</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   exact mul_le_mul_of_nonneg_right</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (mul_le_mul (mul_le_mul_of_nonneg_right hr (Nat.cast_nonneg _)) hp</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (by positivity) (by positivity)) hB</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> </span>
+<span id="L47"><a href="#L47" class="ln">  47</a> theorem profile_induced_degree_mgf (e : (Σ i,V i) ↪ W)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (R : C → Finset W) (c J : ℕ) (hc : 2 ≤ c)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hR : ∀ C₀,(R C₀).card=c) (hJ : ∀ A : Finset W,Fintype.card {C₀ : C // R C₀=A} ≤ J)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (w : C → ℝ) (B : ℝ) (hB : 0 ≤ B) (hw : ∀ C₀,0 ≤ w C₀ ∧ w C₀ ≤ B)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (Z : Finset W) (v : W) (hv : v∈Z) (m : Fin s → ℕ)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     [∀ i,Nonempty (FixedSubset (V i) (m i))]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hm : ∀ i,m i ≤ Fintype.card (V i)) (u : ℝ) :</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     let μ := FiniteLaw.pi (fun i =&gt; FiniteLaw.uniform (FixedSubset (V i) (m i)))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     let X := fun σ =&gt; hypergraphWeightedDegree R</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (inducedResourceWeight R w (Z∪(profileRootSet σ).map e)) v</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     μ.expectation (fun σ =&gt; Real.exp (u*(X σ-μ.expectation X))) ≤</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       Real.exp (u^2*(∑ i,(m i:ℝ))*(2*(J:ℝ)*(Z.card+(∑ j,m j)+1:ℕ)^(c-2)*B)^2/8) := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hh := uniform_profile_mgf m hm</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (fun σ =&gt; hypergraphWeightedDegree R (inducedResourceWeight R w (Z∪(profileRootSet σ).map e)) v)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (2*(J:ℝ)*(Z.card+(∑ j,m j)+1:ℕ)^(c-2)*B) (by positivity)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (fun i σ τ ha x y he =&gt; profile_induced_degree_exchange e R c J hc hR hJ w B hB hw Z v hv σ τ i ha x y he) u</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   simpa only [mul_assoc] using hh</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> theorem profile_induced_degree_tail (e : (Σ i,V i) ↪ W)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (R : C → Finset W) (c J : ℕ) (hc : 2 ≤ c)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (hR : ∀ C₀,(R C₀).card=c) (hJ : ∀ A : Finset W,Fintype.card {C₀ : C // R C₀=A} ≤ J)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (w : C → ℝ) (B : ℝ) (hB : 0 ≤ B) (hw : ∀ C₀,0 ≤ w C₀ ∧ w C₀ ≤ B)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (Z : Finset W) (v : W) (hv : v∈Z) (m : Fin s → ℕ)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     [∀ i,Nonempty (FixedSubset (V i) (m i))]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (hm : ∀ i,m i ≤ Fintype.card (V i)) (t : ℝ) (ht : 0 ≤ t) :</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     let μ := FiniteLaw.pi (fun i =&gt; FiniteLaw.uniform (FixedSubset (V i) (m i)))</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     let X := fun σ =&gt; hypergraphWeightedDegree R</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       (inducedResourceWeight R w (Z∪(profileRootSet σ).map e)) v</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     μ.probability (fun σ =&gt; t ≤ |X σ-μ.expectation X|) ≤</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       2*Real.exp (-2*t^2/((∑ i,(m i:ℝ))*(2*(J:ℝ)*(Z.card+(∑ j,m j)+1:ℕ)^(c-2)*B)^2)) := by</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   apply finiteLaw_mgf_absolute_tail _ _ (by positivity) _ ht</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   intro u</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   convert profile_induced_degree_mgf e R c J hc hR hJ w B hB hw Z v hv m hm u using 1 &lt;;&gt; ring</span>
+<span id="L80"><a href="#L80" class="ln">  80</a> </span>
+<span id="L81"><a href="#L81" class="ln">  81</a> end Oberwolfach</span></pre></html>

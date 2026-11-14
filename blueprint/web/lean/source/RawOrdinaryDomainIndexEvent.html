@@ -1,0 +1,80 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawOrdinaryDomainIndexEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawOrdinaryDomainIndexEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawOrdinaryHubCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawIntervalDomainCounts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.BoundedFinsetCardinality</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.EndpointRelativeCounts</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! A single event for all independent index tests of bounded size,</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> on a fixed hub domain B under the unchanged raw law. B is fixed before</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> the sample; this does not assert uniformity over later choices of B. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 3500000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     [DecidableEq V] [DecidableEq U]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> def RawOrdinaryDomainIndices (F:SimpleGraph V) (π:Equiv.Perm V) (d h:ℕ) (B:Finset U) (pH:ℝ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (j:Color) (t:ℝ) (σ:RawWheelOutcome V U Γ Color):Prop:=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   ∀ S:Finset V,S.card≤h → (∀ v∈S,∀ w∈S,¬F.Adj v w) →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     |((common B S (fun v=&gt;Finset.univ.filter (rawWheelSpokes π d σ j v))).card:ℝ)-</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       pH^S.card*B.card|&lt;t</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> </span>
+<span id="L25"><a href="#L25" class="ln">  25</a> theorem rawOrdinaryDomainIndices_common_event (F:SimpleGraph V) (π:Equiv.Perm V)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (ρ:Sym2 V→ℝ) (hρ:∀ e,0≤ρ e) (hρ1:∀ e,ρ e≤1)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (d:ℕ) (hd:2≤d)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hnoshort:∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hF:permutationConflictGraph π (3*d)≤F)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (B:Finset U) (hm:0&lt;B.card) (h:ℕ) (j:Color) (pH:ℝ) (hj:∀ u,s u j=pH) (t:ℝ) (ht:0&lt;t):</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     1-(Fintype.card V+1:ℝ)^h*</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (2*Real.exp (-2*t^2/((4*(d:ℝ)+3)^2*((h+1:ℝ)*B.card))))≤</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (FiniteLaw.pi (rawWheelLaw ρ hρ hρ1 d hd q hq hQ s hs hS)).probability</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (RawOrdinaryDomainIndices F π d h B pH j t):=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   let I:={S:Finset V//S.card≤h ∧ S.Nonempty ∧ (∀ v∈S,∀ w∈S,¬F.Adj v w)}</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hsep (i:I):∀ x∈i.val,∀ y∈i.val,x≠y → ¬PermutationClose π (3*d) x y:=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     intros x hx y hy hxy hclose</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     exact i.property.2.2 x hx y hy (hF ⟨hxy,hclose⟩)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hh:=rawIntervalCommonHubsOnDomain_common_event π d hd q hq hQ s hs hS hnoshort B hm j pH (fun u _=&gt;hj u)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (fun i:I=&gt;i.val) hsep (fun i=&gt;i.property.2.1) (h+1) (by omega) (fun i=&gt;by have hh:=i.property.1;omega) t ht</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let μ:=rawWheelLaw ρ hρ hρ1 d hd q hq hQ s hs hS</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hproj:=finiteLaw_pi_injective_projection_event μ Sum.inr Sum.inr_injective</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (fun ω=&gt;∀ i:I,|((B.filter (fun u=&gt;∀ v∈i.val,rawIntervalFamilyState π d ω (v,u)=some (Sum.inr j))).card:ℝ)-</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       pH^i.val.card*B.card|&lt;t)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   erw [←hproj] at hh</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hc:Fintype.card I≤(Fintype.card V+1)^h:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let f:I→{S:Finset V//S.card≤h}:=fun i=&gt;⟨i.val,i.property.1⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have hf:Function.Injective f:=by intro i j he;exact Subtype.ext (congrArg (fun a:{S:Finset V//S.card≤h}=&gt;a.val) he)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact (Fintype.card_le_of_injective f hf).trans (boundedFinset_card h)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hcr:(Fintype.card I:ℝ)≤(Fintype.card V+1:ℝ)^h:=by exact_mod_cast hc</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have herr:=mul_le_mul_of_nonneg_right hcr</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (by positivity:(0:ℝ)≤2*Real.exp (-2*t^2/((4*(d:ℝ)+3)^2*((h+1:ℝ)*B.card))))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hh&#x27;:1-(Fintype.card V+1:ℝ)^h*(2*Real.exp (-2*t^2/((4*(d:ℝ)+3)^2*((h+1:ℝ)*B.card))))≤</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (FiniteLaw.pi μ).probability (fun σ=&gt;∀ i:I,</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         |((B.filter (fun u=&gt;∀ v∈i.val,rawWheelSpokes π d σ j v u)).card:ℝ)-pH^i.val.card*B.card|&lt;t):=by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     apply (sub_le_sub_left herr 1).trans</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     convert hh using 1 &lt;;&gt; congr! &lt;;&gt; norm_num</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   apply hh&#x27;.trans</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   apply finiteLaw_probability_mono</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   intro σ hσ S hS hI</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   by_cases hne:S.Nonempty</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   · have hi:=hσ ⟨S,hS,hne,hI⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have heq:(common B S (fun v=&gt;Finset.univ.filter (rawWheelSpokes π d σ j v))).card=</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         (B.filter (fun u=&gt;∀ v∈S,rawWheelSpokes π d σ j v u)).card:=by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       congr 1</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       ext u;simp [mem_common_iff]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     simpa only [heq] using hi</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   · have he:S=∅:=Finset.not_nonempty_iff_eq_empty.mp hne</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     subst S</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have heq:common B (∅:Finset V) (fun v=&gt;Finset.univ.filter (rawWheelSpokes π d σ j v))=B:=by</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       ext u;simp [mem_common_iff]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     simpa only [heq,Finset.card_empty,pow_zero,one_mul,Finset.card_univ,sub_self,abs_zero] using ht</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> </span>
+<span id="L77"><a href="#L77" class="ln">  77</a> end Oberwolfach</span></pre></html>

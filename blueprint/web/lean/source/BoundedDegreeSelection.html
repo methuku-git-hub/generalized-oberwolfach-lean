@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BoundedDegreeSelection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BoundedDegreeSelection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BoundedDegreeSelectionFinite</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SelectionPotentialOrder</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The manuscript&#x27;s selection lemma, with the order threshold chosen</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> before the graph, number of support sets, and candidate families. The</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> proof uses conditional averaging of a common potential and therefore</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> requires no independence between successive choices. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 3000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem mul_sqrt_eq_rpow_three_halves (p : ℝ) (hp : 0 &lt; p) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     p * Real.sqrt p = p ^ (3/2 : ℝ) := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hh := Real.rpow_add hp 1 (1/2)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   norm_num at hh</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   simpa only [Real.sqrt_eq_rpow] using hh.symm</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem bounded_degree_selection (p : ℝ) (hp : 0 &lt; p) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ n₀ : ℕ, 2 ≤ n₀ ∧ ∀ (V : Type*) [Fintype V] [DecidableEq V],</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     n₀ ≤ Fintype.card V → ∀ (N D : ℕ) (G : SimpleGraph V)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (S : Fin N → Finset V) (family : Fin N → Set (SimpleGraph V)),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀ i j, i ≠ j → ((S i ∩ S j).card : ℝ) ≤ p^2 * Fintype.card V) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ v, ((Finset.univ.filter (fun i =&gt; v ∈ S i)).card : ℝ) ≤ p * Fintype.card V) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀ i, ∀ J : SimpleGraph V, J ≤ spanningRestriction G (S i) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ v, (J.degree v : ℝ) ≤ D * (p * Real.sqrt p * Fintype.card V)) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ∃ C : Fin (Nat.ceil (4 * (p * Real.sqrt p * Fintype.card V))) → SimpleGraph V,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (∀ a, C a ∈ family i ∧ C a ≤ spanningRestriction G (S i) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>           (∀ v, (C a).degree v ≤ D) ∧ Disjoint (C a) J) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (∀ a b, a ≠ b → Disjoint (C a) (C b))) →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∃ F : Fin N → SimpleGraph V,</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ i, F i ∈ family i ∧ F i ≤ spanningRestriction G (S i) ∧ ∀ v, (F i).degree v ≤ D) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ i j, i ≠ j → Disjoint (F i) (F j)) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       ∀ v, ((⨆ i, F i).degree v : ℝ) ≤ D * (p * Fintype.card V) := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   obtain ⟨n₀, hn₀, horder⟩ := bounded_degree_selection_order p hp</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   refine ⟨n₀, hn₀, ?_⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   intro V _ _ hn N D G S family hinter hmem hcandidates</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let n := Fintype.card V</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let s := p * Real.sqrt p * n</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let t := Nat.ceil (4 * s)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let B := Nat.floor s + 1</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hnpos : (0 : ℝ) &lt; n := by exact_mod_cast (show 0 &lt; n from lt_of_lt_of_le (by omega) hn)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hs : 0 ≤ s := by dsimp [s]; positivity</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hscale := selection_candidate_scale p n hp hnpos</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   change 0 &lt; t ∧ p^2 * n ≤ (Real.sqrt p / 4) * t ∧ (Nat.floor s : ℝ) ≤ s at hscale</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hcount : (Fintype.card (SelectionVertexTest S) : ℝ) ≤ p * (n : ℝ)^2 := by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have hh := selectionVertexTest_card_le S (p*n) hmem</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     convert hh using 1 &lt;;&gt; dsimp [n] &lt;;&gt; ring</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hremaining (x : SelectionVertexTest S) :</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (selectionRemaining (graphSelectionActive S) 0 x : ℝ) ≤ p*n := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hh : (selectionRemaining (graphSelectionActive S) 0 x : ℝ) ≤</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       ((Finset.univ.filter (fun i =&gt; x.val.2 ∈ S i)).card : ℝ) := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       exact_mod_cast graphSelection_remaining_le S 0 x</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     exact hh.trans (hmem x.val.2)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hsmall := horder n hn (SelectionVertexTest S) N (graphSelectionActive S) hcount hremaining</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   exact bounded_degree_selection_finite N D t B hscale.1 (Real.sqrt p/4) s (p*n)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (by positivity) hs (by simpa [B] using hscale.2.2) G S family</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (fun i j hij =&gt; (hinter i j hij).trans hscale.2.1) hmem hsmall hcandidates</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> </span>
+<span id="L63"><a href="#L63" class="ln">  63</a> end Oberwolfach</span></pre></html>

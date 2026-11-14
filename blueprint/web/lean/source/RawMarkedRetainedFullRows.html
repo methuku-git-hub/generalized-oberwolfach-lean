@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawMarkedRetainedFullRows.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawMarkedRetainedFullRows.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawUniformRetentionRealExponents</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawMarkedRetention</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Full-row retention bounds can be added to the same retained marked sample. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 14000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem raw_marked_retained_full_rows_high_probability</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (d:ℕ) (hd:2≤d) (pstar ζ δ:ℝ) (hpstar:0&lt;pstar) (hζ:0&lt;ζ) (hδ:0&lt;δ):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃m₀ N:ℕ,1≤m₀ ∧ ∀(V:Type) [Fintype V] [LinearOrder V] [Nonempty V],N≤Fintype.card V→</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∀(U Γ Color:Type) [Fintype U] [DecidableEq U] [Fintype Γ] [Fintype Color],</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     m₀≤Fintype.card U→Fintype.card U≤Fintype.card V→</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀(π:Equiv.Perm V) (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (p k:ℝ) (hp:0≤p) (hk:0≤k) (hphys:2*p+2*k≤1)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (q:U→Γ→ℝ) (hq:∀u g,0≤q u g) (hQ:∀u,∑g,q u g≤1/8)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (s:U→Color→ℝ) (hs:∀u j,0≤s u j) (hS:∀u,(∑j,s u j) ≤ intervalUncoveredProbability d (∑g,q u g))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (g:Γ) (t₀:ℝ) (hconst:∀u,q u g=t₀) (hmass:pstar*Fintype.card V≤t₀*Fintype.card U),</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     1-δ≤(rawMarkedRetentionLaw π d hd g p k hp hk hphys q hq hQ s hs hS).probability</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (fun z=&gt;RetainedRestrictionGood π d (fun e=&gt;z.1 (Sum.inr e)) g</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) g))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (fun _:Unit=&gt;Finset.univ) (fun _:Unit=&gt;Finset.univ) ζ z.2):=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   obtain ⟨m₀,N₀,hm₀,hN₀,hret⟩:=raw_uniform_retention_restrictions_real d hd 1 1 pstar ζ hpstar hζ</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨Nδ,hNδ⟩:=exists_nat_gt (1/δ)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   refine ⟨m₀,max (max N₀ m₀) Nδ,hm₀,?_⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   intro V _ _ _ hn U Γ Color _ _ _ _ hUmin hU π hnoshort p k hp hk hphys q hq hQ s hs hS g t₀ hconst hmass</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hn0:0&lt;Fintype.card V:=by omega</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hnR:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn0</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hI:(Fintype.card Unit:ℝ)≤(Fintype.card V:ℝ)^(1:ℝ):=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     rw [Real.rpow_one]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     simp only [Fintype.card_unique,Nat.cast_one]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     exact_mod_cast hn0</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hraw:=hret V U Γ Color Unit (by omega) hU hI π hnoshort q hq hQ s hs hS g t₀ hconst hmass</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (fun _=&gt;Finset.univ) (fun _=&gt;Finset.univ) (by simp) (by intro i;simpa using (show m₀≤Fintype.card V by omega))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (by intro i;simpa using hUmin)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hsmall:(Fintype.card V:ℝ)^(-(1:ℝ))≤δ:=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rw [Real.rpow_neg_one]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     rw [←one_div]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     apply (div_le_iff₀ hnR).2</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hh:1/δ&lt;(Fintype.card V:ℝ):=lt_of_lt_of_le hNδ (by exact_mod_cast (show Nδ≤Fintype.card V by omega))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hh&#x27;:1&lt;(Fintype.card V:ℝ)*δ:=(div_lt_iff₀ hδ).1 hh</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     linarith</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let Good:=fun (z:RawRetainedIntervalOutcome (U:=U) (Γ:=Γ) (Color:=Color) π d g)=&gt;RetainedRestrictionGood π d z.1 g</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (startRetentionMinimum (rawStartHubSet π d z.1 g)) (fun _:Unit=&gt;Finset.univ) (fun _:Unit=&gt;Finset.univ) ζ z.2</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hGood:1-δ≤(rawUniformRetentionLaw π d hd g q hq hQ s hs hS).probability Good:=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     apply (sub_le_sub_left hsmall 1).trans</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     apply hraw.trans</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     apply finiteLaw_probability_mono</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     intro z hz</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     exact hz.2</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   rw [←rawMarkedRetentionLaw_interval_projection π d hd g p k hp hk hphys q hq hQ s hs hS Good] at hGood</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   exact hGood</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> end Oberwolfach</span></pre></html>

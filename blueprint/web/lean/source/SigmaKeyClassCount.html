@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SigmaKeyClassCount.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SigmaKeyClassCount.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.UniformFiberCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Count one fixed index and one fixed length in a dependent family. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem sigma_key_class_count {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (D:U→Type) [∀u,Fintype (D u)] [∀u,DecidableEq (D u)]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (len:∀u,D u→ℕ) (u:U) (r:ℕ):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (Finset.univ.filter (fun z:Σu,D u=&gt;z.1=u ∧ len z.1 z.2=r)).card =</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       (Finset.univ.filter (fun x:D u=&gt;len u x=r)).card :=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   symm</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   apply Finset.card_bij (fun x _=&gt;⟨u,x⟩)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   · intro x hx</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     simp only [Finset.mem_filter,Finset.mem_univ,true_and] at hx ⊢</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     exact hx</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   · intro x hx y hy hxy</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     exact eq_of_heq (Sigma.mk.inj_iff.mp hxy).2</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   · rintro ⟨v,x⟩ hx</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     simp only [Finset.mem_filter,Finset.mem_univ,true_and] at hx</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     obtain ⟨hv,hx⟩:=hx</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     subst v</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     exact ⟨x,Finset.mem_filter.mpr ⟨Finset.mem_univ _,hx⟩,rfl⟩</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHubAbsorberCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHubAbsorberCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.HubCommonPathCycles</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Paired absorbers for the actual marked cycle family at one hub.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> Common-path hypotheses are needed only for distinct roots of the same type. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 6000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U E K : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   {tail head : E → V} {ktail khead : K → V} {m : ℕ}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   {π : Equiv.Perm V} {b : ℕ} {H₀ Hₖ : V → U → Prop}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_hub_paired_absorber_count (hm : 3&lt;m+1) (w : U)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (x : Fin (m+1) → V) (hx : Function.Injective x)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hxhub : MarkedHubCompatible H₀ Hₖ x w)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (β : ℝ) (hβ : 0&lt;β)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hbase : β*(Fintype.card V:ℝ)^(m+1)≤</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       Fintype.card (HubMarkedCycle tail head ktail khead m π b H₀ Hₖ w))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hpath : ∀ j : Bool,∀ v v&#x27; : V,v≠v&#x27; →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (if j then Hₖ v w else H₀ v w) → (if j then Hₖ v&#x27; w else H₀ v&#x27; w) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       β*(Fintype.card V:ℝ)^m≤</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m π b H₀ Hₖ j v v&#x27; w w))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hnbase : 2*(m+1:ℝ)^2≤β*Fintype.card V)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hnpath : 2*(m:ℝ)*(2*(m+1)+(m+1)*m)≤β*Fintype.card V) :</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (β/2)^(m+2)*(Fintype.card V:ℝ)^((m+1)*(m+1))≤</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       Fintype.card (LabelledCycleRecord</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (hubMarkedCycleVertices (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>           (m:=m) (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=Hₖ) w)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (pairedAbsorberTemplate (m+1)).val (Finset.univ.image x)) := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let Base := fun y : Fin (m+1) → V =&gt;</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     IsMarkedCycleTuple tail head ktail khead m π b y ∧ MarkedHubCompatible H₀ Hₖ y w</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let Path := fun (y : Fin (m+1) → V) (n : ℕ) (g : Fin m → V) =&gt;</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∃ i : Fin (m+1),i.val=n ∧ ∃ p : RootFirstCommonMarkedPath tail head ktail khead m π b</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       H₀ Hₖ (markedPositionType i) (x i) (y i) w w,p.val=g</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have htype (f : Fin (m+1) → V) (hf : MarkedHubCompatible H₀ Hₖ f w) (i : Fin (m+1)) :</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       if markedPositionType i then Hₖ (f i) w else H₀ (f i) w :=</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (markedHubCompatible_iff_positions H₀ Hₖ f w).mp hf i</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   apply paired_absorber_abundance _ (by omega) x hx Base Path β hβ</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (fun y hy =&gt; permutationSeparated_injective π b y hy.1.1)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (fun y hy =&gt; ⟨⟨y,hy⟩,rfl⟩) ?_ ?_ (by convert hbase using 1 &lt;;&gt; congr!) ?_ hnbase hnpath</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   · intro y hy hay i g hp</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     rcases hp with ⟨i&#x27;,hi,p,rfl⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have he : i&#x27;=i := Fin.ext hi</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     subst i&#x27;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hh := rootFirstCommonMarkedPath_hub_cycles hm w (markedPositionType i) (x i) (y i)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (htype x hxhub i) (htype y hy.2 i) p</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     exact ⟨hh.2,hh.1⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   · intro y hy hay n hn g hp</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     rcases hp with ⟨i,hi,p,rfl⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact (rootFirstCommonMarkedPath_labels (markedPositionType i) (x i) (y i) w w p).1</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   · intro y hy hay n hn</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     let i : Fin (m+1) := ⟨n,hn⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hne : x i≠y i := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       intro he</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       exact hay i (Finset.mem_image.mpr ⟨i,Finset.mem_univ _,he⟩)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hh := hpath (markedPositionType i) (x i) (y i) hne (htype x hxhub i) (htype y hy.2 i)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     let embed : RootFirstCommonMarkedPath tail head ktail khead m π b H₀ Hₖ</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (markedPositionType i) (x i) (y i) w w → {g // Path y n g} :=</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       fun p =&gt; ⟨p.val,i,rfl,p,rfl⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hi : Function.Injective embed := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       intro p q he</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       apply Subtype.ext</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       exact congrArg (fun z : {g // Path y n g} =&gt; z.val) he</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hcard : (Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m π b H₀ Hₖ</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         (markedPositionType i) (x i) (y i) w w):ℝ)≤Fintype.card {g // Path y n g} := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       exact_mod_cast Fintype.card_le_of_injective embed hi</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     apply hh.trans</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     convert hcard using 1 &lt;;&gt; congr!</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

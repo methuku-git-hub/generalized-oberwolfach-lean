@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MixedTriangleNamedEventTransfer.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MixedTriangleNamedEventTransfer.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MixedOrdinaryAssignedRetainedTransfer</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryAssignedNamedTriangleEvent</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Use the proved ordinary event as the event for an ordinary class of the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> shared mixed exposure, preserving the original law and retention. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 2000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option synthInstance.maxSize 32768</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> local instance (priority := high) mixedTriangleNamedFinEquality (n:ℕ) : DecidableEq (Fin n) := Classical.decEq (Fin n)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem mixed_triangle_named_event_transfer {I:Type} {U:I→Type} [∀i,Fintype (U i)]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {n:ℕ} [Nonempty (Fin n)] (K m d:ℕ) (hd:2≤d) (θ sOrd:ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (label:I→Option (Fin K)) (F:∀i,U i→SimpleGraph (Fin n))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hF:∀i w,(F i w).IsRegularOfDegree 2) (a:I) (j:Fin K) (hj:label a=some j)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (p ρ:ℝ) (hprob:2*p=ρ*sOrd)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hp0:∀_:Sym2 (Fin n),0≤2*p) (hp1:∀_:Sym2 (Fin n),2*p≤1)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (π:Equiv.Perm (Fin n)) (χ:ℝ) (hχ:0≤χ)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (θhost α ρ₀ s₀ βP ηP ηH βH c B:ℝ) (hρ₀:0&lt;ρ₀) (hs₀:0&lt;s₀)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (kH:ℕ) (R Conflict:SimpleGraph (Fin n)) (weight:OrdinaryCycle R 3→ℝ):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     letI : DecidableEq (U a) := Classical.decEq (U a)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let qm:=mixedAssignedIntervalProbability K m θ label F hF a</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let sm:=mixedAssignedSpokeProbability K m sOrd θ label F hF a;</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀ (hqm:∀w g,0≤qm w g) (hQm:∀w,∑g,qm w g≤1/8)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (hsm:∀w g,0≤sm w g) (hSm:∀w,∑g,sm w g≤ intervalUncoveredProbability d (∑g,qm w g)),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ordinaryAssignedNamedTriangleEvent d K hd j θhost α ρ₀ s₀ βP ηP ηH βH c B hρ₀ hs₀ kH</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       R Conflict π (F a) (hF a) sOrd θ ((m:ℝ)+1) ρ weight→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let μ:=FiniteLaw.pi (rawWheelLaw (fun _=&gt;2*p) hp0 hp1 d hd qm hqm hQm sm hsm hSm)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let so:=ordinaryAssignedSpokeProbability (F a) (hF a) K j sOrd θ ((m:ℝ)+1)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let E:=ordinaryCombinedTriangleEvent (U:=U a) (Γ:=Bool) (Color:=Bool)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       d kH R Conflict π θhost α (ρ₀*s₀/2) βP ηP ηH βH c B (ρ*sOrd) sOrd weight false</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     letI : ∀ ω:RawWheelOutcome (Fin n) (U a) Bool Bool,Fintype (mixedClassRetentionSpace false π d false ω):=</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       fun ω=&gt;mixedClassRetentionFintype false π d false ω</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     letI : Fintype (Σ ω:RawWheelOutcome (Fin n) (U a) Bool Bool,mixedClassRetentionSpace false π d false ω):=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       @Sigma.instFintype _ _ (fun ω=&gt;mixedClassRetentionFintype false π d false ω) inferInstance;</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     1-(100*χ+200/(n:ℝ))≤(μ.sigma (mixedClassActualRetention false π d false)).probability (fun z=&gt;E z.1) :=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   intro qm sm hqm hQm hsm hSm hE μ so E</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   unfold ordinaryAssignedNamedTriangleEvent at hE</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   obtain ⟨hRlo,hRhi,hqo,hQo,hso,hSo,hbound⟩:=hE</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hr0:∀_:Sym2 (Fin n),0≤ρ*sOrd:=fun _=&gt;(lt_of_lt_of_le (div_pos (mul_pos hρ₀ hs₀) (by norm_num)) hRlo).le</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hr1:∀_:Sym2 (Fin n),ρ*sOrd≤1:=fun _=&gt;hRhi</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   exact mixed_ordinary_assigned_retained_transfer K m d hd θ sOrd label F hF a j hj p ρ hprob hp0 hp1 hr0 hr1</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     π false χ hχ hqm hQm hsm hSm hqo hQo hso hSo E hbound</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The remaining main-proof dependencies</title>
+<link rel="next" href="sect0013.html" title="Release criteria and scope" />
+<link rel="prev" href="sect0011.html" title="Cyclic-partite fractional decompositions" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000013">11 The remaining main-proof dependencies</h1>
+<p> The next nodes record principal proof obligations, not completed Lean interfaces. Their original statements and source locations are preserved in <span class="ttfamily">manuscript_inventory.json</span>. The extracted references supplement this map but are not a verified exhaustive dependency graph. </p>
+<div class="proposition_thmwrapper theorem-style-plain" id="bp:fixed">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">11.1</span>
+    <span class="proposition_thmtitle">Fixed-set decomposition: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:fixed">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:ordinary-preparation">Proposition 11.2</a></li>
+          
+          <li><a href="sect0012.html#bp:marked-preparation">Proposition 11.3</a></li>
+          
+          <li><a href="sect0012.html#bp:partition">Lemma 11.4</a></li>
+          
+          <li><a href="sect0012.html#bp:single">Lemma 11.11</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.FixedSetTheorem" class="lean_decl">Oberwolfach.FixedSetTheorem</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>    Formalise the classification of factors by abundant bounded cycle lengths or a positive proportion of long cycles, the sequential removal of small classes, and the common-event application of preparation and partition. The order threshold may depend on \(S\) at this stage. </p>
+<p><i class="itshape">Manuscript label:</i> thm:family:fixed-set.</p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="bp:ordinary-preparation">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">11.2</span>
+    <span class="proposition_thmtitle">Ordinary preparation: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:ordinary-preparation">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:ordinary-completion">Proposition 11.12</a></li>
+          
+          <li><a href="sect0012.html#bp:packing">Theorem 11.17</a></li>
+          
+          <li><a href="sect0012.html#bp:reconstruction">Lemma 11.37</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>   The small exceptional vertex set is chosen before the independent edge sample. With the asserted probability, the sample supplies a bounded protected edge set. On that same outcome, every later regular graph satisfying the stated symmetric-difference and protection conditions has the prescribed decomposition. Formalise this order of quantifiers, the sample law, all coefficient functions, the matching selection and its potential-load bounds. </p>
+<p><i class="itshape">Manuscript label:</i> prop:family:ordinary-preparation.</p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="bp:marked-preparation">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">11.3</span>
+    <span class="proposition_thmtitle">Long-cycle preparation: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:marked-preparation">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:marked-completion">Proposition 11.13</a></li>
+          
+          <li><a href="sect0012.html#bp:packing">Theorem 11.17</a></li>
+          
+          <li><a href="sect0012.html#bp:reconstruction">Lemma 11.37</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>   Formalise typed directed occurrences, successor twists, the categorical states of each physical edge, raw interval assignments and subsequent retention. Preserve the fixed successor coefficients, omitted roots and full external root domains. Prove the exact projection and multiplicity identities used to recover the prescribed components. </p>
+<p><i class="itshape">Manuscript label:</i> prop:family:long-preparation.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:partition">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.4</span>
+    <span class="lemma_thmtitle">Protected regular edge partition</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:partition">#</a>
+    
+    <a class="icon proof" href="sect0012.html#a0000000122"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0007.html#bp:protected-deterministic">Theorem 6.4</a></li>
+          
+          <li><a href="sect0008.html#bp:balanced-orientation">Lemma 7.7</a></li>
+          
+          <li><a href="sect0008.html#bp:colour-cuts">Lemma 7.9</a></li>
+          
+          <li><a href="sect0008.html#bp:protected-sampling">Lemma 7.10</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.protectedRegularPartition_highProbability" class="lean_decl">Oberwolfach.protectedRegularPartition_highProbability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.protectedRegularPartition_family_highProbability" class="lean_decl">Oberwolfach.protectedRegularPartition_family_highProbability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.regularDegree_colourDensities" class="lean_decl">Oberwolfach.regularDegree_colourDensities</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Fix \(\alpha {\gt}0\), \(k\ge 1\), positive \(r_a,\xi _a\), and an integer \(B\ge 0\). There is \(N\) depending only on these data such that the following holds for every \(n\ge N\). Let \(G\) be an even \(D\)-regular graph of order \(n\) with \(D\ge (1/2+\alpha )n\). Let \(\sum _a m_a=D/2\) and \(\rho _a=2m_a/D\ge r_a\). Fix sets \(I_b\) with \(\sum _b|I_b|\le \alpha n/100000\) before colouring the edges independently with probabilities \((\rho _a)_a\), obtaining \(S_a^0\). With probability at least \(1-n^{-10}\), for every later family of subgraphs \(A_a\subseteq S_a^0\) with \(\sum _a e(A_a)\le B\), there is an exact edge partition \((S_a)_a\) of \(G\) such that </p>
+<div class="displaymath" id="a0000000123">
+  \[  d_{S_a}(v)=2m_a,\qquad A_a\subseteq S_a,\qquad S_a[I_b]=S_a^0[I_b],\qquad \Delta (S_a\triangle S_a^0)\le \xi _a n.  \]
+</div>
+<p> The more general checked form protects any fixed graph of maximum degree at most \(\alpha n/100000\), and every later graph of maximum degree at most \(B\). </p>
+<p><i class="itshape">Manuscript label:</i> lem:family:partition.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000122">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Use the common degree, cut and balancing event. Small cut sides are handled by subtracting omitted labels from the row or column degree; large sides use the quadratic cut estimate. Set \(\delta _a=\min \{ \alpha /32,\rho _a/512\} \) and \(h_a=\alpha \rho _a/128\). The raw cut is at least \(2h_an\min \{ |S|,|T|\} \). Excluding protected edges and reversing directions loses at most </p>
+<div class="displaymath" id="a0000000124">
+  \[  (\rho _a\alpha n/100000+n^{3/5}+B+4n^{4/5})\min \{ |S|,|T|\} .  \]
+</div>
+<p> The checked numerical choices make this at most \(h_an\min \{ |S|,|T|\} \). Choose \(q=\lfloor q_*n\rfloor \) with the source bounds on \(q_*\). All rounding and normalized-demand margins are proved uniformly before \(n,G,(m_a),(\rho _a)\) are specified. Apply the deterministic partition with real error \(e=5n^{4/5}\) and obtain the bound \(4q+2e\). The probability estimates are first proved with failure \(n^{-12}\); their union has failure at most \(n^{-10}\). Project out the auxiliary directions only after the universal quantifier over later protected graphs. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:vortex-geometry">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.5</span>
+    <span class="lemma_thmtitle">Complete fixed vortex geometry</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:vortex-geometry">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0010.html#bp:vortex">Lemma 9.2</a></li>
+          
+          <li><a href="sect0010.html#bp:shell-permutation">Lemma 9.3</a></li>
+          
+          <li><a href="sect0010.html#bp:vortex-differences">Lemma 9.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.index_size_upper" class="lean_decl">Oberwolfach.Vortex.index_size_upper</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.index_size_lower" class="lean_decl">Oberwolfach.Vortex.index_size_lower</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.consecutive_size_bounds" class="lean_decl">Oberwolfach.Vortex.consecutive_size_bounds</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.two_level_size_bound" class="lean_decl">Oberwolfach.Vortex.two_level_size_bound</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.difference_size_lower" class="lean_decl">Oberwolfach.Vortex.difference_size_lower</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.vortex_with_permutation_exists" class="lean_decl">Oberwolfach.vortex_with_permutation_exists</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    The independent vertex and index floor recursions give \(2u_i\le n_i\) and \(u_i\ge \rho _*n_i/8\) under the stated degree and error bounds. For consecutive nonempty levels, \(\epsilon n_i/2\le n_{i+1}\le \epsilon n_i\). The two-level size bound includes the empty pair. Difference domains have order at least \(3\epsilon m_*/8\). Enlarging \(m_*\) before choosing the input graph ensures a preserving permutation with no cycle shorter than the prescribed fixed length. This constructs the geometry only; the fractional coefficients and their later sampling are separate obligations. </p>
+<p><i class="itshape">Manuscript label:</i> clm:completion:nested:ordinary.</p>
+<p><i class="itshape">Manuscript label:</i> clm:completion:nested:marked.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:threshold-half">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.6</span>
+    <span class="lemma_thmtitle">Ordinary threshold lower bound of one half</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:threshold-half">#</a>
+    
+    <a class="icon proof" href="sect0012.html#a0000000125"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:thresholds">Definition 1.2</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold_half_le" class="lean_decl">Oberwolfach.cycleThreshold_half_le</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.allowedThreshold_half_le" class="lean_decl">Oberwolfach.allowedThreshold_half_le</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycle_divisible_dense_counterexample" class="lean_decl">Oberwolfach.cycle_divisible_dense_counterexample</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.HasCycleDecomposition.closed_set_edge_divisible" class="lean_decl">Oberwolfach.HasCycleDecomposition.closed_set_edge_divisible</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For every \(r\ge 3\), \(\delta _r\ge 1/2\). Thus \(\delta _S\ge 1/2\) for every nonempty allowed set \(S\subseteq \{ 3,4,\ldots \} \). </p>
+<p><i class="itshape">Manuscript label:</i> prop:four:lower.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000125">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>For \(t=2rk\), use \(K_{t-1}\) and \(K_{t+1}\) minus a Hamilton cycle on disjoint vertex sets. The resulting graph is \((t-2)\)-regular on \(2t\) vertices and is \(C_r\)-divisible. Its first component has \(\binom {t-1}{2}\) edges, not divisible by \(r\). A cycle decomposition would force divisibility of the edge count in every closed vertex set. The degree ratio tends to \(1/2\). The formal construction chooses \(k\) explicitly for each requested order and each density below \(1/2\). This checks only the half-density consequence of the cited proposition. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:threshold-odd">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.7</span>
+    <span class="lemma_thmtitle">Odd-cycle threshold lower bounds</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:threshold-odd">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:thresholds">Definition 1.2</a></li>
+          
+          <li><a href="sect0002.html#bp:graphs">Definition 1.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold_odd_sharp_lower" class="lean_decl">Oberwolfach.cycleThreshold_odd_sharp_lower</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold_triangle_lower" class="lean_decl">Oberwolfach.cycleThreshold_triangle_lower</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.odd_threshold_counterexample" class="lean_decl">Oberwolfach.odd_threshold_counterexample</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.HasCycleDecomposition.edge_count_le_obstruction" class="lean_decl">Oberwolfach.HasCycleDecomposition.edge_count_le_obstruction</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For odd \(r\ge 3\), \(\delta _r\ge r/(2r-2)\); in particular, \(\delta _3\ge 3/4\). Take two parts of size \((r-1)s\), where \(s=r(2k+1)\), join all pairs between parts, and within each part use \(r-1\) disjoint cliques of order \(s\). The degree is \(rs-1\), the graph is divisible, and each odd cycle must consume an internal edge. The internal-edge count is too small for a decomposition. This is a proved alternative explicit construction for the ordinary bound. The resolvable-threshold bridge is not asserted by this node. </p>
+<p><i class="itshape">Manuscript label:</i> prop:four:lower.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:factor-components">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.8</span>
+    <span class="lemma_thmtitle">Components of a finite two-factor</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:factor-components">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:graphs">Definition 1.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.AllowedCycleLengths_iff_component_cycles" class="lean_decl">Oberwolfach.AllowedCycleLengths_iff_component_cycles</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.regular_two_component_cycle" class="lean_decl">Oberwolfach.regular_two_component_cycle</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.component_regular_two_cycle_iso" class="lean_decl">Oberwolfach.component_regular_two_cycle_iso</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.connected_regular_two_cycle_iso" class="lean_decl">Oberwolfach.connected_regular_two_cycle_iso</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.two_regular_cycle_partition" class="lean_decl">Oberwolfach.two_regular_cycle_partition</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.AllowedCycleLengths_iff_component_orders" class="lean_decl">Oberwolfach.AllowedCycleLengths_iff_component_orders</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Each component of a finite 2-regular graph is isomorphic to the cycle graph on its order. The main target’s condition on component cardinalities is equivalent to the stated condition on cycle lengths. The cycle covers precisely the reachable vertices, and its edges exhaust that component. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:threshold-four">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.9</span>
+    <span class="lemma_thmtitle">Four-cycle lower bound and local threshold comparisons</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:threshold-four">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:threshold-half">Lemma 11.6</a></li>
+          
+          <li><a href="sect0012.html#bp:threshold-odd">Lemma 11.7</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold_four_lower" class="lean_decl">Oberwolfach.cycleThreshold_four_lower</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.four_threshold_counterexample" class="lean_decl">Oberwolfach.four_threshold_counterexample</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold_ge_transformerDensity" class="lean_decl">Oberwolfach.cycleThreshold_ge_transformerDensity</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold_ge_cycleFactorDensity" class="lean_decl">Oberwolfach.cycleThreshold_ge_cycleFactorDensity</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycleThreshold_ge_ordinaryCycleLowerDensity" class="lean_decl">Oberwolfach.cycleThreshold_ge_ordinaryCycleLowerDensity</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    We have \(\delta _4\ge 2/3\). For \(t=4k+7\), take cliques \(A,C\) of size \(t\) and an independent set \(B\) of size \(t-1\), add all \(AB\) and \(BC\) edges, and delete a six-cycle inside \(C\). All degrees are even, the edge count is divisible by four, and the minimum degree is at least \(2t-4\). Every four-cycle uses an even number of edges inside \(A\), whereas \(\binom t2\) is odd. The degree ratio tends to \(2/3\). Together with the half and odd bounds, this proves all lower comparisons with the cycle-factor and transformer constants. This example proves an ordinary threshold bound and does not assert regularity. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:threshold-inputs">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.10</span>
+    <span class="lemma_thmtitle">Remaining ordinary threshold estimates: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:threshold-inputs">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:threshold-half">Lemma 11.6</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   The ordinary upper thresholds remain to be formalised. The lower bounds and the cycle-factor/transformer comparisons are checked. The common-tail reduction requires a cofinite upper bound; the finite-grid reduction does not. The fixed-set proof also calls local-factor results whose thresholds need the stronger lower bounds. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:single">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.11</span>
+    <span class="lemma_thmtitle">One spanning factor: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:single">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:ordinary-preparation">Proposition 11.2</a></li>
+          
+          <li><a href="sect0012.html#bp:marked-preparation">Proposition 11.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Formalise the density-one application of ordinary or long-cycle preparation, prescribing the same factor at every index. The edge sample is then the entire input graph deterministically. A positive-probability conclusion of preparation gives a decomposition of that graph, hence one spanning copy. The cutoff is fixed before taking the maximum of the finitely many ordinary order thresholds. </p>
+<p><i class="itshape">Manuscript label:</i> lem:family:single-copy.</p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="bp:ordinary-completion">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">11.12</span>
+    <span class="proposition_thmtitle">Ordinary completion: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:ordinary-completion">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:ordinary-cover">Lemma 11.14</a></li>
+          
+          <li><a href="sect0012.html#bp:absorbers">Theorem 11.16</a></li>
+          
+          <li><a href="sect0012.html#bp:sampling">Lemma 11.30</a></li>
+          
+          <li><a href="sect0005.html#bp:scale">Lemma 4.1</a></li>
+          
+          <li><a href="sect0005.html#bp:restriction">Lemma 4.2</a></li>
+          
+          <li><a href="sect0010.html#bp:vortex">Lemma 9.2</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>   The vortex is proved. Construct the simultaneous reference estimates and protected terminal absorber. Prove the deterministic iterative-absorption theorem and verify all substitutions into its local estimates. The checked scalar and set identities above do not establish these graph hypotheses. </p>
+<p><i class="itshape">Manuscript label:</i> prop:completion:ordinary-construction.</p>
+<p><i class="itshape">Manuscript label:</i> thm:family:completion:ordinary.</p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="bp:marked-completion">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">11.13</span>
+    <span class="proposition_thmtitle">Marked completion: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:marked-completion">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:marked-cover">Lemma 11.15</a></li>
+          
+          <li><a href="sect0012.html#bp:absorbers">Theorem 11.16</a></li>
+          
+          <li><a href="sect0012.html#bp:sampling">Lemma 11.30</a></li>
+          
+          <li><a href="sect0005.html#bp:scale">Lemma 4.1</a></li>
+          
+          <li><a href="sect0005.html#bp:restriction">Lemma 4.2</a></li>
+          
+          <li><a href="sect0004.html#bp:omitted">Lemma 3.5</a></li>
+          
+          <li><a href="sect0010.html#bp:vortex">Lemma 9.2</a></li>
+          
+          <li><a href="sect0039.html#bp:vortex-fixed-absorber-completion">Lemma E.633</a></li>
+          
+          <li><a href="sect0039.html#bp:nested-vortex-active-weights">Lemma E.634</a></li>
+          
+          <li><a href="sect0039.html#bp:actual-active-local-load">Lemma E.635</a></li>
+          
+          <li><a href="sect0039.html#bp:actual-reference-active-load">Lemma E.636</a></li>
+          
+          <li><a href="sect0039.html#bp:actual-reference-active-parent-load">Lemma E.637</a></li>
+          
+          <li><a href="sect0039.html#bp:actual-vortex-balance-domains">Lemma E.638</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-actual-balance">Lemma E.639</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-actual-inner-cuts">Lemma E.640</a></li>
+          
+          <li><a href="sect0039.html#bp:actual-inner-cut-fields">Lemma E.641</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-actual-all-levels">Lemma E.642</a></li>
+          
+          <li><a href="sect0039.html#bp:actual-balance-record-inputs">Lemma E.643</a></li>
+          
+          <li><a href="sect0039.html#bp:parent-load-record-inputs">Lemma E.644</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-actual-parent-configurations">Lemma E.645</a></li>
+          
+          <li><a href="sect0039.html#bp:ordered-common-configurations">Lemma E.646</a></li>
+          
+          <li><a href="sect0039.html#bp:retained-load-fixed-weights">Lemma E.647</a></li>
+          
+          <li><a href="sect0039.html#bp:active-nondeeper-record-inputs">Lemma E.648</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-active-record-events">Lemma E.649</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-active-record-inputs">Lemma E.650</a></li>
+          
+          <li><a href="sect0039.html#bp:vortex-level-geometry-inputs">Lemma E.651</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-full-parent-neighbourhood">Lemma E.652</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-parent-spoke-agreement">Lemma E.653</a></li>
+          
+          <li><a href="sect0039.html#bp:parent-neighbourhood-record-inputs">Lemma E.654</a></li>
+          
+          <li><a href="sect0039.html#bp:two-step-vortex-and-endpoints">Lemma E.655</a></li>
+          
+          <li><a href="sect0039.html#bp:reference-parent-normalization">Lemma E.656</a></li>
+          
+          <li><a href="sect0039.html#bp:level-input-bridges">Lemma E.657</a></li>
+          
+          <li><a href="sect0039.html#bp:reference-vortex-record-inputs">Lemma E.658</a></li>
+          
+          <li><a href="sect0039.html#bp:nested-weight-target">Lemma E.659</a></li>
+          
+          <li><a href="sect0039.html#bp:actual-reference-cut-density">Lemma E.660</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-record-error-margins">Lemma E.661</a></li>
+          
+          <li><a href="sect0039.html#bp:finite-reference-chain">Lemma E.662</a></li>
+          
+          <li><a href="sect0039.html#bp:sampled-fixed-absorber-completion">Lemma E.663</a></li>
+          
+          <li><a href="sect0039.html#bp:uniform-inner-margins">Lemma E.664</a></li>
+          
+          <li><a href="sect0039.html#bp:uniform-global-reference">Lemma E.665</a></li>
+          
+          <li><a href="sect0039.html#bp:uniform-parent-active-cover">Lemma E.666</a></li>
+          
+          <li><a href="sect0039.html#bp:uniform-protected-cover">Lemma E.667</a></li>
+          
+          <li><a href="sect0039.html#bp:uniform-reference-level-density">Lemma E.668</a></li>
+          
+          <li><a href="sect0039.html#bp:uniform-finite-completion-density">Lemma E.669</a></li>
+          
+          <li><a href="sect0039.html#bp:ordered-level-configuration">Lemma E.670</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-parent-record-fields">Lemma E.671</a></li>
+          
+          <li><a href="sect0039.html#bp:joint-analytic-record-fields">Lemma E.672</a></li>
+          
+          <li><a href="sect0039.html#bp:ordered-record-error-choices">Lemma E.673</a></li>
+          
+          <li><a href="sect0039.html#bp:sample-reference-density-hierarchy">Lemma E.674</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>   Keep the four marked degree balances, physical injectivity, successor disjointness and the fixed-domain potential loads through the vortex. Formalise the separate typed and physical deletion estimates and the common marked absorber construction. </p>
+<p><i class="itshape">Manuscript label:</i> prop:completion:marked-construction.</p>
+<p><i class="itshape">Manuscript label:</i> thm:family:completion:marked.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:ordinary-cover">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.14</span>
+    <span class="lemma_thmtitle">Ordinary cover-down: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:ordinary-cover">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:packing">Theorem 11.17</a></li>
+          
+          <li><a href="sect0012.html#bp:local-factors">Lemma 11.29</a></li>
+          
+          <li><a href="sect0004.html#bp:neighbourhood-stability">Lemma 3.2</a></li>
+          
+          <li><a href="sect0005.html#bp:cuts">Lemma 4.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Formalise correction of divisibility, inner correction, boundary covering, restoration on the protected pair and each resulting degree bound. </p>
+<p><i class="itshape">Manuscript label:</i> lem:completion:ordinary-cover-down.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:marked-cover">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.15</span>
+    <span class="lemma_thmtitle">Marked cover-down: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:marked-cover">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:packing">Theorem 11.17</a></li>
+          
+          <li><a href="sect0012.html#bp:local-factors">Lemma 11.29</a></li>
+          
+          <li><a href="sect0004.html#bp:neighbourhood-stability">Lemma 3.2</a></li>
+          
+          <li><a href="sect0005.html#bp:cuts">Lemma 4.3</a></li>
+          
+          <li><a href="sect0004.html#bp:omitted">Lemma 3.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Formalise the corresponding marked operations without merging types, directions, occurrences or physical images. Prove the four balance identities for each operation before iterating it. </p>
+<p><i class="itshape">Manuscript label:</i> lem:completion:marked-cover-down.</p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:absorbers">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">11.16</span>
+    <span class="theorem_thmtitle">Terminal absorbers: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:absorbers">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:local-factors">Lemma 11.29</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Formalise ordinary and marked transformers and the two alternative wheel decompositions of each resulting absorber. Prove the embedding, avoidance, divisibility and bounded-size conclusions; cite no literature result as a Lean axiom. </p>
+<p><i class="itshape">Manuscript label:</i> thm:new:ordinary-relative-absorber.</p>
+<p><i class="itshape">Manuscript label:</i> thm:new:marked-relative-absorber.</p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:packing">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">11.17</span>
+    <span class="theorem_thmtitle">Packing applications: partly open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:packing">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0018.html#bp:ordinary-near-balance-packing">Theorem E.9</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-near-balance-packing">Theorem E.23</a></li>
+          
+          <li><a href="sect0012.html#bp:fractional">Theorem 11.27</a></li>
+          
+          <li><a href="sect0012.html#bp:weighted-matching">Theorem 11.28</a></li>
+          
+          <li><a href="sect0004.html#bp:weighted-stability">Lemma 3.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Both ordinary and marked near-balance packing theorems are proved, including sparse balancing deletion, fixed-weight restriction, positive correction and the matching application. Complete both models’ sampled initial weights and remaining potential-load estimates. The fixed candidate families and coefficients must be preserved. A bound for present roots does not replace a bound for potential roots. </p>
+<p><i class="itshape">Manuscript label:</i> thm:pr:ordinary-wheel-weights.</p>
+<p><i class="itshape">Manuscript label:</i> thm:weights:marked-numerical.</p>
+<p><i class="itshape">Manuscript label:</i> lem:new:relative-ordinary-packing.</p>
+<p><i class="itshape">Manuscript label:</i> lem:new:relative-marked-packing.</p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:successor-complete">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">11.18</span>
+    <span class="theorem_thmtitle">Positive successor weights for even lengths</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:successor-complete">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.successor_weights_theorem" class="lean_decl">Oberwolfach.successor_weights_theorem</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   For every even length at least four and positive degree margin, positive lower and upper weight constants are fixed first. For every positive accuracy there is a degree tolerance, then for each separation distance there is an order threshold. The resulting weights on ordered tuples are zero unless every ordinary edge and the closing edge to the permuted first vertex exist and all labels are separated. Each admissible tuple has the asserted two-sided weight bound. Every admissible position-edge has load between one minus the accuracy and one; every positional vertex load has the corresponding bounds relative to the supplied degree. The original partition law, one common good event, fixed weights, close-pair deletion loss and the tuple representation are all included in the proof. </p>
+<p><i class="itshape">Manuscript label:</i> thm:four:successor-kernel.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:bounded-coefficient-exactness">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.19</span>
+    <span class="lemma_thmtitle">Exact bounded coefficients</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:bounded-coefficient-exactness">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.subspace_bounded_coefficients_exact" class="lean_decl">Oberwolfach.subspace_bounded_coefficients_exact</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   If every target in the prescribed neighbourhood within the specified subspace has an approximation with coefficients in the same bounded box, with error strictly smaller than the neighbourhood radius, the centre has an exact representation with coefficients in that box. Compactness, convexity and the separating-functional argument are proved; no approximation outside the subspace is used. </p>
+<p><i class="itshape">Manuscript label:</i> lem:four:zonotope.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:long-interval-reserves">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.20</span>
+    <span class="lemma_thmtitle">Long-interval mixing and path reserves</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:long-interval-reserves">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.reservedPathWeight_endpoints" class="lean_decl">Oberwolfach.reservedPathWeight_endpoints</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>     Finite transition products satisfy the relative-error contraction and the explicit logarithmic mixing cutoff. One exceptional interface is allowed. A clean subinterval suffices even when arbitrary interfaces precede or follow it. For every edge of a long interval, a clean prefix or suffix gives the reserve bound eleven twenty-sevenths of the original capacity. The reserve is a weighting of actual paths with exactly the prescribed endpoint matrix. These are inputs to the fixed-point and positive-weight assembly below. </p>
+<p><i class="itshape">Manuscript label:</i> thm:four:long-capacities.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:long-capacity-assembly">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.21</span>
+    <span class="lemma_thmtitle">Exact assembly of three capacity intervals</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:long-capacity-assembly">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:long-interval-reserves">Lemma 11.20</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.threeIntervalSector_formula" class="lean_decl">Oberwolfach.threeIntervalSector_formula</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>       For locally balanced capacities, normalized transitions give the required stationary profiles. The actual path reserve leaves positive residual degrees; the half-residual endpoint map is continuous and retains the specified boundary marginals. The proved fixed-point construction synchronizes three intervals, and one reserve plus two half-residual contributions recovers every capacity exactly. The pointwise sector formula cancels the endpoint matrices. The uniform scale estimates and the representation by directed transversal cycles are completed in the next node. </p>
+<p><i class="itshape">Manuscript label:</i> thm:four:long-capacities.</p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:long-capacity-complete">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">11.22</span>
+    <span class="theorem_thmtitle">Long cyclic capacity weights on labelled classes</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:long-capacity-complete">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:long-capacity-assembly">Lemma 11.21</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.threeBlock_next_position" class="lean_decl">Oberwolfach.threeBlock_next_position</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>      The positive lower and upper coefficients are chosen before the class size and the common finite label set. Every directed transversal cycle supported by positive capacities receives a positive weight with the required power of the class size, and every directed edge has exactly its prescribed load. The original local balance and one-exception mixing hypotheses imply all intermediate reserve and fixed-point hypotheses. Three compatible paths and one cyclic sequence are in bijection; every edge, including the closing edge, is preserved. Zero-capacity sequences carry zero weight. This covers copies of an arbitrary common finite label set, as required by the marked-capacity caller. The marked position splitting is proved below; its subsequent exact correction and final caller remain open. </p>
+<p><i class="itshape">Manuscript label:</i> thm:four:long-capacities.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:marked-position-splitting">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.23</span>
+    <span class="lemma_thmtitle">Ordinary capacities split among marked-cycle positions</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:marked-position-splitting">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bounded_signed_degree_correction" class="lean_decl">Oberwolfach.bounded_signed_degree_correction</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>     The graph degree and large-cut hypotheses give bounded signed corrections with both endpoint demands. The last capacity is defined by subtraction; its accumulated error proves the same positive bounds. The accuracy constants are chosen before the graph, degree target and weights. Typed edge occurrences are retained throughout. </p>
+<p><i class="itshape">Manuscript label:</i> clm:capacity:position-splitting.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:marked-copied-weights">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.24</span>
+    <span class="lemma_thmtitle">Cycle weights in the copied marked graph</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:marked-copied-weights">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:long-capacity-complete">Theorem 11.22</a></li>
+          
+          <li><a href="sect0012.html#bp:marked-position-splitting">Lemma 11.23</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinary_three_step_minorization" class="lean_decl">Oberwolfach.ordinary_three_step_minorization</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>      The constructed capacities satisfy the original long-cycle hypotheses. Two-step common-neighbourhood bounds only apply to distinct labels; the three-step estimate explicitly subtracts the omitted diagonal contribution. Uniform cycle-weight coefficients are chosen before the actual density, graph, or capacities. The weights extend by zero to the fixed sequence space. The subsequent exclusion and exact-correction caller is not yet complete. </p>
+<p><i class="itshape">Manuscript label:</i> thm:capacity:marked-numerical.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:marked-cycle-representation">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.25</span>
+    <span class="lemma_thmtitle">Typed marked-cycle representation</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:marked-cycle-representation">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.markedCycle_physical_images_injective" class="lean_decl">Oberwolfach.markedCycle_physical_images_injective</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>      Canonical sequences start immediately after the unique marked arc. Their incidence vectors have entries zero or one and satisfy both required balance identities. The typed edge map is injective; composition with the supplied injective physical map retains all multiplicities. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:positive-exact-coefficients">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.26</span>
+    <span class="lemma_thmtitle">Positive exact coefficients</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:positive-exact-coefficients">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:bounded-coefficient-exactness">Lemma 11.19</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.subspace_positive_bounded_coefficients" class="lean_decl">Oberwolfach.subspace_positive_bounded_coefficients</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    A uniform positive preliminary weighting is retained when the remaining balanced target is made exact. The shifted neighbourhood is contained in the original approximation neighbourhood by explicit norm inequalities. The same coefficient box is used for every nearby balanced target. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:fractional">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">11.27</span>
+    <span class="theorem_thmtitle">Fractional cycle and successor weights: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:fractional">#</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  The even cyclic-partite result in the explicit interface representation is proved in Node&#160;<a href="sect0011.html#bp:cyclic-fractional-even">10.4</a>, and its positive bounded weights and pair loads in Node&#160;<a href="sect0011.html#bp:cyclic-spread">10.5</a>. A host with a supplied class-labelling equivalence is also covered by the graph representation bridge. The regularization input is proved in Node&#160;<a href="sect0011.html#bp:random-regularization">10.6</a>; Nodes&#160;<a href="sect0011.html#bp:conditional-partition-degrees">10.7</a>–<a href="sect0011.html#bp:close-tuple-loss">10.9</a> prove its conditional sampling, averaged cyclic weights and exclusion estimates. The complete successor-weight theorem, including its ordered-tuple representation, is proved in Node&#160;<a href="sect0012.html#bp:successor-complete">11.18</a>. The long cyclic capacity result on copied classes is proved in Node&#160;<a href="sect0012.html#bp:long-capacity-complete">11.22</a>. Still formalise the marked capacity theorem and the remaining partition/representation callers. The separate odd-length extension is not used by the successor-weight construction. Imported literature inputs need either existing matching mathlib statements or complete formal proofs. </p>
+<p><i class="itshape">Manuscript label:</i> doLpart:thm:main.</p>
+<p><i class="itshape">Manuscript label:</i> thm:four:long-capacities.</p>
+<p><i class="itshape">Manuscript label:</i> thm:four:successor-kernel.</p>
+<p><i class="itshape">Manuscript label:</i> thm:four:dense-spread.</p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:weighted-matching">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">11.28</span>
+    <span class="theorem_thmtitle">Weighted hypergraph matching input: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:weighted-matching">#</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  A fixed-error weighted theorem with polynomial size and codegree hypotheses is proved in Node&#160;<a href="sect0018.html#bp:uniform-weighted-matching">E.1</a>. The stronger power-rate error in the cited Ehard–Glock–Joos theorem is not claimed here. The fractional-resource application is proved independently in Node&#160;<a href="sect0018.html#bp:fractional-resource-matching">E.3</a>, using the fixed-error theorem. A reference is not a formal proof. </p>
+<p><i class="itshape">Manuscript label:</i> thm:prelim:weighted-matching.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:local-factors">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.29</span>
+    <span class="lemma_thmtitle">Local factors and extensions: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:local-factors">#</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  The marked one-hub factor, including the actual physical wheel conclusions, is proved in Node&#160;<a href="sect0018.html#bp:marked-hub-factor-physical">E.97</a>. The ordinary local factor, including its fixed coefficients and root-omitted sums, is proved in Node&#160;<a href="sect0018.html#bp:ordinary-fixed-weight-factor">E.100</a>. The endpoint-triangle factor from the supplied parent matching and root-omitted potential estimates is proved in Node&#160;<a href="sect0018.html#bp:endpoint-fixed-weight-factor">E.106</a>. The ordinary local-extension conclusion is proved in Node&#160;<a href="sect0018.html#bp:ordinary-local-extensions">E.107</a>. The marked extension bounds on the same common event are proved in Node&#160;<a href="sect0018.html#bp:marked-local-extensions">E.108</a>. The ordinary successive-hub step and its exact remainder are proved in Nodes&#160;<a href="sect0018.html#bp:ordinary-hub-cover">E.110</a> and&#160;<a href="sect0018.html#bp:ordinary-hub-cover-remainder">E.111</a>. The triangle root conversion and the capped one-row-root construction for longer cycles are proved in Nodes&#160;<a href="sect0018.html#bp:endpoint-physical-root">E.112</a> and&#160;<a href="sect0018.html#bp:capped-root-wheels">E.115</a>. The common-event and comparison-host substitutions for successive roots, the boundary stages, and the full graph-specific cover-down assembly remain open. Separation restrictions and external roots must be preserved. </p>
+<p><i class="itshape">Manuscript label:</i> lem:completion:ordinary-local-factor.</p>
+<p><i class="itshape">Manuscript label:</i> lem:completion:marked-hub-factor.</p>
+<p><i class="itshape">Manuscript label:</i> lem:completion:local-extensions.</p>
+<p><i class="itshape">Manuscript label:</i> lem:completion:marked-local-extensions.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:sampling">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.30</span>
+    <span class="lemma_thmtitle">Sampling and simultaneous estimates: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:sampling">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0004.html#bp:weighted-stability">Lemma 3.4</a></li>
+          
+          <li><a href="sect0004.html#bp:omitted">Lemma 3.5</a></li>
+          
+          <li><a href="sect0005.html#bp:common-event">Lemma 4.4</a></li>
+          
+          <li><a href="sect0008.html#bp:bounded-differences">Theorem 7.4</a></li>
+          
+          <li><a href="sect0008.html#bp:common-event-probability">Lemma 7.5</a></li>
+          
+          <li><a href="sect0009.html#bp:fixed-size-concentration">Theorem 8.3</a></li>
+          
+          <li><a href="sect0009.html#bp:chernoff">Theorem 8.5</a></li>
+          
+          <li><a href="sect0018.html#bp:raw-interval-law">Lemma E.26</a></li>
+          
+          <li><a href="sect0018.html#bp:ordinary-raw-sampling">Lemma E.27</a></li>
+          
+          <li><a href="sect0018.html#bp:ordinary-seed-means">Lemma E.28</a></li>
+          
+          <li><a href="sect0018.html#bp:raw-neighbourhood-counts">Lemma E.29</a></li>
+          
+          <li><a href="sect0018.html#bp:rooted-dense-configurations">Lemma E.30</a></li>
+          
+          <li><a href="sect0018.html#bp:rooted-physical-survival">Lemma E.31</a></li>
+          
+          <li><a href="sect0018.html#bp:isolator-count-conversion">Lemma E.32</a></li>
+          
+          <li><a href="sect0018.html#bp:raw-isolator-event">Lemma E.33</a></li>
+          
+          <li><a href="sect0018.html#bp:greedy-transfer-count">Lemma E.34</a></li>
+          
+          <li><a href="sect0018.html#bp:transfer-physical-event">Lemma E.35</a></li>
+          
+          <li><a href="sect0018.html#bp:ordinary-fullhost-reference">Lemma E.36</a></li>
+          
+          <li><a href="sect0018.html#bp:ordinary-reference-cuts">Lemma E.38</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-first-exposure">Lemma E.39</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-reference-cuts">Lemma E.40</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-base-cycles">Lemma E.41</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-sample-physical-map">Lemma E.42</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-configurations">Lemma E.44</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-seed-loads">Lemma E.46</a></li>
+          
+          <li><a href="sect0018.html#bp:raw-marked-restriction">Lemma E.47</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-reference-statistics">Lemma E.48</a></li>
+          
+          <li><a href="sect0018.html#bp:vortex-common-events">Lemma E.49</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-reference-common">Lemma E.50</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-reference-vortex">Lemma E.51</a></li>
+          
+          <li><a href="sect0018.html#bp:interval-retention">Lemma E.53</a></li>
+          
+          <li><a href="sect0018.html#bp:retained-interval-identities">Lemma E.54</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-local-configurations">Lemma E.57</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-local-vortex">Lemma E.58</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-restricted-balance">Lemma E.59</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-restricted-balance-vortex">Lemma E.60</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-row-patterns">Lemma E.61</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-rows-vortex">Lemma E.62</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-indices-vortex">Lemma E.63</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-local-load-vortex">Lemma E.64</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-packing-load-vortex">Lemma E.65</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-retention-law">Lemma E.66</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-spoke-change-estimates">Lemma E.67</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-retained-pattern-vortex">Lemma E.68</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-retained-balance-load-stability">Lemma E.69</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-retained-configurations-vortex">Lemma E.70</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-retained-cut-vortex">Lemma E.71</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-retained-balance-vortex">Lemma E.72</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-retained-load-realization">Lemma E.73</a></li>
+          
+          <li><a href="sect0018.html#bp:geometric-restriction-family-size">Lemma E.74</a></li>
+          
+          <li><a href="sect0018.html#bp:marked-retained-common-configurations">Lemma E.75</a></li>
+          
+          <li><a href="sect0018.html#bp:thinned-common-weight-witness">Lemma E.76</a></li>
+          
+          <li><a href="sect0018.html#bp:common-joint-witness">Lemma E.77</a></li>
+          
+          <li><a href="sect0018.html#bp:retained-common-joint-realization">Lemma E.78</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   The finite independent categorical laws and the uniform fixed-size subset and partition concentration theorem are checked above. Formalise the remaining fixed-root substitutions, retention and trimming estimates, configuration counts and all ordinary/marked realisation substitutions. The original raw interval law, its exact marginals, separated-label and hub-column independence, and ordinary fixed-coefficient potential-load concentration, seed normalization, conflict-exclusion errors and fixed-domain common-neighbourhood counts are proved in the nodes below. Dense conflict-free rooted-set lower bounds and physical-edge survival are also proved, including the external-root case. The complete potential isolator event and the transfer lower counts and two-exposure potential event are now proved below. The combined ordinary full-host reference event, including its parent cycle weights and uniform order threshold, is now proved below. The ordinary and marked reference cuts, marked configuration events, and fixed successor-weight potential loads are now proved below. The single-colour uniform-retention restriction theorem is now proved below, including the original two-stage law and all fixed restrictions. The one-hub local cycle/path events, including all ambient roots and their common realization on fixed vortex domains, are also proved below. Restricted balance and every bounded row/index pattern are now proved on fixed domains and fixed vortex levels below. Domain-specific local and packing weights, their positive normalized coefficients and potential-load events on fixed vortex domains are now proved below. The actual preparation consumers retain only interval colour 1. The actual marked retained law, row/index events across the vortex, and deterministic balance/load transfer are now proved below. The remaining common-witness transfer and complete joint preparation substitutions remain open. Assemble the remaining common events on the original fixed domains. A bound for independent categorical coordinates does not supply the law of sampling without replacement. </p>
+<p><i class="itshape">Manuscript label:</i> lem:pr:rt1-realisation.</p>
+<p><i class="itshape">Manuscript label:</i> lem:pr:marked-realisation.</p>
+<p><i class="itshape">Manuscript label:</i> lem:pr:wi-interactions.</p>
+<p><i class="itshape">Manuscript label:</i> lem:completion:trimming-restrictions.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:supplied-vortex-weighted-common-outcome">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.31</span>
+    <span class="lemma_thmtitle">Supplied-vortex common outcome: checked conditional form</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:supplied-vortex-weighted-common-outcome">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.long_assigned_adaptive_supplied_vortex_weighted_fixed_ordered" class="lean_decl">Oberwolfach.long_assigned_adaptive_supplied_vortex_weighted_fixed_ordered</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   For a supplied compatible vortex and the displayed regular-host, density, weight and matching hypotheses, the theorem constructs the level weights and one retained outcome satisfying the agreement-inclusive adaptive property together with the stated matching and ordinary partial-map conclusions. Its spacing is chosen before the weight bounds, and the absorber tolerance before the later vortex tolerances. The hypotheses and quantifier order in the Lean declaration are part of this statement. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:weighted-vortex-host-inputs">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.32</span>
+    <span class="lemma_thmtitle">Common regular-host vortex and weight inputs: checked</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:weighted-vortex-host-inputs">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.long_host_matching_weighted_vortex" class="lean_decl">Oberwolfach.long_host_matching_weighted_vortex</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   At the displayed original allowed-cycle regular-host threshold, the construction supplies a vortex and a preserving short-cycle-free permutation, together with matching weights for that same permutation. The vortex size is selected before the allowed set and the host. The complete invocation combining this result with the preceding common outcome remains open. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:reserved-path-walks">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.33</span>
+    <span class="lemma_thmtitle">Reserved paths: checked finite-sequence and walk forms</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:reserved-path-walks">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.long_reserved_prescribed_subwalks" class="lean_decl">Oberwolfach.long_reserved_prescribed_subwalks</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.long_reserved_prescribed_subwalks_of_manuscript_bounds" class="lean_decl">Oberwolfach.long_reserved_prescribed_subwalks_of_manuscript_bounds</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   For specified two-factor components with supplied cyclic orderings, the summed block-capacity hypothesis yields the required injective interior sequences and disjoint extended sequences. Consecutive vertices are adjacent, and the sequences are represented by simple graph walks with the displayed lengths, and each interior walk is a subwalk of its extension. The numerical floor condition in the manuscript implies that capacity bound. </p>
+<p><i class="itshape">Manuscript label:</i> lem:reconstruction:reserved-paths.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:marked-one-interval-path">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.34</span>
+    <span class="lemma_thmtitle">One marked interval: checked conditional reconstruction</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:marked-one-interval-path">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_hub_factor_interval_path_with_edges" class="lean_decl">Oberwolfach.marked_hub_factor_interval_path_with_edges</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Given the displayed vertex-disjoint marked hub factor, disjoint spoke types, injective successor interval, terminal avoidance and physical-host edge hypotheses, the theorem selects rooted wheels and gives a simple path of the prescribed length with the selected wheel vertices and terminal vertex as its support. Its physical edge set is exactly the union of the selected wheels’ physical rim edge sets. It does not yet establish the simultaneous edge partition or all of the reconstruction lemma. </p>
+<p><i class="itshape">Manuscript label:</i> lem:reconstruction:paths.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:marked-hub-interval-family">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.35</span>
+    <span class="lemma_thmtitle">Marked intervals at one hub: checked factor-wide assembly</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:marked-hub-interval-family">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_hub_factor_interval_family_with_vertices" class="lean_decl">Oberwolfach.marked_hub_factor_interval_family_with_vertices</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Under the displayed hub-factor, spoke-type, interval-cover, disjointness, terminal-avoidance and physical-edge injectivity hypotheses, all supplied intervals at one hub have simple physical paths of the stated lengths. Their vertex sets are pairwise disjoint and cover the hub factor vertices and interval endpoints. Their physical edge sets are pairwise disjoint and cover precisely the hub factor’s physical rim edges. The Lean declaration records all hypotheses and the indexed support and edge-set identities. The assembly across distinct hubs and the full reconstruction remain open. </p>
+<p><i class="itshape">Manuscript label:</i> lem:reconstruction:paths.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:marked-global-permutation-reconstruction">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.36</span>
+    <span class="lemma_thmtitle">Marked permutation-interval reconstruction: checked form</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:marked-global-permutation-reconstruction">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_decomposition_permutation_reconstruction_directed" class="lean_decl">Oberwolfach.marked_decomposition_permutation_reconstruction_directed</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_interval_partition_count" class="lean_decl">Oberwolfach.marked_interval_partition_count</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   For the exact physical-resource decomposition and the displayed loopless, injective physical rim map, suppose each prescribed permutation interval is injectively indexed, the extended intervals at a hub are disjoint, their terminal vertices avoid the covered set, and the marked spokes are exactly the interval vertices. The theorem constructs all paths in the physical graph, with the prescribed endpoints and lengths, hubwise vertex disjointness and vertex union, and global disjoint coverage of both unordered physical edges and ordered physical arcs. It also proves the hubwise marked-vertex count; the complementary count is a separate checked lemma. The Lean declaration records the complete hypotheses and all indexed conclusions. Its application to the completion and iteration interfaces remains open. </p>
+<p><i class="itshape">Manuscript label:</i> lem:reconstruction:paths.</p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:reconstruction">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">11.37</span>
+    <span class="lemma_thmtitle">Reconstruction and prescribed embeddings: open</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#bp:reconstruction">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0039.html#bp:extending-list-path-pieces">Lemma E.748</a></li>
+          
+          <li><a href="sect0039.html#bp:pinned-cycle-correction">Lemma E.750</a></li>
+          
+          <li><a href="sect0039.html#bp:prescribed-image-invariants">Lemma E.751</a></li>
+          
+          <li><a href="sect0039.html#bp:source-family-path-updates">Lemma E.752</a></li>
+          
+          <li><a href="sect0039.html#bp:five-component-steps">Lemma E.753</a></li>
+          
+          <li><a href="sect0039.html#bp:family-component-invariant">Lemma E.754</a></li>
+          
+          <li><a href="sect0039.html#bp:actual-forbidden-source-graph">Lemma E.755</a></li>
+          
+          <li><a href="sect0039.html#bp:family-state-resources">Lemma E.756</a></li>
+          
+          <li><a href="sect0039.html#bp:path-segment-schedule">Lemma E.757</a></li>
+          
+          <li><a href="sect0039.html#bp:family-original-advances">Lemma E.758</a></li>
+          
+          <li><a href="sect0039.html#bp:actual-family-induction">Lemma E.759</a></li>
+          
+          <li><a href="sect0039.html#bp:ordered-prescribed-embedding">Lemma E.760</a></li>
+          
+          <li><a href="sect0039.html#bp:dependent-prescribed-embedding">Lemma E.761</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Formalise segment selection, gluing maps, inverse images, endpoint prescriptions, list embeddings and edge assignment. Establish injectivity and exact multiplicity before interpreting auxiliary wheels as physical factor edges. </p>
+<p><i class="itshape">Manuscript label:</i> lem:reconstruction:reserved-paths.</p>
+<p><i class="itshape">Manuscript label:</i> lem:images:residual-structure.</p>
+<p><i class="itshape">Manuscript label:</i> lem:new:prescribed-embedding.</p>
+<p><i class="itshape">Manuscript label:</i> lem:new:prescribed-edge-assignment.</p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0011.html" title="Cyclic-partite fractional decompositions"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0013.html" title="Release criteria and scope"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

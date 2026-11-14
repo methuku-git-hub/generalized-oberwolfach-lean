@@ -1,0 +1,88 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CommonCompletionRealization.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CommonCompletionRealization.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RetainedCommonJointRealization</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.CommonMarkedDensityBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The common-witness construction with the density formulas actually</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> used in marked completion. All positive count constants precede the error</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> tolerance, separation length, host and actual marginal arrays. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 3400000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_common_completion_realization</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (k₀ r : ℕ) (hr : 1≤r) (hlen : r+4+1=(k₀+2)*2)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (α₀ ρstar sstar ω : ℝ) (Q : ℕ) (hα₀ : 0&lt;α₀)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hρstar : 0&lt;ρstar) (hsstar : 0&lt;sstar) (hω : 0&lt;ω)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hmargin : successorCycleRatio k₀+α₀/2≤1/2+α₀) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let pstar := min (ρstar*sstar/(2*((r+4:ℕ):ℝ))) (sstar*sstar/((r+4:ℕ):ℝ))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ bc bp : ℝ,0&lt;bc ∧ 0&lt;bp ∧ ∀ η : ℝ,0&lt;η →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∃ δ : ℝ,0&lt;δ ∧ ∀ d : ℕ,∀ hd : 2≤d,∃ N : ℕ,1≤N ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (V U Γ Color : Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       [LinearOrder V] [Nonempty V] [DecidableEq U],</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       N≤Fintype.card V → ω*Fintype.card V≤(Fintype.card U:ℝ) → Fintype.card U≤Fintype.card V →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ (P : SimpleGraph V) (π : Equiv.Perm V),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀ D : ℝ,(Fintype.card V:ℝ)/2≤D → D≤2*Fintype.card V →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ v,|(P.degree v:ℝ)-D|≤δ*Fintype.card V) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ v,(1/2+α₀)*Fintype.card V≤(P.degree v:ℝ)) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∃ weight : (Fin (r+4+1)→V)→ℝ,</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       SuccessorSequenceWeightConditions P π (3*d) D (η/4)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (successorWeightLower k₀ (α₀/2)) (successorWeightUpper k₀ (α₀/2)) weight ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀ (ρ s₀ : ℝ) (hρlo : ρstar≤ρ) (hρhi : ρ≤1) (hslo : sstar≤s₀) (hshi : s₀≤1/100),</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let densities := marked_seed_density_bounds (r+4) (by omega) ρ s₀ ρstar sstar hρstar hsstar hρlo hρhi hslo hshi</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let p := ρ*s₀/2</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let k := p/((r+4:ℕ):ℝ)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ∀ (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (g : Γ) (j : Color),(∀ u,q u g=s₀/((r+4:ℕ):ℝ)) → (∀ u,s u j=s₀) →</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ C : Fin (r+4+1)→V,</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       SuccessorSequenceValid P π C → PermutationSeparated π (3*d) C →</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (successorWeightLower k₀ (α₀/2)/2)/(Fintype.card V:ℝ)^(r+4)≤</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         weight C/(D*p^(r+4)*k*(s₀*s₀/((r+4:ℕ):ℝ))^(r+4)) ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       weight C/(D*p^(r+4)*k*(s₀*s₀/((r+4:ℕ):ℝ))^(r+4))≤</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         (2*successorWeightUpper k₀ (α₀/2)/pstar^(2*(r+4)+1))/(Fintype.card V:ℝ)^(r+4)) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     1-2/(Fintype.card V:ℝ)^Q≤</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (rawMarkedRetentionLaw π d hd g p k</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         ((densities.1.trans_le densities.2.1).le)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         ((densities.1.trans_le densities.2.2.1).le)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         densities.2.2.2.2.2.2.2.2 q hq hQ s hs hS).probability</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         (fun z=&gt;∀ u u&#x27;,u≠u&#x27; → ∃ κ,</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>           CommonWitnessEstimates P π d r D p k s₀ η η η bc bp weight z.1</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>             (retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) g</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>               (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) g)) z.2 g j) κ u u&#x27;) := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   intro pstar</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   let astar := (sstar/((r+4:ℕ):ℝ))*(sstar/((r+4:ℕ):ℝ))</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   let pret := ω*sstar/(2*((r+4:ℕ):ℝ))</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hpstar : 0&lt;pstar := by dsimp [pstar];positivity</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hastar : 0&lt;astar := by dsimp [astar];positivity</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hpret : 0&lt;pret := by dsimp [pret];positivity</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   obtain ⟨bc,bp,hbc,hbp,hreal⟩ := retainedMarked_common_joint_realization k₀ r hr hlen</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (α₀/2) astar pstar pret ω Q (by positivity) hastar hpstar hpret hω</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   refine ⟨bc,bp,hbc,hbp,?_⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   intro η hη</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   obtain ⟨δ,hδ,hδreal⟩ := hreal η hη</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   refine ⟨δ,hδ,?_⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   intro d hd</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   obtain ⟨N,hN,hNreal⟩ := hδreal d hd</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   refine ⟨N,hN,?_⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   intro V U Γ Color _ _ _ _ _ _ _ hn huLo hu P π hnoshort D hDlo hDhi hnear hmin</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hmin&#x27; : ∀ v,(successorCycleRatio k₀+α₀/2)*Fintype.card V≤(P.degree v:ℝ) :=</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     fun v=&gt;(mul_le_mul_of_nonneg_right hmargin (Nat.cast_nonneg _)).trans (hmin v)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   obtain ⟨weight,hw,hweight⟩ := hNreal V U Γ Color hn huLo hu P π hnoshort D hDlo hDhi hnear hmin&#x27;</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   refine ⟨weight,hw,?_⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   intro ρ s₀ hρlo hρhi hslo hshi densities p k q hq hQ s hs hS g j hq₀ hs₀&#x27;</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   obtain ⟨hps,has,hpp,hpk,hpsbar,hsbar1,hqa,hsa,hp,hk,hphys⟩ :=</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     marked_common_density_bounds (r+4) (by omega) ρ s₀ ρstar sstar hρstar hsstar hρlo hρhi hslo hshi</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   have hmass := marked_common_start_mass (r+4) (by omega) ω sstar s₀</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (Fintype.card V) (Fintype.card U) hω hsstar hslo (Nat.cast_nonneg _) huLo</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   exact hweight p k s₀ hp hk hphys (hsstar.trans_le hslo) hpp hpk hpsbar hsbar1 hqa hsa</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     q hq hQ s hs hS g j hq₀ hs₀&#x27; hmass</span>
+<span id="L84"><a href="#L84" class="ln">  84</a> </span>
+<span id="L85"><a href="#L85" class="ln">  85</a> end Oberwolfach</span></pre></html>

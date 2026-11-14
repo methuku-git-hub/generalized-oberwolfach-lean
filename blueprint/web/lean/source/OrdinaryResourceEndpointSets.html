@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryResourceEndpointSets.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryResourceEndpointSets.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryTransformerForbiddenEdges</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Endpoint sets of finite physical edge sets, retaining the distinct</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> row and hub types. These identities control the successive transformer budget. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 4000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V U I:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem ordinaryResourceRows_subset (K:Finset (Sym2 V⊕(V×U))) (N:Finset V)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hr:∀ v w,Sum.inl s(v,w)∈K→v∈N∧w∈N)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hs:∀ v u,Sum.inr (v,u)∈K→v∈N) : ordinaryResourceRows K⊆N := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   intro v hv</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   obtain ⟨e,he,hv⟩:=Finset.mem_biUnion.mp hv</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   cases e with</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   | inl e=&gt;</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     induction e using Sym2.ind with</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     | _ a b=&gt;</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       have hv&#x27;:v=a∨v=b:=by simpa using hv</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       rcases hv&#x27; with h|h</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       · rw [h];exact (hr a b he).1</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       · rw [h];exact (hr a b he).2</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   | inr p=&gt;</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hv&#x27;:v=p.1:=by simpa using hv</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     rw [hv&#x27;];exact hs p.1 p.2 he</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem ordinaryResourceHubs_subset (K:Finset (Sym2 V⊕(V×U))) (B:Finset U)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (h:∀ v u,Sum.inr (v,u)∈K→u∈B) : ordinaryResourceHubs K⊆B := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro u hu</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨e,he,hu⟩:=Finset.mem_biUnion.mp hu</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   cases e with</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   | inl e=&gt;simp at hu</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   | inr p=&gt;</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hu&#x27;:u=p.2:=by simpa using hu</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     rw [hu&#x27;];exact h p.1 p.2 he</span>
+<span id="L38"><a href="#L38" class="ln">  38</a> </span>
+<span id="L39"><a href="#L39" class="ln">  39</a> theorem ordinaryResourceRows_union (K L:Finset (Sym2 V⊕(V×U))) :</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     ordinaryResourceRows (K∪L)=ordinaryResourceRows K∪ordinaryResourceRows L := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   exact Finset.union_biUnion</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> </span>
+<span id="L43"><a href="#L43" class="ln">  43</a> theorem ordinaryResourceHubs_union (K L:Finset (Sym2 V⊕(V×U))) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ordinaryResourceHubs (K∪L)=ordinaryResourceHubs K∪ordinaryResourceHubs L := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   exact Finset.union_biUnion</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> </span>
+<span id="L47"><a href="#L47" class="ln">  47</a> theorem ordinaryResourceRows_biUnion [DecidableEq I] (s:Finset I) (K:I→Finset (Sym2 V⊕(V×U))) :</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     ordinaryResourceRows (s.biUnion K)=s.biUnion (fun i=&gt;ordinaryResourceRows (K i)) := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   exact Finset.biUnion_biUnion _ _ _</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> theorem ordinaryResourceHubs_biUnion [DecidableEq I] (s:Finset I) (K:I→Finset (Sym2 V⊕(V×U))) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     ordinaryResourceHubs (s.biUnion K)=s.biUnion (fun i=&gt;ordinaryResourceHubs (K i)) := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   exact Finset.biUnion_biUnion _ _ _</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> </span>
+<span id="L55"><a href="#L55" class="ln">  55</a> theorem ordinaryResourceRows_mono {K L:Finset (Sym2 V⊕(V×U))} (h:K⊆L) :</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ordinaryResourceRows K⊆ordinaryResourceRows L := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   intro x hx</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   obtain ⟨e,he,hx⟩:=Finset.mem_biUnion.mp hx</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   exact Finset.mem_biUnion.mpr ⟨e,h he,hx⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a> </span>
+<span id="L61"><a href="#L61" class="ln">  61</a> theorem ordinaryResourceHubs_mono {K L:Finset (Sym2 V⊕(V×U))} (h:K⊆L) :</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     ordinaryResourceHubs K⊆ordinaryResourceHubs L := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   intro x hx</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨e,he,hx⟩:=Finset.mem_biUnion.mp hx</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   exact Finset.mem_biUnion.mpr ⟨e,h he,hx⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a> end Oberwolfach</span></pre></html>

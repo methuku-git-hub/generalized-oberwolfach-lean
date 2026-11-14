@@ -1,0 +1,96 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawMarkedPatternSampling.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawMarkedPatternSampling.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawMarkedPotentialSampling</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SupportedPatternSums</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.FinitePatternIncidence</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Mixed rim and spoke patterns in the original product experiment.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> The expected product is used only after physical-edge distinctness and</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> interval-coordinate disjointness have been verified. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 1800000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U Γ Color : Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> abbrev MarkedResource (V U : Type) := ((V×V)⊕(V×V))⊕(Bool×V×U)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> theorem rawMarkedResourceCoordinates_disjoint</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (π : Equiv.Perm V) (d : ℕ) (a b : MarkedResource V U)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (h : match a,b with</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       | Sum.inl e,Sum.inl f=&gt;markedPairPhysical π e≠markedPairPhysical π f</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       | Sum.inr x,Sum.inr y=&gt;x.2.2≠y.2.2 ∨ ¬PermutationClose π (3*d) x.2.1 y.2.1</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       | _,_=&gt;True) :</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     Disjoint (rawMarkedResourceCoordinates π d a) (rawMarkedResourceCoordinates π d b) := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   cases a with</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   | inl a=&gt;cases b with</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     | inl b=&gt;simpa only [rawMarkedResourceCoordinates,Finset.disjoint_singleton,ne_eq,Sum.inl.injEq] using h</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     | inr b=&gt;simp [rawMarkedResourceCoordinates]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   | inr a=&gt;cases b with</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     | inl b=&gt;simp [rawMarkedResourceCoordinates]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     | inr b=&gt;</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       apply Finset.disjoint_left.mpr</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       intro e he hf</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       obtain ⟨x,hx,he⟩ := Finset.mem_image.mp he</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       obtain ⟨y,hy,hf⟩ := Finset.mem_image.mp hf</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       have hxy := Sum.inr.inj (he.trans hf.symm)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       exact Finset.disjoint_left.mp (rawIntervalFamilyCoordinates_disjoint π d a.2 b.2 h) hx (hxy ▸ hy)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> variable (P : SimpleGraph V) (π : Equiv.Perm V)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (p k : ℝ) (hp : 0≤p) (hk : 0≤k) (hsum : 2*p+2*k≤1)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (d : ℕ) (hd : 2≤d)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (q : U→Γ→ℝ) (hq : ∀ u g,0≤q u g) (hQ : ∀ u,∑ g,q u g≤1/8)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> local notation &quot;μmark&quot; =&gt; rawMarkedWheelLaw p k hp hk hsum d hd q hq hQ s hs hS</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> def rawMarkedPatternSum {I : Type} [Fintype I]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (R : I→Finset (MarkedResource V U)) (w : I→ℝ) (g : Γ) (j : Color)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (σ : RawMarkedOutcome V U Γ Color) : ℝ :=</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   supportedPatternSum R w (fun _ _=&gt;true)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (fun σ=&gt;typedMarkedResourceState (rawMarkedPairRims P π d σ) (rawMarkedPairSpokes π d σ g j)) σ</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> </span>
+<span id="L55"><a href="#L55" class="ln">  55</a> theorem rawMarkedPatternSum_expectation</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (hnoshort : ∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     {I : Type} [Fintype I] (R : I→Finset (MarkedResource V U)) (w : I→ℝ)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (hdisj : ∀ i,∀ a∈R i,∀ b∈R i,a≠b →</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       Disjoint (rawMarkedResourceCoordinates π d a) (rawMarkedResourceCoordinates π d b))</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (g : Γ) (j : Color) :</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (FiniteLaw.pi μmark).expectation (rawMarkedPatternSum P π d R w g j)=</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       ∑ i,w i*∏ a∈R i,rawMarkedWheelMarginal P π d p k q s g j a := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   unfold rawMarkedPatternSum</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hh := supportedPatternSum_expectation μmark R w (fun _ _=&gt;true)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (rawMarkedResourceCoordinates π d)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (fun σ=&gt;typedMarkedResourceState (rawMarkedPairRims P π d σ) (rawMarkedPairSpokes π d σ g j))</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (by intro a σ τ ha;exact congrArg (fun Q : Prop=&gt;decide Q) (propext (rawMarkedResourceState_supported P π d g j a σ τ ha))) hdisj</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   simpa only [rawMarkedResource_probability P π p k hp hk hsum d hd q hq hQ s hs hS hnoshort g j] using hh</span>
+<span id="L69"><a href="#L69" class="ln">  69</a> </span>
+<span id="L70"><a href="#L70" class="ln">  70</a> theorem rawMarkedPatternSum_tail</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (hnoshort : ∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     {I : Type} [Fintype I] (R : I→Finset (MarkedResource V U)) (w : I→ℝ) (hw : ∀ i,0≤w i)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (hdisj : ∀ i,∀ a∈R i,∀ b∈R i,a≠b →</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       Disjoint (rawMarkedResourceCoordinates π d a) (rawMarkedResourceCoordinates π d b))</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (g : Γ) (j : Color) (a r L : ℝ) (ha : 0&lt;a) (hr : 0&lt;r) (hL : 0&lt;L)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     (hsize : ∀ i,((R i).card:ℝ)≤r) (htotal : (∑ i,w i)≤L)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     (hload : ∀ e,(∑ i,if e∈R i then w i else 0)≤a) (t : ℝ) (ht : 0&lt;t) :</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (FiniteLaw.pi μmark).probability (fun σ=&gt;t≤</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       |rawMarkedPatternSum P π d R w g j σ-</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>         ∑ i,w i*∏ e∈R i,rawMarkedWheelMarginal P π d p k q s g j e|)≤</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       2*Real.exp (-2*t^2/((8*(d:ℝ)+6)^2*(a*r*L))) := by</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   rw [← rawMarkedPatternSum_expectation P π p k hp hk hsum d hd q hq hQ s hs hS hnoshort R w hdisj g j]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   apply supportedPatternSum_tail μmark R w hw (fun _ _=&gt;true)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     (rawMarkedResourceCoordinates π d)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     (fun σ=&gt;typedMarkedResourceState (rawMarkedPairRims P π d σ) (rawMarkedPairSpokes π d σ g j))</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     (by intro e σ τ he;exact congrArg (fun Q : Prop=&gt;decide Q) (propext (rawMarkedResourceState_supported P π d g j e σ τ he)))</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (8*(d:ℝ)+6) (a*r*L) (by positivity) (by positivity)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     (by intro e;exact_mod_cast rawMarkedResourceCoordinates_card π d e)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     (by intro e;exact_mod_cast rawMarkedResourceCoordinates_reverse_card π d e)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   · exact finite_pattern_incidence_square_sum R w hw a r L ha.le hr.le hsize htotal hload</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   · exact ht</span>
+<span id="L92"><a href="#L92" class="ln">  92</a> </span>
+<span id="L93"><a href="#L93" class="ln">  93</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceCompletionSharedChangeGraphs.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceCompletionSharedChangeGraphs.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceCompletionUniformSizeOrder</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedTypedLossFromSymmetricChanges</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Fix an order threshold before the level data and derive the absorber size bounds from the level-size fields. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option synthInstance.maxSize 32768</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 40000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {Gamma Color:Type} [Fintype Gamma] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {r d N NI Kgeom:ℕ}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {gamma rho omega t p0 betaA aLoA BA kappa ξ thetaDeep alphaInner omegaInner</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   iota β aLo B η x omegaI hIcut deltaI etaBal:ℝ}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_reference_completion_from_shared_change_graphs</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (count:ℕ) (hcount:0&lt;count) (gammaLoss sigmaLoss ε:ℝ) (s a₀ b₀ e₀ f:ℕ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hξε:ξ≤ε) (hγ:0&lt;gammaLoss) (hσ:0&lt;sigmaLoss):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ N₀:ℕ,∀ (levels:ℕ→MarkedReferenceLevelData Gamma Color r d N NI Kgeom gamma rho omega t p0 betaA aLoA BA</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       kappa ξ thetaDeep alphaInner omegaInner iota β aLo B η x omegaI hIcut deltaI etaBal),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     letI : ∀ i,Fintype (levels i).VP:=fun i=&gt;(levels i).inst7</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     letI : ∀ i,Fintype (levels i).UP:=fun i=&gt;(levels i).inst8</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     letI : ∀ i,LinearOrder (levels i).VP:=fun i=&gt;(levels i).inst9</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     letI : ∀ i,DecidableEq (levels i).UP:=fun i=&gt;(levels i).inst10;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     N₀≤Fintype.card (levels 0).VP→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ chain:MarkedReferenceLevelChain levels count,</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ i,i&lt;count→MarkedReferenceLevelStepProperty (levels i) gammaLoss sigmaLoss)→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let V:=(levels 0).VP</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let U:=(levels 0).UP</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let P:=(levels 0).PP</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let π:=(levels 0).πP</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let I:=(levels 0).I</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let J:=(levels 0).J</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let X:=(levels (count-1)).I.image (chain.intoV (count-1))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let Y:=(levels (count-1)).J.image (chain.intoU (count-1));</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∀ (σ:RawMarkedOutcome V U Gamma Color) (Hold:Bool→V→U→Prop) (ζ:ℝ),</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (∀ mark x y,x∈I→y∈I→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (markedPhysicalRim P π (3*d) (fun e=&gt;σ (Sum.inl e)) mark x y=1 ↔</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>        markedPhysicalRim P π (3*d) (fun e=&gt;(levels 0).σBase (Sum.inl e)) mark x y=1))→</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ b v u,v∈I→u∈J→(Hold b v u↔(levels 0).HBase b v u))→</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ v u,¬(Hold false v u∧Hold true v u))→</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     ∀ (FR:SimpleGraph V) (FS:SimpleGraph (V⊕U)),</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (∀ a,¬(rawMarkedPairRims P π d σ a↔rawMarkedPairRims P π d (levels 0).σBase a)→</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       markedPairPhysical π a∈FR.edgeFinset)→</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (∀ b v u,¬(Hold b v u↔(levels 0).HBase b v u)→FS.Adj (Sum.inl v) (Sum.inr u))→</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (∀ x,(FR.degree x:ℝ)≤ζ*Fintype.card V)→</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (∀ z,(FS.degree z:ℝ)≤ζ*Fintype.card V)→</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (∀ (DR:SimpleGraph V) (DS:SimpleGraph (V⊕U)),</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀ x,(DR.degree x:ℝ)≤ζ*Fintype.card V)→</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (∀ z,(DS.degree z:ℝ)≤ζ*Fintype.card V)→</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       let σ&#x27;:=rawMarkedDeleteRims σ DR.edgeFinset</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       let H&#x27;:=markedDeletePhysicalSpokes Hold DS</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       let E:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       let K:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true;</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       MarkedReservedTerminalAbsorberProperty (fun e:E=&gt;e.val.1) (fun e:E=&gt;e.val.2)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         (fun e:K=&gt;e.val.1) (fun e:K=&gt;e.val.2) (H&#x27; false) (H&#x27; true) π (3*d) r s a₀ b₀ e₀ f ε)→</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     X.card+Y.card≤s→</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     let E&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;(levels 0).σBase (Sum.inl e)) false</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     let K&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;(levels 0).σBase (Sum.inl e)) true</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     let tail&#x27;:=fun e:E&#x27;=&gt;e.val.1</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     let head&#x27;:=fun e:E&#x27;=&gt;e.val.2</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     let ktail&#x27;:=fun e:K&#x27;=&gt;e.val.1</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     let khead&#x27;:=fun e:K&#x27;=&gt;e.val.2</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     let H₀&#x27;:=(levels 0).HBase false</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     let HK&#x27;:=(levels 0).HBase true</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     let S:=Finset.univ.filter (fun z:V×U=&gt;H₀&#x27; z.1 z.2∨HK&#x27; z.1 z.2)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     let Full:=markedFiniteResources tail&#x27; head&#x27; ktail&#x27; khead&#x27; π Finset.univ S;</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     MarkedRemainderDivisible tail&#x27; head&#x27; ktail&#x27; khead&#x27; HK&#x27; Finset.univ S (r+4)→</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     HasResourceDecomposition</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       (fun W:MarkedWheel tail&#x27; head&#x27; ktail&#x27; khead&#x27; (r+4) π (3*d) H₀&#x27; HK&#x27;=&gt;markedWheelPhysicalResources W) Full :=by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨N₀,hmain⟩:=marked_reference_completion_uniform_size_order</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (Gamma:=Gamma) (Color:=Color) (r:=r) (d:=d) (N:=N) (NI:=NI) (Kgeom:=Kgeom)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (gamma:=gamma) (rho:=rho) (omega:=omega) (t:=t) (p0:=p0) (betaA:=betaA) (aLoA:=aLoA) (BA:=BA)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (kappa:=kappa) (ξ:=ξ) (thetaDeep:=thetaDeep) (alphaInner:=alphaInner) (omegaInner:=omegaInner)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (iota:=iota) (β:=β) (aLo:=aLo) (B:=B) (η:=η) (x:=x) (omegaI:=omegaI) (hIcut:=hIcut)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     (deltaI:=deltaI) (etaBal:=etaBal) count hcount gammaLoss sigmaLoss ε</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     s a₀ b₀ e₀ f hξε hγ hσ</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   refine ⟨N₀,?_⟩</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   intro levels hn chain hsteps V U P π I J X Y σ Hold ζ hrim hsp htypes FR FS hcr hcs hdegR hdegS huniform hs E&#x27; K&#x27; tail&#x27; head&#x27; ktail&#x27; khead&#x27; H₀&#x27; HK&#x27; S Full hdiv</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   letI : ∀ i,Fintype (levels i).VP:=fun i=&gt;(levels i).inst7</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   letI : ∀ i,Fintype (levels i).UP:=fun i=&gt;(levels i).inst8</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   letI : ∀ i,LinearOrder (levels i).VP:=fun i=&gt;(levels i).inst9</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   letI : ∀ i,DecidableEq (levels i).UP:=fun i=&gt;(levels i).inst10</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   exact hmain levels hn chain hsteps σ Hold ζ hrim hsp htypes FR FS</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     (marked_removed_typed_rim_from_pair_change P FR π d σ (levels 0).σBase hcr)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     (marked_missing_spoke_from_pair_change FS Hold (levels 0).HBase hcs)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     hdegR hdegS huniform hs hdiv</span>
+<span id="L88"><a href="#L88" class="ln">  88</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPaddedMapCompatibility.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPaddedMapCompatibility.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPaddedGraphOccurrences</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The extended maps preserve every actual augmented rim and spoke</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> occurrence, in its original direction and type. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 10000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U A S I:Type} [Fintype A] [Fintype S] [Fintype I] [DecidableEq V] [DecidableEq U] [DecidableEq I]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem padded_maps_compatible (src dst:A→V) (row:S→V) (u:S→U) (φ φ&#x27;:V→V) (ψ ψ&#x27;:U→U)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (m:ℕ) (C C&#x27;:I→Fin (m+1)→V) (h h&#x27;:I→U) (Z:Finset V) (B:Finset U)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hR:∀ a,src a∈Z∧dst a∈Z) (hS:∀ s,row s∈Z) (hU:∀ s,u s∈B)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hφ:∀ v∈Z,φ&#x27; v=φ v) (hψ:∀ z∈B,ψ&#x27; z=ψ z)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hC:∀ i k,φ&#x27; (C i k)=C&#x27; i k) (hh:∀ i,ψ&#x27; (h i)=h&#x27; i):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∀ e,φ&#x27; (paddingRimTail src C e)=paddingRimTail (fun a=&gt;φ (src a)) C&#x27; e)∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ e,φ&#x27; (paddingRimHead dst C e)=paddingRimHead (fun a=&gt;φ (dst a)) C&#x27; e)∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (∀ s,φ&#x27; (paddingSpokeRow row C s)=paddingSpokeRow (fun s=&gt;φ (row s)) C&#x27; s)∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ s,ψ&#x27; (actualPaddingSpokeHub (m:=m) u h s)=actualPaddingSpokeHub (m:=m) (fun s=&gt;ψ (u s)) h&#x27; s):=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   refine ⟨?_,?_,?_,?_⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · rintro (a|⟨i,k⟩)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     · exact hφ (src a) (hR a).1</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     · exact hC i k</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · rintro (a|⟨i,k⟩)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     · exact hφ (dst a) (hR a).2</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     · exact hC i (finRotate (m+1) k)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   · rintro (s|⟨i,k⟩)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     · exact hφ (row s) (hS s)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     · exact hC i k</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   · rintro (s|⟨i,k⟩)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     · exact hψ (u s) (hU s)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     · exact hh i</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> </span>
+<span id="L36"><a href="#L36" class="ln">  36</a> theorem padded_image_resources (π:Equiv.Perm V) (src dst:A→V) (row:S→V) (u:S→U) (jr:A→Bool)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (φ φ&#x27;:V→V) (ψ ψ&#x27;:U→U) (m:ℕ) (C C&#x27;:I→Fin (m+1)→V) (h h&#x27;:I→U) (Z:Finset V) (B:Finset U)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hR:∀ a,src a∈Z∧dst a∈Z) (hS:∀ s,row s∈Z) (hU:∀ s,u s∈B)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hφ:∀ v∈Z,φ&#x27; v=φ v) (hψ:∀ z∈B,ψ&#x27; z=ψ z)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hC:∀ i k,φ&#x27; (C i k)=C&#x27; i k) (hh:∀ i,ψ&#x27; (h i)=h&#x27; i):</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     markedRootGraphResources π (fun e=&gt;φ&#x27; (paddingRimTail src C e))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (fun e=&gt;φ&#x27; (paddingRimHead dst C e)) (fun s=&gt;φ&#x27; (paddingSpokeRow row C s))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (paddingRimType jr m) (fun s=&gt;ψ&#x27; (actualPaddingSpokeHub (m:=m) u h s))=</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     markedRootGraphResources π (paddingRimTail (fun a=&gt;φ (src a)) C&#x27;)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (paddingRimHead (fun a=&gt;φ (dst a)) C&#x27;) (paddingSpokeRow (fun s=&gt;φ (row s)) C&#x27;)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (paddingRimType jr m) (actualPaddingSpokeHub (m:=m) (fun s=&gt;ψ (u s)) h&#x27;):=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨h₁,h₂,h₃,h₄⟩:=padded_maps_compatible src dst row u φ φ&#x27; ψ ψ&#x27; m C C&#x27; h h&#x27; Z B hR hS hU hφ hψ hC hh</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   simp only [h₁,h₂,h₃,h₄]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> </span>
+<span id="L50"><a href="#L50" class="ln">  50</a> end Oberwolfach</span></pre></html>

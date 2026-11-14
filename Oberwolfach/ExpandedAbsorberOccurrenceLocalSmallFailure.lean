@@ -1,0 +1,54 @@
+module
+
+public import Oberwolfach.RawAbsorberOccurrenceLocalSmallFailure
+public import Oberwolfach.RawIntervalUnassignedCountsEvent
+
+@[expose] public section
+/-! The local unassigned-spoke rows lift to the expanded sample and any retained fiber. -/
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 12000000
+open scoped BigOperators
+noncomputable section
+namespace Oberwolfach
+attribute [local instance] Classical.propDecidable
+
+theorem raw_expanded_absorber_occurrence_local_small_failure
+    (d:ℕ) (hd:2≤d) (δ:ℝ) (hδ:0<δ) :
+    ∃m:ℕ,1≤m ∧ ∀(V U Color:Type) [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U]
+      [Fintype Color],
+    ∀(I:Type) (T:Finset I) (A:I→Finset V) (J:I→Finset U),
+    (∀i∈T,m≤(A i).card) → Set.InjOn (fun i=>(A i).card) T →
+    (∀i∈T,0<(J i).card) → (∀i∈T,(J i).card≤(A i).card) →
+    ∀(π:Equiv.Perm V) (p k p₂ k₂ u:ℝ) (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u)
+    (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)
+    (q:U→Bool→ℝ) (hq:∀u g,0≤q u g) (hQ:∀u,∑g,q u g≤1/8)
+    (s:U→Color→ℝ) (hs:∀u j,0≤s u j) (hS:∀u,∑j,s u j≤ intervalUncoveredProbability d (∑g,q u g))
+    (hnoshort:∀x l,0<l→l<2*d+1→(π^l) x≠x)
+    (M:ℝ) (hM:0<M) (hqM:∀u g,q u g≤1/M)
+    (F:RawMarkedOutcome V U Bool Color→Type) [∀ a,Fintype (F a)] (ν:∀ a,FiniteLaw (F a)),
+    let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS)
+    let f:=fun (ω:∀e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Bool Color e) e=>rawExpandedMarkedCollapse e (ω e)
+    1-δ≤(μ.sigma (fun ω=>ν (f ω))).probability (fun z=>∀i∈T,∀v∈A i,
+      ((rawIntervalExtendedAnyHubSet π d (fun e=>z.1 (Sum.inr e)) v ∩ J i).card:ℝ) ≤
+      4*((J i).card:ℝ)/M+4*((A i).card:ℝ)^(3/4:ℝ)):=by
+  obtain ⟨m,hm,hfamily⟩:=raw_interval_absorber_occurrence_local_small_failure d hd δ hδ
+  refine ⟨m,hm,?_⟩
+  intro V U Color _ _ _ _ _ I T A J hmin hinj hJ hJA π p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum q hq hQ s hs hS hnoshort M hM hqM F _ ν μ f
+  let E:=fun σ:RawIntervalFamilyOutcome V U Bool Color=>∀i∈T,∀v∈A i,
+    ((rawIntervalExtendedAnyHubSet π d σ v ∩ J i).card:ℝ) ≤
+      4*((J i).card:ℝ)/M+4*((A i).card:ℝ)^(3/4:ℝ)
+  have hh:=hfamily V U Color I T A J hmin hinj hJ hJA π q hq hQ s hs hS hnoshort M hM hqM
+  have heq:(μ.sigma (fun ω=>ν (f ω))).probability (fun z=>E (fun e=>z.1 (Sum.inr e)))=
+      (FiniteLaw.pi (rawIntervalFamilyLaw (V:=V) d hd q hq hQ s hs hS)).probability E:=by
+    calc
+      _ = μ.probability (fun ω=>E (fun e=>ω (Sum.inr e))) := finiteLaw_sigma_first_probability μ (fun ω=>ν (f ω)) _
+      _ = _ := by
+        simpa only [μ,rawExpandedMarkedWheelLaw] using
+          (finiteLaw_pi_injective_projection_event
+            (rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS)
+            Sum.inr Sum.inr_injective E)
+  change 1-δ≤(μ.sigma (fun ω=>ν (f ω))).probability (fun z=>E (fun e=>z.1 (Sum.inr e)))
+  rw [heq]
+  exact hh
+end Oberwolfach

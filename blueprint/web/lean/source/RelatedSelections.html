@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RelatedSelections.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RelatedSelections.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FixedCoordinateCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Fixing coordinates and requiring one additional coordinate to be</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> related to another reduces the number of free choices by one. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 1000000 in</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem related_fixed_selections_card {I X : Type*}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [Fintype I] [Fintype X] [DecidableEq I] [Nonempty X]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (R : X → X → Prop) (q : ℕ) (hR : ∀ x, Fintype.card {y // R x y} ≤ q)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (A : Finset I) (a : I → X) (i j : I) (hi : i ∉ A) (hij : i ≠ j) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     Fintype.card {f : I → X // (∀ k ∈ A, f k = a k) ∧ R (f j) (f i)} ≤</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       q * Fintype.card X ^ (Fintype.card I - A.card - 1) := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let x₀ : X := Classical.choice (inferInstance : Nonempty X)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let G := {g : I → X // ∀ k ∈ insert i A, g k = Function.update a i x₀ k}</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let B := {f : I → X // (∀ k ∈ A, f k = a k) ∧ R (f j) (f i)}</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   let g (f : B) : G := ⟨Function.update f.1 i x₀, by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     intro k hk</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     rcases Finset.mem_insert.mp hk with h | h</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     · subst k</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       simp</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     · have hki : k ≠ i := by intro he; exact hi (he ▸ h)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       simp only [Function.update_of_ne hki]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       exact f.2.1 k h⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let F (f : B) : Σ g : G, {x : X // R (g.1 j) x} :=</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ⟨g f, f.1 i, by simpa only [g, Function.update_of_ne hij.symm] using f.2.2⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hF : Function.Injective F := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     intro f f&#x27; he</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hg : g f = g f&#x27; := congrArg Sigma.fst he</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hv : f.1 i = f&#x27;.1 i := congrArg (fun z : (Σ g : G, {x : X // R (g.1 j) x}) =&gt; z.2.1) he</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     apply Subtype.ext</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     funext k</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     by_cases hk : k = i</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · simpa only [hk] using hv</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     · have hh := congrArg (fun z : G =&gt; z.1 k) hg</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       simpa only [g, Function.update_of_ne hk] using hh</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   calc</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     Fintype.card B ≤ Fintype.card (Σ g : G, {x : X // R (g.1 j) x}) :=</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       Fintype.card_le_of_injective F hF</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     _ = ∑ g : G, Fintype.card {x : X // R (g.1 j) x} := Fintype.card_sigma</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     _ ≤ ∑ _g : G, q := Finset.sum_le_sum (fun g _ =&gt; hR (g.1 j))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     _ = Fintype.card G * q := by simp</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     _ = _ := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       rw [show Fintype.card G = Fintype.card X ^ (Fintype.card I - (insert i A).card) from</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         fixedCoordinates_card (insert i A) (Function.update a i x₀)]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       rw [Finset.card_insert_of_notMem hi]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       have hsub : Fintype.card I - (A.card + 1) = Fintype.card I - A.card - 1 := by omega</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       rw [hsub, Nat.mul_comm]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> </span>
+<span id="L55"><a href="#L55" class="ln">  55</a> end Oberwolfach</span></pre></html>

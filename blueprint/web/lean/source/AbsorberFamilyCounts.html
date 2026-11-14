@@ -1,0 +1,64 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AbsorberFamilyCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AbsorberFamilyCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AbsorberOccurrenceCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LabelledAbsorberFactors</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Passing from individual template occurrences to any allowed finite</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> family of labelled absorbers, without forgetting their identifiers. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 3000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V C T : Type*} [Fintype V] [DecidableEq V] [Fintype C] [DecidableEq C] [Fintype T] {c : ℕ}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> abbrev LabelledAbsorberFamily (R : C → Finset V) (S : T → VertexAbsorberTemplate c) (X : Finset V) :=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   Σ t,LabelledCycleRecord R (S t).val X</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem labelled_absorber_family_occurrence_count (R : C → Finset V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (S : T → VertexAbsorberTemplate c) (X : Finset V) (C₀ : C) (B : ℕ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hB : ∀ t o,Fintype.card {D : LabelledCycleRecord R (S t).val X // (D.2 o).val=C₀} ≤ B) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     Fintype.card {D : LabelledAbsorberFamily R S X // ∃ o,(D.2.2 o).val=C₀} ≤</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (2*c+1)*Fintype.card T*B := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let F := LabelledAbsorberFamily R S X</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let P (o : Fin c ⊕ Fin (c+1)) := Finset.univ.filter (fun D : F =&gt; (D.2.2 o).val=C₀)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hp (o : Fin c ⊕ Fin (c+1)) : (P o).card ≤ Fintype.card T*B := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let e : {D : F // (D.2.2 o).val=C₀} ≃</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         Σ t,{D : LabelledCycleRecord R (S t).val X // (D.2 o).val=C₀} := {</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       toFun D := ⟨D.val.1,⟨D.val.2,D.property⟩⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       invFun D := ⟨⟨D.1,D.2.val⟩,D.2.property⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       left_inv := by rintro ⟨⟨t,D⟩,h⟩;rfl</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       right_inv := by rintro ⟨t,⟨D,h⟩⟩;rfl }</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have he := Fintype.card_congr e</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     calc</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       _ = ∑ t,Fintype.card {D : LabelledCycleRecord R (S t).val X // (D.2 o).val=C₀} := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         simpa only [Fintype.card_subtype,Fintype.card_sigma,P] using he</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       _ ≤ ∑ _t : T,B := Finset.sum_le_sum (fun t _ =&gt; hB t o)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       _ = _ := by simp</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have he : Finset.univ.filter (fun D : F =&gt; ∃ o,(D.2.2 o).val=C₀)=Finset.univ.biUnion P := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     ext D;simp [P]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   rw [Fintype.card_subtype,he]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   apply Finset.card_biUnion_le.trans</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   calc</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     _ ≤ ∑ _o : Fin c ⊕ Fin (c+1),Fintype.card T*B := Finset.sum_le_sum (fun o _ =&gt; hp o)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     _ = _ := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       simp only [Finset.sum_const,Finset.card_univ,Fintype.card_sum,Fintype.card_fin,smul_eq_mul]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       ring</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> theorem labelled_absorber_subfamily_occurrence_count (R : C → Finset V)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (S : T → VertexAbsorberTemplate c) (X : Finset V) (C₀ : C) (B : ℕ)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hB : ∀ t o,Fintype.card {D : LabelledCycleRecord R (S t).val X // (D.2 o).val=C₀} ≤ B)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (A : Finset (LabelledAbsorberFamily R S X)) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     Fintype.card {D : A // ∃ o,(D.val.2.2 o).val=C₀} ≤ (2*c+1)*Fintype.card T*B := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   let enc (D : {D : A // ∃ o,(D.val.2.2 o).val=C₀}) :</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       {D : LabelledAbsorberFamily R S X // ∃ o,(D.2.2 o).val=C₀} := ⟨D.val.val,D.property⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hinj : Function.Injective enc := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     intro D E he;apply Subtype.ext;apply Subtype.ext</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     exact congrArg (fun z : {D : LabelledAbsorberFamily R S X // ∃ o,(D.2.2 o).val=C₀} =&gt; z.val) he</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   exact (Fintype.card_le_of_injective enc hinj).trans</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (labelled_absorber_family_occurrence_count R S X C₀ B hB)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a> </span>
+<span id="L61"><a href="#L61" class="ln">  61</a> end Oberwolfach</span></pre></html>

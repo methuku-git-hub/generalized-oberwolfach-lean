@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVortexStepConservation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVortexStepConservation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedVortexRestrictionChain</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedReferencePackingRemaining</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The actual cover-down packing removes exactly its physical resources,</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> also after lifting the state and the remainder to the original host. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 16000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {G:SimpleGraph V} {D m:ℕ} {β ε:ℝ} (Q:Vortex U G D β ε m)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_vortex_step_physical_conservation (i:ℕ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (d c:ℕ) (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let P:=G.comap (markedVortexVertexEmbedding Q i)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let ρ:=markedVortexPermutation Q π hπ i</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let σi:=rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let Hi:=fun b (v:markedVortexVertexType Q i) (u:markedVortexHubType Q i)=&gt;H b v.val u.val</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let E:=MarkedSampleArc P ρ (3*d) (fun e=&gt;σi (Sum.inl e)) false</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let K:=MarkedSampleArc P ρ (3*d) (fun e=&gt;σi (Sum.inl e)) true</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let S:=Finset.univ.filter (fun z:markedVortexVertexType Q i×markedVortexHubType Q i=&gt;Hi false z.1 z.2∨Hi true z.1 z.2)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let F:=markedResourceEmbedding (markedVortexVertexEmbedding Q i).toEmbedding (markedVortexHubEmbedding Q i);</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ (T:MarkedReferenceDeletion P ρ d σi)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (M:Finset (MarkedWheel (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:K=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         c ρ (3*d) (Hi false) (Hi true))),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀ Y∈M,∀ Z∈M,Y≠Z→Disjoint (markedWheelPhysicalResources Y) (markedWheelPhysicalResources Z))→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     M.biUnion markedWheelArcs⊆Finset.univ\T.arcs→M.biUnion markedWheelSpokePairs⊆S\T.spokes→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let L:=markedFiniteResources (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:K=&gt;e.val.1) (fun e=&gt;e.val.2) ρ</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (Finset.univ\(T.arcs∪M.biUnion markedWheelArcs)) (S\(T.spokes∪M.biUnion markedWheelSpokePairs))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let E₀:=MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let K₀:=MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) true;</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     L.image F⊆(T.remaining Hi).image F ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     L=T.remaining Hi\M.biUnion markedWheelPhysicalResources ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (M.biUnion markedWheelPhysicalResources).image F=(T.remaining Hi).image F\L.image F ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     HasResourceDecomposition</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (fun W:MarkedWheel (fun e:E₀=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:K₀=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         c π (3*d) (H false) (H true)=&gt;markedWheelPhysicalResources W)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       ((T.remaining Hi).image F\L.image F):=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   intro P ρ σi Hi E K S F T M hM hA hS L E₀ K₀</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hdec:(fun (a b:markedVortexVertexType Q i)=&gt;Classical.propDecidable (a=b))=</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (inferInstance:DecidableEq (markedVortexVertexType Q i)):=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     apply Subsingleton.elim</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   change (fun (a b:markedVortexVertexType Q i)=&gt;Classical.propDecidable (a=b)) =</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (fun (a b:markedVortexVertexType Q i)=&gt;Subtype.instDecidableEq a b) at hdec</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hM&#x27;:=hM</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hA&#x27;:=hA</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hS&#x27;:=hS</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   try rw [←hdec] at hM&#x27;</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   try rw [←hdec] at hA&#x27;</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   try rw [←hdec] at hS&#x27;</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hstep:=marked_reference_state_step_decomposition P ρ d c σi Hi T M hM&#x27; hA&#x27; hS&#x27;</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   rw [hdec] at hstep</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hres:=marked_reference_packing_resources_subset_remaining P ρ d c σi Hi T M hA&#x27; hS&#x27;</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   rw [hdec] at hres</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hL:L=T.remaining Hi\M.biUnion markedWheelPhysicalResources:=hstep.1</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hcovered:T.remaining Hi\L=M.biUnion markedWheelPhysicalResources:=by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     rw [hL]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     ext z</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hh:=fun hz=&gt;hres (x:=z) hz</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     simp only [Finset.mem_sdiff]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     tauto</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hlocal:=hstep.2.2</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hambient:=marked_vortex_ambient_decomposition_lift Q i π hπ d c σ H (T.remaining Hi\L) hlocal</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   refine ⟨Finset.image_subset_image hstep.2.1,?_,?_,?_⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   · exact hL</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   · rw [←hcovered,Finset.image_sdiff _ _ F.injective]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · rw [←Finset.image_sdiff _ _ F.injective]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     exact hambient</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

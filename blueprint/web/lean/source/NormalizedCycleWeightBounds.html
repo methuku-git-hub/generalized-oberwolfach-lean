@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>NormalizedCycleWeightBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>NormalizedCycleWeightBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.NormalizedWeightBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Explicit two-sided bounds after normalization of fixed cycle weights. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> theorem normalized_cycle_weight_bounds (r:ℕ) (hr:2≤r) (n D c cmin a b w:ℝ)</span>
+<span id="L7"><a href="#L7" class="ln">   7</a>     (hn:0&lt;n) (hDlo:n/2≤D) (hDhi:D≤2*n)</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (hcmin:0&lt;cmin) (hclo:cmin≤c) (hchi:c≤1)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (ha:0≤a) (hb:0≤b) (hwlo:a/n^(r-2)≤w) (hwhi:w≤b/n^(r-2)):</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     a/n^(r-1)≤w/(D/2)/c ∧ w/(D/2)/c≤(4*b/cmin)/n^(r-1) := by</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   have hpow:0&lt;n^(r-2):=pow_pos hn _</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hdlo:n/4≤D/2:=by linarith</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hdhi:D/2≤n:=by linarith</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hh:=normalized_weight_bounds n (n^(r-2)) (D/2) c cmin a b w hn hpow hdlo hdhi hcmin hclo hchi ha hb hwlo hwhi</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hp:n^(r-2)*n=n^(r-1):=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     have he:r-1=(r-2)+1:=by omega</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     rw [he,pow_succ]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   simpa only [hp] using hh</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> end Oberwolfach</span></pre></html>

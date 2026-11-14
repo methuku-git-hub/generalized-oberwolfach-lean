@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EndpointConflictRestriction.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EndpointConflictRestriction.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointPotentialLoads</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.InducedFractionalCycles</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Restrict the sampling conflict graph to the rim vertices before using</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> an endpoint factor on a graph with separate hub vertices. Eligible edges,</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> root domains, fixed targets and potential sums are unchanged. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 4500000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V:Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem endpoint_eligible_graph_conflict_restriction (P F:SimpleGraph V) (S Y:Finset V) (x:V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hS:S⊆Y) (hx:x∈Y):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     endpointEligibleGraph P (spanningRestriction F Y) S x=endpointEligibleGraph P F S x:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   ext v w</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   by_cases hv:v∈S &lt;;&gt; by_cases hw:w∈S</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   · simp only [endpointEligibleGraph,spanningRestriction_adj,hv,hw,hS hv,hS hw,hx,and_true,true_and]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · simp [endpointEligibleGraph,hw]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · simp [endpointEligibleGraph,hv]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   · simp [endpointEligibleGraph,hv]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem endpoint_row_target_conflict_restriction (F:SimpleGraph V) (S Y:Finset V) (x v:V)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hS:S⊆Y) (hx:x∈Y) (hv:v∈Y) (w:V→V→ℝ):</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     endpointEligibleRowWeight (spanningRestriction F Y) S x v w=endpointEligibleRowWeight F S x v w:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   unfold endpointEligibleRowWeight</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   apply Finset.sum_congr rfl</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro z hz</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   simp only [spanningRestriction_adj,hx,hv,hS hz,and_true]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> theorem endpoint_potentials_conflict_restriction (P R H F:SimpleGraph V) (A B Y:Finset V)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (x:V) (hA:A⊆Y) (hx:x∈Y) (weight:Sym2 V→ℝ) (D:ℝ):</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∀ v,endpointRowPotential P R H (spanningRestriction F Y) A B x v weight D=</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       endpointRowPotential P R H F A B x v weight D) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∀ u,endpointIndexPotential P R H (spanningRestriction F Y) A x u weight D=</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       endpointIndexPotential P R H F A x u weight D):=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have he:=endpoint_eligible_graph_conflict_restriction P F (A∩P.neighborFinset x) Y x</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (Finset.inter_subset_left.trans hA) hx</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   constructor</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   · intro v</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     simp only [endpointRowPotential,EndpointRowPotentialPredicate,he]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     congr!</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   · intro u</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     simp only [endpointIndexPotential,EndpointIndexPotentialPredicate,he]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     congr!</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> </span>
+<span id="L50"><a href="#L50" class="ln">  50</a> theorem common_conflict_restriction (P F:SimpleGraph V) (A S Y:Finset V)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hA:A⊆Y) (hS:S⊆Y):</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     common A S (fun v=&gt;(P\spanningRestriction F Y).neighborFinset v)=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       common A S (fun v=&gt;(P\F).neighborFinset v):=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   ext z</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   simp only [mem_common_iff,SimpleGraph.mem_neighborFinset,SimpleGraph.sdiff_adj,spanningRestriction_adj]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   constructor</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   · rintro ⟨hz,h⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     exact ⟨hz,fun v hv=&gt;⟨(h v hv).1,fun hf=&gt;(h v hv).2 ⟨hf,hS hv,hA hz⟩⟩⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   · rintro ⟨hz,h⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     exact ⟨hz,fun v hv=&gt;⟨(h v hv).1,fun hf=&gt;(h v hv).2 hf.1⟩⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> theorem restricted_conflict_has_no_hub_edges (F:SimpleGraph V) (Y B:Finset V) (hYB:Disjoint Y B):</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     ∀ u∈B,∀ v,¬(spanningRestriction F Y).Adj u v:=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   intro u hu v h</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   exact Finset.disjoint_left.mp hYB ((spanningRestriction_adj F Y u v).mp h).2.1 hu</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ClassCommonFailureBudget200.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ClassCommonFailureBudget200.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Basic.Real.Basic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Tactic</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A failure parameter may be chosen after the fixed class cutoff, and one</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> order threshold controls the union bound for every later class count. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem class_common_failure_budget_200 (K:ℕ):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ χ:ℝ,0&lt;χ ∧ ∃ N:ℕ,∀ k n:ℕ,k≤K+1→N≤n→</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       (1/2:ℝ)+(∑ _i:Fin k,(100*χ+200/(n:ℝ)))&lt;1:=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   let χ:ℝ:=1/(800*((K:ℝ)+1))</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   let N:=1600*(K+1)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hK:(0:ℝ)&lt;(K:ℝ)+1:=by positivity</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hχ:0&lt;χ:=by dsimp [χ];positivity</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   refine ⟨χ,hχ,N,?_⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   intro k n hk hn</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hn0:0&lt;n:=by dsimp [N] at hn;omega</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hnR:(0:ℝ)&lt;n:=by exact_mod_cast hn0</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hNR:(1600:ℝ)*((K:ℝ)+1)≤n:=by dsimp [N] at hn;exact_mod_cast hn</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hχbound:100*χ=1/(8*((K:ℝ)+1)):=by dsimp [χ];field_simp &lt;;&gt; ring</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hnBound:(200:ℝ)/n≤1/(8*((K:ℝ)+1)):=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     apply (div_le_div_iff₀ hnR (by positivity:0&lt;8*((K:ℝ)+1))).2</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     nlinarith</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have htwo:1/(8*((K:ℝ)+1))+1/(8*((K:ℝ)+1))=1/(4*((K:ℝ)+1)):=by field_simp &lt;;&gt; ring</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hunit:100*χ+200/(n:ℝ)≤1/(4*((K:ℝ)+1)):=by rw [hχbound];linarith</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hkR:(k:ℝ)≤(K:ℝ)+1:=by exact_mod_cast hk</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have he:0≤100*χ+200/(n:ℝ):=by positivity</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hsum:(∑ _i:Fin k,(100*χ+200/(n:ℝ)))≤((K:ℝ)+1)*(1/(4*((K:ℝ)+1))):=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     simp only [Finset.sum_const,Finset.card_univ,Fintype.card_fin,nsmul_eq_mul]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     calc</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       _ ≤ ((K:ℝ)+1)*(100*χ+200/(n:ℝ)):=mul_le_mul_of_nonneg_right hkR he</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       _ ≤ ((K:ℝ)+1)*(1/(4*((K:ℝ)+1))):=mul_le_mul_of_nonneg_left hunit hK.le</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have htotal:((K:ℝ)+1)*(1/(4*((K:ℝ)+1)))=1/4:=by field_simp</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   linarith</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> end Oberwolfach</span></pre></html>

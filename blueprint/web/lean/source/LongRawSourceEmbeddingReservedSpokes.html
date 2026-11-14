@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongRawSourceEmbeddingReservedSpokes.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongRawSourceEmbeddingReservedSpokes.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongRawAssignedSourceReservedSpokes</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongRawComponentAssignmentFromMaps</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.LongAssignedActualIntervalCapacityDecidable</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.LongAssignedPaddedLengths</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Actual long source paths and their old embeddings from one matching,</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> the original class hypothesis, and the same-outcome hub start counts. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 40000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> local instance longRawSourceEventProtectedListDecEqFin_reserved (n:ℕ):DecidableEq (Fin n):=Classical.decEq _</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem long_raw_source_embeddings_from_matching_and_starts_with_reserved_spokes</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     {N K:ℕ} {U:Type} [Fintype U] [DecidableEq U] [Nonempty (Fin N)]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (F:U→SimpleGraph (Fin N)) (hF:∀w,(F w).IsRegularOfDegree 2)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (E:∀w (D:(F w).ConnectedComponent),SimpleGraph.cycleGraph (Fintype.card D) ≃g D.toSimpleGraph)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (Allowed:Set ℕ) (hAllowed:∀w,AllowedCycleLengths (F w) Allowed)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hn:0&lt;N) (hK:3≤K) (hclass:∀w,factorPreparationClass (F w) K=none)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (P₀:SimpleGraph (Fin N)) (π:Equiv.Perm (Fin N)) (d m:ℕ) (hd:2≤d) (hm:7≤m)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (θ:ℝ) (hθ:0&lt;θ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hcut:5/(((m:ℝ)+1)*(d:ℝ)+5)+((m:ℝ)+1)*(d:ℝ)/(K+1)≤θ/2)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hlarge:8*((m:ℝ)+1)/θ&lt;(N:ℝ)^((1:ℝ)/4))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (raw:RawMarkedOutcome (Fin N) U Bool Bool) (t:ℕ)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (Jret:StartRetentionOutcome (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) false) t)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hcounts:∀w g,|rawIntervalHubStartCount π d g (fun e=&gt;raw (Sum.inr e)) w-</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (N:ℝ)*longAssignedIntervalProbability F hF K m θ w g/d|&lt;(N:ℝ)^(3/4:ℝ)/d):</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let ℓ:=longAssignedPaddedLength (K:=K)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let state:=longRawHubState P₀ π d raw true true</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let e:{z // z∈bernoulliVertexSet state}↪_:=Function.Embedding.subtype _</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let R:=longRawSeedResources (U:=U) π d m ℓ</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∀M:Finset (RestrictedResource (mixedCandidateResources R) e),</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∀x∈M,∀y∈M,x≠y→Disjoint (restrictedResourceSet (mixedCandidateResources R) e x)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (restrictedResourceSet (mixedCandidateResources R) e y))→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     LongRawOrdinaryComponentMapsProperty F π d m ℓ e M→</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     ∃assign:LongRawSelectedOrdinary π d m ℓ e M↪(Σw,(F w).ConnectedComponent),</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (∀a,(assign a).1=(longRawSelectedOrdinaryWheel π d m ℓ e M a).val.2) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (∀a,Fintype.card (assign a).2=ℓ (longRawSelectedOrdinaryPayload π d m ℓ e M a).1) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     ∀w:U,</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       let A:=retainedMarkedIndex π d (fun e=&gt;raw (Sum.inr e)) false t Jret w</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       let B:={a:Fin N // rawIntervalColouredStart π d (fun e=&gt;raw (Sum.inr (w,e))) a true}</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       let I:={C:(F w).ConnectedComponent // K&lt;Fintype.card C}</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       let components:I↪(F w).ConnectedComponent:=Function.Embedding.subtype _</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       let J:={a:LongRawSelectedOrdinary π d m ℓ e M // (assign a).1=w}</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       let S:=longRawMarkedWheelsAtHub P₀ π d m ℓ raw true true M w</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       let root:=retainedAndRawIntervalRoot π d (fun e=&gt;raw (Sum.inr e)) false true t Jret w</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       ∃(block:A⊕B↪LongReservedBlockIndex (F w) components (m+1) d)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         (data:ActualResidualData (K:=A⊕B) (J:=J) (F w))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         (ext:∀i:A⊕B,Fin ((m+1)*d+5)↪Fin N) (inner:∀a:A,Fin ((m+1)*d+1)↪Fin N) (ψ:Fin N→Fin N),</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         data.c=m+1 ∧ data.d=d ∧ data.s₁=firstSumIndices ∧ data.s₂=secondSumIndices ∧ data.t=Finset.univ ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         data.Cembed=data.t.biUnion (fun j=&gt;(data.C j).support.toFinset) ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (∀i,data.T i=packedPhysicalSpokePositions _ _ _ _ m (3*d) d π</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>           (rawMarkedPairSpokes π d raw true true false) (rawMarkedPairSpokes π d raw true true true) S w (root i)) ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         (∀i,(data.P i).support=List.ofFn (ext i)) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         (∀i,ext i=longReservedSigmaBlock (F w) components (m+1) d (fun k=&gt;E w (components k)) (block i) d (le_refl _)) ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         (∀i j,i≠j→Disjoint (Finset.univ.image (ext i)) (Finset.univ.image (ext j))) ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (∀a k,inner a k=ext (.inl a) ⟨k.val+2,by omega⟩) ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (∀j:J,(data.C j).length=ℓ (longRawSelectedOrdinaryPayload π d m ℓ e M j.val).1) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         (∀j:J,∀k&lt;(data.C j).length,factorCycleOrientation (F w) (E w) ((data.C j).getVert k)=(data.C j).getVert (k+1)) ∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         Set.InjOn ψ (↑(data.oldDomain\bufferedPathStrictInterior (fun _=&gt;(m+1)*d) inner):Set (Fin N)) ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         (∀i (j:Fin (d+1)),bufferedMarker (m+1) d (ext i) j∈data.prescribed→</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>           ψ (bufferedMarker (m+1) d (ext i) j)=(π^j.val) (root i)) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         (∀i∈data.s₂,∀j:Fin (d+1),∃x∈data.oldDomain\bufferedPathStrictInterior (fun _=&gt;(m+1)*d) inner,</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>           ψ x=(π^j.val) (root i)) ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         ActualOldImageDirected data ψ (rawMixedPhysicalArc P₀ π d raw) ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         ActualOldArcContainment data ψ (E w) (rawMixedPhysicalArc P₀ π d raw) ∧</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         ActualOldPhysicalCoverage data ψ (longRawPhysicalHubRims P₀ π d m ℓ raw true true M w) ∧</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         ActualOldArcContainment data ψ (E w) (fun x y=&gt;({x,y}:Finset (Fin N))∈longRawPhysicalHubRims P₀ π d m ℓ raw true true M w) ∧</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         (∀x,x∈data.oldDomain→x∉bufferedPathFullDomain (fun _=&gt;(m+1)*d) inner→</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>           ψ x∉markedIntervalRootSet π (fun _:retainedMarkedIndex π d (fun e=&gt;raw (Sum.inr e)) false t Jret w=&gt;d) Subtype.val) ∧</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         Disjoint ((data.oldDomain\bufferedPathStrictInterior (fun _=&gt;(m+1)*d) inner).image ψ)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>           (rawReservedSpokeList π d (fun e=&gt;raw (Sum.inr e)) w):=by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   intro ℓ state e R M hmatch hmaps</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   obtain ⟨assign,hhub,hsize⟩:=long_raw_assignment_from_component_maps F π d m ℓ e M hmaps</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   refine ⟨assign,hhub,hsize,?_⟩</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   intro w A B I components J S root</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   let index:A⊕B ≃ retainedAndRawIntervalIndex π d (fun e=&gt;raw (Sum.inr e)) false true t Jret w:=Equiv.refl _</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have hindex:∀b:B,∃a:{a:Fin N // rawIntervalColouredStart π d (fun e=&gt;raw (Sum.inr (w,e))) a true},index (.inr b)=Sum.inr a:=fun b=&gt;⟨b,rfl⟩</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hcapacity:=long_assigned_actual_interval_capacity_decidable F hF Allowed hAllowed hn (by omega) hclass π d m (by omega) θ hθ</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     (fun e=&gt;raw (Sum.inr e)) t Jret w index hcut hlarge (hcounts w)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have hlong:∀i:I,K+1≤Fintype.card (components i):=fun i=&gt;Nat.succ_le_iff.mpr i.property</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   have hshort:∀a:LongRawSelectedOrdinary π d m ℓ e M,ℓ (longRawSelectedOrdinaryPayload π d m ℓ e M a).1&lt;K+1:=by</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     intro a</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     exact Nat.lt_succ_of_le (long_assigned_padded_length_upper hK _)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   exact long_raw_assigned_source_embedding_with_reserved_spokes F hF E P₀ π (m+1) d m (K+1) (by omega) (by omega) rfl hnoshort ℓ raw t Jret w index hindex components hlong hcapacity M hmatch assign hhub hsize hshort</span>
+<span id="L89"><a href="#L89" class="ln">  89</a> end Oberwolfach</span></pre></html>

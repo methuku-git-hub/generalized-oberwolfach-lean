@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AssignedComponentSourceDisjointness.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AssignedComponentSourceDisjointness.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FactorComponentAssignmentTransport</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! An injective assignment to actual factor components gives disjoint</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> source vertex sets for different selected candidates at the same hub. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {n:ℕ} {U A:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem assigned_factor_component_source_disjoint</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (F:U→SimpleGraph (Fin n)) (hub:A→U)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (C:∀a,(F (hub a)).ConnectedComponent)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (assign:A↪(Σu,(F u).ConnectedComponent))</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hC:∀a,(⟨hub a,C a⟩:Σu,(F u).ConnectedComponent)=assign a):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∀a a&#x27;,a≠a&#x27;→hub a=hub a&#x27;→Disjoint (C a).supp (C a&#x27;).supp :=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   intro a a&#x27; hne heq</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   apply Set.disjoint_left.mpr</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   intro x hx hx&#x27;</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have h1:(F (hub a)).connectedComponentMk x=C a:=hx</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have h2:(F (hub a&#x27;)).connectedComponentMk x=C a&#x27;:=hx&#x27;</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hA:assign a=(⟨hub a,(F (hub a)).connectedComponentMk x⟩:Σu,(F u).ConnectedComponent):=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     rw [←hC a,h1]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hB:assign a&#x27;=(⟨hub a&#x27;,(F (hub a&#x27;)).connectedComponentMk x⟩:Σu,(F u).ConnectedComponent):=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     rw [←hC a&#x27;,h2]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hsame:(⟨hub a,(F (hub a)).connectedComponentMk x⟩:Σu,(F u).ConnectedComponent)=</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       ⟨hub a&#x27;,(F (hub a&#x27;)).connectedComponentMk x⟩:=by rw [heq]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   exact hne (assign.injective (hA.trans (hsame.trans hB.symm)))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> end Oberwolfach</span></pre></html>

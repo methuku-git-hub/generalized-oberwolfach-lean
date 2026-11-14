@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedFamilyAvoidOldPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedFamilyAvoidOldPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedAvoidOldPacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! This application retains the original physical packing while completing</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> all separately typed prescribed factors. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {I V:Type} [Fintype I] [Fintype V] [DecidableEq I] [DecidableEq V]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>   {X:I→Type} [∀ i,Fintype (X i)] [∀ i,DecidableEq (X i)]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem prescribed_dependent_source_representation (pieces:∀ i,List (PrescribedSourcePiece (X i))) (i:I):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∀x y,(prescribedDependentGraph pieces i).Adj x y→</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       prescribedDependentDigraph pieces i x y ∨ prescribedDependentDigraph pieces i y x := by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   rw [←prescribed_tagged_graph pieces i,←prescribed_tagged_digraph pieces i]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   exact prescribed_source_model_representation (prescribedTaggedPieces pieces i) ()</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem prescribed_family_avoids_old_packing</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (pieces:∀ i,List (PrescribedSourcePiece (X i)))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (B:∀ i,Finset (X i)) (g Φ:∀ i,X i→V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hold:∀i x,x∈B i→Φ i x=g i x) (M:I→Finset (V×V))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hM:∀i,(prescribedInducedArcs (prescribedDependentDigraph pieces i) (B i)).image (Prod.map (g i) (g i))=M i)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (D:V→V→Prop) (harc:∀i x y,prescribedDependentDigraph pieces i x y→(x∉B i ∨ y∉B i)→D (Φ i x) (Φ i y))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (K:Finset (Sym2 V)) (hMavoid:∀i,Disjoint ((M i).image prescribedArcPhysical) K)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hDavoid:∀x y,D x y→s(x,y)∉K):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀i,Disjoint (((prescribedDependentGraph pieces i).edgeFinset).image (Sym2.map (Φ i))) K := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   intro i</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   exact prescribed_embedding_avoids_physical_packing (prescribedDependentGraph pieces i) (prescribedDependentDigraph pieces i)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (prescribed_dependent_source_representation pieces i) (B i) (g i) (Φ i) (hold i) (M i) (hM i) D (harc i) K (hMavoid i) hDavoid</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> end Oberwolfach</span></pre></html>

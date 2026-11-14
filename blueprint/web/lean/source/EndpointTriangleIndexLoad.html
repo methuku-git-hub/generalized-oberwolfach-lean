@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EndpointTriangleIndexLoad.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EndpointTriangleIndexLoad.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointTriangleCoordinates</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! At a fixed index, the actual triangles are in bijection with their</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> unordered row edges. Each such edge contributes exactly one coefficient. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 4000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   {Q F : SimpleGraph V} {S T : Finset V}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> structure EndpointIndexEdge (Q F : SimpleGraph V) (S : Finset V) (u : V) (e : Sym2 V) : Prop where</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   rows_mem : ∀ v∈e,v∈S</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   row_edge : e∈Q.edgeSet</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   row_allowed : e∉F.edgeSet</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   spokes : ∀ v∈e,Q.Adj u v</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   spoke_allowed : ∀ v∈e,¬F.Adj u v</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem endpoint_triangle_index_coordinates_equiv (hST : Disjoint S T) (u : V) (hu : u∈T) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ e : {C : EndpointTriangle Q F S T // u∈C.val}≃{edge : Sym2 V // EndpointIndexEdge Q F S u edge},</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       ∀ C,endpointTriangleRowEdge C.val=(e C).val := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hindex (C : {C : EndpointTriangle Q F S T // u∈C.val}) : endpointTriangleIndex C.val=u := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hh : u∈C.val.val∩T:=Finset.mem_inter.mpr ⟨C.property,hu⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     rw [endpointTriangleIndex_spec] at hh</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     exact (Finset.mem_singleton.mp hh).symm</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hvalid (C : {C : EndpointTriangle Q F S T // u∈C.val}) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       EndpointIndexEdge Q F S u (endpointTriangleRowEdge C.val) := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hr:=endpointTriangleRowEdge_in_graph C.val</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     refine ⟨fun v hv=&gt;((endpointTriangleRowEdge_mem C.val v).mp hv).2,hr.1,hr.2,?_,?_⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     · intro v hv</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       have hh:=(endpointTriangleRowEdge_mem C.val v).mp hv</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       have hne : u≠v := by rintro rfl;exact Finset.disjoint_left.mp hST hh.2 hu</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       exact C.val.property.2.2.2.1 u C.property v hh.1 hne</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     · intro v hv</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       exact C.val.property.2.2.2.2 u C.property v ((endpointTriangleRowEdge_mem C.val v).mp hv).1</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   let f : {C : EndpointTriangle Q F S T // u∈C.val}→{edge : Sym2 V // EndpointIndexEdge Q F S u edge}:=</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     fun C=&gt;⟨endpointTriangleRowEdge C.val,hvalid C⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hf : Function.Bijective f := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     constructor</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     · intro C D h</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       apply Subtype.ext</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       apply endpointTriangle_coordinates_injective</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       exact Prod.ext ((hindex C).trans (hindex D).symm) (congrArg Subtype.val h)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     · rintro ⟨edge,hedge⟩</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       induction edge using Sym2.ind with</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       | _ v w =&gt;</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         have hvS:=hedge.rows_mem v (by simp)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         have hwS:=hedge.rows_mem w (by simp)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         have hvwQ : Q.Adj v w:=hedge.row_edge</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         have hvwF : ¬F.Adj v w:=hedge.row_allowed</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         obtain ⟨C,hC⟩:=endpoint_triangle_from_vertices Q F S T hST u v w hu hvS hwS hvwQ.ne</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>           (hedge.spokes v (by simp)) (hedge.spokes w (by simp)) hvwQ</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>           (hedge.spoke_allowed v (by simp)) (hedge.spoke_allowed w (by simp)) hvwF</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         change C.val={u,v,w} at hC</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         let D : {C : EndpointTriangle Q F S T // u∈C.val}:=⟨C,by rw [hC];simp⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         refine ⟨D,Subtype.ext ?_⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         exact (endpointTriangle_coordinates_of_vertices hST C u v w hu hvS hwS hC).2</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   exact ⟨Equiv.ofBijective f hf,fun _=&gt;rfl⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> </span>
+<span id="L63"><a href="#L63" class="ln">  63</a> theorem endpoint_triangle_index_load (hST : Disjoint S T) (u : V) (hu : u∈T)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (weight : Sym2 V→ℝ) :</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (∑ C : EndpointTriangle Q F S T,if u∈C.val then weight (endpointTriangleRowEdge C) else 0)=</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       ∑ edge : Sym2 V,if EndpointIndexEdge Q F S u edge then weight edge else 0 := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   obtain ⟨e,he⟩:=endpoint_triangle_index_coordinates_equiv hST u hu</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hl : (∑ C : EndpointTriangle Q F S T,if u∈C.val then weight (endpointTriangleRowEdge C) else 0)=</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       ∑ C : {C : EndpointTriangle Q F S T // u∈C.val},weight (endpointTriangleRowEdge C.val) := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     rw [←Finset.sum_filter]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     exact Finset.sum_subtype _ (fun _=&gt;by simp) _</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hr : (∑ edge : Sym2 V,if EndpointIndexEdge Q F S u edge then weight edge else 0)=</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       ∑ edge : {edge : Sym2 V // EndpointIndexEdge Q F S u edge},weight edge.val := by</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     rw [←Finset.sum_filter]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     exact Finset.sum_subtype _ (fun _=&gt;by simp) _</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   rw [hl,hr,←e.sum_comp (fun edge=&gt;weight edge.val)]</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   apply Finset.sum_congr rfl</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   intro C hC</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   rw [he C]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a> </span>
+<span id="L81"><a href="#L81" class="ln">  81</a> end Oberwolfach</span></pre></html>

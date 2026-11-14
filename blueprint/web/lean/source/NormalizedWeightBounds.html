@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>NormalizedWeightBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>NormalizedWeightBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Data.Real.Basic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Tactic</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Bounds for the fixed cycle coefficients after degree and density normalization. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem normalized_weight_bounds (n S d c cmin a b w:ℝ)</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (hn:0&lt;n) (hS:0&lt;S) (hdlo:n/4≤d) (hdhi:d≤n)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (hcmin:0&lt;cmin) (hclo:cmin≤c) (hchi:c≤1)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (ha:0≤a) (hb:0≤b) (hwlo:a/S≤w) (hwhi:w≤b/S):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     a/(S*n)≤w/d/c ∧ w/d/c≤(4*b/cmin)/(S*n) := by</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hd:0&lt;d:=by linarith</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hc:0&lt;c:=lt_of_lt_of_le hcmin hclo</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hA:0≤a/S:=div_nonneg ha hS.le</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hB:0≤b/S:=div_nonneg hb hS.le</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hLow1:a/S/n≤a/S/d:=div_le_div_of_nonneg_left hA hd hdhi</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hLow2:a/S/d≤(a/S/d)/c:=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     have hh:=div_le_div_of_nonneg_left (div_nonneg hA hd.le) hc hchi</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     simpa only [div_one] using hh</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hLow3:(a/S/d)/c≤w/d/c:=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     div_le_div_of_nonneg_right (div_le_div_of_nonneg_right hwlo hd.le) hc.le</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hlow:a/(S*n)≤w/d/c:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     rw [←div_div]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     exact hLow1.trans (hLow2.trans hLow3)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hUp1:w/d/c≤(b/S/d)/c:=</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     div_le_div_of_nonneg_right (div_le_div_of_nonneg_right hwhi hd.le) hc.le</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hn4:0&lt;n/4:=by positivity</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hUp2:(b/S/d)/c≤(b/S/(n/4))/c:=</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     div_le_div_of_nonneg_right (div_le_div_of_nonneg_left hB hn4 hdlo) hc.le</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hUp3:(b/S/(n/4))/c≤(b/S/(n/4))/cmin:=</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     div_le_div_of_nonneg_left (div_nonneg hB hn4.le) hcmin hclo</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hEq:(b/S/(n/4))/cmin=(4*b/cmin)/(S*n):=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     field_simp</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     &lt;;&gt; ring</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   exact ⟨hlow,by rw [←hEq];exact hUp1.trans (hUp2.trans hUp3)⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> end Oberwolfach</span></pre></html>

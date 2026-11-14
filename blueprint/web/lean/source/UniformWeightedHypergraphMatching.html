@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>UniformWeightedHypergraphMatching.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>UniformWeightedHypergraphMatching.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.WeightedMatchingLargeScales</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A self-contained fixed-error weighted matching theorem. The degree,</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> codegree and weight hypotheses are checked before sampling; one matching</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> satisfies every prescribed weight simultaneously. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem uniform_weighted_hypergraph_matching (k B : ℕ) (hk : 2≤k)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (K a γ : ℝ) (hK : 0&lt;K) (ha : 0&lt;a) (hγ : 0&lt;γ) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃ n₀ : ℕ, ∀ n D : ℕ,n₀≤n → n≤D → D≤n^B →</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∀ (V E A : Type) [Fintype V] [Fintype E] [Fintype A] [DecidableEq V],</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ (R : E → Finset V) (w : A → E → ℝ) (b W : A → ℝ),</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     Fintype.card V≤n^B → Fintype.card A≤n^B →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ e,(R e).card=k) → (∀ v,0&lt;Fintype.card (HypergraphEdgesAt R v)) →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (∀ v,Fintype.card (HypergraphEdgesAt R v)≤D) →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ v z,v≠z → ((Finset.univ.filter (fun e=&gt;v∈R e ∧ z∈R e)).card : ℝ)≤K*D/n) →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ i,0&lt;b i) → (∀ i e,0≤w i e ∧ w i e≤b i) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀ i,∑ e,w i e=W i) → (∀ i,a*b i*D*n≤W i) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃ M : Finset E,(∀ e∈M,∀ f∈M,e≠f → Disjoint (R e) (R f)) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       ∀ i,|(∑ e∈M,w i e)-W i/D|&lt;γ*W i/D := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let η := min (γ/20) (1/100)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hη : 0&lt;η := lt_min (by positivity) (by norm_num)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hη1 : η≤1/100 := min_le_right _ _</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hηγ : 10*η≤γ := by have hh : η≤γ/20 := min_le_left _ _;linarith</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   obtain ⟨c,hc,H₀,hH₀,hmatch⟩ := weighted_matching_large_scales k hk η K a hη hη1 hK ha</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let J := 128*k*B</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨N,hN⟩ := eventually_stretchedExp_le_inv_pow 10 ((16+3*J : ℕ) : ℝ) (c:=c) (p:=1) hc (by norm_num) 1</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   let H := max H₀ N</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   refine ⟨H^(64*k),?_⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro n D hn hDn hDB V E A _ _ _ _ R w b W hV hA hsize hpositive hdegree hcodeg hb hw htotal hweight</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨hH,hhpow,hnupper⟩ := matching_integer_root_scale (64*k) H n (by omega)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hH₀.trans (le_max_left _ _)) hn</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   let h := Nat.nthRoot (64*k) n</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   change H≤h at hH</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   change h^(64*k)≤n at hhpow</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   change n≤h^(2*(64*k)) at hnupper</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hh : 2≤h := hH₀.trans ((le_max_left _ _).trans hH)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hhR : (1 : ℝ)&lt;h := by exact_mod_cast hh</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hnB : n^B≤h^J := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     calc</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       _ ≤ (h^(2*(64*k)))^B := Nat.pow_le_pow_left hnupper B</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       _ = h^J := by rw [← pow_mul];congr 1;dsimp [J];ring</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hsmall : 10*(h : ℝ)^(16+3*J)*Real.exp (-c*h)&lt;1 := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have he := hN h ((le_max_right _ _).trans hH)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     simp only [Real.rpow_one,pow_one] at he</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have he&#x27; : 10*(h : ℝ)^(16+3*J)*Real.exp (-c*h)≤1/(h : ℝ) := by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       simpa only [Real.rpow_natCast] using he</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     exact he&#x27;.trans_lt ((div_lt_one (by linarith : (0 : ℝ)&lt;h)).mpr hhR)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   obtain ⟨M,hM,hMw⟩ := hmatch h n D J ((le_max_left _ _).trans hH) hhpow hDn</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hDB.trans hnB) hsmall V E A R w b W (hV.trans hnB) (hA.trans hnB)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     hsize hpositive hdegree hcodeg hb hw htotal hweight</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   refine ⟨M,hM,fun i=&gt;(hMw i).trans_le ?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hn0 : 0&lt;n := lt_of_lt_of_le (pow_pos (by omega : 0&lt;h) _) hhpow</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hD0 : 0&lt;D := hn0.trans_le hDn</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hW : 0&lt;W i := (mul_pos (mul_pos (mul_pos ha (hb i)) (Nat.cast_pos.mpr hD0)) (Nat.cast_pos.mpr hn0)).trans_le (hweight i)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   exact div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_right hηγ hW.le) (Nat.cast_nonneg _)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> </span>
+<span id="L63"><a href="#L63" class="ln">  63</a> end Oberwolfach</span></pre></html>

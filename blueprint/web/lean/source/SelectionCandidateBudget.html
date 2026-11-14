@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SelectionCandidateBudget.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SelectionCandidateBudget.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BoundedDegreeSelection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.GreedyGraphCandidates</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The repeated-candidate and numerical substitutions in the ordinary</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> and marked cover-down callers. No factor-existence premise is discharged</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> by these lemmas; each caller must supply it for every allowed deletion. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 3000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem cover_down_candidate_budget (p nS a loss : ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hp : 0 ≤ p) (hn : 0 ≤ nS) (hna : nS ≤ 2*a) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     4*(p*Real.sqrt p*nS) + 4*(Nat.ceil (4*(p*Real.sqrt p*nS)):ℝ) + loss</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       ≤ 40*(p*Real.sqrt p)*a + 4 + loss := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hs : 0 ≤ 4*(p*Real.sqrt p*nS) := by positivity</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hc := (Nat.ceil_lt_add_one hs).le</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hn&#x27; := mul_le_mul_of_nonneg_left hna (by positivity : 0 ≤ p*Real.sqrt p)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   nlinarith</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem bounded_degree_selection_from_single_copy (p : ℝ) (hp : 0 &lt; p) :</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ n₀ : ℕ, 2 ≤ n₀ ∧ ∀ (V : Type*) [Fintype V] [DecidableEq V],</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     n₀ ≤ Fintype.card V → ∀ (N D : ℕ) (G : SimpleGraph V)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (S : Fin N → Finset V) (family : Fin N → Set (SimpleGraph V)),</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀ i j, i ≠ j → ((S i ∩ S j).card : ℝ) ≤ p^2 * Fintype.card V) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀ v, ((Finset.univ.filter (fun i =&gt; v ∈ S i)).card : ℝ) ≤ p * Fintype.card V) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ i, ∀ K : SimpleGraph V, K ≤ spanningRestriction G (S i) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ v, (K.degree v : ℝ) ≤ D * (p * Real.sqrt p * Fintype.card V) +</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         D * (Nat.ceil (4 * (p * Real.sqrt p * Fintype.card V)) : ℝ)) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       ∃ C : SimpleGraph V, C ∈ family i ∧ C ≤ spanningRestriction G (S i) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>           (∀ v, C.degree v ≤ D) ∧ Disjoint C K) →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∃ F : Fin N → SimpleGraph V,</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ i, F i ∈ family i ∧ F i ≤ spanningRestriction G (S i) ∧ ∀ v, (F i).degree v ≤ D) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ i j, i ≠ j → Disjoint (F i) (F j)) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∀ v, ((⨆ i, F i).degree v : ℝ) ≤ D * (p * Fintype.card V) := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨n₀, hn₀, hselect⟩ := bounded_degree_selection p hp</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨n₀, hn₀, ?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   intro V _ _ hn N D G S family hinter hmem hsingle</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   apply hselect V hn N D G S family hinter hmem</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   intro i J hJG hJD</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   exact greedy_graph_candidates (spanningRestriction G (S i)) J (family i)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (Nat.ceil (4*(p*Real.sqrt p*Fintype.card V))) D</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (D*(p*Real.sqrt p*Fintype.card V)) hJG hJD (hsingle i)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> end Oberwolfach</span></pre></html>

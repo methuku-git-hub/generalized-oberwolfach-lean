@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cyclic-partite fractional decompositions</title>
+<link rel="next" href="sect0012.html" title="The remaining main-proof dependencies" />
+<link rel="prev" href="sect0010.html" title="The vortex construction" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000012">10 Cyclic-partite fractional decompositions</h1>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:brouwer">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">10.1</span>
+    <span class="theorem_thmtitle">Brouwer fixed point</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0011.html#bp:brouwer">#</a>
+    
+    <a class="icon proof" href="sect0011.html#a0000000111"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.compact_convex_fixed_point" class="lean_decl">Oberwolfach.compact_convex_fixed_point</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   A continuous self-map of a nonempty compact convex subset of a finite-dimensional real normed space has a fixed point. </p>
+<p><i class="itshape">Manuscript label:</i> thm:prelim:brouwer.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000111">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The vendored proof from <span class="ttfamily">harfe/fixed-point-theorems-lean4</span> is ported to the pinned library. Its cubical Sperner argument and finite-dimensional homeomorphism reduction are included in the kernel check. No fixed-point axiom is introduced. The MIT license and source retrieval and port records accompany the source. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:transport-residual">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">10.2</span>
+    <span class="lemma_thmtitle">Transportation domains and residual endpoint maps</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0011.html#bp:transport-residual">#</a>
+    
+    <a class="icon proof" href="sect0011.html#a0000000112"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.transportMatrices_isCompact" class="lean_decl">Oberwolfach.transportMatrices_isCompact</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.intervalResidualMap_mem" class="lean_decl">Oberwolfach.intervalResidualMap_mem</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.intervalResidualMap_continuous" class="lean_decl">Oberwolfach.intervalResidualMap_continuous</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   The fixed-marginal transportation domains are nonempty compact convex sets. For actual consecutive interfaces, the reserve respects every edge capacity and the scaled residual endpoint matrix belongs to the same domain. This map is continuous, including at zero residual degree. </p>
+<p><i class="itshape">Manuscript label:</i> doLpart:eq:reserve-weight.</p>
+<p><i class="itshape">Manuscript label:</i> doLpart:eq:H-map.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000112">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Prove the reserve-load bound using the common-neighbourhood lower bound. Exact residual row and column sums give the prescribed marginals. At zero residual degree, bound the path weight between zero and that degree. No division by a possibly zero number is cancelled. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:cyclic-path-assembly">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">10.3</span>
+    <span class="lemma_thmtitle">Complementary chains and conditional path realization</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0011.html#bp:cyclic-path-assembly">#</a>
+    
+    <a class="icon proof" href="sect0011.html#a0000000113"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0011.html#bp:brouwer">Theorem 10.1</a></li>
+          
+          <li><a href="sect0011.html#bp:transport-residual">Lemma 10.2</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.complementary_transport_fixed_point" class="lean_decl">Oberwolfach.complementary_transport_fixed_point</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.weighted_conditional_realization" class="lean_decl">Oberwolfach.weighted_conditional_realization</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fractional_cycle_path_assembly" class="lean_decl">Oberwolfach.fractional_cycle_path_assembly</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    There is one fixed point of the complementary-chain map. The explicit chain weighting has the required endpoint and consecutive-pair marginals. Conditional realization preserves each interval’s path weighting and forces its endpoints to agree with the boundary variables. Summing over the distinguished intervals gives marginal \(\rho _i+(k-1)\widehat\Lambda _i\) on each interval. </p>
+<p><i class="itshape">Manuscript label:</i> doLpart:eq:fixed-point.</p>
+<p><i class="itshape">Manuscript label:</i> doLpart:lem:conditional-realization.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000113">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Use Brouwer on the product transportation domain. Prove all chain marginals by finite summation, including the cyclic reindexing. Construct the conditional product law, then sum out its boundary coordinates. Zero-mass fibres contribute zero; they do not require a positive conditional denominator. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:cyclic-fractional-even">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">10.4</span>
+    <span class="theorem_thmtitle">Fractional cycles in the interface representation</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0011.html#bp:cyclic-fractional-even">#</a>
+    
+    <a class="icon proof" href="sect0011.html#a0000000114"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0011.html#bp:cyclic-path-assembly">Lemma 10.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cyclicInterfaceGraph_has_fractional_cycles" class="lean_decl">Oberwolfach.cyclicInterfaceGraph_has_fractional_cycles</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    For \(k\ge 2\), specify the interfaces \(X_iY_i\) and \(Y_iX_{i+1}\) by adjacency relations. Assume local balance at both types of vertex, nonempty finite classes, and endpoint degrees at least \(\delta \), where \(k|Y_i|\le (2k-1)\delta \) and all middle classes have the same order. Then the resulting graph has a fractional decomposition into actual part-respecting copies of \(C_{2k}\). The formal representation uses copies of fixed finite types \(X,Y\) for the classes. Transport from an arbitrary named partition of a host vertex set is a separate semantic bridge. </p>
+<p><i class="itshape">Manuscript label:</i> doLpart:thm:main.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000114">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Local balance proves the common interface mass. Apply the fixed-point path construction with marginals calculated from the given graph. Reserve plus residual weights recover both interface capacities exactly. Tag the classes and embed the cycle injectively, checking every consecutive edge. Positive-weight tuples lie in the host graph. Aggregate weights over all tuples representing each actual subgraph; the edge equations are preserved, including zero loads on nonedges. </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="bp:cyclic-spread">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">10.5</span>
+    <span class="corollary_thmtitle">Positive weights and pair loads in the cyclic graph</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0011.html#bp:cyclic-spread">#</a>
+    
+    <a class="icon proof" href="sect0011.html#a0000000115"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0011.html#bp:cyclic-fractional-even">Theorem 10.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cyclicInterfaceGraph_fractional_cycles_with_pair_bounds" class="lean_decl">Oberwolfach.cyclicInterfaceGraph_fractional_cycles_with_pair_bounds</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>    With equal class sizes \(n\) and minimum cyclic degree at least \((k/(2k-1)+\alpha )n\), the same construction gives weights on actual part-respecting cycles between \(a_-n^{2-2k}\) and \(a_+n^{2-2k}\), where \(a_-,a_+{\gt}0\) depend only on \(k,\alpha \). The total weight through two distinct adjacent edges is at most \(a_+/n\), and through two vertex-disjoint edges at most \(a_+/n^2\). The formal statement uses tagged copies of a common finite type. </p>
+<p><i class="itshape">Manuscript label:</i> doLpart:cor:spread.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000115">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Preserve the explicit conditional-product formula through the existence construction. Positive slack bounds all residual path weights on both sides and makes every residual endpoint entry positive. Cancel the endpoint weights in each sector, including the empty internal product for four-cycles. Compatible tuples have unique cycle-graph descriptions, so aggregation introduces no multiplicity factor. Count selections with prescribed vertices by their fixed coordinates; conflicting prescriptions in one class give zero selections. Apply this count to the three or four endpoints of the specified edges. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:random-regularization">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">10.6</span>
+    <span class="lemma_thmtitle">Regularization with controlled edge-deletion probabilities</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0011.html#bp:random-regularization">#</a>
+    
+    <a class="icon proof" href="sect0011.html#a0000000116"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.retainedBipartiteGraph_deleted_edge" class="lean_decl">Oberwolfach.retainedBipartiteGraph_deleted_edge</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>      For fixed \(\beta {\gt}0\), choose \(C,\eta _0{\gt}0\), then for each \(0{\lt}\eta {\lt}\eta _0\) choose \(m_0\). A bipartite graph with equal parts of size \(m\ge m_0\), minimum degree \((1/2+\beta )m\) and degrees in \([d-\eta m,d+\eta m]\) has a random spanning \(\lfloor d-\sqrt\eta m\rfloor \)-regular subgraph in which each original edge is deleted with probability at most \(C\sqrt\eta \). The formal graph uses two tagged copies of the label type. </p>
+<p><i class="itshape">Manuscript label:</i> lem:four:random-regularization.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000116">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Prove the required large-cut estimate from the minimum degree. Explicit floor and scale inequalities give the scaled demands used by the real-flow theorem. For rounding, construct a doubly stochastic auxiliary matching matrix with degree slots and a private complement for each original edge. Birkhoff’s theorem gives a finite law with the prescribed edge marginals. Supported matchings satisfy the exact integer demands. Their complementary original edge sets give the regular graph. No independence among deleted edges is asserted. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:conditional-partition-degrees">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">10.7</span>
+    <span class="lemma_thmtitle">Conditional partition degree estimates</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0011.html#bp:conditional-partition-degrees">#</a>
+    
+    <a class="icon proof" href="sect0011.html#a0000000117"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fixedPartition_two_placement" class="lean_decl">Oberwolfach.fixedPartition_two_placement</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>     Condition on prescribed classes for a fixed vertex set \(X\). For selected classes of size \(m\), a fixed family \(J\) of vertex permutations, and every vertex \(v\), test the numbers of labels \(z\) in a class for which \(v\sigma (z)\) is an edge. If \(\varepsilon \le \eta /4\), \(\eta \le 1\) and \(2|X|\le \eta m/4\), all these counts differ from \(Dm/n\) by less than \(\eta m\) on one event of probability at least </p>
+<div class="displaymath" id="a0000000118">
+  \[  1-2|\mathcal C||J|n\exp (-\eta ^2m/2).  \]
+</div>
+<p> The two-label placement probability in two distinct classes is exactly \(m^2/(n(n-1))\). </p>
+<p><i class="itshape">Manuscript label:</i> thm:four:successor-kernel.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000117">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The remaining labels have the exact uniform fixed-size partition law. A cell therefore has the uniform fixed-size subset law. Bound the conditional mean shift by \(2|X|\) and apply the proved exchange concentration inequality. Union-bound the fixed graph-neighbourhood and inverse-image tests. The vertices in these tests range over the entire original domain. Count labelled injections to obtain the exact placement probabilities. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:near-regular-cyclic-weights">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">10.8</span>
+    <span class="lemma_thmtitle">Positive weights after cyclic interface regularization</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0011.html#bp:near-regular-cyclic-weights">#</a>
+    
+    <a class="icon proof" href="sect0011.html#a0000000119"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.stochastic_cyclic_weights" class="lean_decl">Oberwolfach.stochastic_cyclic_weights</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Near-regular cyclic zero-one interface matrices admit nonnegative weights on their transversal tuples. If their common regularized degree \(q=\lfloor d-\sqrt\eta m\rfloor \) exceeds the positive-margin cyclic threshold, every positional load is exactly \(q\). Every original interface edge has load between \(1-C\sqrt\eta \) and \(1\); nonedges have zero load. All tuple weights have a common upper bound \(B m^{2-c}\), and every valid tuple has weight at least \((1-cC\sqrt\eta )A m^{2-c}\), with the same positive cyclic constants. </p>
+<p><i class="itshape">Manuscript label:</i> thm:four:successor-kernel.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000119">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Sample the independently regularized interfaces and apply the proved positive cyclic weighting to each positive-mass outcome. Removing zero-mass outcomes changes no probabilities or expectations. Average these weights under the same finite law. Exact incidence equations give the positional and edge loads. A union bound over the specified tuple’s \(c\) interface edges gives its survival probability; no independence among edges of an interface is used. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:close-tuple-loss">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">10.9</span>
+    <span class="lemma_thmtitle">Weight lost by excluding close pairs</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0011.html#bp:close-tuple-loss">#</a>
+    
+    <a class="icon proof" href="sect0011.html#a0000000120"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.separated_successor_edges_injective" class="lean_decl">Oberwolfach.separated_successor_edges_injective</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For tuples with \(c\) coordinates, fix \(a\) pairwise separated labels, where \(1\le a{\lt}c\). If each tuple has weight at most \(C n^{2-c}\), the total weight of tuples satisfying these prescriptions and having a pair at permutation distance at most \(b\) is at most </p>
+<div class="displaymath" id="a0000000121">
+  \[  c^2(2b+1)C/n^{a-1}.  \]
+</div>
+<p> A separated successor tuple has distinct physical edges, including its permuted closing edge. </p>
+<p><i class="itshape">Manuscript label:</i> thm:four:successor-kernel.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000120">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>A violating pair must include a coordinate outside the prescribed set. Expose all other coordinates; the remaining label has at most \(2b+1\) choices. Sum over ordered pairs and apply the pointwise weight bound. For edge distinctness, use injectivity of the tuple labels and the separation of the successor of the first label from all other labels. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0010.html" title="The vortex construction"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0012.html" title="The remaining main-proof dependencies"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

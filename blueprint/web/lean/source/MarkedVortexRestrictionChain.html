@@ -1,0 +1,500 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVortexRestrictionChain.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVortexRestrictionChain.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFixedVortexGeometry</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawMarkedPairRestriction</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedResourceEmbeddingComposition</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedSampleArcEmbedding</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedResourceDecompositionEmbedding</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Concrete maps between every two levels of the fixed vortex. These are</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> chosen before sampling; raw states are restricted without resampling. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 10000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> variable {G:SimpleGraph V} {D m:ℕ} {β ε:ℝ} (Q:Vortex U G D β ε m)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> def markedVortexNestedVertex (i j:ℕ) (hij:i≤j):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     markedVortexVertexType Q j ↪o markedVortexVertexType Q i where</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   toFun x:=⟨x.val,Q.extendedVertices_subset hij x.property⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   inj&#x27;:=by intro x y h;apply Subtype.ext;exact congrArg (fun z:markedVortexVertexType Q i=&gt;z.val) h</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   map_rel_iff&#x27;:=by intro x y;rfl</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> def markedVortexNestedHub (i j:ℕ) (hij:i≤j):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     markedVortexHubType Q j ↪ markedVortexHubType Q i where</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   toFun x:=⟨x.val,Q.extendedIndices_subset hij x.property⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   inj&#x27;:=by intro x y h;apply Subtype.ext;exact congrArg (fun z:markedVortexHubType Q i=&gt;z.val) h</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem marked_vortex_nested_vertex_comp (i j k:ℕ) (hij:i≤j) (hjk:j≤k) (hik:i≤k)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (x:markedVortexVertexType Q k):</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     markedVortexNestedVertex Q i j hij (markedVortexNestedVertex Q j k hjk x)=</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       markedVortexNestedVertex Q i k hik x:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   apply Subtype.ext</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   rfl</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> </span>
+<span id="L36"><a href="#L36" class="ln">  36</a> theorem marked_vortex_nested_hub_comp (i j k:ℕ) (hij:i≤j) (hjk:j≤k) (hik:i≤k)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (u:markedVortexHubType Q k):</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     markedVortexNestedHub Q i j hij (markedVortexNestedHub Q j k hjk u)=</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       markedVortexNestedHub Q i k hik u:=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   apply Subtype.ext</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   rfl</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> </span>
+<span id="L43"><a href="#L43" class="ln">  43</a> theorem marked_vortex_nested_next_images (i:ℕ):</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     Finset.univ.image (markedVortexNestedVertex Q i (i+1) (by omega))=markedVortexInnerVertices Q i ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     Finset.univ.image (markedVortexNestedHub Q i (i+1) (by omega))=markedVortexInnerHubs Q i:=by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   constructor</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   · ext x</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     simp only [Finset.mem_image,Finset.mem_univ,true_and,markedVortexInnerVertices,Finset.mem_filter]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     constructor</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     · rintro ⟨v,rfl⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       exact v.property</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     · intro hx</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       exact ⟨⟨x.val,hx⟩,Subtype.ext rfl⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   · ext x</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     simp only [Finset.mem_image,Finset.mem_univ,true_and,markedVortexInnerHubs,Finset.mem_filter]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     constructor</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     · rintro ⟨v,rfl⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       exact v.property</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     · intro hx</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       exact ⟨⟨x.val,hx⟩,Subtype.ext rfl⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> theorem marked_vortex_nested_next_deeper (i:ℕ):</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (∀ x:markedVortexVertexType Q (i+1),</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       markedVortexNestedVertex Q i (i+1) (by omega) x∈markedVortexDeeperVertices Q i ↔</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         x∈markedVortexInnerVertices Q (i+1)) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (∀ u:markedVortexHubType Q (i+1),</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       markedVortexNestedHub Q i (i+1) (by omega) u∈markedVortexDeeperHubs Q i ↔</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         u∈markedVortexInnerHubs Q (i+1)):=by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   constructor</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · intro x</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     simp only [markedVortexDeeperVertices,markedVortexInnerVertices,Finset.mem_filter,Finset.mem_univ,true_and]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     change x.val∈Q.extendedVertices (i+2) ↔ x.val∈Q.extendedVertices (i+1+1)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have he:i+2=i+1+1:=by omega</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     rw [he]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · intro x</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     simp only [markedVortexDeeperHubs,markedVortexInnerHubs,Finset.mem_filter,Finset.mem_univ,true_and]</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     change x.val∈Q.extendedIndices (i+2) ↔ x.val∈Q.extendedIndices (i+1+1)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have he:i+2=i+1+1:=by omega</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     rw [he]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a> </span>
+<span id="L81"><a href="#L81" class="ln">  81</a> theorem marked_vortex_nested_commutes (π:Equiv.Perm V)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     (hπ:∀ i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     (i j:ℕ) (hij:i≤j) (x:markedVortexVertexType Q j):</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     markedVortexNestedVertex Q i j hij (markedVortexPermutation Q π hπ j x)=</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       markedVortexPermutation Q π hπ i (markedVortexNestedVertex Q i j hij x):=by</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   apply Subtype.ext</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   rfl</span>
+<span id="L88"><a href="#L88" class="ln">  88</a> </span>
+<span id="L89"><a href="#L89" class="ln">  89</a> theorem marked_vortex_nested_graph (i j:ℕ) (hij:i≤j):</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     G.comap (markedVortexVertexEmbedding Q j)=</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>       (G.comap (markedVortexVertexEmbedding Q i)).comap (markedVortexNestedVertex Q i j hij):=by</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   ext x y</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   rfl</span>
+<span id="L94"><a href="#L94" class="ln">  94</a> /-- Restricting first to one fixed pair and then to a smaller pair is</span>
+<span id="L95"><a href="#L95" class="ln">  95</a> restriction of the very same raw outcome to the composed embeddings. -/</span>
+<span id="L96"><a href="#L96" class="ln">  96</a> theorem raw_marked_pair_restriction_composition</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     {V₀ V₁ V₂ U₀ U₁ U₂ Γ&#x27; Color&#x27;:Type}</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     [Fintype V₀] [Fintype V₁] [Fintype V₂] [Fintype U₀] [Fintype U₁] [Fintype U₂]</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     [Fintype Γ&#x27;] [Fintype Color&#x27;] [LinearOrder V₀] [LinearOrder V₁] [LinearOrder V₂]</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     [DecidableEq U₀] [DecidableEq U₁] [DecidableEq U₂]</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     (f:V₁→V₀) (g:U₁→U₀) (f&#x27;:V₂→V₁) (g&#x27;:U₂→U₁)</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     (σ:RawMarkedOutcome V₀ U₀ Γ&#x27; Color&#x27;):</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     rawMarkedRestrictPair f&#x27; g&#x27; (rawMarkedRestrictPair f g σ)=</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>       rawMarkedRestrictPair (f∘f&#x27;) (g∘g&#x27;) σ:=by</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   funext e</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>   cases e with</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>   | inl e=&gt;</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     simp only [rawMarkedRestrictPair,rawMarkedRestrictVertices,rawMarkedRestrictHubs,</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>       rawMarkedVertexState,rawMarkedHubState,rawMarkedVertexCoordinate,rawMarkedHubCoordinate,</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       ]</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     rw [Sym2.map_map]</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>   | inr e=&gt;</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     rcases e with ⟨u,e⟩</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     cases e with</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     | inl e=&gt;rfl</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     | inr e=&gt;cases e &lt;;&gt; rfl</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a> </span>
+<span id="L118"><a href="#L118" class="ln"> 118</a> /-- Consecutive vortex restrictions preserve the exact sampled outcome. -/</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a> theorem marked_vortex_nested_raw_restriction (i j:ℕ) (hij:i≤j)</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     (σ:RawMarkedOutcome V U Γ Color):</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     rawMarkedRestrictPair (markedVortexNestedVertex Q i j hij) (markedVortexNestedHub Q i j hij)</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>       (rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ)=</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     rawMarkedRestrictPair (markedVortexVertexEmbedding Q j) (markedVortexHubEmbedding Q j) σ:=by</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>   rw [raw_marked_pair_restriction_composition]</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>   have hf:(markedVortexVertexEmbedding Q i ∘ markedVortexNestedVertex Q i j hij)=</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>       (markedVortexVertexEmbedding Q j:markedVortexVertexType Q j→V):=by funext x;rfl</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>   have hg:(markedVortexHubEmbedding Q i ∘ markedVortexNestedHub Q i j hij)=</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>       (markedVortexHubEmbedding Q j:markedVortexHubType Q j→U):=by funext x;rfl</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>   rw [hf,hg]</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a> </span>
+<span id="L131"><a href="#L131" class="ln"> 131</a> /-- Physical spoke relations restrict to the same ordered pair of vertices. -/</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a> theorem marked_vortex_nested_spokes (i j:ℕ) (hij:i≤j) (H:Bool→V→U→Prop):</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     (fun b (v:markedVortexVertexType Q j) (u:markedVortexHubType Q j)=&gt;</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>       H b (markedVortexVertexEmbedding Q i (markedVortexNestedVertex Q i j hij v))</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>         (markedVortexHubEmbedding Q i (markedVortexNestedHub Q i j hij u)))=</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     (fun b v u=&gt;H b (markedVortexVertexEmbedding Q j v) (markedVortexHubEmbedding Q j u)):=rfl</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a> </span>
+<span id="L138"><a href="#L138" class="ln"> 138</a> /-- Both rim types agree when a fixed raw sample is viewed at a smaller level. -/</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a> theorem marked_vortex_nested_rim_agreement (i j:ℕ) (hij:i≤j)</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     (d:ℕ) (σ:RawMarkedOutcome V U Γ Color)</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>     (e:(markedVortexVertexType Q j×markedVortexVertexType Q j)⊕</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>       (markedVortexVertexType Q j×markedVortexVertexType Q j)):</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>     rawMarkedPairRims (G.comap (markedVortexVertexEmbedding Q j)) (markedVortexPermutation Q π hπ j) d</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>       (rawMarkedRestrictPair (markedVortexVertexEmbedding Q j) (markedVortexHubEmbedding Q j) σ) e ↔</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     rawMarkedPairRims (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) d</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>       (rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ)</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>       (Sum.map (Prod.map (markedVortexNestedVertex Q i j hij) (markedVortexNestedVertex Q i j hij))</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>         (Prod.map (markedVortexNestedVertex Q i j hij) (markedVortexNestedVertex Q i j hij)) e):=by</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>   have he:=rawMarkedRestrictPair_rims (markedVortexNestedVertex Q i j hij)</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>     (markedVortexNestedHub Q i j hij) (markedVortexPermutation Q π hπ i)</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>     (markedVortexPermutation Q π hπ j) (marked_vortex_nested_commutes Q π hπ i j hij)</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>     (G.comap (markedVortexVertexEmbedding Q i)) d</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>     (rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ) e</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>   rw [←marked_vortex_nested_graph Q i j hij,marked_vortex_nested_raw_restriction Q i j hij σ] at he</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>   exact he</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a> </span>
+<span id="L158"><a href="#L158" class="ln"> 158</a> /-- Both spoke types agree for the corresponding row and hub. -/</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a> theorem marked_vortex_nested_spoke_agreement (i j:ℕ) (hij:i≤j)</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>     (d:ℕ) (σ:RawMarkedOutcome V U Γ Color) (a:Γ) (c:Color) (b:Bool)</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>     (x:markedVortexVertexType Q j) (u:markedVortexHubType Q j):</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>     rawMarkedPairSpokes (markedVortexPermutation Q π hπ j) d</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>       (rawMarkedRestrictPair (markedVortexVertexEmbedding Q j) (markedVortexHubEmbedding Q j) σ) a c b x u ↔</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>     rawMarkedPairSpokes (markedVortexPermutation Q π hπ i) d</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>       (rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ) a c b</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>       (markedVortexNestedVertex Q i j hij x) (markedVortexNestedHub Q i j hij u):=by</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>   have he:=rawMarkedRestrictPair_spokes (markedVortexNestedVertex Q i j hij)</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>     (markedVortexNestedHub Q i j hij) (markedVortexPermutation Q π hπ i)</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>     (markedVortexPermutation Q π hπ j) (marked_vortex_nested_commutes Q π hπ i j hij) d</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>     (rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ) a c b x u</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>   rw [marked_vortex_nested_raw_restriction Q i j hij σ] at he</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>   exact he</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a> </span>
+<span id="L175"><a href="#L175" class="ln"> 175</a> /-- The first-level embeddings of the reference chain are identities. -/</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a> theorem marked_vortex_nested_self (i:ℕ):</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>     (∀ x:markedVortexVertexType Q i,markedVortexNestedVertex Q i i (le_refl i) x=x) ∧</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>     (∀ u:markedVortexHubType Q i,markedVortexNestedHub Q i i (le_refl i) u=u):=by</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>   constructor &lt;;&gt; intro x &lt;;&gt; apply Subtype.ext &lt;;&gt; rfl</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a> </span>
+<span id="L181"><a href="#L181" class="ln"> 181</a> /-- Both rim-edge sets and spoke pairs have the same physical image</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a> whether transported through an intermediate level or in one step. -/</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a> theorem marked_vortex_nested_resource_composition</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a>     (i j k:ℕ) (hij:i≤j) (hjk:j≤k) (hik:i≤k)</span>
+<span id="L185"><a href="#L185" class="ln"> 185</a>     (z:Finset (markedVortexVertexType Q k)⊕</span>
+<span id="L186"><a href="#L186" class="ln"> 186</a>       (markedVortexVertexType Q k×markedVortexHubType Q k)):</span>
+<span id="L187"><a href="#L187" class="ln"> 187</a>     markedResourceEmbedding (markedVortexNestedVertex Q i j hij).toEmbedding (markedVortexNestedHub Q i j hij)</span>
+<span id="L188"><a href="#L188" class="ln"> 188</a>       (markedResourceEmbedding (markedVortexNestedVertex Q j k hjk).toEmbedding (markedVortexNestedHub Q j k hjk) z)=</span>
+<span id="L189"><a href="#L189" class="ln"> 189</a>     markedResourceEmbedding (markedVortexNestedVertex Q i k hik).toEmbedding (markedVortexNestedHub Q i k hik) z:=by</span>
+<span id="L190"><a href="#L190" class="ln"> 190</a>   rw [markedResourceEmbedding_comp_apply]</span>
+<span id="L191"><a href="#L191" class="ln"> 191</a>   have hf:(markedVortexNestedVertex Q j k hjk).toEmbedding.trans (markedVortexNestedVertex Q i j hij).toEmbedding=</span>
+<span id="L192"><a href="#L192" class="ln"> 192</a>       (markedVortexNestedVertex Q i k hik).toEmbedding:=by</span>
+<span id="L193"><a href="#L193" class="ln"> 193</a>     ext x &lt;;&gt; rfl</span>
+<span id="L194"><a href="#L194" class="ln"> 194</a>   have hg:(markedVortexNestedHub Q j k hjk).trans (markedVortexNestedHub Q i j hij)=</span>
+<span id="L195"><a href="#L195" class="ln"> 195</a>       markedVortexNestedHub Q i k hik:=by</span>
+<span id="L196"><a href="#L196" class="ln"> 196</a>     ext x &lt;;&gt; rfl</span>
+<span id="L197"><a href="#L197" class="ln"> 197</a>   rw [hf,hg]</span>
+<span id="L198"><a href="#L198" class="ln"> 198</a> </span>
+<span id="L199"><a href="#L199" class="ln"> 199</a> /-- An actual sampled arc at a later level maps injectively to the same</span>
+<span id="L200"><a href="#L200" class="ln"> 200</a> directed, typed arc at the earlier level. -/</span>
+<span id="L201"><a href="#L201" class="ln"> 201</a> def markedVortexNestedSampleArcEmbedding (i j:ℕ) (hij:i≤j)</span>
+<span id="L202"><a href="#L202" class="ln"> 202</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L203"><a href="#L203" class="ln"> 203</a>     (d:ℕ) (σ:RawMarkedOutcome V U Γ Color) (a:Bool):</span>
+<span id="L204"><a href="#L204" class="ln"> 204</a>     MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q j)) (markedVortexPermutation Q π hπ j) (3*d)</span>
+<span id="L205"><a href="#L205" class="ln"> 205</a>       (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q j) (markedVortexHubEmbedding Q j) σ (Sum.inl e)) a ↪</span>
+<span id="L206"><a href="#L206" class="ln"> 206</a>     MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) (3*d)</span>
+<span id="L207"><a href="#L207" class="ln"> 207</a>       (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ (Sum.inl e)) a where</span>
+<span id="L208"><a href="#L208" class="ln"> 208</a>   toFun e:=⟨(markedVortexNestedVertex Q i j hij e.val.1,markedVortexNestedVertex Q i j hij e.val.2),by</span>
+<span id="L209"><a href="#L209" class="ln"> 209</a>     cases a with</span>
+<span id="L210"><a href="#L210" class="ln"> 210</a>     | false=&gt;</span>
+<span id="L211"><a href="#L211" class="ln"> 211</a>       exact (marked_vortex_nested_rim_agreement Q i j hij π hπ d σ (Sum.inl e.val)).mp e.property</span>
+<span id="L212"><a href="#L212" class="ln"> 212</a>     | true=&gt;</span>
+<span id="L213"><a href="#L213" class="ln"> 213</a>       exact (marked_vortex_nested_rim_agreement Q i j hij π hπ d σ (Sum.inr e.val)).mp e.property⟩</span>
+<span id="L214"><a href="#L214" class="ln"> 214</a>   inj&#x27; a b he:=by</span>
+<span id="L215"><a href="#L215" class="ln"> 215</a>     apply Subtype.ext</span>
+<span id="L216"><a href="#L216" class="ln"> 216</a>     apply Prod.ext</span>
+<span id="L217"><a href="#L217" class="ln"> 217</a>     · exact (markedVortexNestedVertex Q i j hij).injective (congrArg (fun z=&gt;z.val.1) he)</span>
+<span id="L218"><a href="#L218" class="ln"> 218</a>     · exact (markedVortexNestedVertex Q i j hij).injective (congrArg (fun z=&gt;z.val.2) he)</span>
+<span id="L219"><a href="#L219" class="ln"> 219</a> </span>
+<span id="L220"><a href="#L220" class="ln"> 220</a> theorem marked_vortex_nested_arc_endpoints (i j:ℕ) (hij:i≤j)</span>
+<span id="L221"><a href="#L221" class="ln"> 221</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L222"><a href="#L222" class="ln"> 222</a>     (d:ℕ) (σ:RawMarkedOutcome V U Γ Color) (a:Bool)</span>
+<span id="L223"><a href="#L223" class="ln"> 223</a>     (e:MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q j)) (markedVortexPermutation Q π hπ j) (3*d)</span>
+<span id="L224"><a href="#L224" class="ln"> 224</a>       (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q j) (markedVortexHubEmbedding Q j) σ (Sum.inl e)) a):</span>
+<span id="L225"><a href="#L225" class="ln"> 225</a>     (markedVortexNestedSampleArcEmbedding Q i j hij π hπ d σ a e).val=</span>
+<span id="L226"><a href="#L226" class="ln"> 226</a>       (markedVortexNestedVertex Q i j hij e.val.1,markedVortexNestedVertex Q i j hij e.val.2):=rfl</span>
+<span id="L227"><a href="#L227" class="ln"> 227</a> </span>
+<span id="L228"><a href="#L228" class="ln"> 228</a> /-- A wheel decomposition on a later vortex level lifts to the earlier</span>
+<span id="L229"><a href="#L229" class="ln"> 229</a> level, preserving its physical rim and spoke resources exactly. -/</span>
+<span id="L230"><a href="#L230" class="ln"> 230</a> theorem marked_vortex_nested_decomposition_lift (i j:ℕ) (hij:i≤j)</span>
+<span id="L231"><a href="#L231" class="ln"> 231</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L232"><a href="#L232" class="ln"> 232</a>     (d m:ℕ) (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop):</span>
+<span id="L233"><a href="#L233" class="ln"> 233</a>     let Ei:=MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) (3*d)</span>
+<span id="L234"><a href="#L234" class="ln"> 234</a>       (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ (Sum.inl e)) false</span>
+<span id="L235"><a href="#L235" class="ln"> 235</a>     let Ki:=MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) (3*d)</span>
+<span id="L236"><a href="#L236" class="ln"> 236</a>       (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ (Sum.inl e)) true</span>
+<span id="L237"><a href="#L237" class="ln"> 237</a>     let Ej:=MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q j)) (markedVortexPermutation Q π hπ j) (3*d)</span>
+<span id="L238"><a href="#L238" class="ln"> 238</a>       (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q j) (markedVortexHubEmbedding Q j) σ (Sum.inl e)) false</span>
+<span id="L239"><a href="#L239" class="ln"> 239</a>     let Kj:=MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q j)) (markedVortexPermutation Q π hπ j) (3*d)</span>
+<span id="L240"><a href="#L240" class="ln"> 240</a>       (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q j) (markedVortexHubEmbedding Q j) σ (Sum.inl e)) true</span>
+<span id="L241"><a href="#L241" class="ln"> 241</a>     let Hi:=fun b (v:markedVortexVertexType Q i) (u:markedVortexHubType Q i)=&gt;H b v.val u.val</span>
+<span id="L242"><a href="#L242" class="ln"> 242</a>     let Hj:=fun b (v:markedVortexVertexType Q j) (u:markedVortexHubType Q j)=&gt;H b v.val u.val;</span>
+<span id="L243"><a href="#L243" class="ln"> 243</a>     ∀ R:Finset (Finset (markedVortexVertexType Q j)⊕(markedVortexVertexType Q j×markedVortexHubType Q j)),</span>
+<span id="L244"><a href="#L244" class="ln"> 244</a>     HasResourceDecomposition</span>
+<span id="L245"><a href="#L245" class="ln"> 245</a>       (fun W:MarkedWheel (fun e:Ej=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:Kj=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L246"><a href="#L246" class="ln"> 246</a>         m (markedVortexPermutation Q π hπ j) (3*d) (Hj false) (Hj true)=&gt;markedWheelPhysicalResources W) R→</span>
+<span id="L247"><a href="#L247" class="ln"> 247</a>     HasResourceDecomposition</span>
+<span id="L248"><a href="#L248" class="ln"> 248</a>       (fun W:MarkedWheel (fun e:Ei=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:Ki=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L249"><a href="#L249" class="ln"> 249</a>         m (markedVortexPermutation Q π hπ i) (3*d) (Hi false) (Hi true)=&gt;markedWheelPhysicalResources W)</span>
+<span id="L250"><a href="#L250" class="ln"> 250</a>       (R.image (markedResourceEmbedding (markedVortexNestedVertex Q i j hij).toEmbedding (markedVortexNestedHub Q i j hij))):=by</span>
+<span id="L251"><a href="#L251" class="ln"> 251</a>   intro Ei Ki Ej Kj Hi Hj R hR</span>
+<span id="L252"><a href="#L252" class="ln"> 252</a>   apply marked_resource_decomposition_embedding</span>
+<span id="L253"><a href="#L253" class="ln"> 253</a>     (markedVortexNestedVertex Q i j hij).toEmbedding (markedVortexNestedHub Q i j hij)</span>
+<span id="L254"><a href="#L254" class="ln"> 254</a>     (marked_vortex_nested_commutes Q π hπ i j hij)</span>
+<span id="L255"><a href="#L255" class="ln"> 255</a>     (markedVortexNestedSampleArcEmbedding Q i j hij π hπ d σ false)</span>
+<span id="L256"><a href="#L256" class="ln"> 256</a>     (markedVortexNestedSampleArcEmbedding Q i j hij π hπ d σ true)</span>
+<span id="L257"><a href="#L257" class="ln"> 257</a>     (by intro a;rfl) (by intro a;rfl) (by intro a;rfl) (by intro a;rfl)</span>
+<span id="L258"><a href="#L258" class="ln"> 258</a>     (by intro x u h;exact h) (by intro x u h;exact h) R hR</span>
+<span id="L259"><a href="#L259" class="ln"> 259</a> </span>
+<span id="L260"><a href="#L260" class="ln"> 260</a> /-- An actual typed arc on a vortex level is the same directed arc in</span>
+<span id="L261"><a href="#L261" class="ln"> 261</a> the ambient sample. -/</span>
+<span id="L262"><a href="#L262" class="ln"> 262</a> def markedVortexAmbientSampleArcEmbedding (i:ℕ)</span>
+<span id="L263"><a href="#L263" class="ln"> 263</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L264"><a href="#L264" class="ln"> 264</a>     (d:ℕ) (σ:RawMarkedOutcome V U Γ Color) (a:Bool):</span>
+<span id="L265"><a href="#L265" class="ln"> 265</a>     MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) (3*d)</span>
+<span id="L266"><a href="#L266" class="ln"> 266</a>       (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ (Sum.inl e)) a ↪</span>
+<span id="L267"><a href="#L267" class="ln"> 267</a>     MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) a where</span>
+<span id="L268"><a href="#L268" class="ln"> 268</a>   toFun e:=⟨(markedVortexVertexEmbedding Q i e.val.1,markedVortexVertexEmbedding Q i e.val.2),by</span>
+<span id="L269"><a href="#L269" class="ln"> 269</a>     cases a with</span>
+<span id="L270"><a href="#L270" class="ln"> 270</a>     | false=&gt;</span>
+<span id="L271"><a href="#L271" class="ln"> 271</a>       exact (rawMarkedRestrictPair_rims (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i)</span>
+<span id="L272"><a href="#L272" class="ln"> 272</a>         π (markedVortexPermutation Q π hπ i) (marked_vortex_permutation_compatibility Q π hπ i).1</span>
+<span id="L273"><a href="#L273" class="ln"> 273</a>         G d σ (Sum.inl e.val)).mp e.property</span>
+<span id="L274"><a href="#L274" class="ln"> 274</a>     | true=&gt;</span>
+<span id="L275"><a href="#L275" class="ln"> 275</a>       exact (rawMarkedRestrictPair_rims (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i)</span>
+<span id="L276"><a href="#L276" class="ln"> 276</a>         π (markedVortexPermutation Q π hπ i) (marked_vortex_permutation_compatibility Q π hπ i).1</span>
+<span id="L277"><a href="#L277" class="ln"> 277</a>         G d σ (Sum.inr e.val)).mp e.property⟩</span>
+<span id="L278"><a href="#L278" class="ln"> 278</a>   inj&#x27; a b he:=by</span>
+<span id="L279"><a href="#L279" class="ln"> 279</a>     apply Subtype.ext</span>
+<span id="L280"><a href="#L280" class="ln"> 280</a>     apply Prod.ext</span>
+<span id="L281"><a href="#L281" class="ln"> 281</a>     · exact (markedVortexVertexEmbedding Q i).injective (congrArg (fun z=&gt;z.val.1) he)</span>
+<span id="L282"><a href="#L282" class="ln"> 282</a>     · exact (markedVortexVertexEmbedding Q i).injective (congrArg (fun z=&gt;z.val.2) he)</span>
+<span id="L283"><a href="#L283" class="ln"> 283</a> </span>
+<span id="L284"><a href="#L284" class="ln"> 284</a> /-- Lift a later-level wheel decomposition all the way to the original</span>
+<span id="L285"><a href="#L285" class="ln"> 285</a> host. The conclusion uses the exact physical image of its resources. -/</span>
+<span id="L286"><a href="#L286" class="ln"> 286</a> theorem marked_vortex_ambient_decomposition_lift (i:ℕ)</span>
+<span id="L287"><a href="#L287" class="ln"> 287</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L288"><a href="#L288" class="ln"> 288</a>     (d m:ℕ) (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop):</span>
+<span id="L289"><a href="#L289" class="ln"> 289</a>     let E:=MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L290"><a href="#L290" class="ln"> 290</a>     let K:=MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) true</span>
+<span id="L291"><a href="#L291" class="ln"> 291</a>     let Ei:=MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) (3*d)</span>
+<span id="L292"><a href="#L292" class="ln"> 292</a>       (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ (Sum.inl e)) false</span>
+<span id="L293"><a href="#L293" class="ln"> 293</a>     let Ki:=MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) (3*d)</span>
+<span id="L294"><a href="#L294" class="ln"> 294</a>       (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ (Sum.inl e)) true</span>
+<span id="L295"><a href="#L295" class="ln"> 295</a>     let Hi:=fun b (v:markedVortexVertexType Q i) (u:markedVortexHubType Q i)=&gt;H b v.val u.val;</span>
+<span id="L296"><a href="#L296" class="ln"> 296</a>     ∀ R:Finset (Finset (markedVortexVertexType Q i)⊕(markedVortexVertexType Q i×markedVortexHubType Q i)),</span>
+<span id="L297"><a href="#L297" class="ln"> 297</a>     HasResourceDecomposition</span>
+<span id="L298"><a href="#L298" class="ln"> 298</a>       (fun W:MarkedWheel (fun e:Ei=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:Ki=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L299"><a href="#L299" class="ln"> 299</a>         m (markedVortexPermutation Q π hπ i) (3*d) (Hi false) (Hi true)=&gt;markedWheelPhysicalResources W) R→</span>
+<span id="L300"><a href="#L300" class="ln"> 300</a>     HasResourceDecomposition</span>
+<span id="L301"><a href="#L301" class="ln"> 301</a>       (fun W:MarkedWheel (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:K=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L302"><a href="#L302" class="ln"> 302</a>         m π (3*d) (H false) (H true)=&gt;markedWheelPhysicalResources W)</span>
+<span id="L303"><a href="#L303" class="ln"> 303</a>       (R.image (markedResourceEmbedding (markedVortexVertexEmbedding Q i).toEmbedding (markedVortexHubEmbedding Q i))):=by</span>
+<span id="L304"><a href="#L304" class="ln"> 304</a>   intro E K Ei Ki Hi R hR</span>
+<span id="L305"><a href="#L305" class="ln"> 305</a>   apply marked_resource_decomposition_embedding</span>
+<span id="L306"><a href="#L306" class="ln"> 306</a>     (markedVortexVertexEmbedding Q i).toEmbedding (markedVortexHubEmbedding Q i)</span>
+<span id="L307"><a href="#L307" class="ln"> 307</a>     (marked_vortex_permutation_compatibility Q π hπ i).1</span>
+<span id="L308"><a href="#L308" class="ln"> 308</a>     (markedVortexAmbientSampleArcEmbedding Q i π hπ d σ false)</span>
+<span id="L309"><a href="#L309" class="ln"> 309</a>     (markedVortexAmbientSampleArcEmbedding Q i π hπ d σ true)</span>
+<span id="L310"><a href="#L310" class="ln"> 310</a>     (by intro a;rfl) (by intro a;rfl) (by intro a;rfl) (by intro a;rfl)</span>
+<span id="L311"><a href="#L311" class="ln"> 311</a>     (by intro x u h;exact h) (by intro x u h;exact h) R hR</span>
+<span id="L312"><a href="#L312" class="ln"> 312</a> </span>
+<span id="L313"><a href="#L313" class="ln"> 313</a> /-- Lifting a physical resource through an intermediate vortex level and</span>
+<span id="L314"><a href="#L314" class="ln"> 314</a> then to the ambient host has the same result as lifting it directly. -/</span>
+<span id="L315"><a href="#L315" class="ln"> 315</a> theorem marked_vortex_ambient_resource_composition (i j:ℕ) (hij:i≤j)</span>
+<span id="L316"><a href="#L316" class="ln"> 316</a>     (z:Finset (markedVortexVertexType Q j)⊕</span>
+<span id="L317"><a href="#L317" class="ln"> 317</a>       (markedVortexVertexType Q j×markedVortexHubType Q j)):</span>
+<span id="L318"><a href="#L318" class="ln"> 318</a>     markedResourceEmbedding (markedVortexVertexEmbedding Q i).toEmbedding (markedVortexHubEmbedding Q i)</span>
+<span id="L319"><a href="#L319" class="ln"> 319</a>       (markedResourceEmbedding (markedVortexNestedVertex Q i j hij).toEmbedding (markedVortexNestedHub Q i j hij) z)=</span>
+<span id="L320"><a href="#L320" class="ln"> 320</a>     markedResourceEmbedding (markedVortexVertexEmbedding Q j).toEmbedding (markedVortexHubEmbedding Q j) z:=by</span>
+<span id="L321"><a href="#L321" class="ln"> 321</a>   rw [markedResourceEmbedding_comp_apply]</span>
+<span id="L322"><a href="#L322" class="ln"> 322</a>   have hf:(markedVortexNestedVertex Q i j hij).toEmbedding.trans (markedVortexVertexEmbedding Q i).toEmbedding=</span>
+<span id="L323"><a href="#L323" class="ln"> 323</a>       (markedVortexVertexEmbedding Q j).toEmbedding:=by ext x &lt;;&gt; rfl</span>
+<span id="L324"><a href="#L324" class="ln"> 324</a>   have hg:(markedVortexNestedHub Q i j hij).trans (markedVortexHubEmbedding Q i)=</span>
+<span id="L325"><a href="#L325" class="ln"> 325</a>       markedVortexHubEmbedding Q j:=by ext x &lt;;&gt; rfl</span>
+<span id="L326"><a href="#L326" class="ln"> 326</a>   rw [hf,hg]</span>
+<span id="L327"><a href="#L327" class="ln"> 327</a> </span>
+<span id="L328"><a href="#L328" class="ln"> 328</a> /-- Decompositions on finitely many vortex levels combine in the original</span>
+<span id="L329"><a href="#L329" class="ln"> 329</a> host when their actual physical images are pairwise disjoint. -/</span>
+<span id="L330"><a href="#L330" class="ln"> 330</a> theorem marked_vortex_ambient_finite_decompositions</span>
+<span id="L331"><a href="#L331" class="ln"> 331</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L332"><a href="#L332" class="ln"> 332</a>     (d m:ℕ) (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L333"><a href="#L333" class="ln"> 333</a>     (J:Finset ℕ)</span>
+<span id="L334"><a href="#L334" class="ln"> 334</a>     (R:∀ i,Finset (Finset (markedVortexVertexType Q i)⊕</span>
+<span id="L335"><a href="#L335" class="ln"> 335</a>       (markedVortexVertexType Q i×markedVortexHubType Q i))):</span>
+<span id="L336"><a href="#L336" class="ln"> 336</a>     let E:=MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L337"><a href="#L337" class="ln"> 337</a>     let K:=MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) true;</span>
+<span id="L338"><a href="#L338" class="ln"> 338</a>     (∀ i∈J,</span>
+<span id="L339"><a href="#L339" class="ln"> 339</a>       let Ei:=MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) (3*d)</span>
+<span id="L340"><a href="#L340" class="ln"> 340</a>         (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ (Sum.inl e)) false</span>
+<span id="L341"><a href="#L341" class="ln"> 341</a>       let Ki:=MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) (3*d)</span>
+<span id="L342"><a href="#L342" class="ln"> 342</a>         (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ (Sum.inl e)) true</span>
+<span id="L343"><a href="#L343" class="ln"> 343</a>       let Hi:=fun b (v:markedVortexVertexType Q i) (u:markedVortexHubType Q i)=&gt;H b v.val u.val;</span>
+<span id="L344"><a href="#L344" class="ln"> 344</a>       HasResourceDecomposition</span>
+<span id="L345"><a href="#L345" class="ln"> 345</a>         (fun W:MarkedWheel (fun e:Ei=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:Ki=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L346"><a href="#L346" class="ln"> 346</a>           m (markedVortexPermutation Q π hπ i) (3*d) (Hi false) (Hi true)=&gt;markedWheelPhysicalResources W) (R i))→</span>
+<span id="L347"><a href="#L347" class="ln"> 347</a>     (∀ i∈J,∀ j∈J,i≠j→Disjoint</span>
+<span id="L348"><a href="#L348" class="ln"> 348</a>       ((R i).image (markedResourceEmbedding (markedVortexVertexEmbedding Q i).toEmbedding (markedVortexHubEmbedding Q i)))</span>
+<span id="L349"><a href="#L349" class="ln"> 349</a>       ((R j).image (markedResourceEmbedding (markedVortexVertexEmbedding Q j).toEmbedding (markedVortexHubEmbedding Q j))))→</span>
+<span id="L350"><a href="#L350" class="ln"> 350</a>     HasResourceDecomposition</span>
+<span id="L351"><a href="#L351" class="ln"> 351</a>       (fun W:MarkedWheel (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:K=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L352"><a href="#L352" class="ln"> 352</a>         m π (3*d) (H false) (H true)=&gt;markedWheelPhysicalResources W)</span>
+<span id="L353"><a href="#L353" class="ln"> 353</a>       (J.biUnion (fun i=&gt;(R i).image</span>
+<span id="L354"><a href="#L354" class="ln"> 354</a>         (markedResourceEmbedding (markedVortexVertexEmbedding Q i).toEmbedding (markedVortexHubEmbedding Q i)))):=by</span>
+<span id="L355"><a href="#L355" class="ln"> 355</a>   intro E K hR hdis</span>
+<span id="L356"><a href="#L356" class="ln"> 356</a>   apply resource_decomposition_biUnion _ _ J</span>
+<span id="L357"><a href="#L357" class="ln"> 357</a>   · intro i hi</span>
+<span id="L358"><a href="#L358" class="ln"> 358</a>     exact marked_vortex_ambient_decomposition_lift Q i π hπ d m σ H (R i) (hR i hi)</span>
+<span id="L359"><a href="#L359" class="ln"> 359</a>   · exact hdis</span>
+<span id="L360"><a href="#L360" class="ln"> 360</a> </span>
+<span id="L361"><a href="#L361" class="ln"> 361</a> /-- Resource layers of a decreasing finite-set sequence are disjoint. -/</span>
+<span id="L362"><a href="#L362" class="ln"> 362</a> theorem decreasing_resource_layers_disjoint {X:Type} [DecidableEq X]</span>
+<span id="L363"><a href="#L363" class="ln"> 363</a>     (B R:ℕ→Finset X) (J:Finset ℕ)</span>
+<span id="L364"><a href="#L364" class="ln"> 364</a>     (hB:∀ i,B (i+1)⊆B i)</span>
+<span id="L365"><a href="#L365" class="ln"> 365</a>     (hR:∀ i∈J,R i⊆B i\B (i+1)):</span>
+<span id="L366"><a href="#L366" class="ln"> 366</a>     ∀ i∈J,∀ j∈J,i≠j→Disjoint (R i) (R j):=by</span>
+<span id="L367"><a href="#L367" class="ln"> 367</a>   have hanti:Antitone B:=antitone_nat_of_succ_le hB</span>
+<span id="L368"><a href="#L368" class="ln"> 368</a>   intro i hi j hj hne</span>
+<span id="L369"><a href="#L369" class="ln"> 369</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L370"><a href="#L370" class="ln"> 370</a>   intro z hzi hzj</span>
+<span id="L371"><a href="#L371" class="ln"> 371</a>   by_cases hij:i&lt;j</span>
+<span id="L372"><a href="#L372" class="ln"> 372</a>   · have hnext:=hanti (Nat.succ_le_of_lt hij)</span>
+<span id="L373"><a href="#L373" class="ln"> 373</a>     exact (Finset.mem_sdiff.mp (hR i hi hzi)).2 (hnext (Finset.mem_sdiff.mp (hR j hj hzj)).1)</span>
+<span id="L374"><a href="#L374" class="ln"> 374</a>   · have hji : j &lt; i := by omega</span>
+<span id="L375"><a href="#L375" class="ln"> 375</a>     have hnext:=hanti (Nat.succ_le_of_lt hji)</span>
+<span id="L376"><a href="#L376" class="ln"> 376</a>     exact (Finset.mem_sdiff.mp (hR j hj hzj)).2 (hnext (Finset.mem_sdiff.mp (hR i hi hzi)).1)</span>
+<span id="L377"><a href="#L377" class="ln"> 377</a> </span>
+<span id="L378"><a href="#L378" class="ln"> 378</a> /-- Exact finite conservation: each covered layer and the final remainder</span>
+<span id="L379"><a href="#L379" class="ln"> 379</a> partition the initial resource set. No infinite sequence hypothesis is needed. -/</span>
+<span id="L380"><a href="#L380" class="ln"> 380</a> theorem finite_resource_layers_partition {X:Type} [DecidableEq X]</span>
+<span id="L381"><a href="#L381" class="ln"> 381</a>     (B R:ℕ→Finset X) (n:ℕ)</span>
+<span id="L382"><a href="#L382" class="ln"> 382</a>     (hB:∀ i,i&lt;n→B (i+1)⊆B i)</span>
+<span id="L383"><a href="#L383" class="ln"> 383</a>     (hR:∀ i,i&lt;n→R i=B i\B (i+1)):</span>
+<span id="L384"><a href="#L384" class="ln"> 384</a>     (Finset.range n).biUnion R ∪ B n=B 0:=by</span>
+<span id="L385"><a href="#L385" class="ln"> 385</a>   induction n with</span>
+<span id="L386"><a href="#L386" class="ln"> 386</a>   | zero=&gt;simp</span>
+<span id="L387"><a href="#L387" class="ln"> 387</a>   | succ n ih=&gt;</span>
+<span id="L388"><a href="#L388" class="ln"> 388</a>     have hBn:B (n+1)⊆B n:=hB n (by omega)</span>
+<span id="L389"><a href="#L389" class="ln"> 389</a>     have hRn:R n=B n\B (n+1):=hR n (by omega)</span>
+<span id="L390"><a href="#L390" class="ln"> 390</a>     have hprev:(Finset.range n).biUnion R ∪ B n=B 0:=</span>
+<span id="L391"><a href="#L391" class="ln"> 391</a>       ih (fun i hi=&gt;hB i (by omega)) (fun i hi=&gt;hR i (by omega))</span>
+<span id="L392"><a href="#L392" class="ln"> 392</a>     rw [Finset.range_add_one,Finset.biUnion_insert,hRn]</span>
+<span id="L393"><a href="#L393" class="ln"> 393</a>     calc</span>
+<span id="L394"><a href="#L394" class="ln"> 394</a>       (B n\B (n+1) ∪ (Finset.range n).biUnion R) ∪ B (n+1)</span>
+<span id="L395"><a href="#L395" class="ln"> 395</a>           = (Finset.range n).biUnion R ∪ ((B n\B (n+1)) ∪ B (n+1)):=by ac_rfl</span>
+<span id="L396"><a href="#L396" class="ln"> 396</a>       _ = (Finset.range n).biUnion R ∪ B n:=by rw [Finset.sdiff_union_of_subset hBn]</span>
+<span id="L397"><a href="#L397" class="ln"> 397</a>       _ = B 0:=hprev</span>
+<span id="L398"><a href="#L398" class="ln"> 398</a> </span>
+<span id="L399"><a href="#L399" class="ln"> 399</a> /-- Disjointness of the covered layers needs only the finite sequence of</span>
+<span id="L400"><a href="#L400" class="ln"> 400</a> monotonicity and layer-containment facts used by the iteration. -/</span>
+<span id="L401"><a href="#L401" class="ln"> 401</a> theorem finite_resource_layers_disjoint {X:Type} [DecidableEq X]</span>
+<span id="L402"><a href="#L402" class="ln"> 402</a>     (B R:ℕ→Finset X) (n:ℕ)</span>
+<span id="L403"><a href="#L403" class="ln"> 403</a>     (hB:∀ i,i&lt;n→B (i+1)⊆B i)</span>
+<span id="L404"><a href="#L404" class="ln"> 404</a>     (hR:∀ i,i&lt;n→R i⊆B i\B (i+1)):</span>
+<span id="L405"><a href="#L405" class="ln"> 405</a>     ∀ i&lt;n,∀ j&lt;n,i≠j→Disjoint (R i) (R j):=by</span>
+<span id="L406"><a href="#L406" class="ln"> 406</a>   have hmono:∀ i j,i≤j→j≤n→B j⊆B i:=by</span>
+<span id="L407"><a href="#L407" class="ln"> 407</a>     intro i j hij</span>
+<span id="L408"><a href="#L408" class="ln"> 408</a>     induction hij with</span>
+<span id="L409"><a href="#L409" class="ln"> 409</a>     | refl=&gt;intro _;exact Finset.Subset.rfl</span>
+<span id="L410"><a href="#L410" class="ln"> 410</a>     | @step j hij ih=&gt;</span>
+<span id="L411"><a href="#L411" class="ln"> 411</a>       intro hj</span>
+<span id="L412"><a href="#L412" class="ln"> 412</a>       exact (hB j (by omega)).trans (ih (by omega))</span>
+<span id="L413"><a href="#L413" class="ln"> 413</a>   intro i hi j hj hne</span>
+<span id="L414"><a href="#L414" class="ln"> 414</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L415"><a href="#L415" class="ln"> 415</a>   intro z hzi hzj</span>
+<span id="L416"><a href="#L416" class="ln"> 416</a>   by_cases hij:i&lt;j</span>
+<span id="L417"><a href="#L417" class="ln"> 417</a>   · have hnext:=hmono (i+1) j (by omega) (by omega)</span>
+<span id="L418"><a href="#L418" class="ln"> 418</a>     exact (Finset.mem_sdiff.mp (hR i hi hzi)).2 (hnext (Finset.mem_sdiff.mp (hR j hj hzj)).1)</span>
+<span id="L419"><a href="#L419" class="ln"> 419</a>   · have hji : j &lt; i := by omega</span>
+<span id="L420"><a href="#L420" class="ln"> 420</a>     have hnext:=hmono (j+1) i (by omega) (by omega)</span>
+<span id="L421"><a href="#L421" class="ln"> 421</a>     exact (Finset.mem_sdiff.mp (hR j hj hzj)).2 (hnext (Finset.mem_sdiff.mp (hR i hi hzi)).1)</span>
+<span id="L422"><a href="#L422" class="ln"> 422</a> </span>
+<span id="L423"><a href="#L423" class="ln"> 423</a> /-- A finite prefix of successive deletions is decreasing. -/</span>
+<span id="L424"><a href="#L424" class="ln"> 424</a> theorem finite_resource_prefix_subset {X:Type} [DecidableEq X]</span>
+<span id="L425"><a href="#L425" class="ln"> 425</a>     (B:ℕ→Finset X) (n:ℕ) (hB:∀ i,i&lt;n→B (i+1)⊆B i)</span>
+<span id="L426"><a href="#L426" class="ln"> 426</a>     (i j:ℕ) (hij:i≤j) (hjn:j≤n):B j⊆B i:=by</span>
+<span id="L427"><a href="#L427" class="ln"> 427</a>   induction hij with</span>
+<span id="L428"><a href="#L428" class="ln"> 428</a>   | refl=&gt;exact Finset.Subset.rfl</span>
+<span id="L429"><a href="#L429" class="ln"> 429</a>   | @step j hij ih=&gt;</span>
+<span id="L430"><a href="#L430" class="ln"> 430</a>     exact (hB j (by omega)).trans (ih (by omega))</span>
+<span id="L431"><a href="#L431" class="ln"> 431</a> </span>
+<span id="L432"><a href="#L432" class="ln"> 432</a> /-- The final remainder is disjoint from all resources covered earlier. -/</span>
+<span id="L433"><a href="#L433" class="ln"> 433</a> theorem finite_resource_layers_terminal_disjoint {X:Type} [DecidableEq X]</span>
+<span id="L434"><a href="#L434" class="ln"> 434</a>     (B R:ℕ→Finset X) (n:ℕ)</span>
+<span id="L435"><a href="#L435" class="ln"> 435</a>     (hB:∀ i,i&lt;n→B (i+1)⊆B i)</span>
+<span id="L436"><a href="#L436" class="ln"> 436</a>     (hR:∀ i,i&lt;n→R i⊆B i\B (i+1)):</span>
+<span id="L437"><a href="#L437" class="ln"> 437</a>     Disjoint ((Finset.range n).biUnion R) (B n):=by</span>
+<span id="L438"><a href="#L438" class="ln"> 438</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L439"><a href="#L439" class="ln"> 439</a>   intro z hz hzn</span>
+<span id="L440"><a href="#L440" class="ln"> 440</a>   obtain ⟨i,hi,hzi⟩:=Finset.mem_biUnion.mp hz</span>
+<span id="L441"><a href="#L441" class="ln"> 441</a>   have hin:i&lt;n:=Finset.mem_range.mp hi</span>
+<span id="L442"><a href="#L442" class="ln"> 442</a>   have hsub:=finite_resource_prefix_subset B n hB (i+1) n (by omega) (by omega)</span>
+<span id="L443"><a href="#L443" class="ln"> 443</a>   exact (Finset.mem_sdiff.mp (hR i hin hzi)).2 (hsub hzn)</span>
+<span id="L444"><a href="#L444" class="ln"> 444</a> </span>
+<span id="L445"><a href="#L445" class="ln"> 445</a> /-- Exact layer decompositions and a terminal decomposition combine into</span>
+<span id="L446"><a href="#L446" class="ln"> 446</a> a decomposition of the initial resource set. -/</span>
+<span id="L447"><a href="#L447" class="ln"> 447</a> theorem finite_resource_layer_decompositions {X W:Type} [DecidableEq X] [DecidableEq W]</span>
+<span id="L448"><a href="#L448" class="ln"> 448</a>     (F:W→Finset X) (B R:ℕ→Finset X) (n:ℕ)</span>
+<span id="L449"><a href="#L449" class="ln"> 449</a>     (hB:∀ i,i&lt;n→B (i+1)⊆B i)</span>
+<span id="L450"><a href="#L450" class="ln"> 450</a>     (hR:∀ i,i&lt;n→R i=B i\B (i+1))</span>
+<span id="L451"><a href="#L451" class="ln"> 451</a>     (hdec:∀ i,i&lt;n→HasResourceDecomposition F (R i))</span>
+<span id="L452"><a href="#L452" class="ln"> 452</a>     (hterm:HasResourceDecomposition F (B n)):</span>
+<span id="L453"><a href="#L453" class="ln"> 453</a>     HasResourceDecomposition F (B 0):=by</span>
+<span id="L454"><a href="#L454" class="ln"> 454</a>   have hsub:∀ i,i&lt;n→R i⊆B i\B (i+1):=by intro i hi;rw [hR i hi]</span>
+<span id="L455"><a href="#L455" class="ln"> 455</a>   have hdis:=finite_resource_layers_disjoint B R n hB hsub</span>
+<span id="L456"><a href="#L456" class="ln"> 456</a>   have hlayers:HasResourceDecomposition F ((Finset.range n).biUnion R):=by</span>
+<span id="L457"><a href="#L457" class="ln"> 457</a>     apply resource_decomposition_biUnion F R (Finset.range n)</span>
+<span id="L458"><a href="#L458" class="ln"> 458</a>     · intro i hi;exact hdec i (Finset.mem_range.mp hi)</span>
+<span id="L459"><a href="#L459" class="ln"> 459</a>     · intro i hi j hj hne;exact hdis i (Finset.mem_range.mp hi) j (Finset.mem_range.mp hj) hne</span>
+<span id="L460"><a href="#L460" class="ln"> 460</a>   have htermDis:=finite_resource_layers_terminal_disjoint B R n hB hsub</span>
+<span id="L461"><a href="#L461" class="ln"> 461</a>   have hfull:=resource_decomposition_union F ((Finset.range n).biUnion R) (B n) hlayers hterm htermDis</span>
+<span id="L462"><a href="#L462" class="ln"> 462</a>   rw [finite_resource_layers_partition B R n hB hR] at hfull</span>
+<span id="L463"><a href="#L463" class="ln"> 463</a>   exact hfull</span>
+<span id="L464"><a href="#L464" class="ln"> 464</a> </span>
+<span id="L465"><a href="#L465" class="ln"> 465</a> /-- If the actual images of the level decompositions are exactly the</span>
+<span id="L466"><a href="#L466" class="ln"> 466</a> successive deletion layers, a terminal decomposition completes the original</span>
+<span id="L467"><a href="#L467" class="ln"> 467</a> host. The layer identities themselves are the remaining iteration input. -/</span>
+<span id="L468"><a href="#L468" class="ln"> 468</a> theorem marked_vortex_decompositions_from_exact_layers</span>
+<span id="L469"><a href="#L469" class="ln"> 469</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L470"><a href="#L470" class="ln"> 470</a>     (d m:ℕ) (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop) (n:ℕ)</span>
+<span id="L471"><a href="#L471" class="ln"> 471</a>     (R:∀ i,Finset (Finset (markedVortexVertexType Q i)⊕</span>
+<span id="L472"><a href="#L472" class="ln"> 472</a>       (markedVortexVertexType Q i×markedVortexHubType Q i)))</span>
+<span id="L473"><a href="#L473" class="ln"> 473</a>     (B:ℕ→Finset (Finset V⊕(V×U))):</span>
+<span id="L474"><a href="#L474" class="ln"> 474</a>     let E:=MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L475"><a href="#L475" class="ln"> 475</a>     let K:=MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) true</span>
+<span id="L476"><a href="#L476" class="ln"> 476</a>     let F:=fun W:MarkedWheel (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:K=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L477"><a href="#L477" class="ln"> 477</a>       m π (3*d) (H false) (H true)=&gt;markedWheelPhysicalResources W</span>
+<span id="L478"><a href="#L478" class="ln"> 478</a>     let S:=fun i=&gt;(R i).image</span>
+<span id="L479"><a href="#L479" class="ln"> 479</a>       (markedResourceEmbedding (markedVortexVertexEmbedding Q i).toEmbedding (markedVortexHubEmbedding Q i));</span>
+<span id="L480"><a href="#L480" class="ln"> 480</a>     (∀ i,i&lt;n→B (i+1)⊆B i)→</span>
+<span id="L481"><a href="#L481" class="ln"> 481</a>     (∀ i,i&lt;n→S i=B i\B (i+1))→</span>
+<span id="L482"><a href="#L482" class="ln"> 482</a>     (∀ i,i&lt;n→</span>
+<span id="L483"><a href="#L483" class="ln"> 483</a>       let Ei:=MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) (3*d)</span>
+<span id="L484"><a href="#L484" class="ln"> 484</a>         (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ (Sum.inl e)) false</span>
+<span id="L485"><a href="#L485" class="ln"> 485</a>       let Ki:=MarkedSampleArc (G.comap (markedVortexVertexEmbedding Q i)) (markedVortexPermutation Q π hπ i) (3*d)</span>
+<span id="L486"><a href="#L486" class="ln"> 486</a>         (fun e=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ (Sum.inl e)) true</span>
+<span id="L487"><a href="#L487" class="ln"> 487</a>       let Hi:=fun b (v:markedVortexVertexType Q i) (u:markedVortexHubType Q i)=&gt;H b v.val u.val;</span>
+<span id="L488"><a href="#L488" class="ln"> 488</a>       HasResourceDecomposition</span>
+<span id="L489"><a href="#L489" class="ln"> 489</a>         (fun W:MarkedWheel (fun e:Ei=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:Ki=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L490"><a href="#L490" class="ln"> 490</a>           m (markedVortexPermutation Q π hπ i) (3*d) (Hi false) (Hi true)=&gt;markedWheelPhysicalResources W) (R i))→</span>
+<span id="L491"><a href="#L491" class="ln"> 491</a>     HasResourceDecomposition F (B n)→HasResourceDecomposition F (B 0):=by</span>
+<span id="L492"><a href="#L492" class="ln"> 492</a>   intro E K F S hB hS hR hterm</span>
+<span id="L493"><a href="#L493" class="ln"> 493</a>   apply finite_resource_layer_decompositions F B S n hB hS ?_ hterm</span>
+<span id="L494"><a href="#L494" class="ln"> 494</a>   intro i hi</span>
+<span id="L495"><a href="#L495" class="ln"> 495</a>   exact marked_vortex_ambient_decomposition_lift Q i π hπ d m σ H (R i) (hR i hi)</span>
+<span id="L496"><a href="#L496" class="ln"> 496</a> </span>
+<span id="L497"><a href="#L497" class="ln"> 497</a> end Oberwolfach</span></pre></html>

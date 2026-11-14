@@ -1,0 +1,96 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CompleteRemainderAndGlue.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CompleteRemainderAndGlue.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CompleteRemainderWithShield</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.AssignedEndpointExclusion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PrescribedSubtypeCompleteGlue</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Assign all bad edges from the actual lists and complete the prescribed</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> factor family while preserving the reserved and previously packed edges. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 15000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {I V:Type} [Fintype I] [Fintype V] [DecidableEq I] [DecidableEq V] [Nonempty I] [Nonempty V]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   {X Y:I→Type} [∀i,Fintype (X i)] [∀i,DecidableEq (X i)] [∀i,DecidableEq (Y i)]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem complete_remainder_and_glue_from_lists</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (pieces:∀i,List (PrescribedSourcePiece (X i)))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hshape:∀i p,p∈pieces i→p.Shape)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hapart:∀i,(pieces i).Pairwise (fun p q=&gt;Disjoint p.vertices.toFinset q.vertices.toFinset))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (A:∀i,Finset (X i)) (hA:∀i x,x∈A i→∀y,y∈A i→¬(prescribedDependentGraph pieces i).Adj x y)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (f:∀i,X i→V) (hinj:∀i,Set.InjOn (f i) (↑(A i):Set (X i)))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (embed:∀i,X i↪Y i) (Aold:∀i,Finset (Y i)) (ψ:∀i,Y i→V)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hOverlap:∀i x,x∈A i↔embed i x∈Aold i)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hψ:∀i,Set.InjOn (ψ i) (↑(Aold i):Set (Y i))) (hf:∀i x,x∈A i→f i x=ψ i (embed i x))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (Kbad J:SimpleGraph V) (Lbad:Sym2 V→Finset I) (Bad:V→Finset I) (inner:Finset I) (Z:I→Finset V)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hOutside:∀e∈Kbad.edgeFinset,Disjoint (Lbad e) inner)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hOldZ:∀i,Disjoint ((Aold i).image (ψ i)) (Z i)) (houter:∀i,i∉inner→Z i=∅)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hOldShield:∀i e v,e∈Kbad.edgeFinset→v∈e.toFinset→v∈(Aold i).image (ψ i)→i∈Lbad e→i∈Bad v)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (a b:ℝ) (ha:0&lt;a) (hb:0≤b) (hbsmall:b≤a/16) (hnV:0&lt;Fintype.card V)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hLbad:∀e∈Kbad.edgeFinset,a*Fintype.card V≤((Lbad e).card:ℝ))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hBad:∀v,((Bad v).card:ℝ)≤b*Fintype.card V)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hKbad:∀v,(Kbad.degree v:ℝ)≤b*Fintype.card V)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (harc:∀i,Fintype.card (X i)≤(prescribedArcFinset (prescribedDependentDigraph pieces i)).card+(A i).card)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hcapacity:∀i,8*(A i).card+8*⌈4*(Kbad.edgeFinset.card:ℝ)/(a*Fintype.card V)⌉₊+4*(Z i).card+10≤Fintype.card (X i))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (β δ:ℝ) (hβ:0&lt;β) (hβ1:β≤1) (hδ:0&lt;δ) (hδbound:δ≤(β/100)^2)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hnβ:100/β≤(Fintype.card V:ℝ)) (hn:2/Real.sqrt δ≤(Fintype.card V:ℝ))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hI:(Fintype.card I:ℝ)≤Fintype.card V)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hsize:∀i,(Fintype.card (X i):ℝ)≤δ*Fintype.card V)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hold:∀v,((Finset.univ.filter (fun i=&gt;v∈(A i).image (f i))).card:ℝ)+Kbad.degree v+</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ((Finset.univ.filter (fun i=&gt;v∈Z i)).card:ℝ)≤δ*Fintype.card V)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hJ:∀v,(J.degree v:ℝ)≤δ*Fintype.card V) (hKJ:Disjoint Kbad.edgeFinset J.edgeFinset)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (D Dstar:V→V→Prop) (hDD:∀x y,D x y→Dstar x y)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hDstar:∀x y,Kbad.Adj x y→Dstar x y ∨ Dstar y x)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (Pack:Finset (Sym2 V)) (hKPack:Disjoint Kbad.edgeFinset Pack) (hDPack:∀x y,D x y→s(x,y)∉Pack)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (Lists:I→Finset V) (hext:∀i,IsExtendingList D (Lists i) β)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (hListOld:∀i,Disjoint (Lists i) ((Aold i).image (ψ i))):</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     ∃ (assign:Sym2 V→I) (orient:Sym2 V→V×V) (B:∀i,Finset (X i)) (g Φ:∀i,X i→V) (h:∀i,Y i→V),</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (∀i,Set.InjOn (h i) (↑(Aold i∪Finset.univ.image (embed i)):Set (Y i))) ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (∀i y,y∈Aold i→h i y=ψ i y) ∧ (∀i x,h i (embed i x)=Φ i x) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∀i,A i⊆B i ∧ (∀x∈A i,g i x=f i x) ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         (B i).image (g i)=(A i).image (f i)∪prescribedMatchingEndpoints (prescribedAssignedArcs Kbad assign orient i)∪Z i) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (∀i v,v∈prescribedMatchingEndpoints (prescribedAssignedArcs Kbad assign orient i)→i∉Bad v) ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (∀i v,v∈prescribedMatchingEndpoints (prescribedAssignedArcs Kbad assign orient i)→</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         ∃e∈Kbad.edgeFinset,v∈e.toFinset ∧ i∈Lbad e) ∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (∀i,Set.InjOn (Φ i) (↑(Finset.univ:Finset (X i)):Set (X i))) ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (∀i x,x∈B i→Φ i x=g i x) ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (∀i v,v∈Z i→∃x,Φ i x=v) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (∀i x,x∉B i→Φ i x∈Lists i) ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (∀i x y,prescribedDependentDigraph pieces i x y→Dstar (Φ i x) (Φ i y) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         ((x∉B i ∨ y∉B i)→D (Φ i x) (Φ i y))) ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       let E:I→Finset (Sym2 V):=fun i=&gt;((prescribedDependentGraph pieces i).edgeFinset).image (Sym2.map (Φ i));</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       PairwisePhysicalDisjoint E ∧ Kbad.edgeFinset⊆Finset.univ.biUnion E ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (∀i,Disjoint (E i) J.edgeFinset) ∧ (∀i,Disjoint (E i) Pack) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (∀v,(((Finset.univ.filter (fun z:(Σi,X i)=&gt;z.2∉B z.1)).filter (fun z=&gt;Φ z.1 z.2=v)).card:ℝ)≤Real.sqrt δ*Fintype.card V+1) ∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (prescribedPhysicalUnion E).edgeFinset=Finset.univ.biUnion E ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (∀v,((prescribedPhysicalUnion E).degree v:ℝ)≤5*Real.sqrt δ*Fintype.card V) := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hAold:∀i,(A i).image (f i)⊆(Aold i).image (ψ i):=by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     intro i v hv</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     obtain ⟨x,hx,rfl⟩:=Finset.mem_image.mp hv</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     refine Finset.mem_image.mpr ⟨embed i x,(hOverlap i x).mp hx,?_⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     exact (hf i x hx).symm</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   obtain ⟨assign,orient,B,g,Φ,hBg,hEnd,hEndList,hΦinj,hΦold,hZ,hL,hArc,hPair,hKcover,hJavoid,hPack,hFree,hUnion,hDegree⟩:=</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     complete_remainder_with_image_and_shield pieces hshape hapart A hA f hinj Kbad J Lbad Bad inner Z</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       (fun i=&gt;(Aold i).image (ψ i)) hAold hOldShield hOutside hOldZ houter</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       a b ha hb hbsmall hnV hLbad hBad hKbad harc hcapacity β δ hβ hβ1 hδ hδbound hnβ hn hI hsize hold hJ hKJ</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       D Dstar hDD hDstar Pack hKPack hDPack Lists hext</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hOldC:∀i,Disjoint ((Aold i).image (ψ i)) (prescribedMatchingEndpoints (prescribedAssignedArcs Kbad assign orient i)):=by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     intro i</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     intro v hvOld hvC</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     obtain ⟨e,he,hve,hi⟩:=hEndList i v hvC</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     exact hEnd i v hvC (hOldShield i e v he hve hvOld hi)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have hh:∀i,∃h:Y i→V,Set.InjOn h (↑(Aold i∪Finset.univ.image (embed i)):Set (Y i)) ∧</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       (∀y∈Aold i,h y=ψ i y) ∧ (∀x,h (embed i x)=Φ i x):=by</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     intro i</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     have hΦ:Function.Injective (Φ i):=by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       intro x y he</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       exact hΦinj i (Finset.mem_univ x) (Finset.mem_univ y) he</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     exact prescribed_subtype_complete_factor_glue (embed i) (Aold i) (A i) (B i) (ψ i) (f i) (g i) (Φ i)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       (Lists i) (prescribedMatchingEndpoints (prescribedAssignedArcs Kbad assign orient i)) (Z i)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>       (hOverlap i) (hBg i).1 (hψ i) hΦ (hf i) (hBg i).2.1 (hΦold i) (hBg i).2.2</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>       (hOldC i) (hOldZ i) (hL i) (hListOld i)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   choose h hinjH hOldH hRemH using hh</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   exact ⟨assign,orient,B,g,Φ,h,hinjH,hOldH,hRemH,hBg,hEnd,hEndList,hΦinj,hΦold,hZ,hL,hArc,hPair,hKcover,hJavoid,hPack,hFree,hUnion,hDegree⟩</span>
+<span id="L93"><a href="#L93" class="ln">  93</a> end Oberwolfach</span></pre></html>

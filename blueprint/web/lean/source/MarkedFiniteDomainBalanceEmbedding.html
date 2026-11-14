@@ -1,0 +1,78 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedFiniteDomainBalanceEmbedding.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedFiniteDomainBalanceEmbedding.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFiniteBalanceEmbedding</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Opposite-endpoint balances commute with injective vertex and occurrence</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> maps when both domains are their exact preimages. This preserves the original</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> ambient root in each comparison and does not enlarge any uniform event. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 9000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U V&#x27; U&#x27; E K E&#x27; K&#x27;:Type}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [DecidableEq V] [DecidableEq U] [DecidableEq V&#x27;] [DecidableEq U&#x27;]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [DecidableEq E] [DecidableEq K] [DecidableEq E&#x27;] [DecidableEq K&#x27;]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem markedFiniteDomainBalance_embedding</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (tail head:E→V) (ktail khead:K→V) (tail&#x27; head&#x27;:E&#x27;→V&#x27;) (ktail&#x27; khead&#x27;:K&#x27;→V&#x27;)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (HK:V→U→Prop) (HK&#x27;:V&#x27;→U&#x27;→Prop) (f:V↪V&#x27;) (g:U↪U&#x27;) (e:E↪E&#x27;) (k:K↪K&#x27;)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (het:∀ a,tail&#x27; (e a)=f (tail a)) (heh:∀ a,head&#x27; (e a)=f (head a))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hkt:∀ a,ktail&#x27; (k a)=f (ktail a)) (hkh:∀ a,khead&#x27; (k a)=f (khead a))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (A:Finset (E⊕K)) (S:Finset (V×U)) (m:ℕ)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hHK:∀ s∈S,HK&#x27; (f s.1) (g s.2)↔HK s.1 s.2)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (X:Finset V) (Z:Finset U) (I:Finset V&#x27;) (J:Finset U&#x27;)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hX:∀ x,f x∈I↔x∈X) (hZ:∀ u,g u∈J↔u∈Z) (z:V⊕U) (i:Fin 4):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     markedFiniteDomainBalance tail&#x27; head&#x27; ktail&#x27; khead&#x27; HK&#x27; (A.image (e.sumMap k))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (S.image (Prod.map f g)) m I J (Sum.map f g z) i=</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       markedFiniteDomainBalance tail head ktail khead HK A S m X Z z i:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have ht (a:E⊕K):Sum.elim tail&#x27; ktail&#x27; ((e.sumMap k) a)=f (Sum.elim tail ktail a):=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     cases a with</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     | inl a=&gt;exact het a</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     | inr a=&gt;exact hkt a</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hh (a:E⊕K):Sum.elim head&#x27; khead&#x27; ((e.sumMap k) a)=f (Sum.elim head khead a):=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     cases a with</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     | inl a=&gt;exact heh a</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     | inr a=&gt;exact hkh a</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   cases z with</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   | inl v=&gt;</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hA:((A.image (e.sumMap k)).filter</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (fun a=&gt;(if Sum.elim tail&#x27; ktail&#x27; a=f v then Sum.elim head&#x27; khead&#x27; a else Sum.elim tail&#x27; ktail&#x27; a)∈I))=</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (A.filter (fun a=&gt;(if Sum.elim tail ktail a=v then Sum.elim head khead a else Sum.elim tail ktail a)∈X)).image (e.sumMap k):=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       rw [Finset.filter_image]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       congr 1</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       apply Finset.filter_congr</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       intro a _</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       simp only [ht,hh,f.injective.eq_iff]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       split_ifs &lt;;&gt; exact hX _</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hS:((S.image (Prod.map f g)).filter (fun s=&gt;s.2∈J))=</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         (S.filter (fun s=&gt;s.2∈Z)).image (Prod.map f g):=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       rw [Finset.filter_image]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       congr 1</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       apply Finset.filter_congr</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       intro s _</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       exact hZ s.2</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     simp only [Sum.map_inl,Sum.map_inr]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     dsimp only [markedFiniteDomainBalance]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     rw [hA,hS]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     exact markedFiniteBalance_embedding tail head ktail khead tail&#x27; head&#x27; ktail&#x27; khead&#x27; HK HK&#x27; f g e k</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       het heh hkt hkh _ _ m (fun s hs=&gt;hHK s (Finset.mem_filter.mp hs).1) (Sum.inl v) i</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   | inr u=&gt;</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hS:((S.image (Prod.map f g)).filter (fun s=&gt;s.1∈I))=</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (S.filter (fun s=&gt;s.1∈X)).image (Prod.map f g):=by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       rw [Finset.filter_image]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       congr 1</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       apply Finset.filter_congr</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       intro s _</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       exact hX s.1</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     simp only [Sum.map_inl,Sum.map_inr]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     dsimp only [markedFiniteDomainBalance]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     rw [hS]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     have h:=markedFiniteBalance_embedding tail head ktail khead tail&#x27; head&#x27; ktail&#x27; khead&#x27; HK HK&#x27; f g e k</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       het heh hkt hkh ∅ (S.filter (fun s=&gt;s.1∈X)) m</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       (fun s hs=&gt;hHK s (Finset.mem_filter.mp hs).1) (Sum.inr u) i</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     simpa only [Finset.image_empty,Sum.map_inr] using h</span>
+<span id="L74"><a href="#L74" class="ln">  74</a> </span>
+<span id="L75"><a href="#L75" class="ln">  75</a> end Oberwolfach</span></pre></html>

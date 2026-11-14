@@ -1,0 +1,72 @@
+version: "v0.4"
+project:
+  name: "Generalized Oberwolfach problem: prescribed 2-factor decompositions"
+  description: >-
+    A Lean formalization of a prescribed 2-factor decomposition theorem for
+    sufficiently large even-regular graphs. The minimum-degree threshold is
+    determined by ordinary cycle-decomposition thresholds for an arbitrary
+    nonempty set of permitted cycle lengths; the order threshold is uniform in
+    that set and in the prescribed list of factors.
+  authors: ["Abhishek Methuku"]
+  responsible_maintainers: ["Abhishek Methuku"]
+  license: "Apache-2.0"
+classification:
+  arxiv: ["math.CO"]
+  msc2020: []
+sources:
+  - title: "Sharp Dirac thresholds for the generalized Oberwolfach problem"
+    authors: ["Dong Yeap Kang", "Abhishek Methuku", "Pablo Oviedo"]
+    type: "paper"
+    relationship: "formalizes"
+    id: "Final manuscript source SHA-256 5f9cef1149b88a3680cc5ccf193b7a68a18fd12105ab6c495f4f23d893e772d9"
+    location: "Theorem labelled thm:new:prescribed-factor in source/manuscript.tex"
+    note: >-
+      Manuscript source provided by Abhishek Methuku as the final version on
+      14 November 2026. The theorem statement agrees with the earlier
+      manuscript snapshot used in the Lean development, after normalization of
+      LaTeX math delimiters; the full manuscript files differ.
+status:
+  scope: >-
+    The selected theorem is the uniform prescribed 2-factor decomposition
+    result, with the threshold defined through ordinary cycle decompositions.
+    The project includes supporting lemmas and conditional constructions. It
+    does not claim to formalize every corollary or the full manuscript.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+automation:
+  methods:
+    - method: "agent"
+      tool_setup: >-
+        OpenAI Codex was used extensively for Lean formalization, porting,
+        proof integration, verification, and statement comparison under human
+        direction. Lean, Mathlib, Lean's checker, NanoDa and con-ron were used
+        for local verification.
+  notes: >-
+    The complete extent of human mathematical review is to be confirmed before
+    publication or submission.
+fidelity:
+  divergences: >-
+    No mismatch has been identified in the main-theorem comparison with the
+    indicated final manuscript. Some graph-theoretic interpretations have been
+    checked separately in Lean. The final Challenge/Solution comparison and an
+    independent human mathematical review remain outstanding.
+review:
+  status: "agent-reviewed"
+  reviewers: ["OpenAI Codex"]
+  notes: >-
+    Codex compared the formal statement and definitions against the indicated
+    final manuscript and performed local machine checks. The machine checks
+    do not establish the semantic fidelity of the formalization to the paper;
+    an independent human mathematical review has not been recorded.
+alignment:
+  namespace: "Oberwolfach"
+  statements:
+    - source: "Manuscript theorem labelled thm:new:prescribed-factor"
+      lean: "Oberwolfach.mainTheoremProof"
+      module: "Oberwolfach.MainTheoremFromProtectedPreparation"
+      status: "proved"
+      note: >-
+        The original main-theorem gate and independent kernel checks passed on
+        a related source-stable local candidate. The exact prepared repository
+        has not yet passed Palomar Comparator or its own full final verification.

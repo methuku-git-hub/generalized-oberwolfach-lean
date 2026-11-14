@@ -1,0 +1,98 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SuppliedVortexPrepareProtectedResidual.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SuppliedVortexPrepareProtectedResidual.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SuppliedVortexOutcomePreparedProtectedResidual</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SuppliedVortexOutcomePreparedProtectedGlobal</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.FirstVortexPreparedProtectedResidualProof</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.SuppliedVortexOutcomePreparedFirstResidual</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.FirstVortexPreparedResidual</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.FirstVortexReservedListsEvent</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 10000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> local instance suppliedPrepareProtectedResidualFin (n:ℕ):DecidableEq (Fin n):=selectedAlignedSourceWithLoadFin n</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem supplied_vortex_prepare_protected_residual</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (r k₀ K d:ℕ) (hr:2≤r) (hK:3≤K) (hm:7≤r+4) (hd:2≤d)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (αRef sstar γRich tstar kstar θ ρ₀ ρ D eps lam ζret alpha γ:ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hθpos:0&lt;θ) (hθ:θ≤1/100) (hρ₀:0&lt;ρ₀) (hρlo:ρ₀≤ρ) (hρ1:ρ≤1) (hD:0&lt;D)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hcut:(1/((((r+4):ℕ):ℝ)+1))/(d:ℝ)≤θ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (β βCommon εAbs εRob ζRob εRef δRef ζ εBal ζBal εNbr ζNbr εLoad ζLoad ζLocal ζConfig τLevel:ℝ)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (BM:ℝ) (BO:Fin K→ℝ) (t₀ ξ Δ τ:ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (size a₀ b₀ e₀ aRob bRob eRob f₀ L hNbr n:ℕ) (hn:1≤n)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (U:Type) [Fintype U] [DecidableEq U]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (Allowed:Set ℕ) (hAllowed:∀u,AllowedCycleLengths (F u) Allowed)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hsize:ρ*D=2*Fintype.card U) (hclass:∀u,factorPreparationClass (F u) K=none)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (weight:(Fin ((r+4)+1)→Fin n)→ℝ)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (w:∀i:Fin K,OrdinaryCycle P (longPaddedSeedExponent i+2)→ℝ)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (Dnat vsize:ℕ) (βQ εQ:ℝ) (Q:Vortex U P Dnat βQ εQ vsize)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hpres:∀i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (δlocal αMatch bmatch:ℝ)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (βlist lamList ζList βfinal η γList pstar:ℝ)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hn2:2≤n) (hu:Fintype.card U≤n) (hεQ:0≤εQ)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hb:0≤bmatch) (hbsmall:bmatch≤((ρ₀/4)/40000)/16) (hαb:αMatch/16≤bmatch)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hθδ:10*θ≤δlocal) (hεδ:εQ≤δlocal) (hβfinal:0&lt;βfinal) (hβfinal1:βfinal≤1)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hδ:0&lt;δlocal) (hδbound:δlocal≤(βfinal/100)^2)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hnβ:100/βfinal≤(n:ℝ)) (hnδ:2/Real.sqrt δlocal≤(n:ℝ))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hγList:0≤γList) (hpstar:0≤pstar) (hp:pstar≤ρ*(1/100)/2)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hβlist:0≤βlist) (hlamList:0≤lamList) (hζList:0≤ζList) (hΔζ:Δ≤ζList)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hP:∀x,(1/2+γList)*n≤(P.degree x:ℝ))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (herror:(n:ℝ)^(3/4:ℝ)+2*(2*((3*d:ℕ):ℝ)+1)≤γList*pstar^2*n)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (hmargin:βlist*n+(n:ℝ)^(3/4:ℝ)≤γList*pstar^2*n*(1/100:ℝ))</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hlistBudget:(lamList+2*ζList)*n≤βlist*n)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hsub:(n:ℝ)^(3/4:ℝ)≤η*n)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (htrim:βfinal+εQ+1/(100*((r+4:ℕ):ℝ))+η≤lamList)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> :</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     SuppliedVortexOutcomeWithPreparedProtectedGlobal r k₀ K d hr hK hm hd αRef sstar γRich tstar kstar θ ρ₀ ρ D eps lam ζret alpha γ</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       hθpos hθ hρ₀ hρlo hρ1 hD hcut β βCommon εAbs εRob ζRob εRef δRef ζ εBal ζBal εNbr ζNbr εLoad ζLoad ζLocal ζConfig τLevel</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       BM BO t₀ ξ Δ τ size a₀ b₀ e₀ aRob bRob eRob f₀ L hNbr n hn U F hF Allowed hAllowed hsize hclass P π weight w Dnat vsize βQ εQ Q hpres δlocal αMatch bmatch →</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     SuppliedVortexOutcomeWithPreparedProtectedResidual r k₀ K d hr hK hm hd αRef sstar γRich tstar kstar θ ρ₀ ρ D eps lam ζret alpha γ</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       hθpos hθ hρ₀ hρlo hρ1 hD hcut β βCommon εAbs εRob ζRob εRef δRef ζ εBal ζBal εNbr ζNbr εLoad ζLoad ζLocal ζConfig τLevel</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       BM BO t₀ ξ Δ τ size a₀ b₀ e₀ aRob bRob eRob f₀ L hNbr n hn U F hF Allowed hAllowed hsize hclass P π weight w Dnat vsize βQ εQ Q hpres δlocal αMatch bmatch :=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   intro hout</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   letI:Nonempty (Fin n):=⟨⟨0,by omega⟩⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   unfold SuppliedVortexOutcomeWithPreparedProtectedGlobal at hout</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hdec : suppliedPreparedProtectedGlobalFin n = suppliedPrepareProtectedResidualFin n := Subsingleton.elim _ _</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hdecK : suppliedPreparedProtectedGlobalFin K = suppliedPrepareProtectedResidualFin K := Subsingleton.elim _ _</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hdec6 : suppliedPreparedProtectedGlobalFin 6 = suppliedPrepareProtectedResidualFin 6 := Subsingleton.elim _ _</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   try rw [hdec] at hout</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   try rw [hdecK] at hout</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   try rw [hdec6] at hout</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   unfold SuppliedVortexOutcomeWithPreparedProtectedResidual</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hdec&#x27; : suppliedPreparedProtectedResidualFin n = suppliedPrepareProtectedResidualFin n := Subsingleton.elim _ _</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hdecK&#x27; : suppliedPreparedProtectedResidualFin K = suppliedPrepareProtectedResidualFin K := Subsingleton.elim _ _</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hdec6&#x27; : suppliedPreparedProtectedResidualFin 6 = suppliedPrepareProtectedResidualFin 6 := Subsingleton.elim _ _</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   try rw [hdec&#x27;]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   try rw [hdecK&#x27;]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   try rw [hdec6&#x27;]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨levelWeight,hweight,z,hz⟩:=hout</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hkeep:=hz</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   obtain ⟨hInputs,hPrepared,hmass,hPrior,hrow,hlocalRow,hfixed,hcolumn,hextLocal,hboundary,hrows,hglobalRet,hunassigned,hcolumnAll,hprotected,hglobalBound,hpair,hselected1,hselected2,hpaths,hstarts,hres,hfixedSelection,hspoke,hcount,hmark,hord,hload,hmasspost,hbudget,hmatch⟩:=hz</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   refine ⟨levelWeight,hweight,z,hInputs,?_,hkeep.2.2⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hneighbour:∀u i,|rawIntervalReservedLabelHubCountOn π d (fun e=&gt;z.1 (Sum.inr e)) u false</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       (rawSelectedNeighbourTestSet P π d (fun e=&gt;z.1 (Sum.inl e)) i)-</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       (rawSelectedNeighbourTestSet P π d (fun e=&gt;z.1 (Sum.inl e)) i).card*(1/100:ℝ)|&lt;(n:ℝ)^(3/4:ℝ):=by</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     simpa only [longAssignedSpokeProbability,Bool.false_eq_true,ite_false] using hselected2</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   have hdecL : instDecidableEqFin n = suppliedPrepareProtectedResidualFin n := Subsingleton.elim _ _</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   have hdecLK : instDecidableEqFin K = suppliedPrepareProtectedResidualFin K := Subsingleton.elim _ _</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have hList:=@first_vortex_reserved_lists_from_event_tests n U _ _</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   try rw [hdecL] at hList</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   try rw [hdecLK] at hList</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have hext:=hList hn2 F hF K (r+4) d (by omega) (by omega)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     θ hθpos.le (by linarith) P π Dnat vsize βQ εQ Q hεQ z.1 γList pstar (ρ*(1/100)/2) βlist lamList ζList Δ</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     hγList hpstar hp hβlist hlamList hζList hP herror hpaths hneighbour hmargin hlistBudget hΔζ _ z.2</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (fun u=&gt;hstarts u false) βfinal η hβfinal.le hsub htrim</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hresidual:=first_vortex_prepared_protected_residual_completion P π Dnat vsize d (r+4) βQ εQ Q F hF θ lam eps δlocal δlocal αMatch bmatch ρ₀ ξ Δ alpha γ βfinal weight w z.1 _ z.2</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     hρ₀ hb hbsmall hαb hθδ hεδ hβfinal hβfinal1 hδ hδbound (by omega) hnβ hnδ hu</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   have hdecR : firstVortexPreparedProtectedResidualProofFin n = suppliedPrepareProtectedResidualFin n := Subsingleton.elim _ _</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   have hdecRK : firstVortexPreparedProtectedResidualProofFin K = suppliedPrepareProtectedResidualFin K := Subsingleton.elim _ _</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   try rw [hdecR] at hresidual</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   try rw [hdecRK] at hresidual</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   exact hresidual hext hPrepared</span>
+<span id="L95"><a href="#L95" class="ln">  95</a> end Oberwolfach</span></pre></html>

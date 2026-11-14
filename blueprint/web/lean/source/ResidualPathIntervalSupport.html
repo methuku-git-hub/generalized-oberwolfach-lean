@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ResidualPathIntervalSupport.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ResidualPathIntervalSupport.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResidualPathInterval</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The vertices of a walk interval are exactly those in its index range. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> variable {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem walk_interval_mem_support_iff {F:SimpleGraph V} {u v:V} (p:F.Walk u v)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (a b:ℕ) (hab:a≤b) (hb:b≤p.length) (x:V):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     x∈(walkInterval p a b hab).support ↔</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       ∃ j,a≤j ∧ j≤b ∧ p.getVert j=x := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   constructor</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   · intro hx</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     obtain ⟨k,hk,hkle⟩:=SimpleGraph.Walk.mem_support_iff_exists_getVert.mp hx</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     have hlen:=walk_interval_length p a b hab hb</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     have hkle&#x27;:k≤b-a := by omega</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     rw [walk_interval_getVert p a b hab k hkle&#x27;] at hk</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     exact ⟨a+k,by omega,by omega,hk⟩</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   · rintro ⟨j,haj,hjb,hjx⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     apply SimpleGraph.Walk.mem_support_iff_exists_getVert.mpr</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     refine ⟨j-a,?_,?_⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     · rw [walk_interval_getVert p a b hab (j-a) (by omega)]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       simpa [Nat.add_sub_of_le haj] using hjx</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     · rw [walk_interval_length p a b hab hb]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       omega</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem path_interval_endpoints_ne {F:SimpleGraph V} {u v:V} (p:F.Walk u v)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hp:p.IsPath) (a b:ℕ) (hab:a&lt;b) (hb:b≤p.length):</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     p.getVert a≠p.getVert b := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro heq</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have h:=hp.getVert_injOn (by simp;omega) (by simpa using hb) heq</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   omega</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> theorem disjoint_path_intervals {F:SimpleGraph V} {u v:V} (p:F.Walk u v)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hp:p.IsPath) (a b a&#x27; b&#x27;:ℕ) (hab:a≤b) (ha&#x27;b&#x27;:a&#x27;≤b&#x27;)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hb&#x27;:b&#x27;≤p.length) (hsep:b&lt;a&#x27;):</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     Disjoint (walkInterval p a b hab).support.toFinset</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (walkInterval p a&#x27; b&#x27; ha&#x27;b&#x27;).support.toFinset := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   intro x hx hx&#x27;</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hb:b≤p.length:=by omega</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   obtain ⟨i,hai,hib,hix⟩:=(walk_interval_mem_support_iff p a b hab hb x).mp (List.mem_toFinset.mp hx)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   obtain ⟨j,haj,hjb&#x27;,hjx⟩:=(walk_interval_mem_support_iff p a&#x27; b&#x27; ha&#x27;b&#x27; hb&#x27; x).mp (List.mem_toFinset.mp hx&#x27;)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have heq:i=j := hp.getVert_injOn (by simp;omega) (by simp;omega) (hix.trans hjx.symm)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   omega</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> end Oberwolfach</span></pre></html>

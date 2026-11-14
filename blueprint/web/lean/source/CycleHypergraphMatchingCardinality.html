@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CycleHypergraphMatchingCardinality.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CycleHypergraphMatchingCardinality.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.UniformWeightedHypergraphMatching</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The weighted matching theorem applied to a cycle hypergraph with its</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> vertices taken to be the vertices of the underlying graph. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 4000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem cycle_hypergraph_matching_cardinality</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (k B:ℕ) (hk:2≤k) (K a γ:ℝ) (hK:0&lt;K) (ha:0&lt;a) (hγ:0&lt;γ):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ n₀:ℕ,∀ n D:ℕ,n₀≤n→n≤D→D≤n^B→</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∀ (V E:Type) [Fintype V] [Fintype E] [DecidableEq V],</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∀ (R:E→Finset V),</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     Fintype.card V≤n^B→</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (∀ e,(R e).card=k)→(∀ v,0&lt;Fintype.card (HypergraphEdgesAt R v))→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∀ v,Fintype.card (HypergraphEdgesAt R v)≤D)→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ v z,v≠z→((Finset.univ.filter (fun e=&gt;v∈R e ∧ z∈R e)).card:ℝ)≤K*D/n)→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     a*D*n≤(Fintype.card E:ℝ)→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ M:Finset E,(∀ e∈M,∀ f∈M,e≠f→Disjoint (R e) (R f)) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (1-γ)*(Fintype.card E:ℝ)/D≤M.card := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   obtain ⟨N,hN⟩:=uniform_weighted_hypergraph_matching k B hk K a γ hK ha hγ</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   refine ⟨max N 1,?_⟩</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   intro n D hn hnD hDB V E _ _ _ R hV hsize hpositive hdegree hcodeg htotal</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hnpos:0&lt;n:=by omega</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hpow:1≤n^B:=Nat.succ_le_iff.mpr (pow_pos hnpos B)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   obtain ⟨M,hM,hweight⟩:=hN n D ((le_max_left N 1).trans hn) hnD hDB V E Unit R</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (fun _ _=&gt;1) (fun _=&gt;1) (fun _=&gt;(Fintype.card E:ℝ)) hV (by simpa using hpow)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     hsize hpositive hdegree hcodeg (by intro;norm_num) (by intro;norm_num)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (by intro; simp) (by intro;simpa using htotal)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   refine ⟨M,hM,?_⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have h:=hweight ()</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   simp only [Finset.sum_const_zero,Finset.sum_const,Finset.card_univ, nsmul_eq_mul, mul_one] at h</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hlo:-(γ*(Fintype.card E:ℝ)/D)&lt;(M.card:ℝ)-(Fintype.card E:ℝ)/D:=(abs_lt.mp h).1</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hDpos:(0:ℝ)&lt;D:=by exact_mod_cast (lt_of_lt_of_le hnpos hnD)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hdiv:((1-γ)*(Fintype.card E:ℝ)/D)=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>      (Fintype.card E:ℝ)/D-γ*(Fintype.card E:ℝ)/D:=by ring</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   rw [hdiv];linarith</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

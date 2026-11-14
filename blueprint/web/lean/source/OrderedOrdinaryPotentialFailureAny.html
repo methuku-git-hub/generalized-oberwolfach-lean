@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrderedOrdinaryPotentialFailureAny.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrderedOrdinaryPotentialFailureAny.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrientationMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The union-bound budget may be chosen after fixing the finite number of</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> cycle types and colours, and before the order threshold. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 4000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem ordered_ordinary_potential_failure_small_any (d m:ℕ) (B t ε:ℝ) (hB:0&lt;B) (ht:0&lt;t) (hε:0&lt;ε):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∃ N:ℕ,∀ n:ℕ,N≤n→</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       8*(n:ℝ)^2*Real.exp (-2*t^2/((8*(d:ℝ)+6)^2*(((m:ℝ)+1)^3*B/n)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B)))≤ε:=by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   let K:ℝ:=(8*(d:ℝ)+6)^2*(((m:ℝ)+1)^3*B)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hK:0&lt;K:=by dsimp [K];positivity</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   let c:ℝ:=2*t^2/K</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hc:0&lt;c:=by dsimp [c];positivity</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   obtain ⟨N,hN⟩:=eventually_stretchedExp_le_inv_pow (8:ℝ) 2 (c:=c) (p:=1) hc (by norm_num) 1</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   obtain ⟨M,hM⟩:=exists_nat_gt (1/ε)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   refine ⟨max N (max M 1),?_⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   intro n hn</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hnM:M≤n:=le_trans (le_max_left _ _) (le_trans (le_max_right _ _) hn)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hn1:1≤n:=le_trans (le_max_right _ _) (le_trans (le_max_right _ _) hn)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hnpos:(0:ℝ)&lt;n:=by exact_mod_cast (show 0&lt;n by omega)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hnM&#x27;:(M:ℝ)≤n:=by exact_mod_cast hnM</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hb:=hN n (le_trans (le_max_left _ _) hn)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   simp only [Real.rpow_one,Real.rpow_two,pow_one] at hb</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have harg:-2*t^2/((8*(d:ℝ)+6)^2*(((m:ℝ)+1)^3*B/n)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B)) = -c*(n:ℝ):=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     dsimp [c,K]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     field_simp</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   rw [harg]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hsmall:(1:ℝ)/(n:ℝ)≤ε:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     apply (div_le_iff₀ hnpos).2</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hh:1/ε&lt;(n:ℝ):=hM.trans_le hnM&#x27;</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hh&#x27;:1&lt;ε*(n:ℝ):=by simpa [mul_comm] using (div_lt_iff₀ hε).mp hh</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     linarith</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   exact hb.trans hsmall</span>
+<span id="L38"><a href="#L38" class="ln">  38</a> end Oberwolfach</span></pre></html>

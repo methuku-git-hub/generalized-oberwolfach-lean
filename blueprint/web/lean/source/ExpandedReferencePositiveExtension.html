@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExpandedReferencePositiveExtension.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExpandedReferencePositiveExtension.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteSigmaReferenceExtension</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedExpandedRawLaw</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The retained reference theorem&#x27;s arbitrary high-probability extra event</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> can carry the richer approximate sample without assuming independent layers. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem raw_expanded_reference_positive_extension</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (p k p₂ k₂ u:ℝ) (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (d:ℕ) (hd:2≤d) (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (s:U→Color→ℝ) (hs:∀ u j,0≤s u j) (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (F:RawMarkedOutcome V U Γ Color→Type) [∀ a,Fintype (F a)] (ν:∀ a,FiniteLaw (F a))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (Ref:(Σ a,F a)→Prop)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (Good:(Σ ω:(∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e),</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         F (fun e=&gt;rawExpandedMarkedCollapse e (ω e)))→Prop):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let f:=fun (ω:∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e) e=&gt;rawExpandedMarkedCollapse e (ω e)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let law:=μ.sigma (fun ω=&gt;ν (f ω));</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (99:ℝ)/100≤law.probability Good→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀ E:(Σ a,F a)→Prop,(99:ℝ)/100≤((FiniteLaw.pi (rawMarkedWheelLaw (V:=V) p k hp hk (by linarith) d hd q hq hQ s hs hS)).sigma ν).probability E→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       ∃ y,Ref y ∧ E y)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∃ z,Ref ⟨f z.1,z.2⟩ ∧ Good z ∧ 0&lt;law.mass z:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   intro μ f law hGood hRef</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hmap:μ.map f=FiniteLaw.pi (rawMarkedWheelLaw (V:=V) p k hp hk (by linarith) d hd q hq hQ s hs hS):=</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     raw_expanded_marked_wheel_law_projection p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have href&#x27;:∀ E:(Σ a,F a)→Prop,(99:ℝ)/100≤((μ.map f).sigma ν).probability E→∃ y,Ref y ∧ E y:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     intro E hE</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     apply hRef E</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     simpa only [hmap] using hE</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   exact finiteLaw_sigma_reference_extension μ f ν Good Ref (99/100) hGood href&#x27;</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> end Oberwolfach</span></pre></html>

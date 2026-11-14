@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TriangleTransformerVertices.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TriangleTransformerVertices.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SeparatedCandidatePairs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! All triangular edge-stage vertices are chosen from the supplied</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> four-neighbour counts. The rim vertices are chosen first. Each subsequent</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> pair uses those fixed vertices, and its second choice also uses its first</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> vertex. This is the exposure order used in the manuscript. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 512</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 10000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E J:Type} [Fintype V] [Fintype U] [Fintype E] [Fintype J]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   [DecidableEq V] [DecidableEq U] [DecidableEq E] [DecidableEq J]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem triangular_transformer_vertices (Q F:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (A W R:Finset V) (x y x&#x27; y&#x27;:E→V) (v v&#x27;:J→V) (u u&#x27;:J→U) (e₀ e₁:J→E)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (d c:ℝ) (hd:0≤d) (hF:∀ w,(F.degree w:ℝ)≤d)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hfour:∀ w x y z,c≤((A.filter (fun a=&gt;Q.Adj w a∧Q.Adj x a∧Q.Adj y a∧Q.Adj z a)).card:ℝ))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hspfour:∀ j w x y z,c≤((A.filter (fun a=&gt;H a (u j)∧H a (u&#x27; j)∧Q.Adj w a∧Q.Adj x a∧Q.Adj y a∧Q.Adj z a)).card:ℝ))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hbudget:W.card+((R.card:ℝ)+Fintype.card E+2*Fintype.card J+1)*(d+1)&lt;c):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ (p:E↪V) (a b:J→V),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ e,p e∈A∧p e∉W∧p e∉R∧∀ w∈R,¬F.Adj (p e) w)∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ e,Q.Adj (x e) (p e)∧Q.Adj (y e) (p e)∧Q.Adj (x&#x27; e) (p e)∧Q.Adj (y&#x27; e) (p e))∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ j,a j∈A∧b j∈A∧Q.Adj (v j) (a j)∧Q.Adj (v&#x27; j) (a j)∧Q.Adj (p (e₀ j)) (a j)∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         Q.Adj (v j) (b j)∧Q.Adj (v&#x27; j) (b j)∧Q.Adj (p (e₁ j)) (b j)∧Q.Adj (a j) (b j)∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         H (a j) (u j)∧H (a j) (u&#x27; j)∧H (b j) (u j)∧H (b j) (u&#x27; j))∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ j,∀ w∈({a j,b j}:Finset V),w∉W∧w∉R∧(∀ e,w≠p e)∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         (∀ z∈R,¬F.Adj w z)∧∀ e,¬F.Adj w (p e))∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ i j,i≠j→Disjoint ({a i,b i}:Finset V) {a j,b j})∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i j,¬F.Adj (p i) (p j))∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ i j,∀ w∈({a i,b i}:Finset V),∀ z∈({a j,b j}:Finset V),¬F.Adj w z):=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let C:E→Finset V:=fun e=&gt;A.filter (fun w=&gt;Q.Adj (x e) w∧Q.Adj (y e) w∧Q.Adj (x&#x27; e) w∧Q.Adj (y&#x27; e) w)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hc:∀ e,c≤((C e).card:ℝ):=fun e=&gt;hfour (x e) (y e) (x&#x27; e) (y&#x27; e)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hsmall:W.card+((R.card:ℝ)+Fintype.card E)*(d+1)&lt;c:=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have ht:0≤(2*(Fintype.card J:ℝ)+1)*(d+1):=by positivity</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     nlinarith only [hbudget,ht]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨p,hp,hpp⟩:=separated_candidate_vertices F C W R d c hd hF hc hsmall</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let R&#x27;:=R∪Finset.univ.image p</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hR&#x27;:(R&#x27;.card:ℝ)≤R.card+Fintype.card E:=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hh:=Finset.card_union_le R (Finset.univ.image p)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     rw [Finset.card_image_of_injective _ p.injective,Finset.card_univ] at hh</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     exact_mod_cast hh</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let C₀:J→Finset V:=fun j=&gt;A.filter (fun w=&gt;H w (u j)∧H w (u&#x27; j)∧Q.Adj (v j) w∧Q.Adj (v&#x27; j) w∧Q.Adj (p (e₀ j)) w)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let C₁:J→V→Finset V:=fun j a=&gt;A.filter (fun w=&gt;H w (u j)∧H w (u&#x27; j)∧Q.Adj (v j) w∧Q.Adj (v&#x27; j) w∧Q.Adj (p (e₁ j)) w∧Q.Adj a w)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hC₀ (j:J):c≤((C₀ j).card:ℝ):=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     simpa only [C₀,and_self] using hspfour j (v j) (v&#x27; j) (p (e₀ j)) (p (e₀ j))</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hC₁ (j:J) (a:V) (_ha:a∈C₀ j):c≤((C₁ j a).card:ℝ):=</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     hspfour j (v j) (v&#x27; j) (p (e₁ j)) a</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hb:W.card+((R&#x27;.card:ℝ)+2*Fintype.card J+1)*(d+1)&lt;c:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have hh:=mul_le_mul_of_nonneg_right hR&#x27; (show 0≤d+1 by linarith)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     nlinarith only [hbudget,hh]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   obtain ⟨a,b,hab,havoid,hdis,hff⟩:=separated_candidate_pairs F C₀ C₁ W R&#x27; d c hd hF hC₀ hC₁ hb</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   refine ⟨p,a,b,?_,?_,?_,?_,hdis,hpp,hff⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   · intro e;exact ⟨(Finset.mem_filter.mp (hp e).1).1,(hp e).2⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   · intro e;exact (Finset.mem_filter.mp (hp e).1).2</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   · intro j</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have ha:=Finset.mem_filter.mp (hab j).1</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hb:=Finset.mem_filter.mp (hab j).2.1</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact ⟨ha.1,hb.1,ha.2.2.2.1,ha.2.2.2.2.1,ha.2.2.2.2.2,</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       hb.2.2.2.1,hb.2.2.2.2.1,hb.2.2.2.2.2.1,hb.2.2.2.2.2.2,ha.2.1,ha.2.2.1,hb.2.1,hb.2.2.1⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   · intro j w hw</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     have hh:=havoid j w hw</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     refine ⟨hh.1,fun h=&gt;hh.2.1 (Finset.mem_union_left _ h),?_,?_,?_⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     · intro e he</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       exact hh.2.1 (Finset.mem_union_right _ (Finset.mem_image.mpr ⟨e,Finset.mem_univ _,he.symm⟩))</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     · intro z hz;exact hh.2.2 z (Finset.mem_union_left _ hz)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · intro e;exact hh.2.2 (p e) (Finset.mem_union_right _ (Finset.mem_image.mpr ⟨e,Finset.mem_univ _,rfl⟩))</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> </span>
+<span id="L71"><a href="#L71" class="ln">  71</a> end Oberwolfach</span></pre></html>

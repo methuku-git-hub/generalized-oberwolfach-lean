@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualResidualFamilyToDecomposition.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualResidualFamilyToDecomposition.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResidualActualEdgePartition</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.TwoFactorEmbeddingDecomposition</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The actual residual-family output gives an exact decomposition once its</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> old and new physical edges lie in the regular host and the completed factors</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> are pairwise edge-disjoint. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem actual_residual_family_gives_decomposition</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {n D:ℕ} {K J:Type} [DecidableEq K] [DecidableEq J]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hEven:Even D) (H:SimpleGraph (Fin n)) (hH:H.IsRegularOfDegree D)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (F:Fin (D/2)→SimpleGraph (Fin n)) (hF:∀i,(F i).IsRegularOfDegree 2)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (a:∀i,ActualResidualData (K:=K) (J:=J) (F i))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hCycle:∀i,(a i).t.biUnion (fun j=&gt;((a i).C j).support.toFinset)⊆(a i).Cembed)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (ψ f:Fin (D/2)→Fin n→Fin n)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (Φ:∀i,{x // x∈(a i).remaining}→Fin n)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hinj:∀i,Function.Injective (f i))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hold:∀i x,x∈(a i).oldDomain→f i x=ψ i x)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hrem:∀i (x:{x // x∈(a i).remaining}),f i x.val=Φ i x)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (Pack:Finset (Sym2 (Fin n)))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hOldPack:∀i,(a i).deletedEdges.image (Sym2.map (ψ i))⊆Pack)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hPackHost:Pack⊆H.edgeFinset)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hNewHost:∀i,(((a i).graph.induce (↑(a i).remaining:Set (Fin n))).edgeFinset).image</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (Sym2.map (Φ i))⊆H.edgeFinset)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hdis:PairwisePhysicalDisjoint (fun i=&gt;((F i).edgeFinset).image (Sym2.map (f i)))) :</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     HasFactorDecomposition H F := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   apply even_regular_two_factor_embeddings_give_decomposition hEven H hH F hF f hinj ?_ hdis</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro i</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   rw [(a i).glued_factor_edge_images (hF i) (hCycle i) (ψ i) (f i) (Φ i) (hold i) (hrem i)]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   exact Finset.union_subset ((hOldPack i).trans hPackHost) (hNewHost i)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> end Oberwolfach</span></pre></html>

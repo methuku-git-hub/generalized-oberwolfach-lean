@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SeparatedCandidateVertices.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SeparatedCandidateVertices.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteConflictSeparatedChoices</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Choose actual vertices from specified candidate sets. The exclusion</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> cost is the size of the forbidden set plus the vertices and conflict</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> neighbours of the prescribed roots; no probability factor is used. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 5000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V I:Type} [Fintype V] [Fintype I] [DecidableEq V] [DecidableEq I]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem candidate_vertex_avoiding (F:SimpleGraph V) (C W R:Finset V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (d c:ℝ) (hF:∀ v,(F.degree v:ℝ)≤d) (hC:c≤(C.card:ℝ))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hbudget:W.card+(R.card:ℝ)*(d+1)&lt;c):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∃ v∈C,v∉W∧v∉R∧∀ w∈R,¬F.Adj v w:=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   let D:=W∪(R∪R.biUnion (fun v=&gt;F.neighborFinset v))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hR:=forbidden_used_neighbours_card F R d hF</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hu:(D.card:ℝ)≤W.card+(R∪R.biUnion (fun v=&gt;F.neighborFinset v)).card:=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     exact_mod_cast Finset.card_union_le W (R∪R.biUnion (fun v=&gt;F.neighborFinset v))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hlt:D.card&lt;C.card:=by exact_mod_cast (show (D.card:ℝ)&lt;C.card by linarith only [hR,hu,hC,hbudget])</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   obtain ⟨v,hv,hvD⟩:=Finset.exists_mem_notMem_of_card_lt_card hlt</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hout:v∉W∧v∉R∧v∉R.biUnion (fun v=&gt;F.neighborFinset v):=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     simpa only [D,Finset.mem_union,not_or] using hvD</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   refine ⟨v,hv,hout.1,hout.2.1,?_⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   intro w hw hadj</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   exact hout.2.2 (Finset.mem_biUnion.mpr ⟨w,hw,(F.mem_neighborFinset w v).mpr hadj.symm⟩)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem separated_candidate_vertices (F:SimpleGraph V) (C:I→Finset V) (W R:Finset V)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (d c:ℝ) (hd:0≤d) (hF:∀ v,(F.degree v:ℝ)≤d) (hC:∀ i,c≤((C i).card:ℝ))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hbudget:W.card+((R.card:ℝ)+Fintype.card I)*(d+1)&lt;c):</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∃ p:I↪V,(∀ i,p i∈C i∧p i∉W∧p i∉R∧∀ v∈R,¬F.Adj (p i) v)∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       ∀ i j,¬F.Adj (p i) (p j):=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let Good:I→V→Prop:=fun i v=&gt;v∈C i∧v∉R∧∀ w∈R,¬F.Adj v w</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hc:∀ i,∀ B:Finset V,(B.card:ℝ)≤W.card+Fintype.card I*1*(d+1)→</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       ∃ v,Good i v∧({v}:Finset V).card≤1∧Disjoint ({v}:Finset V) B:=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     intro i B hB</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     obtain ⟨v,hv,hvB,hvR,hvF⟩:=candidate_vertex_avoiding F (C i) B R d c hF (hC i)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (by linarith only [hB,hbudget])</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     exact ⟨v,⟨hv,hvR,hvF⟩,by simp,by simpa using hvB⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   obtain ⟨p,hp,hsep⟩:=finite_conflict_separated_choices (fun v:V=&gt;({v}:Finset V)) Good W 1 F d hd hF (by simpa only [Nat.cast_one] using hc)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hinj:Function.Injective p:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     intro i j he</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     by_contra hij</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hh:=(hsep i j hij).1</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     simpa only [he,Finset.disjoint_singleton_left,Finset.mem_singleton,not_true_eq_false] using hh</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   refine ⟨⟨p,hinj⟩,?_,?_⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   · intro i</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     exact ⟨(hp i).1.1,by simpa using (hp i).2.2,(hp i).1.2.1,(hp i).1.2.2⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · intro i j</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     by_cases he:i=j</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     · subst j;exact F.loopless.irrefl _</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     · exact (hsep i j he).2 _ (by simp) _ (by simp)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> </span>
+<span id="L56"><a href="#L56" class="ln">  56</a> end Oberwolfach</span></pre></html>

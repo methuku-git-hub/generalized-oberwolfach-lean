@@ -1,0 +1,78 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CycleEdgeEnumeration.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CycleEdgeEnumeration.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CycleCopies</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Each edge of an embedded cycle is indexed exactly once by a cyclic step. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> def cycleNext {r : ℕ} (i : Fin r) : Fin r :=</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   ⟨(i.val + 1) % r, Nat.mod_lt _ (Nat.zero_lt_of_lt i.isLt)⟩</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem cycleNext_val {r : ℕ} (i : Fin r) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (cycleNext i).val = if i.val + 1 &lt; r then i.val + 1 else 0 := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   dsimp only [cycleNext]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   split_ifs with h</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   · exact Nat.mod_eq_of_lt h</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   · have hi : i.val + 1 = r := by omega</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     rw [hi, Nat.mod_self]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem cycleNext_two_ne {r : ℕ} (hr : 3 ≤ r) (i : Fin r) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     cycleNext (cycleNext i) ≠ i := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro heq</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hv := congrArg Fin.val heq</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   rw [cycleNext_val, cycleNext_val] at hv</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   split_ifs at hv &lt;;&gt; omega</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem cycle_edge_injective {V : Type*} {r : ℕ} (hr : 3 ≤ r)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (f : Fin r ↪ V) : Function.Injective (fun i =&gt; s(f i, f (cycleNext i))) := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro i j hij</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   rcases Sym2.eq_iff.mp hij with h | h</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   · exact f.injective h.1</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   · have hi := f.injective h.1</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hj := f.injective h.2</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     exfalso</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     apply cycleNext_two_ne hr i</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     rw [hj, ← hi]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem cycle_copy_edgeFinset {n r : ℕ} {H : SimpleGraph (Fin n)}</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (_hr : 3 ≤ r) (f : Fin r ↪ Fin n)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hf : ∀ u v, H.Adj u v ↔ ∃ i j : Fin r, f i = u ∧ f j = v ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       ((i.val + 1) % r = j.val ∨ (j.val + 1) % r = i.val)) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     H.edgeFinset = Finset.univ.image (fun i =&gt; s(f i, f (cycleNext i))) := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   ext e</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   induction e using Sym2.ind with</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   | _ u v =&gt;</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     rw [SimpleGraph.mem_edgeFinset, SimpleGraph.mem_edgeSet]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     simp only [Finset.mem_image, Finset.mem_univ, true_and]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     constructor</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     · intro huv</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       obtain ⟨i, j, hi, hj, hstep | hstep⟩ := (hf u v).mp huv</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       · have hnext : cycleNext i = j := Fin.ext hstep</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         exact ⟨i, by rw [hnext, hi, hj]⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       · have hnext : cycleNext j = i := Fin.ext hstep</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         exact ⟨j, by rw [hnext, hi, hj]; exact Sym2.eq_swap⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     · rintro ⟨i, hi⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       have hedge : H.Adj (f i) (f (cycleNext i)) :=</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         (hf _ _).mpr ⟨i, cycleNext i, rfl, rfl, Or.inl rfl⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       have hmem : s(f i, f (cycleNext i)) ∈ H.edgeFinset :=</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         SimpleGraph.mem_edgeFinset.mpr hedge</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       rw [hi] at hmem</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       exact SimpleGraph.mem_edgeFinset.mp hmem</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> theorem cycle_copy_filtered_edge_count {n r : ℕ} {H : SimpleGraph (Fin n)}</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (hr : 3 ≤ r) (f : Fin r ↪ Fin n)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (hf : ∀ u v, H.Adj u v ↔ ∃ i j : Fin r, f i = u ∧ f j = v ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       ((i.val + 1) % r = j.val ∨ (j.val + 1) % r = i.val))</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (P : Sym2 (Fin n) → Prop) [DecidablePred P] :</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (H.edgeFinset.filter P).card =</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       ∑ i : Fin r, if P s(f i, f (cycleNext i)) then 1 else 0 := by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   rw [cycle_copy_edgeFinset hr f hf, Finset.card_filter, Finset.sum_image]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   exact fun i hi j hj hij =&gt; cycle_edge_injective hr f hij</span>
+<span id="L74"><a href="#L74" class="ln">  74</a> </span>
+<span id="L75"><a href="#L75" class="ln">  75</a> end Oberwolfach</span></pre></html>

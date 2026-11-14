@@ -1,0 +1,87 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualMatchedPieceDirectedArcs.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualMatchedPieceDirectedArcs.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ActualOldPieceTargetMatching</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Matching the original old pieces transfers every directed target arc,</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> including the first arc of each cyclic component, back to its source arc. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 12000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem actual_matched_piece_directed_arcs</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {X V K J:Type} [Fintype X] [DecidableEq X] [DecidableEq V] [DecidableEq K] [DecidableEq J]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {G:SimpleGraph X} (data:ActualResidualData (K:=K) (J:=J) G)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (H:SimpleGraph V) (u v:actualOldPieceIndex data→V) (q:∀z,H.Walk (u z) (v z))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hlen:∀z,(q z).length=(actualOldPieceWalk data z).length)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (R:V→V→Prop) (hdir:∀z k,k&lt;(q z).length→R ((q z).getVert k) ((q z).getVert (k+1)))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hclose:∀j:{j // j∈data.t},R (v (.inl j)) (u (.inl j)))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (ψ:X→V):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let A:=Finset.univ.biUnion (fun z:actualOldPieceIndex data=&gt;(actualOldPieceWalk data z).support.toFinset)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀(f:{x // x∈A}↪V),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀x (hx:x∈A),ψ x=f ⟨x,hx⟩)→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀z (k:Fin ((actualOldPieceWalk data z).length+1)),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       f ⟨(actualOldPieceWalk data z).getVert k.val,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         Finset.mem_biUnion.mpr ⟨z,Finset.mem_univ _,List.mem_toFinset.mpr ((actualOldPieceWalk data z).getVert_mem_support _)⟩⟩=</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (q z).getVert k.val)→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀z k,k&lt;(actualOldPieceWalk data z).length→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       R (ψ ((actualOldPieceWalk data z).getVert k)) (ψ ((actualOldPieceWalk data z).getVert (k+1)))) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀j:{j // j∈data.t},R (ψ (data.root j.val)) (ψ (data.C j.val).snd)):=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   intro A f hψ hf</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hmap:∀z k,k≤(actualOldPieceWalk data z).length→ψ ((actualOldPieceWalk data z).getVert k)=(q z).getVert k:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     intro z k hk</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hx:(actualOldPieceWalk data z).getVert k∈A:=</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       Finset.mem_biUnion.mpr ⟨z,Finset.mem_univ _,List.mem_toFinset.mpr ((actualOldPieceWalk data z).getVert_mem_support _)⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     rw [hψ _ hx]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     exact hf z ⟨k,by omega⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   constructor</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · intro z k hk</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     rw [hmap z k (by omega),hmap z (k+1) (by omega)]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     apply hdir</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rw [hlen]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     exact hk</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   · intro j</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let z:actualOldPieceIndex data:=.inl j</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hfirst:ψ (data.C j.val).snd=u z:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       have hh:=hmap z 0 (Nat.zero_le _)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       simpa only [z,actualOldPieceWalk,actualOldPieceStart,SimpleGraph.Walk.getVert_zero] using hh</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hlast:ψ (data.root j.val)=v z:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       have hh:=hmap z (actualOldPieceWalk data z).length (le_refl _)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       have hsource:(actualOldPieceWalk data z).getVert (actualOldPieceWalk data z).length=data.root j.val:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         exact (data.C j.val).tail.getVert_length</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       have htarget:(q z).getVert (actualOldPieceWalk data z).length=v z:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         rw [←hlen z]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         exact (q z).getVert_length</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       rw [hsource,htarget] at hh</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       exact hh</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     rw [hfirst,hlast]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     exact hclose j</span>
+<span id="L58"><a href="#L58" class="ln">  58</a> end Oberwolfach</span>
+<span id="L59"><a href="#L59" class="ln">  59</a> </span>
+<span id="L60"><a href="#L60" class="ln">  60</a> namespace Oberwolfach</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> </span>
+<span id="L63"><a href="#L63" class="ln">  63</a> theorem actual_matched_cycle_directed_arcs</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     {X V K J:Type} [Fintype X] [DecidableEq X] [DecidableEq V] [DecidableEq K] [DecidableEq J]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     {G:SimpleGraph X} (data:ActualResidualData (K:=K) (J:=J) G) (ψ:X→V) (R:V→V→Prop)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (hpieces:∀z k,k&lt;(actualOldPieceWalk data z).length→</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       R (ψ ((actualOldPieceWalk data z).getVert k)) (ψ ((actualOldPieceWalk data z).getVert (k+1))))</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (hclose:∀j:{j // j∈data.t},R (ψ (data.root j.val)) (ψ (data.C j.val).snd)):</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     ∀j∈data.t,∀k&lt;(data.C j).length,R (ψ ((data.C j).getVert k)) (ψ ((data.C j).getVert (k+1))):=by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   intro j hj k hk</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   let q:{j // j∈data.t}:=⟨j,hj⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   by_cases hk0:k=0</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   · subst k</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     have hsnd:(data.C j).getVert 1=(data.C j).snd:=by</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       simpa only [SimpleGraph.Walk.getVert_zero] using (SimpleGraph.Walk.getVert_tail (n:=0) (data.C j)).symm</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     simpa only [SimpleGraph.Walk.getVert_zero,hsnd] using hclose q</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   · have htail:(data.C j).tail.length+1=(data.C j).length:=(data.C j).length_tail_add_one (data.hcycle j hj).not_nil</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hh:=hpieces (.inl q) (k-1) (by change k-1&lt;(data.C j).tail.length;omega)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     change R (ψ ((data.C j).tail.getVert (k-1))) (ψ ((data.C j).tail.getVert ((k-1)+1))) at hh</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     simp only [SimpleGraph.Walk.getVert_tail] at hh</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     have h₁:k-1+1=k:=by omega</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     have h₂:k-1+1+1=k+1:=by omega</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     simpa only [h₁,h₂] using hh</span>
+<span id="L84"><a href="#L84" class="ln">  84</a> end Oberwolfach</span></pre></html>

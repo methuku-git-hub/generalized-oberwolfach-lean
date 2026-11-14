@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedUniformFiniteFamilyReferenceIterationDensities.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedUniformFiniteFamilyReferenceIterationDensities.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedUniformReferenceFiniteIterationDensities</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedUniformReferenceFiniteIteration</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedFiniteReferenceChain</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The actual finite cover-down iteration needs records only on its finite</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> prefix. No assumption about unused vortex levels is introduced. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option synthInstance.maxSize 32768</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 30000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem marked_uniform_finite_family_reference_iteration_uniform_densities (gamma pA0:ℝ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hg:0&lt; gamma) (hg1:gamma≤   1) (hpA0:0&lt; pA0) (hpA01:pA0≤   1/2):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃ c₀:ℕ,∀ r:ℕ,2≤r→c₀≤r+5→∀ rho₀ omega₀ t₀ p0 betaA aLoA BA:ℝ,</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     0&lt;rho₀ → rho₀≤1 → 0&lt;omega₀ → 0&lt;t₀ → t₀≤1 → 0&lt;p0 → p0≤1/2 → 0&lt;betaA → 0&lt;aLoA → 0&lt;BA →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ Kgeom:ℕ,0&lt; Kgeom∧   ∃ kappa0 ξ thetaDeep:ℝ,0&lt; kappa0∧   0&lt;ξ∧   0&lt; thetaDeep∧   ∀ kappa:ℝ,0&lt; kappa →            kappa≤   kappa0 →            </span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ alphaInner omegaInner:ℝ,0&lt; alphaInner →         0&lt; omegaInner →         omegaInner≤   1 →         </span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃ betaExt epsilonExt:ℝ,0&lt; betaExt∧   0&lt; epsilonExt∧   </span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ gammaMax:ℝ,0&lt;gammaMax ∧ ∀ gammaLoss iota β aLo B:ℝ,0&lt;gammaLoss → gammaLoss≤gammaMax →   0&lt; iota →        0&lt;β →        β≤   betaExt →        0&lt; aLo →        0≤   B →        </span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∃ η ηEnd ζ ζD pmax:ℝ,0&lt;η∧   0&lt;ηEnd∧   0&lt;ζ∧   0&lt;ζD∧   0&lt; pmax∧   pmax≤   1/8∧   </span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (p:ℝ) (hp:0&lt; p) (hp1:p≤   1),p≤   pmax →            ∃ θ:ℝ,0&lt;θ∧   </span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃ delta:ℝ,0&lt; delta∧   ∀ x:ℝ,0&lt; x →    x≤   delta →    </span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ sigmaMax:ℝ,0&lt;sigmaMax ∧ ∀ sigmaLoss:ℝ,0&lt;sigmaLoss → sigmaLoss≤sigmaMax →  ∀ omegaI hIcut deltaI:ℝ,0&lt; omegaI →    0&lt; hIcut →    0&lt; deltaI →    deltaI&lt;1/4 →    </span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∃ etaBal:ℝ,0&lt; etaBal∧   ∃ NI:ℕ,∀ d:ℕ,1≤   d →            ∃ N:ℕ,1≤   N∧   </span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀ rho omega t:ℝ,rho₀≤rho → rho≤1 → omega₀≤omega → omega≤1 → t₀≤t → (r+4:ℝ)*t≤1 →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     pA0≤rho*(r+4:ℝ)*t/2 → p0≤rho*(r+4:ℝ)*t/2 → p0≤rho*t/2 → p0≤t →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∀ (Gamma Color:Type) [Fintype Gamma] [Fintype Color],</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀ (count:ℕ) (hc:0&lt;count),</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∀ R:Fin count → MarkedReferenceLevelData Gamma Color r d N NI Kgeom gamma rho omega t p0 betaA aLoA BA</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       kappa ξ thetaDeep alphaInner omegaInner iota β aLo B η x omegaI hIcut deltaI etaBal,</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     letI : ∀ i,Fintype (R i).VP:=fun i=&gt;(R i).inst7</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     letI : ∀ i,Fintype (R i).UP:=fun i=&gt;(R i).inst8</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     letI : ∀ i,LinearOrder (R i).VP:=fun i=&gt;(R i).inst9</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     letI : ∀ i,DecidableEq (R i).UP:=fun i=&gt;(R i).inst10;</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∀ C:MarkedFiniteReferenceChain hc R,</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let levels:=markedFiniteLevels hc R</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     letI : ∀ i,Fintype (levels i).VP:=fun i=&gt;(levels i).inst7</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     letI : ∀ i,Fintype (levels i).UP:=fun i=&gt;(levels i).inst8</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     letI : ∀ i,LinearOrder (levels i).VP:=fun i=&gt;(levels i).inst9</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     letI : ∀ i,DecidableEq (levels i).UP:=fun i=&gt;(levels i).inst10;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let chain:=markedFiniteReferenceChainToChain hc R C;</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∀ D₀:MarkedReferenceDeletion (levels 0).PP (levels 0).πP d (levels 0).σBase,</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     D₀.Valid (levels 0).HBase (r+4) (levels 0).I (levels 0).J</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (gammaLoss*Fintype.card (levels 0).VP) (sigmaLoss*Fintype.card (levels 0).VP) →</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     let E₀:=MarkedSampleArc (levels 0).PP (levels 0).πP (3*d) (fun e=&gt;(levels 0).σBase (Sum.inl e)) false</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let K₀:=MarkedSampleArc (levels 0).PP (levels 0).πP (3*d) (fun e=&gt;(levels 0).σBase (Sum.inl e)) true</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     let R₀:=fun W:MarkedWheel (fun e:E₀=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:K₀=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (r+4) (levels 0).πP (3*d) ((levels 0).HBase false) ((levels 0).HBase true)=&gt;markedWheelPhysicalResources W</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     let B₀:=(D₀.remaining (levels 0).HBase).image (markedResourceEmbedding (chain.intoV 0).toEmbedding (chain.intoU 0));</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     ∃ L:Finset (Finset (levels 0).VP⊕((levels 0).VP×(levels 0).UP)),L⊆B₀ ∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       HasResourceDecomposition R₀ (B₀\L) ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       let last:=count-1</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       let E:=MarkedSampleArc (levels last).PP (levels last).πP (3*d) (fun e=&gt;(levels last).σBase (Sum.inl e)) false</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       let K:=MarkedSampleArc (levels last).PP (levels last).πP (3*d) (fun e=&gt;(levels last).σBase (Sum.inl e)) true</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       let S:=Finset.univ.filter (fun z:(levels last).VP×(levels last).UP=&gt;</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         (levels last).HBase false z.1 z.2∨(levels last).HBase true z.1 z.2)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       let Full:=markedFiniteResources (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:K=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (levels last).πP Finset.univ S;</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       L⊆((Full.filter (markedInnerResource (levels last).I (levels last).J)).image</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         (markedResourceEmbedding (chain.intoV last).toEmbedding (chain.intoU last))) ∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       MarkedReferenceTerminalRepresentation (levels last) (chain.intoV last).toEmbedding (chain.intoU last) L := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨c₀,hcover⟩ := marked_uniform_reference_finite_iteration_uniform_densities gamma pA0 hg hg1 hpA0 hpA01</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   refine ⟨c₀,?_⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   intro r hr hrc rho₀ omega₀ t₀ p0 betaA aLoA BA hrho₀ hrho₀1 ho₀ ht₀ ht₀1 hp0 hp01 hbA haA hBA</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   obtain ⟨Kgeom,hKgeom,kappa0,ξ,thetaDeep,hkappa0,hξ,hΘDeep,hcover⟩ :=</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     hcover r hr hrc rho₀ omega₀ t₀ p0 betaA aLoA BA hrho₀ hrho₀1 ho₀ ht₀ ht₀1 hp0 hp01 hbA haA hBA</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   refine ⟨Kgeom,hKgeom,kappa0,ξ,thetaDeep,hkappa0,hξ,hΘDeep,?_⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   intro kappa hkappa hkk alphaInner omegaInner hAlpha hOmega hOmega1</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨betaExt,epsilonExt,hBetaExt,hEpsilonExt,hcover⟩ := hcover kappa hkappa hkk alphaInner omegaInner hAlpha hOmega hOmega1</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   obtain ⟨gammaMax,hGammaMax,hcover⟩ := hcover</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   refine ⟨betaExt,epsilonExt,hBetaExt,hEpsilonExt,gammaMax,hGammaMax,?_⟩</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   intro gammaLoss iota β aLo B hGammaLoss hGammaBound hIota hβ hBetaSmall haLo hB</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   obtain ⟨η,ηEnd,ζ,ζD,pmax,hη,hηEnd,hζ,hζD,hpmax,hpmax8,hcover⟩ :=</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     hcover gammaLoss iota β aLo B hGammaLoss hGammaBound hIota hβ hBetaSmall haLo hB</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   refine ⟨η,ηEnd,ζ,ζD,pmax,hη,hηEnd,hζ,hζD,hpmax,hpmax8,?_⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   intro p hp hp1 hpp</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   obtain ⟨θ,hθ,delta,hdelta,hcover⟩ := hcover p hp hp1 hpp</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   refine ⟨θ,hθ,delta,hdelta,?_⟩</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   intro x hx hxdelta</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   obtain ⟨sigmaMax,hSigmaMax,hcover⟩ := hcover x hx hxdelta</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   refine ⟨sigmaMax,hSigmaMax,?_⟩</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   intro sigmaLoss hSigmaLoss hSigmaBound omegaI hIcut deltaI hoI hhI hdI hdIs</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   obtain ⟨etaBal,hetaBal,NI,hcover⟩ := hcover sigmaLoss hSigmaLoss hSigmaBound omegaI hIcut deltaI hoI hhI hdI hdIs</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   refine ⟨etaBal,hetaBal,NI,?_⟩</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   intro d hd</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   obtain ⟨NN,hNN,hcover⟩ := hcover d hd</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   refine ⟨NN,hNN,?_⟩</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   intro rho omega t hρ hrho1 hω ho1 htlo ht1 hPA0 hpr hpk hpt</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   intro Gamma Color _ _ count hc R C levels chain</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   letI : ∀ i,Fintype (R i).VP:=fun i=&gt;(R i).inst7</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   letI : ∀ i,Fintype (R i).UP:=fun i=&gt;(R i).inst8</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   letI : ∀ i,LinearOrder (R i).VP:=fun i=&gt;(R i).inst9</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   letI : ∀ i,DecidableEq (R i).UP:=fun i=&gt;(R i).inst10</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   letI : ∀ i,Fintype (levels i).VP:=fun i=&gt;(levels i).inst7</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   letI : ∀ i,Fintype (levels i).UP:=fun i=&gt;(levels i).inst8</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   letI : ∀ i,LinearOrder (levels i).VP:=fun i=&gt;(levels i).inst9</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   letI : ∀ i,DecidableEq (levels i).UP:=fun i=&gt;(levels i).inst10</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   exact hcover rho omega t hρ hrho1 hω ho1 htlo ht1 hPA0 hpr hpk hpt Gamma Color levels count hc chain</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a> end Oberwolfach</span></pre></html>

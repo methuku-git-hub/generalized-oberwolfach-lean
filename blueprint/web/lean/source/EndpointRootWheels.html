@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EndpointRootWheels.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EndpointRootWheels.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointTriangleCoordinates</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.EndpointHostGraph</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.TriangleSupportEdges</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.OrdinaryWheelResources</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Complete an actual endpoint triangle to a physical three-wheel by</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> adjoining the external root. The index becomes the hub; the two row</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> vertices and the root form the rim triangle. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option synthInstance.maxSize 512</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 2400000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> variable {V : Type} [Fintype V] [DecidableEq V]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem endpoint_triangle_root_wheel (Q H F : SimpleGraph V) (A B S T : Finset V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hAB : Disjoint A B) (hSA : S⊆A) (hTB : T⊆B) (x : V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hS : ∀ v∈S,Q.Adj x v ∧ ¬F.Adj x v) (hT : ∀ u∈T,H.Adj x u)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (C : EndpointTriangle (endpointHostGraph Q H A B) F S T) :</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∃ W : OrdinaryWheel Q F H.Adj 3,</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ordinaryWheelHub W=endpointTriangleIndex C ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (ordinaryWheelRim W).support.toFinset=insert x (C.val∩S) := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   obtain ⟨v,w,hvw,hrows⟩:=Finset.card_eq_two.mp C.property.2.1</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hv : v∈C.val ∧ v∈S:=Finset.mem_inter.mp (by rw [hrows];simp)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hw : w∈C.val ∧ w∈S:=Finset.mem_inter.mp (by rw [hrows];simp)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let u:=endpointTriangleIndex C</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hu : u∈C.val ∧ u∈T:=endpointTriangleIndex_mem C</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have huv : u≠v:=fun he=&gt;Finset.disjoint_left.mp hAB (he ▸ hSA hv.2) (hTB hu.2)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have huw : u≠w:=fun he=&gt;Finset.disjoint_left.mp hAB (he ▸ hSA hw.2) (hTB hu.2)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hvwQ : Q.Adj v w:=(endpointHostGraph_row Q H A B hAB (hSA hv.2) (hSA hw.2)).mp</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (C.property.2.2.2.1 v hv.1 w hw.1 hvw)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hvuH : H.Adj v u:=(endpointHostGraph_spoke Q H A B hAB (hSA hv.2) (hTB hu.2)).mp</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (C.property.2.2.2.1 v hv.1 u hu.1 huv.symm)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hwuH : H.Adj w u:=(endpointHostGraph_spoke Q H A B hAB (hSA hw.2) (hTB hu.2)).mp</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (C.property.2.2.2.1 w hw.1 u hu.1 huw.symm)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hxvQ:=(hS v hv.2).1</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hxwQ:=(hS w hw.2).1</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hxvF:=(hS v hv.2).2</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hxwF:=(hS w hw.2).2</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hvwF:=C.property.2.2.2.2 v hv.1 w hw.1</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   obtain ⟨D,hD⟩:=triangle_cycle_from_vertices_support Q x v w hxvQ.ne hxwQ.ne hvw hxvQ hxwQ hvwQ</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hsupp (z : V) : z∈D.val.val.support ↔ z=x ∨ z=v ∨ z=w := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     rw [←Set.mem_toFinset,hD];simp</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hH : ∀ z∈D.val.val.support,H.Adj z u := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     intro z hz</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     rcases (hsupp z).mp hz with rfl|rfl|rfl</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     · exact hT u hu.2</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     · exact hvuH</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     · exact hwuH</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hF : ∀ a∈D.val.val.support,∀ b∈D.val.val.support,¬F.Adj a b := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     intro a ha b hb</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hvxF : ¬F.Adj v x:=fun h=&gt;hxvF h.symm</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hwxF : ¬F.Adj w x:=fun h=&gt;hxwF h.symm</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hwvF : ¬F.Adj w v:=fun h=&gt;hvwF h.symm</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     rcases (hsupp a).mp ha with rfl|rfl|rfl &lt;;&gt;</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       rcases (hsupp b).mp hb with rfl|rfl|rfl &lt;;&gt; simp_all</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   refine ⟨⟨(D,u),hH,hF⟩,rfl,?_⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   change D.val.val.support.toFinset=insert x (C.val∩S)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   rw [hD,hrows]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> </span>
+<span id="L63"><a href="#L63" class="ln">  63</a> end Oberwolfach</span></pre></html>

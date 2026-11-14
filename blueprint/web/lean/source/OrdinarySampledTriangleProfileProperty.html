@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinarySampledTriangleProfileProperty.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinarySampledTriangleProfileProperty.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinarySampledTriangleProfileInputs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Explicit sampled two-hub weights and four-neighbour inputs for triangles. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 10000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option synthInstance.maxSize 16384</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance 100000] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def ordinarySampledTriangleProfileProperty</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (P F:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (σ:RawWheelOutcome V U Γ Color)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (pmin smin:ℝ) (j:Color) (β η a b:ℝ):Prop :=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     let Q:=rawWheelGraph P σ\F</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     let H:=rawWheelSpokes π d σ j</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let cmin:=pmin^3*(smin*smin)^2;</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ u u&#x27; v₁ v₂ v₃ v₄,β*Fintype.card V≤</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ((Finset.univ.filter (fun z=&gt;H z u∧H z u&#x27;∧Q.Adj v₁ z∧Q.Adj v₂ z∧Q.Adj v₃ z∧Q.Adj v₄ z)).card:ℝ)) ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ localWeight:∀ u u&#x27;:U,u≠u&#x27;→LocalOrdinaryCycle Q F (Finset.univ.filter (fun z=&gt;H z u∧H z u&#x27;)) 3→ℝ,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀ u u&#x27; (hne:u≠u&#x27;) C,a/(Fintype.card V:ℝ)^2≤localWeight u u&#x27; hne C ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         localWeight u u&#x27; hne C≤(4*b/cmin)/(Fintype.card V:ℝ)^2) ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ u u&#x27; (hne:u≠u&#x27;),∀ v∈Finset.univ.filter (fun z=&gt;H z u∧H z u&#x27;),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         |1-hypergraphWeightedDegree localOrdinaryVertices (localWeight u u&#x27; hne) v|≤η)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem ordinary_sampled_triangle_property_from_inputs</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (P F:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (σ:RawWheelOutcome V U Γ Color)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (p pmin smin:ℝ) (s:U→Color→ℝ) (j:Color) (α t L β η a b D:ℝ)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hn:0&lt;(Fintype.card V:ℝ)) (hα:0&lt;α) (hL:0≤L)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hP:∀ v,(3/4+α)*Fintype.card V≤(P.degree v:ℝ)) (hF:∀ v,(F.degree v:ℝ)≤L)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hpmin:0&lt;pmin) (hp:pmin≤p) (hp1:p≤1) (hsmin:0&lt;smin) (hsmin1:smin≤1)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hslo:∀ u,smin≤s u j) (hshi:∀ u,s u j≤1) (ha:0≤a) (hb:0≤b)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hDlo:(Fintype.card V:ℝ)/2≤D) (hDhi:D≤2*Fintype.card V)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (weight:OrdinaryCycle P 3→ℝ)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hwlo:∀ C,a/(Fintype.card V:ℝ)≤weight C)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hwhi:∀ C,weight C≤b/(Fintype.card V:ℝ))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hrows:RawOrdinaryRows P π d 4 Finset.univ p s j t σ)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hmargin:β*Fintype.card V≤(pmin^4*smin^4)*(4*(min α (1/4)))*Fintype.card V-t-4*L)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hdeg:∀ u u&#x27;,u≠u&#x27;→∀ v,ordinaryPairHubSpokes π d σ j u u&#x27; v ()→</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       |1-ordinaryPairHubLocalDegree P F π d σ j u u&#x27; weight D</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (p^3*(s u j*s u&#x27; j)^2) v|≤η):</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ordinarySampledTriangleProfileProperty P F π d σ pmin smin j β η a b := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   exact ordinary_sampled_triangle_profile_inputs P F π d σ p pmin smin s j α t L β η a b D</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     hn hα hL hP hF hpmin hp hp1 hsmin hsmin1 hslo hshi ha hb hDlo hDhi weight hwlo hwhi hrows hmargin hdeg</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> end Oberwolfach</span></pre></html>

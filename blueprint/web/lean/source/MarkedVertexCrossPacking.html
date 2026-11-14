@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVertexCrossPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVertexCrossPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedCrossFamilyPacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedAttachmentArcIsolation</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! A vertex wheel meets an earlier rim or spoke wheel only at its fixed</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> attachments. The assigned hub inequalities then exclude shared spokes,</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> while the absence of an attachment-to-attachment arc excludes shared rims. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 10000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U E K:Type} [Fintype V] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {tail head:E→V} {ktail khead:K→V} {π:Equiv.Perm V} {b:ℕ} {H₀ HK:V→U→Prop}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a>  theorem marked_vertex_cross_packing (n:ℕ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (C D:MarkedWheel tail head ktail khead (n+3) π b H₀ HK)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (R A:Finset V) (p:Fin (n+3)↪V) (v:V) (j:Bool)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hC:∀ i,C.1.val i∈R∪A) (hv:v∉R∪A)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hD:∀ i,D.1.val i=rootedCycleOrder (markedRootOrder (n+3) j) v p i)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hpR:∀ i,p i∉R)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hpA:∀ i,p i∈A→p i∈({p 0,p (Fin.last (n+2))}:Finset V))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hfirst:∀ i,C.1.val i=p 0→C.2.val≠D.2.val)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hlast:∀ i,C.1.val i=p (Fin.last (n+2))→C.2.val≠D.2.val):</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     Disjoint (markedWheelPhysicalResources C) (markedWheelPhysicalResources D):=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hval:∀ i,D.1.val i=v∨∃ z,D.1.val i=p z:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     intro i</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hh:D.1.val i∈Finset.univ.image D.1.val:=Finset.mem_image.mpr ⟨i,Finset.mem_univ _,rfl⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     rw [funext hD,rootedCycleOrder_vertices] at hh</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     rw [←hD i] at hh</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     rcases Finset.mem_insert.mp hh with hh|hh</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     · exact Or.inl hh</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     · obtain ⟨z,_,hz⟩:=Finset.mem_image.mp hh</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       exact Or.inr ⟨z,hz.symm⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hshared:∀ i k,C.1.val i=D.1.val k→D.1.val k∈A:=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     intro i k he</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     rcases hval k with hv&#x27;|⟨z,hz⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · exact False.elim (hv ((he.trans hv&#x27;) ▸ hC i))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     · have hc:=hC i</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       rcases Finset.mem_union.mp hc with hc|hc</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       · exact False.elim (hpR z ((he.trans hz) ▸ hc))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       · exact he ▸ hc</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   apply marked_wheels_disjoint_of_shared_labels hp C D A hshared</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (marked_fixed_attachment_no_attachment_arc n p v j A</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (fun h=&gt;hv (Finset.mem_union_right _ h)) hpA D hD) ?_</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro i k he</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   rcases hval k with hv&#x27;|⟨z,hz⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   · exact False.elim (hv ((he.trans hv&#x27;) ▸ hC i))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   · have hzA:p z∈A:=hz ▸ hshared i k he</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     rcases Finset.mem_insert.mp (hpA z hzA) with hh|hh</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     · exact hfirst i (he.trans (hz.trans hh))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     · exact hlast i (he.trans (hz.trans (Finset.mem_singleton.mp hh)))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> </span>
+<span id="L55"><a href="#L55" class="ln">  55</a> end Oberwolfach</span></pre></html>

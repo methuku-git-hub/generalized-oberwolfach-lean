@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSpokeWheelFamilies.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSpokeWheelFamilies.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedTransformerPathWheels</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteConflictSeparatedChoices</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Construct all wheel pairs for prescribed old spokes, with disjoint</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> free paths separated from one another and from every old row root. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 10000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U E K I:Type} [Fintype V] [Fintype I] [DecidableEq V] [DecidableEq I]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a>  theorem marked_spoke_wheel_families</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (tail head:E→V) (ktail khead:K→V) (H₀ HK:V→U→Prop)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (π:Equiv.Perm V) (b l:ℕ) (hl:2≤l) (v v&#x27;:I→V) (u u&#x27;:I→U) (j:I→Bool)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (W Z:Finset V) (hroots:∀ i,v i∈Z∧v&#x27; i∈Z) (c:ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hroot:∀ i,if j i then HK (v i) (u i)∧HK (v&#x27; i) (u&#x27; i) else H₀ (v i) (u i)∧H₀ (v&#x27; i) (u&#x27; i))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hopen:∀ i,c≤((Finset.univ.filter (fun a=&gt;(∃ e,tail e=v i∧head e=a)∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (∃ e,tail e=v&#x27; i∧head e=a)∧H₀ a (u i)∧H₀ a (u&#x27; i))).card:ℝ))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hclose:∀ i,c≤((Finset.univ.filter (fun a=&gt;(if j i then</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∃ e,ktail e=a∧khead e=v i)∧(∃ e,ktail e=a∧khead e=v&#x27; i) else</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∃ e,tail e=a∧head e=v i)∧(∃ e,tail e=a∧head e=v&#x27; i))∧H₀ a (u i)∧H₀ a (u&#x27; i))).card:ℝ))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hstep:∀ i,∀ t:Bool,∀ x,c≤((Finset.univ.filter (fun a=&gt;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (if t then ∃ e,ktail e=x∧khead e=a else ∃ e,tail e=x∧head e=a)∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (if t then HK a (u i)∧HK a (u&#x27; i) else H₀ a (u i)∧H₀ a (u&#x27; i)))).card:ℝ))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hjoin:∀ i,∀ x y,x≠y→c≤((Finset.univ.filter (fun a=&gt;(∃ e,tail e=x∧head e=a)∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∃ e,tail e=a∧head e=y)∧H₀ a (u i)∧H₀ a (u&#x27; i))).card:ℝ))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hbudget:W.card+((Fintype.card I:ℝ)*(l+3)+Z.card+l+4)*(2*b+1)&lt;c):</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∃ p:I→(Fin (l+3)↪V),∃ A D:I→MarkedWheel tail head ktail khead (l+3) π b H₀ HK,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ i,(A i).2.val=u i∧(D i).2.val=u&#x27; i)∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i a,(A i).1.val a=rootedCycleOrder (markedRootOrder (l+3) (j i)) (v i) (p i) a)∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ i a,(D i).1.val a=rootedCycleOrder (markedRootOrder (l+3) (j i)) (v&#x27; i) (p i) a)∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ i a,p i a∉W∧p i a∉Z∧∀ z∈Z,¬PermutationClose π b (p i a) z)∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ i,PermutationSeparated π b (p i))∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ i k,i≠k→Disjoint (Finset.univ.image (p i)) (Finset.univ.image (p k)))∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       ∀ i k,∀ a z,p i a≠p k z→¬PermutationClose π b (p i a) (p k z):=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   let F:=permutationConflictGraph π b</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hF:∀ x,(F.degree x:ℝ)≤2*b:=by intro x;exact_mod_cast permutationConflictGraph_degree_le π b x</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let C₀:=(Fin (l+3)↪V)×</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (MarkedWheel tail head ktail khead (l+3) π b H₀ HK×MarkedWheel tail head ktail khead (l+3) π b H₀ HK)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let S:C₀→Finset V:=fun q=&gt;Finset.univ.image q.1</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let Good:I→C₀→Prop:=fun i q=&gt;</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     q.2.1.2.val=u i∧q.2.2.2.val=u&#x27; i∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (∀ a,q.2.1.1.val a=rootedCycleOrder (markedRootOrder (l+3) (j i)) (v i) q.1 a)∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (∀ a,q.2.2.1.val a=rootedCycleOrder (markedRootOrder (l+3) (j i)) (v&#x27; i) q.1 a)∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (∀ a,q.1 a∉Z∧∀ z∈Z,¬PermutationClose π b (q.1 a) z)∧PermutationSeparated π b q.1</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hc:∀ i,∀ B:Finset V,(B.card:ℝ)≤W.card+Fintype.card I*(l+3)*(2*b+1)→</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       ∃ q,Good i q∧(S q).card≤l+3∧Disjoint (S q) B:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     intro i B hB</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have hbd:(B.card:ℝ)+(Z.card+l+4)*(2*b+1)&lt;c:=by nlinarith only [hB,hbudget]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     obtain ⟨p,A,D,hAu,hDu,hA,hD,hav,hsp⟩:=marked_transformer_path_wheels tail head ktail khead H₀ HK π b l hl</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (v i) (v&#x27; i) (u i) (u&#x27; i) (j i) B Z (hroots i).1 (hroots i).2 c</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (hroot i) (hopen i) (hclose i) (hstep i) (hjoin i) hbd</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     refine ⟨⟨p,A,D⟩,⟨hAu,hDu,hA,hD,fun a=&gt;(hav a).2,hsp⟩,?_,?_⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     · simpa only [S,Fintype.card_fin,Finset.card_univ] using Finset.card_image_le (f:=(p:Fin (l+3)→V)) (s:=Finset.univ)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     · apply Finset.disjoint_left.mpr</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       intro x hx hxB</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       obtain ⟨a,_,rfl⟩:=Finset.mem_image.mp hx</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       exact (hav a).1 hxB</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   obtain ⟨q,hq,hd⟩:=finite_conflict_separated_choices S Good W (l+3) F (2*b) (by positivity) hF</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (by simpa only [Nat.cast_add,Nat.cast_ofNat] using hc)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   refine ⟨fun i=&gt;(q i).1,fun i=&gt;(q i).2.1,fun i=&gt;(q i).2.2,</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     fun i=&gt;⟨(hq i).1.1,(hq i).1.2.1⟩,</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     fun i=&gt;(hq i).1.2.2.1,fun i=&gt;(hq i).1.2.2.2.1,?_,fun i=&gt;(hq i).1.2.2.2.2.2,</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     fun i k hik=&gt;(hd i k hik).1,?_⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   · intro i a</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     refine ⟨?_,(hq i).1.2.2.2.2.1 a⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     exact fun ha=&gt;Finset.disjoint_left.mp (hq i).2.2 (Finset.mem_image.mpr ⟨a,Finset.mem_univ _,rfl⟩) ha</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · intro i k a z hne</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     by_cases hik:i=k</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     · subst k</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       exact (hq i).1.2.2.2.2.2 a z (fun h=&gt;hne (congrArg (q i).1 h))</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     · intro hclose</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       exact (hd i k hik).2 _ (Finset.mem_image.mpr ⟨a,Finset.mem_univ _,rfl⟩)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>         _ (Finset.mem_image.mpr ⟨z,Finset.mem_univ _,rfl⟩) ⟨hne,hclose⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a> </span>
+<span id="L78"><a href="#L78" class="ln">  78</a> end Oberwolfach</span></pre></html>

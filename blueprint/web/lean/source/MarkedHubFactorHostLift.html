@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHubFactorHostLift.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHubFactorHostLift.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedHubFactorOn</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Lift a factor to a larger typed host using actual occurrence maps.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> Cycle coordinates, spoke types and physical graphs are unchanged. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 14000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U E K EB KB:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def hubCycleHostLift</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (tail head:E→V) (ktail khead:K→V) (btail bhead:EB→V) (bktail bkhead:KB→V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (e:E→EB) (k:K→KB) (het:∀ a,btail (e a)=tail a) (heh:∀ a,bhead (e a)=head a)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hkt:∀ a,bktail (k a)=ktail a) (hkh:∀ a,bkhead (k a)=khead a)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (m b:ℕ) (π:Equiv.Perm V) (H₀ HK B₀ BK:V→U→Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (h₀:∀ v u,H₀ v u→B₀ v u) (hK:∀ v u,HK v u→BK v u) (u:U):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     HubMarkedCycle tail head ktail khead m π b H₀ HK u↪</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       HubMarkedCycle btail bhead bktail bkhead m π b B₀ BK u where</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   toFun C:=⟨C.val,⟨C.property.1.1,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     fun i=&gt;by obtain ⟨a,ha,hb⟩:=C.property.1.2.1 i;exact ⟨e a,(het a).trans ha,(heh a).trans hb⟩,</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     by obtain ⟨a,ha,hb⟩:=C.property.1.2.2;exact ⟨k a,(hkt a).trans ha,(hkh a).trans hb⟩⟩,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     hK _ _ C.property.2.1,fun i=&gt;h₀ _ _ (C.property.2.2 i)⟩</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   inj&#x27; C D he:=Subtype.ext (congrArg (fun C:HubMarkedCycle btail bhead bktail bkhead m π b B₀ BK u=&gt;C.val) he)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem marked_hub_factor_host_lift [Fintype U] [DecidableEq U]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (tail head:E→V) (ktail khead:K→V) (btail bhead:EB→V) (bktail bkhead:KB→V)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (e:E→EB) (k:K→KB) (het:∀ a,btail (e a)=tail a) (heh:∀ a,bhead (e a)=head a)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hkt:∀ a,bktail (k a)=ktail a) (hkh:∀ a,bkhead (k a)=khead a)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (m b:ℕ) (π:Equiv.Perm V) (H₀ HK B₀ BK:V→U→Prop)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (h₀:∀ v u,H₀ v u→B₀ v u) (hK:∀ v u,HK v u→BK v u) (u:U) (Y:Finset V)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (P:MarkedHubFactorOn tail head ktail khead m π b H₀ HK u Y):</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∃ Q:MarkedHubFactorOn btail bhead bktail bkhead m π b B₀ BK u Y,</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       Q.rim=P.rim∧Q.graph=P.graph:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let f:=hubCycleHostLift tail head ktail khead btail bhead bktail bkhead e k het heh hkt hkh m b π H₀ HK B₀ BK h₀ hK u</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hv (C):hubMarkedCycleVertices u (f C)=hubMarkedCycleVertices u C:=rfl</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have he (C):hubCyclePhysicalEdges u (f C)=hubCyclePhysicalEdges u C:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     unfold hubCyclePhysicalEdges markedCyclePhysicalEdges</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     apply Finset.image_congr</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     intro i _</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     simp only [Function.comp_apply,markedCycle_physical_pair,hubCycleAsMarked]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     rfl</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let Q:MarkedHubFactorOn btail bhead bktail bkhead m π b B₀ BK u Y:=</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     {cycles:=P.cycles.image f</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>      disjoint:=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       intro C hC D hD hCD</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       obtain ⟨c,hc,hfc⟩:=Finset.mem_image.mp hC</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       obtain ⟨d,hd,hfd⟩:=Finset.mem_image.mp hD</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       subst C;subst D</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       exact P.disjoint c hc d hd (fun h=&gt;hCD (congrArg f h))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>      covers:=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       rw [Finset.image_biUnion]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       exact P.covers}</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hr:Q.rim=P.rim:=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     change physicalEdgeGraph ((P.cycles.image f).biUnion (hubCyclePhysicalEdges u))=P.rim</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     rw [Finset.image_biUnion]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     simp_rw [he]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     rfl</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   exact ⟨Q,hr,congrArg (fun G:SimpleGraph V=&gt;G.map (Sum.inl:V→V⊕U)) hr⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> end Oberwolfach</span></pre></html>

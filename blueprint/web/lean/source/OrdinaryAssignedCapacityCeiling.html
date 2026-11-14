@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryAssignedCapacityCeiling.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryAssignedCapacityCeiling.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryPositionCapacityArithmetic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Convert the edge-count bound and the assignment ceiling into the</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> normalised matching-size bound used in the capacity calculation. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem ordinary_assigned_ceiling_bound</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (n θ C ε lam a d E:ℝ) (hn:0&lt;n) (ha:0&lt;a) (hE0:0≤E)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hE:E≤C*(θ*ε^2+lam*ε)*n^2+C*d*n):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ((⌈4*E/(a*n)⌉₊:ℕ):ℝ) ≤</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       4*C*(θ*ε^2+lam*ε)*(1/a)*n+(4*C*d/a+1) := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hquot:0≤4*E/(a*n):=by positivity</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hceil:((⌈4*E/(a*n)⌉₊:ℕ):ℝ)≤4*E/(a*n)+1 := (Nat.ceil_lt_add_one hquot).le</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hbound:=mul_le_mul_of_nonneg_left hE (show 0≤4/(a*n) by positivity)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hnorm:(4/(a*n))*(C*(θ*ε^2+lam*ε)*n^2+C*d*n)=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       4*C*(θ*ε^2+lam*ε)*(1/a)*n+4*C*d/a := by field_simp &lt;;&gt; ring</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hleft:(4/(a*n))*E=4*E/(a*n):=by ring</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   rw [hnorm,hleft] at hbound</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   linarith</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> end Oberwolfach</span></pre></html>

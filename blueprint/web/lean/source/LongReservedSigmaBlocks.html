@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongReservedSigmaBlocks.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongReservedSigmaBlocks.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongReservedComponentBlocks</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Blocks in distinct specified components have disjoint vertex images. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 12000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {V I:Type*} [Fintype V] [DecidableEq V] [Fintype I]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (G:SimpleGraph V) (components:I↪G.ConnectedComponent) (c d:ℕ)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> abbrev LongReservedBlockIndex := Σi:I,Fin (Fintype.card (components i)/(c*d+5))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem long_reserved_sigma_block_fit (q:LongReservedBlockIndex G components c d):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (c*d+5)*(q.2.val+1)≤Fintype.card (components q.1) := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hpos:0&lt;c*d+5:=by omega</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hh:q.2.val+1≤Fintype.card (components q.1)/(c*d+5):=by have hq:=q.2.isLt;omega</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   simpa only [Nat.mul_comm] using (Nat.le_div_iff_mul_le hpos).mp hh</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> def longReservedSigmaBlock</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (e:∀i:I,SimpleGraph.cycleGraph (Fintype.card (components i)) ≃g (components i).toSimpleGraph)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (q:LongReservedBlockIndex G components c d) (t:ℕ) (ht:t≤d):Fin (c*t+5)↪V :=</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   (longReservedComponentBlock G (components q.1) (e q.1) c d t q.2.val ht</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (long_reserved_sigma_block_fit G components c d q)).trans (Function.Embedding.subtype _)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem long_reserved_sigma_block_edges</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (e:∀i:I,SimpleGraph.cycleGraph (Fintype.card (components i)) ≃g (components i).toSimpleGraph)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hthree:∀i,3≤Fintype.card (components i))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (q:LongReservedBlockIndex G components c d) (t:ℕ) (ht:t≤d):</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀j:Fin (c*t+4),G.Adj</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (longReservedSigmaBlock G components c d e q t ht ⟨j.val,by omega⟩)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (longReservedSigmaBlock G components c d e q t ht ⟨j.val+1,by omega⟩) := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   intro j</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   exact long_reserved_component_block_edges G (components q.1) (e q.1) (hthree q.1)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     c d t q.2.val ht (long_reserved_sigma_block_fit G components c d q) j</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a> theorem long_reserved_sigma_blocks_disjoint</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (e:∀i:I,SimpleGraph.cycleGraph (Fintype.card (components i)) ≃g (components i).toSimpleGraph)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (q q&#x27;:LongReservedBlockIndex G components c d) (t t&#x27;:ℕ) (ht:t≤d) (ht&#x27;:t&#x27;≤d) (hne:q≠q&#x27;):</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     Disjoint (Finset.univ.image (longReservedSigmaBlock G components c d e q t ht))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (Finset.univ.image (longReservedSigmaBlock G components c d e q&#x27; t&#x27; ht&#x27;)) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   cases q with</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   | mk i bi =&gt;</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     cases q&#x27; with</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     | mk j bj =&gt;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       by_cases hij:i=j</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       · subst j</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         have hblock:bi.val≠bj.val:=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           intro hv</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>           have hh:bi=bj:=Fin.ext hv</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>           apply hne</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>           cases hh</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>           rfl</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         have hdis:=long_reserved_component_blocks_disjoint G (components i) (e i) c d t t&#x27; bi.val bj.val ht ht&#x27;</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>           (long_reserved_sigma_block_fit G components c d ⟨i,bi⟩) (long_reserved_sigma_block_fit G components c d ⟨i,bj⟩) hblock</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         apply Finset.disjoint_left.mpr</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         intro v hva hvb</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         obtain ⟨x,_,hx⟩:=Finset.mem_image.mp hva</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         obtain ⟨y,_,hy⟩:=Finset.mem_image.mp hvb</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         let A:=longReservedComponentBlock G (components i) (e i) c d t bi.val ht (long_reserved_sigma_block_fit G components c d ⟨i,bi⟩)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         let B:=longReservedComponentBlock G (components i) (e i) c d t&#x27; bj.val ht&#x27; (long_reserved_sigma_block_fit G components c d ⟨i,bj⟩)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         have heq:A x=B y:=by apply Subtype.ext; exact hx.trans hy.symm</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         have hA:A x∈Finset.univ.image A:=Finset.mem_image.mpr ⟨x,Finset.mem_univ _,rfl⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         have hB:B y∈Finset.univ.image B:=Finset.mem_image.mpr ⟨y,Finset.mem_univ _,rfl⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         exact (Finset.disjoint_left.mp hdis) hA (heq ▸ hB)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       · apply Finset.disjoint_left.mpr</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         intro v hva hvb</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         obtain ⟨x,_,hx⟩:=Finset.mem_image.mp hva</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         obtain ⟨y,_,hy⟩:=Finset.mem_image.mp hvb</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         let A:=longReservedComponentBlock G (components i) (e i) c d t bi.val ht (long_reserved_sigma_block_fit G components c d ⟨i,bi⟩)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         let B:=longReservedComponentBlock G (components j) (e j) c d t&#x27; bj.val ht&#x27; (long_reserved_sigma_block_fit G components c d ⟨j,bj⟩)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         have hci:G.connectedComponentMk v=components i:=by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>           apply (SimpleGraph.ConnectedComponent.mem_supp_iff _ _).mp</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>           have hv:(A x).val=v:=hx</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>           rw [←hv]</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>           exact (A x).property</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>         have hcj:G.connectedComponentMk v=components j:=by</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>           apply (SimpleGraph.ConnectedComponent.mem_supp_iff _ _).mp</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>           have hv:(B y).val=v:=hy</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>           rw [←hv]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>           exact (B y).property</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>         exact hij (components.injective (hci.symm.trans hcj))</span>
+<span id="L83"><a href="#L83" class="ln">  83</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,125 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BalancedOrientation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BalancedOrientation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrientationMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The manuscript&#x27;s high-probability balanced-orientation claim, with one</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> sampling event for every later forbidden graph and an order threshold</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> chosen solely from alpha. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> universe u</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem orientationMatrix_degree</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {V : Type*} [Fintype V] (G : SimpleGraph V) (M : V → V → ℕ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hphysical : ∀ x y, M x y + M y x = if G.Adj x y then 1 else 0) (x : V) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∑ y, M x y) + (∑ y, M y x) = G.degree x := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   rw [← Finset.sum_add_distrib]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   simp only [hphysical]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   rw [← Finset.card_filter]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   congr 1</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   ext y</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   simp</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> /-- An exact statement of the balanced-orientation claim used by the</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> protected partition. The only hypotheses on the graph are even degrees</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> and its minimum-degree bound. All concentration, routing, rounding and</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> asymptotic choices are discharged. -/</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem balancedOrientation_highProbability_pow {α : ℝ} (hα : 0 &lt; α) (q : ℕ) :</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∃ N₀ : ℕ, ∀ (V : Type u) [Fintype V] [LinearOrder V],</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       let n := Fintype.card V</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       N₀ ≤ n → ∀ G : SimpleGraph V,</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ v, Even (G.degree v)) →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ v, (1 / 2 + α) * n ≤ (G.degree v : ℝ)) →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       1 - 1 / (n : ℝ) ^ q ≤</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (FiniteLaw.pi (fun _ : Sym2 (V) =&gt; FiniteLaw.fairCoin)).probability (fun σ =&gt;</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>           ∀ F : SimpleGraph (V), (∀ v, (F.degree v : ℝ) ≤ α * n / 100) →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>           ∃ M : V → V → ℕ,</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>             (∀ x y, M x y + M y x = if G.Adj x y then 1 else 0) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>             (∀ v, (∑ w, M v w) = G.degree v / 2 ∧ (∑ w, M w v) = G.degree v / 2) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>             (∀ x y, M x y ≠ sampledOrientation G σ x y ∨</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>               M y x ≠ sampledOrientation G σ y x → ¬ F.Adj x y) ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>             ∀ x, ((Finset.univ.filter (fun y =&gt; M x y ≠ sampledOrientation G σ x y ∨</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>               M y x ≠ sampledOrientation G σ y x)).card : ℝ) ≤ 4 * (n : ℝ) ^ (4 / 5 : ℝ)) := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   obtain ⟨N₁, h₁⟩ := eventually_orientation_numeric hα</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨N₂, h₂⟩ := eventually_orientation_failure_small_pow hα q</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   refine ⟨max N₁ N₂, fun V _ _ =&gt; ?_⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   intro n hn G heven hmin</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   obtain ⟨hnpos, hL, hmargin, hchange⟩ := h₁ n (le_trans (le_max_left _ _) hn)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hnreal : (0 : ℝ) &lt; n := by exact_mod_cast hnpos</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hfailure := h₂ n (le_trans (le_max_right _ _) hn)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   let d (v : V) := G.degree v / 2</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hd (v : V) : 2 * d v = G.degree v := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     obtain ⟨k, hk⟩ := heven v</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     dsimp [d]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     omega</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hc := commonNeighbours_of_minDegree G hmin</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hcommon (x y : V) (_hxy : x ≠ y) :</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       8 * (α / 4) * Fintype.card (V) ≤</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         ((G.neighborFinset x ∩ G.neighborFinset y).card : ℝ) := by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hh := hc x y</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     linarith</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hdegree (v : V) : 0 &lt; G.degree v := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have hpos : (0 : ℝ) &lt; (1 / 2 + α) * n := by positivity</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hh := hpos.trans_le (hmin v)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     exact_mod_cast hh</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hprob := sampledOrientation_balancing_event G G le_rfl d hd</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (Nat.ceil ((n : ℝ) ^ (4 / 5 : ℝ))) hL hnpos</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (a := (n : ℝ) ^ (3 / 5 : ℝ)) (f := α * n / 100) (β := α / 4)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (by positivity) (by positivity) (by positivity) hcommon</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     hmargin</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hsum := orientation_failure_sum_bound G G hdegree</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (a := (n : ℝ) ^ (3 / 5 : ℝ)) (α := α) (fun x y _ =&gt; hc x y)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   change _ ≤ 2 * n * Real.exp (-2 * ((n : ℝ) ^ (3 / 5 : ℝ)) ^ 2 / n) +</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     2 * (n : ℝ) ^ 2 * Real.exp (-α * n / 32) at hsum</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   rw [threeFifths_tail_exponent hnreal] at hsum</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hbase : 1 - 1 / (n : ℝ) ^ q ≤</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       (FiniteLaw.pi (fun _ : Sym2 (V) =&gt; FiniteLaw.fairCoin)).probability (fun σ =&gt;</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>         ∀ F : SimpleGraph (V), (∀ v, (F.degree v : ℝ) ≤ α * n / 100) →</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>         ∃ M : V → V → ℕ,</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>           (∀ x y, M x y + M y x = if G.Adj x y then 1 else 0) ∧</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>           (∀ v, ∑ w, M v w = d v) ∧</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>           (∀ x y, M x y ≠ sampledOrientation G σ x y ∨ M y x ≠ sampledOrientation G σ y x →</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>             G.Adj x y ∧ ¬ F.Adj x y) ∧</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>           ∀ x, ((Finset.univ.filter (fun y =&gt; M x y ≠ sampledOrientation G σ x y ∨</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>             M y x ≠ sampledOrientation G σ y x)).card : ℝ) ≤</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>               (n : ℝ) ^ (3 / 5 : ℝ) + 2 * Nat.ceil ((n : ℝ) ^ (4 / 5 : ℝ))) := by</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     apply le_trans ?_ hprob</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     linarith [hsum, hfailure]</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   apply hbase.trans</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   apply finiteLaw_probability_mono</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   intro σ hσ F hF</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   obtain ⟨M, hphys, hout, havoid, hsize⟩ := hσ F hF</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   refine ⟨M, hphys, ?_, fun x y h =&gt; (havoid x y h).2,</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     fun x =&gt; (hsize x).trans hchange⟩</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   intro v</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have hh := orientationMatrix_degree G M hphys v</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   rw [hout v] at hh</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   have hdv := hd v</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   exact ⟨hout v, by dsimp [d] at *; omega⟩</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a> </span>
+<span id="L103"><a href="#L103" class="ln"> 103</a> </span>
+<span id="L104"><a href="#L104" class="ln"> 104</a> theorem balancedOrientation_highProbability {α : ℝ} (hα : 0 &lt; α) :</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     ∃ N₀ : ℕ, ∀ (V : Type u) [Fintype V] [LinearOrder V],</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       let n := Fintype.card V</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>       N₀ ≤ n → ∀ G : SimpleGraph V,</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>       (∀ v, Even (G.degree v)) →</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>       (∀ v, (1 / 2 + α) * n ≤ (G.degree v : ℝ)) →</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       1 - 1 / (n : ℝ) ^ 10 ≤</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>         (FiniteLaw.pi (fun _ : Sym2 (V) =&gt; FiniteLaw.fairCoin)).probability (fun σ =&gt;</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>           ∀ F : SimpleGraph (V), (∀ v, (F.degree v : ℝ) ≤ α * n / 100) →</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>           ∃ M : V → V → ℕ,</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>             (∀ x y, M x y + M y x = if G.Adj x y then 1 else 0) ∧</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>             (∀ v, (∑ w, M v w) = G.degree v / 2 ∧ (∑ w, M w v) = G.degree v / 2) ∧</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>             (∀ x y, M x y ≠ sampledOrientation G σ x y ∨</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>               M y x ≠ sampledOrientation G σ y x → ¬ F.Adj x y) ∧</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>             ∀ x, ((Finset.univ.filter (fun y =&gt; M x y ≠ sampledOrientation G σ x y ∨</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>               M y x ≠ sampledOrientation G σ y x)).card : ℝ) ≤ 4 * (n : ℝ) ^ (4 / 5 : ℝ)) :=</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>   balancedOrientation_highProbability_pow hα 10</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a> </span>
+<span id="L122"><a href="#L122" class="ln"> 122</a> end Oberwolfach</span></pre></html>

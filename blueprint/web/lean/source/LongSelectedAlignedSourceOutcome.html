@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongSelectedAlignedSourceOutcome.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongSelectedAlignedSourceOutcome.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongRawSurvivingSourceFromFrequencies</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> set_option autoImplicit false</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option maxHeartbeats 10000000</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> local instance selectedAlignedSourceOutcomeFin (n:ℕ):DecidableEq (Fin n):=Classical.decEq _</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> def LongSelectedAlignedSourceOutcome</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hU:0&lt;Fintype.card U) (F:U→SimpleGraph (Fin n)) (P:SimpleGraph (Fin n))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (π:Equiv.Perm (Fin n)) (d m:ℕ) (ℓ:Fin K→ℕ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (t:ℕ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (Jret:StartRetentionOutcome (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) false) t)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (σ:∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Bool Bool e):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     let T:=bernoulliVertexSet (longRawHubState P π d raw true true)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let e:{z // z∈T}↪_:=Function.Embedding.subtype _</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀M:Finset (RestrictedResource (mixedCandidateResources (longRawSeedResources (U:=U) π d m ℓ)) e), Prop :=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     letI:Nonempty U:=Fintype.card_pos_iff.mp hU</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let T:=bernoulliVertexSet (longRawHubState P π d raw true true)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let e:{z // z∈T}↪_:=Function.Embedding.subtype _</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     fun M=&gt;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       ∃(Dsrc:∀w,Fin n→Fin n→Prop) (orig:∀w,List (PrescribedSourcePiece (Fin n))),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀w,(orig w).Pairwise (fun p q=&gt;Disjoint p.vertices.toFinset q.vertices.toFinset)) ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀w p,p∈orig w→∃a xs,p=.cycle a xs ∧ p.OriginalValid (Dsrc w)) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀w,sourcePieceVerticesUnion (orig w)=Finset.univ ∧ sourcePieceEdgesUnion (orig w)=(F w).edgeFinset) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀w x y,Dsrc w x y↔(x,y)∈sourcePieceArcsUnion (orig w)) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       ∃E:∀w (C:(F w).ConnectedComponent),SimpleGraph.cycleGraph (Fintype.card C) ≃g C.toSimpleGraph,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         (∀w x,Dsrc w x (factorCycleOrientation (F w) (E w) x)) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         LateComplementContinuation (V:=Fin n) F Dsrc ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∃(ext:∀w:U,(retainedMarkedIndex π d (fun e=&gt;raw (Sum.inr e)) false t Jret w ⊕</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         {a:Fin n // rawIntervalColouredStart π d (fun e=&gt;raw (Sum.inr (w,e))) a true})→Fin ((m+1)*d+5)↪Fin n)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (inner:∀w:U,retainedMarkedIndex π d (fun e=&gt;raw (Sum.inr e)) false t Jret w→Fin ((m+1)*d+1)↪Fin n)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (ψ:∀w:U,Fin n→Fin n) ,</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∃assign:LongRawSelectedOrdinary π d m ℓ e M↪(Σw,(F w).ConnectedComponent),</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∃(data:∀w:U,ActualResidualData</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (K:=(retainedMarkedIndex π d (fun e=&gt;raw (Sum.inr e)) false t Jret w) ⊕</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         {a:Fin n // rawIntervalColouredStart π d (fun e=&gt;raw (Sum.inr (w,e))) a true})</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (J:={a:LongRawSelectedOrdinary π d m ℓ e M // (assign a).1=w}) (F w)) ,</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀w,(data w).c=m+1 ∧ (data w).d=d ∧ (data w).s₁=firstSumIndices ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (data w).Cembed=(data w).t.biUnion (fun j=&gt;((data w).C j).support.toFinset) ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (∀i,((data w).P i).support=List.ofFn (ext w i)) ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∀a k,inner w a k=ext w (.inl a) ⟨k.val+2,by omega⟩) ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (∀i (j:Fin (d+1)),bufferedMarker (m+1) d (ext w i) j∈(data w).prescribed→</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         ψ w (bufferedMarker (m+1) d (ext w i) j)=(π^j.val)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>           (retainedAndRawIntervalRoot π d (fun e=&gt;raw (Sum.inr e)) false true t Jret w i)) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∀i∈(data w).s₂,∀j:Fin (d+1),∃x∈(data w).oldDomain\bufferedPathStrictInterior (fun _=&gt;(m+1)*d) (inner w),</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         ψ w x=(π^j.val) (retainedAndRawIntervalRoot π d (fun e=&gt;raw (Sum.inr e)) false true t Jret w i)) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       Disjoint (bufferedPathStrictInterior (fun _=&gt;(m+1)*d) (inner w)) (data w).remaining ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       Set.InjOn (ψ w) (↑((data w).oldDomain\bufferedPathStrictInterior (fun _=&gt;(m+1)*d) (inner w)):Set (Fin n)) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       ActualOldArcContainment (data w) (ψ w) (E w)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         (fun x y=&gt;({x,y}:Finset (Fin n))∈longRawPhysicalHubRims P π d m ℓ raw true true M w) ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       Disjoint (((data w).oldDomain\bufferedPathStrictInterior (fun _=&gt;(m+1)*d) (inner w)).image (ψ w))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (rawReservedSpokeList π d (fun e=&gt;raw (Sum.inr e)) w) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (data w).s₂=secondSumIndices ∧ (data w).t=Finset.univ ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (∀i,(data w).T i=packedPhysicalSpokePositions _ _ _ _ m (3*d) d π</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         (rawMarkedPairSpokes π d raw true true false) (rawMarkedPairSpokes π d raw true true true)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         (longRawMarkedWheelsAtHub P π d m ℓ raw true true M w) w</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (retainedAndRawIntervalRoot π d (fun e=&gt;raw (Sum.inr e)) false true t Jret w i)) ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (∀j,((data w).C j).length=ℓ (longRawSelectedOrdinaryPayload π d m ℓ e M j.val).1) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (∀j,((data w).C j).toSubgraph.verts=</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         (assignedComponentAtHub F (fun a=&gt;(assign a).1) (fun a=&gt;(assign a).2) w j).supp) ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (∀j:{a:LongRawSelectedOrdinary π d m ℓ e M // (assign a).1=w},∀x∈Finset.univ.image ((longRawSelectedOrdinaryWheel π d m ℓ e M j.val).val.1.val),</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         x∈((data w).oldDomain\bufferedPathStrictInterior (fun _=&gt;(m+1)*d) (inner w)).image (ψ w)) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (∀W∈longRawMarkedWheelsAtHub P π d m ℓ raw true true M w,∀i:Fin (m+1),</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         W.1.val i∈((data w).oldDomain\bufferedPathStrictInterior (fun _=&gt;(m+1)*d) (inner w)).image (ψ w))) ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     ∃(pieces:∀w,List (PrescribedSourcePiece {x // x∈(data w).remaining})),</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (∀w,prescribedDependentGraph pieces w=((data w).graph).induce (↑(data w).remaining:Set (Fin n))) ∧</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       (∀w x y,prescribedDependentDigraph pieces w x y ↔ Dsrc w x.1 y.1 ∧ (data w).graph.Adj x.1 y.1) ∧</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     let old:=fun w=&gt;((data w).deletedEdges\(Finset.univ.biUnion</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       (fun i:{i // i∈(data w).s₁}=&gt;((data w).path (.inl i)).edges.toFinset))).image (Sym2.map (ψ w))</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     ∃Pack:Finset (Sym2 (Fin n)),</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       (∀w z,w≠z→Disjoint (old w) (old z)) ∧ (∀w,old w⊆Pack) ∧</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       Pack⊆(longApproximatePhysicalGraph P π d σ).edgeFinset ∧</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       (∀x y,rawSelectedPhysicalRelation P π d (fun e=&gt;σ (Sum.inl e)) x y→s(x,y)∉Pack) ∧</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       (∀a,(assign a).1=(longRawSelectedOrdinaryWheel π d m ℓ e M a).val.2) ∧</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       (∀a,Fintype.card (assign a).2=ℓ (longRawSelectedOrdinaryPayload π d m ℓ e M a).1) end Oberwolfach</span></pre></html>

@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EdgeAssignmentOptionToFunction.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EdgeAssignmentOptionToFunction.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EdgeAssignmentAvailableIndex</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! An option-valued assignment that is defined on every edge in a finite</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set gives a genuine function on the subtype of those edges, preserving each</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> index&#x27;s exact load. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {E W:Type} [Fintype E] [DecidableEq E] [DecidableEq W]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem edge_assignment_option_to_function (S:Finset E) (f:E→Option W)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hfull:∀e∈S,∃w,f e=some w):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃g:{e:E // e∈S}→W,</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       (∀e,f e.1=some (g e)) ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (∀w,(Finset.univ.filter (fun e:{e:E // e∈S}=&gt;g e=w)).card=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>         (S.filter (fun e=&gt;f e=some w)).card) := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   let g:{e:E // e∈S}→W:=fun e=&gt;Classical.choose (hfull e.1 e.2)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hg:∀e,f e.1=some (g e):=fun e=&gt;Classical.choose_spec (hfull e.1 e.2)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   refine ⟨g,hg,?_⟩</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   intro w</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   apply Finset.card_bij (fun e _=&gt;e.1)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · intro e he</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     have he&#x27;:g e=w:=(Finset.mem_filter.mp he).2</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     apply Finset.mem_filter.mpr</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     exact ⟨e.2,by rw [hg e,he&#x27;]⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · intro a ha b hb hab</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     exact Subtype.ext hab</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   · intro e he</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hh:=Finset.mem_filter.mp he</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let x:{e:E // e∈S}:=⟨e,hh.1⟩</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hx:g x=w:=Option.some.inj ((hg x).symm.trans hh.2)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     refine ⟨x,Finset.mem_filter.mpr ⟨Finset.mem_univ x,hx⟩,rfl⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> end Oberwolfach</span></pre></html>

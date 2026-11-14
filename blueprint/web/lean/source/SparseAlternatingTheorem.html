@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SparseAlternatingTheorem.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SparseAlternatingTheorem.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SparseAlternatingCorrection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Uniform constants for alternating corrections, depending only on the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> lower density bound and preceding both graph classes and all other data. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 1400000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem sparse_alternating_correction (p₀ : ℝ) (hp₀ : 0&lt;p₀) :</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ δ₀ C : ℝ,0&lt;δ₀ ∧ 0&lt;C ∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       ∀ (A B : Type) [Fintype A] [Fintype B] [DecidableEq A] [DecidableEq B],</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ∀ (H : A → B → Prop) (p : B → ℝ) (δ D : ℝ),</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       0&lt;Fintype.card A → 0&lt;Fintype.card B → 0≤δ → 0≤D →</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (∀ u,p₀≤p u ∧ p u≤1) →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (∀ u,|bipColumnDegree H u-(Fintype.card A:ℝ)*p u|≤δ*Fintype.card A) →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∀ u v,u≠v → |bipPairIntersection H v u-(Fintype.card A:ℝ)*p v*p u|≤δ*Fintype.card A) →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (∀ u v t,u≠v → u≠t → v≠t →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         |bipTripleIntersection H u v t-(Fintype.card A:ℝ)*p u*p v*p t|≤δ*Fintype.card A) →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀ x,∃ E : Finset A,(E.card:ℝ)≤D ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         ∀ y,y∉E → |bipWeightedCodegree H (fun u=&gt;1/p u) x y-(Fintype.card B:ℝ)|≤δ*Fintype.card B) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       δ+D/(Fintype.card A:ℝ)+1/(Fintype.card B:ℝ)≤δ₀ →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       ∀ z : A×B → ℝ,z∈zeroMarginalSpace H →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         ∃ t : BipartiteFourCycle H → ℝ,</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>           (∀ e,z e=∑ Q,t Q*bipartiteFourCycleVector Q e) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>           (∀ e,(∑ Q,if FourCycleIncident Q e then |t Q| else 0)≤C*‖z‖) := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let L := max 1 (1/p₀)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hL1 : 1≤L := le_max_left _ _</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hL0 : 0&lt;L := lt_of_lt_of_le zero_lt_one hL1</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   refine ⟨1/(200*L^6),8*L^3*(1+9*L^3),by positivity,by positivity,?_⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   intro A B _ _ _ _ H p δ D ha hb hδ hD hp hdeg hpair htriple hcodeg hsmall z hz</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let q (u : B) := 1/p u</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hp0 (u : B) : 0&lt;p u := hp₀.trans_le (hp u).1</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hq (u : B) : 0≤q u ∧ q u≤L := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     constructor</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     · exact div_nonneg zero_le_one (hp0 u).le</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · exact (one_div_le_one_div_of_le hp₀ (hp u).1).trans (le_max_right _ _)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hdata : SparseIntersectionData H p q L δ D :=</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     { one_le_L := hL1</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       delta_nonneg := hδ</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       D_nonneg := hD</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       density := fun u=&gt;⟨(hp0 u).le,(hp u).2⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       inverse_bounds := hq</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       inverse_identity := fun u=&gt;by dsimp only [q];exact div_mul_cancel₀ 1 (hp0 u).ne&#x27;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       degree_error := hdeg</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       pair_error := hpair</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       triple_error := htriple</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       exceptions := hcodeg }</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   exact sparse_alternating_correction_inverse_profile H p q L δ D hdata ha hb hsmall z hz</span>
+<span id="L52"><a href="#L52" class="ln">  52</a> </span>
+<span id="L53"><a href="#L53" class="ln">  53</a> end Oberwolfach</span></pre></html>

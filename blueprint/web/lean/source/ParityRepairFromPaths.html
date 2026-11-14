@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ParityRepairFromPaths.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ParityRepairFromPaths.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ParitySwitchRepair</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ColouredTwoPaths</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Pair the actual odd complement degrees and realise every pair in the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> single fixed coloured graph. No candidate set is resampled after pairing. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1200000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem parity_repair_from_coloured_paths {V : Type*} [Fintype V] [DecidableEq V] [Nonempty V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {q : ℕ} (hq : Even q) (G : SimpleGraph V) (σ : Sym2 V → Fin (q+1))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (ρ : ℝ) (L : ℕ) (hL : 0&lt;L)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hpath : ∀ a : Fin q,∀ u v,u≠v → ρ*Fintype.card V≤</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (colouredTwoPathCount G σ u v a.castSucc (Fin.last q):ℝ))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hlarge : (q:ℝ)*Fintype.card V/L+4*q+4*L&lt;ρ*Fintype.card V) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃ τ : Sym2 V → Fin (q+1),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (∀ a,(edgeColourGraph G τ a).edgeFinset.card=(edgeColourGraph G σ a).edgeFinset.card) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀ a v,Even ((G\edgeColourGraph G τ a).degree v)) ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀ a v,|((edgeColourGraph G τ a).degree v:ℝ)-((edgeColourGraph G σ a).degree v:ℝ)|≤q+1) := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let T (j : Fin q) := Finset.univ.filter (fun v =&gt; Odd ((G\edgeColourGraph G σ j.castSucc).degree v))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hTeven (j : Fin q) : Even (T j).card := odd_complement_degree_set_even G (edgeColourGraph G σ j.castSucc)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   choose m hm he using fun j : Fin q =&gt; even_finset_pairing (T j) (hTeven j)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let e (j : Fin q) : (Fin (m j)×Bool)≃T j := Classical.choice (he j)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let I := (j : Fin q)×Fin (m j)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let x (i : I) := (e i.1 (i.2,false)).val</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let y (i : I) := (e i.1 (i.2,true)).val</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hxy (i : I) : x i≠y i := pairing_endpoints_distinct (e i.1) i.2</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let C (i : I) := (G.neighborFinset (x i)∩G.neighborFinset (y i)).filter</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (fun w =&gt; σ s(x i,w)=i.1.castSucc ∧ σ s(w,y i)=Fin.last q)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hI : Fintype.card I≤q*Fintype.card V := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hmle (j : Fin q) : m j≤Fintype.card V := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       have hh := Finset.card_le_univ (T j)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       rw [hm j] at hh</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       omega</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     simp only [I,Fintype.card_sigma,Fintype.card_fin]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     calc</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       _ ≤ ∑ _ : Fin q,Fintype.card V := Finset.sum_le_sum (fun j _ =&gt; hmle j)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       _ = _ := by simp</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hx (v : V) : ((Finset.univ.filter (fun i : I =&gt; x i=v)).card:ℝ)≤q := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     dsimp only [I,x]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have hh := paired_family_endpoint_bound T m e v false</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     simp only [Fintype.card_fin] at hh</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     exact_mod_cast hh</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hy (v : V) : ((Finset.univ.filter (fun i : I =&gt; y i=v)).card:ℝ)≤q := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     dsimp only [I,y]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have hh := paired_family_endpoint_bound T m e v true</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     simp only [Fintype.card_fin] at hh</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact_mod_cast hh</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hC (i : I) : (Fintype.card I:ℝ)/L+4*(q:ℝ)+4*L&lt;(C i).card := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hi : (Fintype.card I:ℝ)≤(q:ℝ)*Fintype.card V := by exact_mod_cast hI</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hd := div_le_div_of_nonneg_right hi (Nat.cast_nonneg (α:=ℝ) L)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hp := hpath i.1 (x i) (y i) (hxy i)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     change ρ*Fintype.card V≤((C i).card:ℝ) at hp</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     linarith only [hd,hlarge,hp]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   obtain ⟨z,hz,hd,_⟩ := undirectedTwoPathPacking_exists x y C L hL hx hy hC</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hzx (i : I) : G.Adj (x i) (z i) :=</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (G.mem_neighborFinset _ _).mp (Finset.mem_inter.mp (Finset.mem_filter.mp (hz i)).1).1</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hzy (i : I) : G.Adj (z i) (y i) :=</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     ((G.mem_neighborFinset _ _).mp (Finset.mem_inter.mp (Finset.mem_filter.mp (hz i)).1).2).symm</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hc0 (i : I) : σ s(x i,z i)=i.1.castSucc := (Finset.mem_filter.mp (hz i)).2.1</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hc1 (i : I) : σ s(z i,y i)=Fin.last q := (Finset.mem_filter.mp (hz i)).2.2</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   obtain ⟨τ,hcard,hparity,hdeg,hlast⟩ := paired_colour_parity_repair hq G σ T m e</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (fun j v =&gt; by simp only [T,Finset.mem_filter,Finset.mem_univ,true_and]) z hd hzx hzy hc0 hc1</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   refine ⟨τ,hcard,hparity,?_⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   intro a v</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   refine Fin.lastCases ?_ (fun j =&gt; ?_) a</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   · exact (hlast v).trans (by linarith)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   · exact (hdeg j v).trans (by have hq0 : (0:ℝ)≤q := Nat.cast_nonneg _;linarith)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a> </span>
+<span id="L74"><a href="#L74" class="ln">  74</a> end Oberwolfach</span></pre></html>

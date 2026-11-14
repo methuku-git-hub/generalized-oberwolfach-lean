@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedProtectedActiveOrdinaryCut.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedProtectedActiveOrdinaryCut.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPhysicalCutTransfer</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedReferenceFixedCuts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OccurrenceRestrictionCuts</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The ordinary-rim cut required in active cover-down follows from the</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> reference cut family, with a precise cutoff and a realized deletion loss. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 6000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem square_bipartiteLargeCut_iff {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hn:0&lt;Fintype.card V) (M:V→V→ℕ) (δ h:ℝ):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     BipartiteLargeCut M δ h↔∀ S T:Finset V,</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (1-2*δ)*Fintype.card V&lt;(S.card:ℝ)+T.card→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       h*Fintype.card V*min (S.card:ℝ) T.card≤(matrixCut M S T:ℝ):=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hn0:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hn1:(0:ℝ)≤Fintype.card V:=hn0.le</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   unfold BipartiteLargeCut</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have he (S T:Finset V):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (1-2*δ&lt;(S.card:ℝ)/Fintype.card V+(T.card:ℝ)/Fintype.card V)↔</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (1-2*δ)*Fintype.card V&lt;(S.card:ℝ)+T.card:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     rw [←add_div,lt_div_iff₀ hn0]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   simp only [he,bipartiteLargeCut_sum_restrict,bipartite_normalized_cut_scale hn hn,</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ←mul_min_of_nonneg _ _ hn1,←mul_assoc]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   rfl</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> </span>
+<span id="L31"><a href="#L31" class="ln">  31</a> variable {V W U Z Γ Color:Type} [Fintype V] [Fintype W] [Fintype U] [Fintype Z]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   [Fintype Γ] [Fintype Color] [LinearOrder V] [LinearOrder W] [DecidableEq U] [DecidableEq Z]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> theorem marked_protected_active_ordinary_cut</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (f:W↪oV) (g:Z↪U) (π:Equiv.Perm V) (ρ:Equiv.Perm W)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hf:∀ x,f (ρ x)=π (f x)) (P:SimpleGraph V) (d:ℕ) (hn:0&lt;Fintype.card W)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (σ:RawMarkedOutcome V U Γ Color) (DR:SimpleGraph V) (a:Γ) (c:Color)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (γ p k tstar ζ:ℝ) (hγ:0≤γ) (hp:0≤p) (hp1:p≤1) (hζ:0≤ζ) (hζsmall:ζ≤γ*p/8)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hcut:MarkedReferenceCutFamilies P π d a c γ p k tstar σ)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hsize:(1-min ((γ/8)/16) (p/128))*Fintype.card V≤(Fintype.card W:ℝ))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hDR:∀ x,((DR.comap f).degree x:ℝ)≤ζ*Fintype.card W):</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let σA:=rawMarkedRestrictPair f g (rawMarkedDeleteRims σ DR.edgeFinset);</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∀ S T:Finset W,(1-2*min ((γ/8)/16) (p/128))*Fintype.card W&lt;(S.card:ℝ)+T.card→</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       4*((γ/8)*p/16)*Fintype.card W*min (S.card:ℝ) T.card≤</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       ((Finset.univ.filter (fun e:MarkedSampleArc (P.comap f) ρ (3*d) (fun e=&gt;σA (Sum.inl e)) false=&gt;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         e.val.1∈S∧e.val.2∈T)).card:ℝ):=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro σA</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let δ:=min ((γ/8)/16) (p/128)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hd0:0≤δ:=le_min (by positivity) (by positivity)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hd1:δ&lt;1:=lt_of_le_of_lt (min_le_right _ _) (by linarith)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hdγ:2*δ≤γ/32:=by have h:=min_le_left ((γ/8)/16) (p/128);dsimp [δ];linarith</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hdp:2*δ≤p/32:=by have h:=min_le_right ((γ/8)/16) (p/128);dsimp [δ];linarith</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hV:0&lt;Fintype.card V:=lt_of_lt_of_le hn (Fintype.card_le_of_injective f f.injective)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hparent:BipartiteLargeCut (markedPhysicalRim P π (3*d) (fun e=&gt;σ (Sum.inl e)) false) (2*δ) (γ*p/4):=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     apply (square_bipartiteLargeCut_iff hV _ _ _).mpr</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     exact hcut.2 false (2*δ) hdγ hdp</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hemb:=bipartiteLargeCut_embedding f.toEmbedding f.toEmbedding _ hn hn (1-δ) (2*δ) δ (γ*p/4)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (by linarith) (by positivity) hsize hsize (by nlinarith [sq_nonneg δ]) hparent</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have he:(fun x y=&gt;markedPhysicalRim P π (3*d) (fun e=&gt;σ (Sum.inl e)) false (f x) (f y))=</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       markedPhysicalRim (P.comap f) ρ (3*d) (fun e=&gt;rawMarkedRestrictPair f g σ (Sum.inl e)) false:=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     funext x y</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     exact (markedPhysicalRim_restrictPair_eq f g π ρ hf P d σ false x y).symm</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   change BipartiteLargeCut (fun x y=&gt;markedPhysicalRim P π (3*d) (fun e=&gt;σ (Sum.inl e)) false (f x) (f y)) _ _ at hemb</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   rw [he] at hemb</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hdel:=marked_rim_largeCut_after_physical_deletion (P.comap f) ρ d hn</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (rawMarkedRestrictPair f g σ) false (DR.comap f) δ (γ*p/4) ζ hζ hDR hemb</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   rw [←rawMarkedRestrictPair_deleteRims f g σ DR] at hdel</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hfin:=bipartiteLargeCut_coefficient_mono _ δ (γ*p/4-ζ) (4*((γ/8)*p/16))</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (by have h:0≤γ*p:=mul_nonneg hγ hp;nlinarith) hdel</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hmatrix:=(square_bipartiteLargeCut_iff hn _ _ _).mp hfin</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   intro S T hST</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hh:=hmatrix S T hST</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   rw [←markedSampleArc_multiplicity,occurrence_matrix_cut] at hh</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   exact hh</span>
+<span id="L75"><a href="#L75" class="ln">  75</a> </span>
+<span id="L76"><a href="#L76" class="ln">  76</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TransferConfigurationBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TransferConfigurationBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryTransferConfigurations</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryCycleRootCounts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Coefficient and support bounds for the actual transfer configurations.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The counting argument uses only their injective free-label maps. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1600000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem transferCycleCoefficient_abs_sum {r : ℕ} (hr : 0&lt;r) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (∑ j : TransferCycleIndex r,|transferCycleCoefficient j|)≤3 := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hr&#x27; : (0:ℝ)&lt;r := Nat.cast_pos.mpr hr</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have habs (j : TransferCycleIndex r) : |transferCycleCoefficient j|=1/(r:ℝ) := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     rcases j with ⟨⟩|⟨i,b⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     · simp [transferCycleCoefficient,abs_of_nonneg (show 0≤1/(r:ℝ) by positivity)]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     · cases b &lt;;&gt; simp [transferCycleCoefficient,abs_of_nonneg (show 0≤1/(r:ℝ) by positivity)]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   simp only [habs,Finset.sum_const,Finset.card_univ,nsmul_eq_mul,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     Fintype.card_sum,Fintype.card_unique,Fintype.card_prod,Fintype.card_fin,Fintype.card_bool]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   push_cast</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have h1 : (1:ℝ)≤r := by exact_mod_cast hr</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   rw [mul_one_div]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   apply (div_le_iff₀ hr&#x27;).mpr</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   linarith</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem indexedWheelWeight_abs_le {V U I : Type*} [Fintype I]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     {Q F : SimpleGraph V} {H : V → U → Prop} {r : ℕ}</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (W : I → OrdinaryWheel Q F H r) (a : I → ℝ) (D : OrdinaryWheel Q F H r) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     |indexedWheelWeight W a D|≤∑ i,|a i| := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   unfold indexedWheelWeight</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   apply (Finset.abs_sum_le_sum_abs (fun i =&gt; if W i=D then a i else 0) Finset.univ).trans</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   apply Finset.sum_le_sum</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   intro i _</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   split_ifs</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · rfl</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   · simpa only [abs_zero] using abs_nonneg (a i)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem indexedWheelWeight_zero_of_no_image {V U I : Type*} [Fintype I]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     {Q F : SimpleGraph V} {H : V → U → Prop} {r : ℕ}</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (W : I → OrdinaryWheel Q F H r) (a : I → ℝ) (D : OrdinaryWheel Q F H r)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (hD : ∀ i,W i≠D) : indexedWheelWeight W a D=0 := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   apply Finset.sum_eq_zero</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro i _</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   exact if_neg (hD i)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> theorem OrdinaryTransferConfiguration.coefficient_bound {V U : Type*} {r : ℕ} {hr : 3≤r}</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     {Q F : SimpleGraph V} {H : V → U → Prop} {v : V} {u u&#x27; : U}</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (T : OrdinaryTransferConfiguration hr Q F H v u u&#x27;) (D : OrdinaryWheel Q F H r) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     |T.weight D|≤6 := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have h₁ := (indexedWheelWeight_abs_le (T.wheel true) transferCycleCoefficient D).trans</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (transferCycleCoefficient_abs_sum (by omega))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have h₂ := (indexedWheelWeight_abs_le (T.wheel false) transferCycleCoefficient D).trans</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (transferCycleCoefficient_abs_sum (by omega))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hh := abs_add_le (indexedWheelWeight (T.wheel true) transferCycleCoefficient D)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (-(indexedWheelWeight (T.wheel false) transferCycleCoefficient D))</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   simp only [abs_neg,← sub_eq_add_neg] at hh</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   change |indexedWheelWeight (T.wheel true) transferCycleCoefficient D-</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     indexedWheelWeight (T.wheel false) transferCycleCoefficient D|≤6</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   linarith</span>
+<span id="L63"><a href="#L63" class="ln">  63</a> </span>
+<span id="L64"><a href="#L64" class="ln">  64</a> theorem OrdinaryTransferConfiguration.weight_support {V U : Type*} {r : ℕ} {hr : 3≤r}</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     {Q F : SimpleGraph V} {H : V → U → Prop} {v : V} {u u&#x27; : U}</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (T : OrdinaryTransferConfiguration hr Q F H v u u&#x27;) (D : OrdinaryWheel Q F H r)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (hD : T.weight D≠0) :</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (ordinaryWheelHub D=u ∨ ordinaryWheelHub D=u&#x27;) ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (ordinaryWheelRim D).support⊆insert v (Set.range T.labels) := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hex : ∃ b : Bool,∃ j : TransferCycleIndex r,T.wheel b j=D := by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     by_contra hn</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     have hzero (b : Bool) : indexedWheelWeight (T.wheel b) transferCycleCoefficient D=0 := by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       apply indexedWheelWeight_zero_of_no_image</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       intro j hj</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       exact hn ⟨b,j,hj⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     apply hD</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     change indexedWheelWeight (T.wheel true) transferCycleCoefficient D-</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       indexedWheelWeight (T.wheel false) transferCycleCoefficient D=0</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     rw [hzero,hzero,sub_self]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   obtain ⟨b,j,rfl⟩ := hex</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   constructor</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   · cases b</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     · exact Or.inr rfl</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     · exact Or.inl rfl</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   · exact transferCycleGraph_support_subset hr T.labels v T.omitted j</span>
+<span id="L86"><a href="#L86" class="ln">  86</a> </span>
+<span id="L87"><a href="#L87" class="ln">  87</a> end Oberwolfach</span></pre></html>

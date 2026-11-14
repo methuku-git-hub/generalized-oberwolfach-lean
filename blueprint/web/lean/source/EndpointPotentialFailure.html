@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EndpointPotentialFailure.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EndpointPotentialFailure.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ConfigurationFailureMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Numeric normalization of endpoint pattern concentration on fixed domains. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 1500000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem endpoint_row_variance_bound (a b K ω p C S:ℝ)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (ha:0&lt;a) (hω:0&lt;ω) (hp:0&lt;p) (hC:0&lt;C) (hS:0&lt;S)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hb:ω*a≤b) (hb&#x27;:b≤K*a):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     let M:=C/(a*b*p^5)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     S^2*((M*(2*b+a))*5*(M*(b*a)))≤</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       (S^2*5*(C/(ω*p^5))^2*(2*K+1)*K)/a:=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   dsimp only</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hb0:0&lt;b:=(mul_pos hω ha).trans_le hb</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hK:0&lt;K:=by nlinarith only [hb0,hb&#x27;,ha]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hm:C/(a*b*p^5)≤(C/(ω*p^5))/a^2:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     calc</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       _≤C/(a*(ω*a)*p^5):=div_le_div_of_nonneg_left hC.le (by positivity) (by gcongr)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       _=_:=by field_simp &lt;;&gt; ring</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   calc</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     _≤S^2*((((C/(ω*p^5))/a^2)*((2*K+1)*a))*5*</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (((C/(ω*p^5))/a^2)*(K*a^2))):=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         apply mul_le_mul_of_nonneg_left _ (sq_nonneg S)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         apply mul_le_mul</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         · apply mul_le_mul_of_nonneg_right _ (by norm_num)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>           exact mul_le_mul hm (by nlinarith only [hb&#x27;]) (by positivity) (by positivity)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         · exact mul_le_mul hm (by nlinarith only [mul_le_mul_of_nonneg_right hb&#x27; ha.le]) (by positivity) (by positivity)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         · positivity</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         · positivity</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     _=_:=by field_simp &lt;;&gt; ring</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> theorem endpoint_tail_variance_mono (t v w:ℝ) (hv:0&lt;v) (hvw:v≤w):</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     2*Real.exp (-2*t^2/v)≤2*Real.exp (-2*t^2/w):=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   apply mul_le_mul_of_nonneg_left _ (by norm_num)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   apply Real.exp_le_exp.mpr</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   simpa only [neg_mul,neg_div] using</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     neg_le_neg (div_le_div_of_nonneg_left (show 0≤2*t^2 by positivity) hv hvw)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

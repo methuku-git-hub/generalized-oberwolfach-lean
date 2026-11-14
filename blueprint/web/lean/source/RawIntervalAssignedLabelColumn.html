@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawIntervalAssignedLabelColumn.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawIntervalAssignedLabelColumn.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawIntervalDistribution</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawIntervalUnassignedColumnCount</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Jointly unassigned pairs in distinct hub columns are independent even</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> though the two labels inside one column may have overlapping windows. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 14000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def rawIntervalAssignedLabelColumnCount (π:Equiv.Perm V) (d:ℕ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (σ:RawIntervalFamilyOutcome V U Γ Color) (x:V) (g:Γ) (J:Finset U):ℝ:=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   ∑u∈J,if rawIntervalFamilyState π d σ (x,u)=some (Sum.inl g) then 1 else 0</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem raw_interval_assigned_label_column_tail</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (π:Equiv.Perm V) (d:ℕ) (hd:2≤d)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (q:U→Γ→ℝ) (hq:∀u g,0≤q u g) (hQ:∀u,∑g,q u g≤1/8)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (s:U→Color→ℝ) (hs:∀u j,0≤s u j) (hS:∀u,∑j,s u j≤ intervalUncoveredProbability d (∑g,q u g))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (x:V) (g:Γ) (J:Finset U) (t:ℝ) (ht:0≤t):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let μ:=fun u=&gt;rawIntervalCoordinateLaw (V:=V) d hd (q u) (hq u) (hQ u) (s u) (hs u) (hS u)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let p:=fun u=&gt;(FiniteLaw.pi (μ u)).probability (fun σ=&gt;rawIntervalState π d σ x=some (Sum.inl g))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (FiniteLaw.pi (rawIntervalFamilyLaw (V:=V) d hd q hq hQ s hs hS)).probability</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (fun σ=&gt;t≤|rawIntervalAssignedLabelColumnCount π d σ x g J-∑u∈J,p u|)≤2*Real.exp (-2*t^2/J.card) :=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   intro μ p</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let X:=fun (_:U) (σ:RawIntervalOutcome V Γ Color)=&gt;</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     if rawIntervalState π d σ x=some (Sum.inl g) then (1:ℝ) else 0</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   letI:MeasurableSpace (RawIntervalOutcome V Γ Color):=⊤</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   letI:MeasurableSingletonClass (RawIntervalOutcome V Γ Color):=⟨fun _=&gt;trivial⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hh:=finiteLaw_bounded_coordinate_sum (fun u=&gt;FiniteLaw.pi (μ u)) X</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (fun _=&gt;0) (fun _=&gt;1) J (by intro u _ σ;dsimp [X];split_ifs &lt;;&gt; norm_num) ht</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hmean (u:U):(FiniteLaw.pi (μ u)).expectation (X u)=p u:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     dsimp only [p]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     unfold FiniteLaw.expectation FiniteLaw.probability</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     dsimp only [X]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     apply Finset.sum_congr rfl</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     intro σ _</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     split_ifs &lt;;&gt; simp_all</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   simp only [hmean,sub_zero,one_pow,Finset.sum_const,nsmul_eq_mul,mul_one] at hh</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have he:=finiteLaw_pi_blocks_probability μ (fun τ=&gt;t≤|(∑u∈J,X u (τ u))-∑u∈J,p u|)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   rw [←he] at hh</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   convert hh using 1</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   dsimp only [μ,X,rawIntervalFamilyLaw,rawIntervalAssignedLabelColumnCount,rawIntervalFamilyState]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   unfold rawIntervalFamilyLaw</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   rfl</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,338 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ResourcePatternConcentration.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ResourcePatternConcentration.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteCoordinateIndependence</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ResourceRootOmittedLoads</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Concentration of fixed resource-pattern loads with a specified coordinate</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> omitted. Patterns may require different categorical states; their supports,</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> coefficients and root domains are fixed before sampling. The variance bound</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> uses the actual pair weights rather than the number of sample coordinates. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 1500000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> variable {A I : Type*} [Fintype A] [Fintype I] [DecidableEq A]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> def resourcePatternLoad {State : A → Type*} (R : I → Finset A) (w : I → ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (s : I → ∀ a,State a) (e : A) (σ : ∀ a,State a) : ℝ :=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   ∑ i,(if e∈R i then w i else 0)*patternValue (R i\{e}) (s i) σ</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> def resourcePatternMean {State : A → Type*} [∀ a,Fintype (State a)]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (μ : ∀ a,FiniteLaw (State a)) (R : I → Finset A) (w : I → ℝ)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (s : I → ∀ a,State a) (e : A) : ℝ :=</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   ∑ i,(if e∈R i then w i else 0)*∏ a∈R i\{e},(μ a).mass (s i a)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem resourcePatternLoad_expectation {State : A → Type*} [∀ a,Fintype (State a)]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (μ : ∀ a,FiniteLaw (State a)) (R : I → Finset A) (w : I → ℝ)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (s : I → ∀ a,State a) (e : A) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (FiniteLaw.pi μ).expectation (resourcePatternLoad R w s e)=resourcePatternMean μ R w s e := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   exact finiteLaw_expectation_omitted_root_sum μ Finset.univ R {e} s</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (fun i=&gt;if e∈R i then w i else 0)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> theorem resourceOmittedPairWeight_nonneg (R : I → Finset A) (w : I → ℝ)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hw : ∀ i,0≤w i) (e f : A) : 0≤resourceOmittedPairWeight R w e f := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   exact Finset.sum_nonneg (fun i _=&gt;by split_ifs &lt;;&gt; first | exact hw i | rfl)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> </span>
+<span id="L38"><a href="#L38" class="ln">  38</a> theorem resourceOmittedPairWeight_sum (R : I → Finset A) (w : I → ℝ) (e : A) :</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (∑ f,resourceOmittedPairWeight R w e f)=</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       ∑ i,if e∈R i then ((R i\{e}).card:ℝ)*w i else 0 := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   unfold resourceOmittedPairWeight</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   rw [Finset.sum_comm]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   apply Finset.sum_congr rfl</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   intro i _</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   by_cases he : e∈R i</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   · simp only [he,true_and,ite_true]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     rw [← Finset.sum_filter]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have hset : Finset.univ.filter (fun f=&gt;f∈R i ∧ f≠e)=R i\{e} := by ext f;simp</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     rw [hset]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     simp only [Finset.sum_const,nsmul_eq_mul]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · simp only [he,false_and,ite_false,Finset.sum_const_zero]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a> </span>
+<span id="L53"><a href="#L53" class="ln">  53</a> theorem resourceOmittedPairWeight_square_sum_le (R : I → Finset A) (w : I → ℝ)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hw : ∀ i,0≤w i) (e : A) (q L a : ℝ)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hq : 0≤q) (ha : 0≤a)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (hsize : ∀ i,e∈R i → ((R i\{e}).card:ℝ)≤q)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (hload : (∑ i,if e∈R i then w i else 0)≤L)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (hpair : ∀ f,resourceOmittedPairWeight R w e f≤a) :</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (∑ f,(resourceOmittedPairWeight R w e f)^2)≤a*q*L := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have htotal : (∑ f,resourceOmittedPairWeight R w e f)≤q*L := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     rw [resourceOmittedPairWeight_sum]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     calc</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       _ ≤ ∑ i,q*(if e∈R i then w i else 0) := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         apply Finset.sum_le_sum</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         intro i _</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         by_cases he : e∈R i</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         · simp only [he,ite_true]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>           exact mul_le_mul_of_nonneg_right (hsize i he) (hw i)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         · simp only [he,ite_false,mul_zero,le_refl]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       _ = q*∑ i,if e∈R i then w i else 0 := (Finset.mul_sum _ _ _).symm</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       _ ≤ q*L := mul_le_mul_of_nonneg_left hload hq</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   calc</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     _ ≤ ∑ f,a*resourceOmittedPairWeight R w e f := by</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       apply Finset.sum_le_sum</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       intro f _</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       simpa only [pow_two] using mul_le_mul_of_nonneg_right (hpair f)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>         (resourceOmittedPairWeight_nonneg R w hw e f)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     _ = a*∑ f,resourceOmittedPairWeight R w e f := (Finset.mul_sum _ _ _).symm</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     _ ≤ a*(q*L) := mul_le_mul_of_nonneg_left htotal ha</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     _ = _ := by ring</span>
+<span id="L81"><a href="#L81" class="ln">  81</a> </span>
+<span id="L82"><a href="#L82" class="ln">  82</a> theorem resourcePatternLoad_one_coordinate {State : A → Type*}</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     (R : I → Finset A) (w : I → ℝ) (hw : ∀ i,0≤w i)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     (s : I → ∀ a,State a) (e f : A) (σ τ : ∀ a,State a)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     (hagree : ∀ a,a≠f → σ a=τ a) :</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     |resourcePatternLoad R w s e σ-resourcePatternLoad R w s e τ|≤</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       resourceOmittedPairWeight R w e f := by</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hh := omitted_root_stability Finset.univ R {e} {f} s</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     (fun i=&gt;if e∈R i then w i else 0) τ σ</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     (by intro i _;split_ifs &lt;;&gt; first | exact hw i | rfl)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     (by intro i _ a _ _ ha;exact (hagree a (by simpa using ha)).symm)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   simp only [Finset.sum_singleton] at hh</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   apply hh.trans_eq</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   unfold resourceOmittedPairWeight</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   apply Finset.sum_congr rfl</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   intro i _</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   simp only [Finset.mem_sdiff,Finset.mem_singleton]</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   split_ifs &lt;;&gt; simp_all</span>
+<span id="L99"><a href="#L99" class="ln">  99</a> </span>
+<span id="L100"><a href="#L100" class="ln"> 100</a> /-- This form also covers a zero actual influence sum: the positive supplied</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a> upper bound does not conceal a division by zero. -/</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a> theorem finiteLaw_boundedDifferences_variance_bound</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     {State : A → Type*} [∀ a,Fintype (State a)]</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     (μ : ∀ a,FiniteLaw (State a)) (X : (∀ a,State a) → ℝ)</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     (c : A → ℝ) (hc : ∀ a,0≤c a) (v : ℝ) (hv : 0&lt;v)</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     (hsq : (∑ a,(c a)^2)≤v)</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     (hchange : ∀ a σ τ,(∀ b,b≠a → σ b=τ b) → |X σ-X τ|≤c a)</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     (t : ℝ) (ht : 0&lt;t) :</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     (FiniteLaw.pi μ).probability (fun σ=&gt;t≤|X σ-(FiniteLaw.pi μ).expectation X|)≤</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       2*Real.exp (-2*t^2/v) := by</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>   have hs0 : 0≤∑ a,(c a)^2 := Finset.sum_nonneg (fun _ _=&gt;sq_nonneg _)</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>   by_cases hs : (∑ a,(c a)^2)=0</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>   · have hc0 : ∀ a,c a=0 := by</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>       intro a</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>       have hh := Finset.single_le_sum (s:=Finset.univ) (f:=fun a=&gt;(c a)^2)</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>         (fun _ _=&gt;sq_nonneg _) (Finset.mem_univ a)</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>       rw [hs] at hh</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>       nlinarith only [hh,sq_nonneg (c a)]</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     have hx := finiteLaw_zero_boundedDifferences μ X</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>       (fun a σ τ hagree=&gt;by simpa only [hc0 a] using hchange a σ τ hagree)</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     have hbad : ∀ σ,¬t≤|X σ-(FiniteLaw.pi μ).expectation X| := by</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>       intro σ;rw [hx σ,sub_self,abs_zero];exact not_le.mpr ht</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     simp only [FiniteLaw.probability,hbad,ite_false,Finset.sum_const_zero]</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     positivity</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>   · have hsp : 0&lt;(∑ a,(c a)^2) := lt_of_le_of_ne hs0 (Ne.symm hs)</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     apply (finiteLaw_boundedDifferences μ X c hc hchange ht.le).trans</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     apply mul_le_mul_of_nonneg_left _ (by norm_num)</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     apply Real.exp_le_exp.mpr</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     exact (div_le_div_iff₀ hsp hv).mpr</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>       (mul_le_mul_of_nonpos_left hsq (by nlinarith only [sq_nonneg t]))</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a> </span>
+<span id="L132"><a href="#L132" class="ln"> 132</a> theorem resourcePatternLoad_tail {State : A → Type*} [∀ a,Fintype (State a)]</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     (μ : ∀ a,FiniteLaw (State a)) (R : I → Finset A) (w : I → ℝ)</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     (hw : ∀ i,0≤w i) (s : I → ∀ a,State a) (e : A)</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     (q L a : ℝ) (hq : 0&lt;q) (hL : 0&lt;L) (ha : 0&lt;a)</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     (hsize : ∀ i,e∈R i → ((R i\{e}).card:ℝ)≤q)</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     (hload : (∑ i,if e∈R i then w i else 0)≤L)</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     (hpair : ∀ f,resourceOmittedPairWeight R w e f≤a)</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>     (t : ℝ) (ht : 0&lt;t) :</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>     (FiniteLaw.pi μ).probability (fun σ=&gt;t≤|resourcePatternLoad R w s e σ-resourcePatternMean μ R w s e|)≤</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>       2*Real.exp (-2*t^2/(a*q*L)) := by</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>   have hh := finiteLaw_boundedDifferences_variance_bound μ (resourcePatternLoad R w s e)</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>     (resourceOmittedPairWeight R w e) (resourceOmittedPairWeight_nonneg R w hw e)</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>     (a*q*L) (by positivity)</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>     (resourceOmittedPairWeight_square_sum_le R w hw e q L a hq.le ha.le hsize hload hpair)</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     (resourcePatternLoad_one_coordinate R w hw s e) t ht</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>   simpa only [resourcePatternLoad_expectation] using hh</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a> </span>
+<span id="L149"><a href="#L149" class="ln"> 149</a> theorem resourcePatternLoad_common_event {State : A → Type*} [∀ a,Fintype (State a)]</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>     (μ : ∀ a,FiniteLaw (State a)) (R : I → Finset A) (w : I → ℝ)</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>     (hw : ∀ i,0≤w i) (s : I → ∀ a,State a) (q L a : ℝ)</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>     (hq : 0&lt;q) (hL : 0&lt;L) (ha : 0&lt;a)</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>     (hsize : ∀ i,((R i).card:ℝ)≤q)</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>     (hload : ∀ e,(∑ i,if e∈R i then w i else 0)≤L)</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>     (hpair : ∀ e f,resourceOmittedPairWeight R w e f≤a)</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>     (t : ℝ) (ht : 0&lt;t) :</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>     1-(Fintype.card A:ℝ)*(2*Real.exp (-2*t^2/(a*q*L)))≤</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>       (FiniteLaw.pi μ).probability (fun σ=&gt;∀ e,</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>         |resourcePatternLoad R w s e σ-resourcePatternMean μ R w s e|&lt;t) := by</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>   have hh := finiteLaw_common_event_lower (FiniteLaw.pi μ) Finset.univ</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>     (fun e σ=&gt;t≤|resourcePatternLoad R w s e σ-resourcePatternMean μ R w s e|)</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>     (fun _=&gt;2*Real.exp (-2*t^2/(a*q*L)))</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>     (fun e _=&gt;resourcePatternLoad_tail μ R w hw s e q L a hq hL ha</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>       (fun i _=&gt;by</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>         have hc : ((R i\{e}).card:ℝ)≤(R i).card := by</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>           exact_mod_cast Finset.card_le_card (Finset.sdiff_subset : R i\{e}⊆R i)</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>         exact hc.trans (hsize i))</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>       (hload e) (hpair e) t ht)</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>   simpa only [Finset.sum_const,Finset.card_univ,nsmul_eq_mul,Finset.mem_univ,true_implies,not_le] using hh</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a> </span>
+<span id="L171"><a href="#L171" class="ln"> 171</a> </span>
+<span id="L172"><a href="#L172" class="ln"> 172</a> /-- A sparse incidence relation between primitive coordinates and resource</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a> states costs the product of its two maximum incidence bounds. -/</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a> theorem locality_square_sum {E : Type*} [Fintype E] [DecidableEq E]</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>     (S : A → Finset E) (B : ℝ) (hB : 0≤B)</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>     (hread : ∀ a,((S a).card:ℝ)≤B)</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>     (haffect : ∀ e,((Finset.univ.filter (fun a=&gt;e∈S a)).card:ℝ)≤B)</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>     (c : A → ℝ) :</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>     (∑ e,(∑ a,if e∈S a then c a else 0)^2)≤B^2*∑ a,(c a)^2 := by</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>   have hlocal (e : E) : (∑ a,if e∈S a then c a else 0)^2≤</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>       B*∑ a,if e∈S a then (c a)^2 else 0 := by</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>     rw [← Finset.sum_filter,← Finset.sum_filter]</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>     have hh := Finset.sum_mul_sq_le_sq_mul_sq</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a>       (Finset.univ.filter (fun a=&gt;e∈S a)) (fun _ : A=&gt;(1:ℝ)) c</span>
+<span id="L185"><a href="#L185" class="ln"> 185</a>     simp only [one_mul,one_pow,Finset.sum_const,nsmul_eq_mul,mul_one] at hh</span>
+<span id="L186"><a href="#L186" class="ln"> 186</a>     exact hh.trans (mul_le_mul_of_nonneg_right (haffect e)</span>
+<span id="L187"><a href="#L187" class="ln"> 187</a>       (Finset.sum_nonneg (fun _ _=&gt;sq_nonneg _)))</span>
+<span id="L188"><a href="#L188" class="ln"> 188</a>   calc</span>
+<span id="L189"><a href="#L189" class="ln"> 189</a>     _ ≤ ∑ e,B*∑ a,if e∈S a then (c a)^2 else 0 := Finset.sum_le_sum (fun e _=&gt;hlocal e)</span>
+<span id="L190"><a href="#L190" class="ln"> 190</a>     _ = B*∑ a,((S a).card:ℝ)*(c a)^2 := by</span>
+<span id="L191"><a href="#L191" class="ln"> 191</a>       rw [← Finset.mul_sum,Finset.sum_comm]</span>
+<span id="L192"><a href="#L192" class="ln"> 192</a>       congr 1</span>
+<span id="L193"><a href="#L193" class="ln"> 193</a>       apply Finset.sum_congr rfl</span>
+<span id="L194"><a href="#L194" class="ln"> 194</a>       intro a _</span>
+<span id="L195"><a href="#L195" class="ln"> 195</a>       rw [← Finset.sum_filter]</span>
+<span id="L196"><a href="#L196" class="ln"> 196</a>       have hs : Finset.univ.filter (fun e=&gt;e∈S a)=S a := by ext;simp</span>
+<span id="L197"><a href="#L197" class="ln"> 197</a>       rw [hs,Finset.sum_const,nsmul_eq_mul]</span>
+<span id="L198"><a href="#L198" class="ln"> 198</a>     _ ≤ B*∑ a,B*(c a)^2 := mul_le_mul_of_nonneg_left</span>
+<span id="L199"><a href="#L199" class="ln"> 199</a>       (Finset.sum_le_sum (fun a _=&gt;mul_le_mul_of_nonneg_right (hread a) (sq_nonneg _))) hB</span>
+<span id="L200"><a href="#L200" class="ln"> 200</a>     _ = _ := by rw [← Finset.mul_sum];ring</span>
+<span id="L201"><a href="#L201" class="ln"> 201</a> </span>
+<span id="L202"><a href="#L202" class="ln"> 202</a> theorem resourcePatternLoad_supported_change</span>
+<span id="L203"><a href="#L203" class="ln"> 203</a>     {E : Type*} [Fintype E] [DecidableEq E] {Base : E → Type*} {State : A → Type*}</span>
+<span id="L204"><a href="#L204" class="ln"> 204</a>     (R : I → Finset A) (w : I → ℝ) (hw : ∀ i,0≤w i)</span>
+<span id="L205"><a href="#L205" class="ln"> 205</a>     (s : I → ∀ a,State a) (S : A → Finset E)</span>
+<span id="L206"><a href="#L206" class="ln"> 206</a>     (state : (∀ e,Base e) → ∀ a,State a)</span>
+<span id="L207"><a href="#L207" class="ln"> 207</a>     (hs : ∀ a σ τ,(∀ e∈S a,σ e=τ e) → state σ a=state τ a)</span>
+<span id="L208"><a href="#L208" class="ln"> 208</a>     (root : A) (e : E) (σ τ : ∀ e,Base e)</span>
+<span id="L209"><a href="#L209" class="ln"> 209</a>     (hagree : ∀ f,f≠e → σ f=τ f) :</span>
+<span id="L210"><a href="#L210" class="ln"> 210</a>     |resourcePatternLoad R w s root (state σ)-resourcePatternLoad R w s root (state τ)|≤</span>
+<span id="L211"><a href="#L211" class="ln"> 211</a>       ∑ a,if e∈S a then resourceOmittedPairWeight R w root a else 0 := by</span>
+<span id="L212"><a href="#L212" class="ln"> 212</a>   let D := Finset.univ.filter (fun a=&gt;e∈S a)</span>
+<span id="L213"><a href="#L213" class="ln"> 213</a>   have hh := omitted_root_stability Finset.univ R {root} D s</span>
+<span id="L214"><a href="#L214" class="ln"> 214</a>     (fun i=&gt;if root∈R i then w i else 0) (state τ) (state σ)</span>
+<span id="L215"><a href="#L215" class="ln"> 215</a>     (by intro i _;split_ifs &lt;;&gt; first | exact hw i | rfl)</span>
+<span id="L216"><a href="#L216" class="ln"> 216</a>     (by</span>
+<span id="L217"><a href="#L217" class="ln"> 217</a>       intro i _ a _ _ ha</span>
+<span id="L218"><a href="#L218" class="ln"> 218</a>       apply hs a</span>
+<span id="L219"><a href="#L219" class="ln"> 219</a>       intro f hf</span>
+<span id="L220"><a href="#L220" class="ln"> 220</a>       apply Eq.symm (hagree f _)</span>
+<span id="L221"><a href="#L221" class="ln"> 221</a>       intro he;subst f</span>
+<span id="L222"><a href="#L222" class="ln"> 222</a>       exact ha (by simp [D,hf]))</span>
+<span id="L223"><a href="#L223" class="ln"> 223</a>   apply hh.trans_eq</span>
+<span id="L224"><a href="#L224" class="ln"> 224</a>   rw [Finset.sum_filter]</span>
+<span id="L225"><a href="#L225" class="ln"> 225</a>   apply Finset.sum_congr rfl</span>
+<span id="L226"><a href="#L226" class="ln"> 226</a>   intro a _</span>
+<span id="L227"><a href="#L227" class="ln"> 227</a>   by_cases ha : e∈S a</span>
+<span id="L228"><a href="#L228" class="ln"> 228</a>   · simp only [ha,ite_true,resourceOmittedPairWeight]</span>
+<span id="L229"><a href="#L229" class="ln"> 229</a>     apply Finset.sum_congr rfl</span>
+<span id="L230"><a href="#L230" class="ln"> 230</a>     intro i _</span>
+<span id="L231"><a href="#L231" class="ln"> 231</a>     simp only [Finset.mem_sdiff,Finset.mem_singleton]</span>
+<span id="L232"><a href="#L232" class="ln"> 232</a>     split_ifs &lt;;&gt; simp_all</span>
+<span id="L233"><a href="#L233" class="ln"> 233</a>   · simp only [ha,ite_false]</span>
+<span id="L234"><a href="#L234" class="ln"> 234</a> </span>
+<span id="L235"><a href="#L235" class="ln"> 235</a> theorem resourcePatternLoad_supported_tail</span>
+<span id="L236"><a href="#L236" class="ln"> 236</a>     {E : Type*} [Fintype E] [DecidableEq E]</span>
+<span id="L237"><a href="#L237" class="ln"> 237</a>     {Base : E → Type*} [∀ e,Fintype (Base e)] {State : A → Type*}</span>
+<span id="L238"><a href="#L238" class="ln"> 238</a>     (μ : ∀ e,FiniteLaw (Base e)) (R : I → Finset A) (w : I → ℝ)</span>
+<span id="L239"><a href="#L239" class="ln"> 239</a>     (hw : ∀ i,0≤w i) (s : I → ∀ a,State a)</span>
+<span id="L240"><a href="#L240" class="ln"> 240</a>     (S : A → Finset E) (state : (∀ e,Base e) → ∀ a,State a)</span>
+<span id="L241"><a href="#L241" class="ln"> 241</a>     (hs : ∀ a σ τ,(∀ e∈S a,σ e=τ e) → state σ a=state τ a)</span>
+<span id="L242"><a href="#L242" class="ln"> 242</a>     (B : ℝ) (hB : 0&lt;B)</span>
+<span id="L243"><a href="#L243" class="ln"> 243</a>     (hread : ∀ a,((S a).card:ℝ)≤B)</span>
+<span id="L244"><a href="#L244" class="ln"> 244</a>     (haffect : ∀ e,((Finset.univ.filter (fun a=&gt;e∈S a)).card:ℝ)≤B)</span>
+<span id="L245"><a href="#L245" class="ln"> 245</a>     (root : A) (q L a : ℝ) (hq : 0&lt;q) (hL : 0&lt;L) (ha : 0&lt;a)</span>
+<span id="L246"><a href="#L246" class="ln"> 246</a>     (hsize : ∀ i,root∈R i → ((R i\{root}).card:ℝ)≤q)</span>
+<span id="L247"><a href="#L247" class="ln"> 247</a>     (hload : (∑ i,if root∈R i then w i else 0)≤L)</span>
+<span id="L248"><a href="#L248" class="ln"> 248</a>     (hpair : ∀ f,resourceOmittedPairWeight R w root f≤a)</span>
+<span id="L249"><a href="#L249" class="ln"> 249</a>     (t : ℝ) (ht : 0&lt;t) :</span>
+<span id="L250"><a href="#L250" class="ln"> 250</a>     (FiniteLaw.pi μ).probability (fun σ=&gt;t≤</span>
+<span id="L251"><a href="#L251" class="ln"> 251</a>       |resourcePatternLoad R w s root (state σ)-</span>
+<span id="L252"><a href="#L252" class="ln"> 252</a>         (FiniteLaw.pi μ).expectation (fun τ=&gt;resourcePatternLoad R w s root (state τ))|)≤</span>
+<span id="L253"><a href="#L253" class="ln"> 253</a>       2*Real.exp (-2*t^2/(B^2*a*q*L)) := by</span>
+<span id="L254"><a href="#L254" class="ln"> 254</a>   apply finiteLaw_boundedDifferences_variance_bound μ</span>
+<span id="L255"><a href="#L255" class="ln"> 255</a>     (fun σ=&gt;resourcePatternLoad R w s root (state σ))</span>
+<span id="L256"><a href="#L256" class="ln"> 256</a>     (fun e=&gt;∑ f,if e∈S f then resourceOmittedPairWeight R w root f else 0)</span>
+<span id="L257"><a href="#L257" class="ln"> 257</a>     (fun e=&gt;Finset.sum_nonneg (fun f _=&gt;by</span>
+<span id="L258"><a href="#L258" class="ln"> 258</a>       split_ifs;exact resourceOmittedPairWeight_nonneg R w hw root f;exact le_refl _))</span>
+<span id="L259"><a href="#L259" class="ln"> 259</a>     (B^2*a*q*L) (by positivity) _</span>
+<span id="L260"><a href="#L260" class="ln"> 260</a>     (resourcePatternLoad_supported_change R w hw s S state hs root) t ht</span>
+<span id="L261"><a href="#L261" class="ln"> 261</a>   calc</span>
+<span id="L262"><a href="#L262" class="ln"> 262</a>     _ ≤ B^2*∑ f,(resourceOmittedPairWeight R w root f)^2 := locality_square_sum S B hB.le hread haffect _</span>
+<span id="L263"><a href="#L263" class="ln"> 263</a>     _ ≤ B^2*(a*q*L) := mul_le_mul_of_nonneg_left</span>
+<span id="L264"><a href="#L264" class="ln"> 264</a>       (resourceOmittedPairWeight_square_sum_le R w hw root q L a hq.le ha.le hsize hload hpair) (sq_nonneg _)</span>
+<span id="L265"><a href="#L265" class="ln"> 265</a>     _ = _ := by ring</span>
+<span id="L266"><a href="#L266" class="ln"> 266</a> </span>
+<span id="L267"><a href="#L267" class="ln"> 267</a> </span>
+<span id="L268"><a href="#L268" class="ln"> 268</a> theorem finiteLaw_disjoint_supported_family</span>
+<span id="L269"><a href="#L269" class="ln"> 269</a>     {E J : Type*} [Fintype E] [DecidableEq E] [DecidableEq J]</span>
+<span id="L270"><a href="#L270" class="ln"> 270</a>     {Base : E → Type*} [∀ e,Fintype (Base e)]</span>
+<span id="L271"><a href="#L271" class="ln"> 271</a>     (μ : ∀ e,FiniteLaw (Base e)) (S : J → Finset E)</span>
+<span id="L272"><a href="#L272" class="ln"> 272</a>     (event : J → (∀ e,Base e) → Prop)</span>
+<span id="L273"><a href="#L273" class="ln"> 273</a>     (hs : ∀ j σ τ,(∀ e∈S j,σ e=τ e) → (event j σ↔event j τ))</span>
+<span id="L274"><a href="#L274" class="ln"> 274</a>     (T : Finset J)</span>
+<span id="L275"><a href="#L275" class="ln"> 275</a>     (hdisj : ∀ i∈T,∀ j∈T,i≠j → Disjoint (S i) (S j)) :</span>
+<span id="L276"><a href="#L276" class="ln"> 276</a>     (FiniteLaw.pi μ).probability (fun σ=&gt;∀ j∈T,event j σ)=</span>
+<span id="L277"><a href="#L277" class="ln"> 277</a>       ∏ j∈T,(FiniteLaw.pi μ).probability (event j) := by</span>
+<span id="L278"><a href="#L278" class="ln"> 278</a>   induction T using Finset.induction_on with</span>
+<span id="L279"><a href="#L279" class="ln"> 279</a>   | empty =&gt; simp [FiniteLaw.probability,(FiniteLaw.pi μ).total]</span>
+<span id="L280"><a href="#L280" class="ln"> 280</a>   | @insert j T hj ih =&gt;</span>
+<span id="L281"><a href="#L281" class="ln"> 281</a>     have hd : Disjoint (S j) (T.biUnion S) := by</span>
+<span id="L282"><a href="#L282" class="ln"> 282</a>       apply Finset.disjoint_left.mpr</span>
+<span id="L283"><a href="#L283" class="ln"> 283</a>       intro e he ht</span>
+<span id="L284"><a href="#L284" class="ln"> 284</a>       obtain ⟨i,hi,hei⟩ := Finset.mem_biUnion.mp ht</span>
+<span id="L285"><a href="#L285" class="ln"> 285</a>       exact Finset.disjoint_left.mp</span>
+<span id="L286"><a href="#L286" class="ln"> 286</a>         (hdisj j (Finset.mem_insert_self _ _) i (Finset.mem_insert_of_mem hi)</span>
+<span id="L287"><a href="#L287" class="ln"> 287</a>           (fun h=&gt;hj (h ▸ hi))) he hei</span>
+<span id="L288"><a href="#L288" class="ln"> 288</a>     have htail : ∀ σ τ,(∀ e∈T.biUnion S,σ e=τ e) →</span>
+<span id="L289"><a href="#L289" class="ln"> 289</a>         ((∀ i∈T,event i σ)↔∀ i∈T,event i τ) := by</span>
+<span id="L290"><a href="#L290" class="ln"> 290</a>       intro σ τ hagree</span>
+<span id="L291"><a href="#L291" class="ln"> 291</a>       apply forall_congr&#x27;</span>
+<span id="L292"><a href="#L292" class="ln"> 292</a>       intro i</span>
+<span id="L293"><a href="#L293" class="ln"> 293</a>       apply forall_congr&#x27;</span>
+<span id="L294"><a href="#L294" class="ln"> 294</a>       intro hi</span>
+<span id="L295"><a href="#L295" class="ln"> 295</a>       exact hs i σ τ (fun e he=&gt;hagree e (Finset.mem_biUnion.mpr ⟨i,hi,he⟩))</span>
+<span id="L296"><a href="#L296" class="ln"> 296</a>     have hh := finiteLaw_disjoint_supported_events μ (S j) (T.biUnion S) hd</span>
+<span id="L297"><a href="#L297" class="ln"> 297</a>       (event j) (fun σ=&gt;∀ i∈T,event i σ) (hs j) htail</span>
+<span id="L298"><a href="#L298" class="ln"> 298</a>     have hi := ih (fun i hi j hj hne=&gt;hdisj i (Finset.mem_insert_of_mem hi)</span>
+<span id="L299"><a href="#L299" class="ln"> 299</a>       j (Finset.mem_insert_of_mem hj) hne)</span>
+<span id="L300"><a href="#L300" class="ln"> 300</a>     simpa only [Finset.forall_mem_insert,Finset.prod_insert hj,hi] using hh</span>
+<span id="L301"><a href="#L301" class="ln"> 301</a> </span>
+<span id="L302"><a href="#L302" class="ln"> 302</a> /-- Expected potential loads factor on each candidate when its non-root</span>
+<span id="L303"><a href="#L303" class="ln"> 303</a> resource states read disjoint primitive coordinates. Nothing conditions the</span>
+<span id="L304"><a href="#L304" class="ln"> 304</a> experiment on the omitted root, whose coordinate support may overlap them. -/</span>
+<span id="L305"><a href="#L305" class="ln"> 305</a> theorem resourcePatternLoad_supported_expectation</span>
+<span id="L306"><a href="#L306" class="ln"> 306</a>     {E : Type*} [Fintype E] [DecidableEq E]</span>
+<span id="L307"><a href="#L307" class="ln"> 307</a>     {Base : E → Type*} [∀ e,Fintype (Base e)] {State : A → Type*}</span>
+<span id="L308"><a href="#L308" class="ln"> 308</a>     (μ : ∀ e,FiniteLaw (Base e)) (R : I → Finset A) (w : I → ℝ)</span>
+<span id="L309"><a href="#L309" class="ln"> 309</a>     (s : I → ∀ a,State a) (S : A → Finset E)</span>
+<span id="L310"><a href="#L310" class="ln"> 310</a>     (state : (∀ e,Base e) → ∀ a,State a)</span>
+<span id="L311"><a href="#L311" class="ln"> 311</a>     (hs : ∀ a σ τ,(∀ e∈S a,σ e=τ e) → state σ a=state τ a)</span>
+<span id="L312"><a href="#L312" class="ln"> 312</a>     (root : A)</span>
+<span id="L313"><a href="#L313" class="ln"> 313</a>     (hdisj : ∀ i,root∈R i → ∀ a∈R i\{root},∀ b∈R i\{root},a≠b → Disjoint (S a) (S b)) :</span>
+<span id="L314"><a href="#L314" class="ln"> 314</a>     (FiniteLaw.pi μ).expectation (fun σ=&gt;resourcePatternLoad R w s root (state σ))=</span>
+<span id="L315"><a href="#L315" class="ln"> 315</a>       ∑ i,(if root∈R i then w i else 0)*∏ a∈R i\{root},</span>
+<span id="L316"><a href="#L316" class="ln"> 316</a>         (FiniteLaw.pi μ).probability (fun σ=&gt;state σ a=s i a) := by</span>
+<span id="L317"><a href="#L317" class="ln"> 317</a>   unfold FiniteLaw.expectation resourcePatternLoad</span>
+<span id="L318"><a href="#L318" class="ln"> 318</a>   simp_rw [Finset.mul_sum]</span>
+<span id="L319"><a href="#L319" class="ln"> 319</a>   rw [Finset.sum_comm]</span>
+<span id="L320"><a href="#L320" class="ln"> 320</a>   apply Finset.sum_congr rfl</span>
+<span id="L321"><a href="#L321" class="ln"> 321</a>   intro i _</span>
+<span id="L322"><a href="#L322" class="ln"> 322</a>   by_cases hi : root∈R i</span>
+<span id="L323"><a href="#L323" class="ln"> 323</a>   · simp only [hi,ite_true]</span>
+<span id="L324"><a href="#L324" class="ln"> 324</a>     have hh := finiteLaw_disjoint_supported_family μ S (fun a σ=&gt;state σ a=s i a)</span>
+<span id="L325"><a href="#L325" class="ln"> 325</a>       (fun a σ τ hagree=&gt;by rw [hs a σ τ hagree]) (R i\{root}) (hdisj i hi)</span>
+<span id="L326"><a href="#L326" class="ln"> 326</a>     rw [← hh]</span>
+<span id="L327"><a href="#L327" class="ln"> 327</a>     unfold FiniteLaw.probability</span>
+<span id="L328"><a href="#L328" class="ln"> 328</a>     rw [Finset.mul_sum]</span>
+<span id="L329"><a href="#L329" class="ln"> 329</a>     apply Finset.sum_congr rfl</span>
+<span id="L330"><a href="#L330" class="ln"> 330</a>     intro σ _</span>
+<span id="L331"><a href="#L331" class="ln"> 331</a>     rw [patternValue_indicator]</span>
+<span id="L332"><a href="#L332" class="ln"> 332</a>     split_ifs &lt;;&gt; ring</span>
+<span id="L333"><a href="#L333" class="ln"> 333</a>   · simp only [hi,ite_false,zero_mul,mul_zero,Finset.sum_const_zero]</span>
+<span id="L334"><a href="#L334" class="ln"> 334</a> </span>
+<span id="L335"><a href="#L335" class="ln"> 335</a> end Oberwolfach</span></pre></html>

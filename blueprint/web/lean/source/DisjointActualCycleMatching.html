@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>DisjointActualCycleMatching.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>DisjointActualCycleMatching.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CycleWalkTailSupport</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SimpleWalkLengthEmbeddingGetVert</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Match disjoint source cycles to disjoint target cycles of the same sizes,</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> preserving their directed cyclic orders. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 12000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem disjoint_cycle_families_match</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {X V I:Type} [Fintype X] [DecidableEq X] [Fintype V] [DecidableEq V] [Fintype I] [DecidableEq I]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (G:SimpleGraph X) (H:SimpleGraph V) (a:I→X) (p:∀i,G.Walk (a i) (a i))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hp:∀i,(p i).IsCycle) (u:I→V) (q:∀i,H.Walk (u i) (u i))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hq:∀i,(q i).IsCycle) (hlen:∀i,(q i).length=(p i).length)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hpdis:∀i j,i≠j→Disjoint (p i).support.toFinset (p j).support.toFinset)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hqdis:∀i j,i≠j→Disjoint (q i).support.toFinset (q j).support.toFinset):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃φ:{x // x∈Finset.univ.biUnion (fun i=&gt;(p i).tail.support.toFinset)}↪V,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ∀i (k:Fin ((p i).tail.length+1)),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         φ ⟨(p i).tail.getVert k.val,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>           Finset.mem_biUnion.mpr ⟨i,Finset.mem_univ _,List.mem_toFinset.mpr ((p i).tail.getVert_mem_support _)⟩⟩=</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>           (q i).tail.getVert k.val:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hpt:∀i,(p i).tail.IsPath:=fun i=&gt;(hp i).isPath_tail</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hqt:∀i,(q i).tail.IsPath:=fun i=&gt;(hq i).isPath_tail</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hlent:∀i,(q i).tail.length=(p i).tail.length:=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     intro i</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     simp only [SimpleGraph.Walk.length_tail,hlen]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hpdt:∀i j,i≠j→Disjoint (p i).tail.support.toFinset (p j).tail.support.toFinset:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     intro i j hij</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     simpa only [cycle_tail_support_eq G (p i) (hp i),cycle_tail_support_eq G (p j) (hp j)] using hpdis i j hij</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hqdt:∀i j,i≠j→Disjoint (q i).tail.support.toFinset (q j).tail.support.toFinset:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     intro i j hij</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     simpa only [cycle_tail_support_eq H (q i) (hq i),cycle_tail_support_eq H (q j) (hq j)] using hqdis i j hij</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   obtain ⟨φ,hφ⟩:=disjoint_simple_walk_families_match G H</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (fun i=&gt;(p i).snd) a (fun i=&gt;(p i).tail) hpt</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (fun i=&gt;(q i).snd) u (fun i=&gt;(q i).tail) hqt hlent hpdt hqdt</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   refine ⟨φ,?_⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   intro i k</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hh:=hφ i k</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   simpa only [simple_walk_length_embedding_getVert] using hh</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

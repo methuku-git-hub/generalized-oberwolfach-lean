@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FactorDirectedCyclePieces.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FactorDirectedCyclePieces.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FactorDirectedCycleChain</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FactorDirectedEdgesToPhysical</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Orient the actual two-factor components as valid source cycle pieces. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem two_factor_components_as_directed_pieces (F:SimpleGraph V)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hF:F.IsRegularOfDegree 2):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∃ (root:F.ConnectedComponent→V) (tail:F.ConnectedComponent→List V)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       (D:V→V→Prop),</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       (∀ c,(PrescribedSourcePiece.cycle (root c) (tail c)).Valid D ⊥) ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (∀ c x,x∈root c::tail c ↔ x∈c.supp) ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (∀ c c&#x27; x,x∈root c::tail c→x∈root c&#x27;::tail c&#x27;→c=c&#x27;) ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (∀ x,∃ c,x∈root c::tail c) ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (∀ x y,D x y→F.Adj x y) ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∀ x y,F.Adj x y ↔ ∃ c,x∈root c::tail c ∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         s(x,y)∈(PrescribedSourcePiece.cycle (root c) (tail c)).edges) := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   obtain ⟨root,tail,hcycle,hverts,hdisj,hcover,hedges⟩:=two_factor_all_components_enumerated F hF</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   let D:V→V→Prop := fun x y=&gt;∃ c,(x,y)∈prescribedDirectedPathEdges ((root c::tail c)++[root c])</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   refine ⟨root,tail,D,?_,hverts,hdisj,hcover,?_,?_⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   · intro c</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     change (root c::tail c).Nodup ∧ 3≤(root c::tail c).length ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       DirectedCycleThrough D ⊥ (root c::tail c)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     refine ⟨(hcycle c).1,(hcycle c).2,?_⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     apply (directed_cycle_through_iff_chain D ⊥ (root c) (tail c)).2</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     apply (prescribed_directed_edges_chain (fun x y=&gt;D x y ∧ ¬(⊥:SimpleGraph V).Adj x y) _).2</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     intro e he</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     refine ⟨⟨c,he⟩,?_⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     simp</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   · intro x y hxy</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     obtain ⟨c,hc⟩:=hxy</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hend:=prescribed_directed_path_edge_endpoints ((root c::tail c)++[root c]) (x,y) hc</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hx:x∈root c::tail c := by simpa [or_assoc,or_left_comm,or_comm] using hend.1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact (hedges x y).2 ⟨c,hx,directed_path_edge_is_physical _ x y hc⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · intro x y</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     simpa [PrescribedSourcePiece.edges] using hedges x y</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

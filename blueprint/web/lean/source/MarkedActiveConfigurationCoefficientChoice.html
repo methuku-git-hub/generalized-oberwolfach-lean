@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedActiveConfigurationCoefficientChoice.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedActiveConfigurationCoefficientChoice.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedParentConfigurationHierarchy</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The active configuration coefficient is chosen separately from the</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> vortex regularity error, after the caller&#x27;s active coefficient cap. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_active_configuration_coefficient_choice</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (βA bC bP βext cap:ℝ)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hβA:0&lt;βA) (hC:3*βA≤bC) (hP:3*βA≤bP) (hext:0&lt;βext) (hcap:0&lt;cap):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ βactive:ℝ,0&lt;βactive ∧ βactive≤βext ∧ βactive≤cap ∧</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       3*βactive≤bC ∧ 3*βactive≤bP:=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   let βactive:=min βA (min βext cap)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hβ:0&lt;βactive:=by dsimp [βactive];positivity</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hA:βactive≤βA:=min_le_left _ _</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have he:βactive≤βext:=(min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hc:βactive≤cap:=(min_le_right _ _).trans (min_le_right _ _)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   exact ⟨βactive,hβ,he,hc,by linarith,by linarith⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> end Oberwolfach</span></pre></html>

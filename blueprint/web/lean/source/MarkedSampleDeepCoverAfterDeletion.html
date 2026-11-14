@@ -1,0 +1,188 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSampleDeepCoverAfterDeletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSampleDeepCoverAfterDeletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSampleHubAndRowCovers</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedConfigurationsAfterPhysicalDeletion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedPotentialPhysicalDeletion</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedSampleHubClassSizes</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! A uniform deterministic deletion allowance for the actual sampled</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> hub-and-row construction. The same fixed profiles and root-omitted weights</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> suffice for every later physical deletion within the proved degree bounds.</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> No fresh random choice, changed coefficient or new good event is used. -/</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option autoImplicit false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option synthInstance.maxSize 8192</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> set_option maxHeartbeats 40000000</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> set_option maxRecDepth 4096</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> noncomputable section</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> namespace Oberwolfach</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem marked_sample_deep_cover_after_physical_deletion</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (r:ℕ) (hr:1≤r) (omega t rho gamma eta:ℝ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (ho:0&lt;omega) (ht:0&lt;t) (hrho:0&lt;rho) (hrho1:rho≤1) (hg:0&lt;gamma) (hg1:gamma≤1)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hst:(((r+1)+3:ℕ):ℝ)*t≤1) (heta:0&lt;eta) (hetaSmall:eta≤t*(t*omega/2)/32)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (β aLo B pstar:ℝ) (hβ:0&lt;β) (hβt:β≤t/2) (haLo:0&lt;aLo) (hB:0≤B) (hpstar:0&lt;pstar):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃ eps:ℝ,0&lt;eps ∧ ∃ K:ℕ,0&lt;K ∧ ∃ zeta:ℝ,0&lt;zeta ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ θ:ℝ,0&lt;θ ∧ ∃ delta:ℝ,0&lt;delta ∧ ∀ d:ℕ,1≤d→∃ N:ℕ,1≤N ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ (V U Γ Color:Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       [LinearOrder V] [DecidableEq U],</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     N≤Fintype.card V→(Fintype.card U:ℝ)≤Fintype.card V→ omega*Fintype.card V≤(Fintype.card U:ℝ)→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∀ (P:SimpleGraph V) (π:Equiv.Perm V),</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ x,(1/2+gamma/2)*Fintype.card V≤(P.degree x:ℝ))→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ x,|(P.degree x:ℝ)-2*Fintype.card U/rho|≤eps*Fintype.card V)→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∀ (q:U→Γ→ℝ) (s:U→Color→ℝ) (g:Γ) (j:Color),</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (∀ u,q u g=t)→(∀ u,s u j=(((r+1)+3:ℕ):ℝ)*t)→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀ (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop),</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     MarkedRowsWithSpokes P π d ((r+1)+11) Finset.univ (rho*((((r+1)+3:ℕ):ℝ)*t)/2) (rho*t/2)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       q s g j (eps*Fintype.card V) σ H→</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     MarkedIndicesWithSpokes π d ((r+1)+11) Finset.univ q s g j (eps*Fintype.card V) σ H→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ∀ (D τ p k s₀:ℝ),(Fintype.card V:ℝ)/2≤D→D≤2*Fintype.card V→</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     pstar≤p→pstar≤k→pstar≤s₀→p≤1→k≤1→s₀≤1→</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     ∀ weight:(Fin (r+4+1)→V)→ℝ,SuccessorSequenceWeightConditions P π (3*d) D τ aLo B weight→</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     MarkedLocalConfigurationsWithSpokes r P π d Finset.univ (2*β) (2*β) σ H→</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     MarkedLocalSpokeLoadsWithSpokes P π d (r+4) D p k s₀ weight (θ/2) σ H→</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∀ (DR:SimpleGraph V) (DS:SimpleGraph (V⊕U)),</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (∀ x,(DR.degree x:ℝ)≤delta*Fintype.card V)→</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (∀ x,(DS.degree (Sum.inl x):ℝ)≤delta*Fintype.card V)→</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (∀ u,(DS.degree (Sum.inr u):ℝ)≤delta*Fintype.card V)→</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     let σ&#x27;:=rawMarkedDeleteRims σ DR.edgeFinset</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let H&#x27;:=markedDeletePhysicalSpokes H DS</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     let E₀:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let E₁:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     let tail:=fun e:E₀=&gt;e.val.1</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     let head:=fun e:E₀=&gt;e.val.2</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     let ktail:=fun e:E₁=&gt;e.val.1</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     let khead:=fun e:E₁=&gt;e.val.2</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     ∀ (F:Finset V),(∀ x,π x∈F↔x∈F)→((Fᶜ).card:ℝ)≤zeta*Fintype.card V→</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ∀ hHub:ℕ,(hHub:ℝ)≤zeta*Fintype.card V→</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     ∀ u:Fin hHub→U,Function.Injective u→</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (∀ i x,¬(H&#x27; false x (u i)∧H&#x27; true x (u i)))→</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (∀ i x z,H&#x27; false x (u i)→H&#x27; true z (u i)→x≠π z)→</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (∀ i,Fintype.card (hubNeighbourClass (H&#x27; false) (H&#x27; true) (u i) false)=</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (r+4)*Fintype.card (hubNeighbourClass (H&#x27; false) (H&#x27; true) (u i) true))→</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (∀ i x,H&#x27; false x (u i)∨H&#x27; true x (u i)→x∈F)→</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     ∀ (m:ℕ) (v:Fin m→V),Function.Injective v→(m:ℝ)≤zeta*Fintype.card V→(∀ i,v i∉F)→</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (∀ i u,¬(H&#x27; false (v i) u∧H&#x27; true (v i) u))→</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (∀ i,∀ a:E₀⊕E₁,Sum.elim head khead a=v i→Sum.elim tail ktail a∈F)→</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (∀ i,∀ a:E₀⊕E₁,Sum.elim tail ktail a=v i→Sum.elim head khead a∈F)→</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (∀ i,(Finset.univ.filter (fun a:E₀⊕E₁=&gt;Sum.elim head khead a=v i)).card=</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (Finset.univ.filter (fun a:E₀⊕E₁=&gt;Sum.elim tail ktail a=v i)).card)→</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (∀ i,(Finset.univ.filter (fun a:E₀⊕E₁=&gt;Sum.elim head khead a=v i)).card=</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       (Finset.univ.filter (fun z:V×U=&gt;(H&#x27; false z.1 z.2∨H&#x27; true z.1 z.2)∧z.1=v i)).card)→</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (∀ i,(Finset.univ.filter (fun a:E₀⊕E₁=&gt;Sum.elim head khead a=v i∧markedArcType a=true)).card=</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       (Finset.univ.filter (fun z:V×U=&gt;H&#x27; true z.1 z.2∧z.1=v i)).card)→</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     let Y₀:=fun i=&gt;Finset.univ.filter (H&#x27; false (v i))</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     let Y₁:=fun i=&gt;Finset.univ.filter (H&#x27; true (v i))</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     let ain:=fun i=&gt;markedEndpointTaggedArcEmbedding P π d Finset.univ true (v i) σ&#x27;</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     let xout:=fun i=&gt;markedEndpointTaggedArcEmbedding P π d Finset.univ false (v i) σ&#x27;</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     (∀ i,Disjoint (Y₀ i∪Y₁ i) (Finset.univ.image u))→</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     ∃ M:Finset (MarkedWheel tail head ktail khead (r+4) π (3*d) (H&#x27; false) (H&#x27; true)),</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       (∀ W∈M,∀ Z∈M,W≠Z→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources Z)) ∧</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       (∀ x,(spanningRestriction (markedPackingRimGraph M) F).degree x≤2*hHub+m*(4*(K+4))) ∧</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       (∀ x∈F,(markedPackingRimGraph M).degree x≤2*hHub+m*(4*(K+4))+2*m) ∧</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       (∀ x∈F,(Finset.univ.filter (markedPackingSpokes M x)).card≤hHub+m*(K+4)) ∧</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       (∀ z∉Finset.univ.image u,(Finset.univ.filter (fun x=&gt;markedPackingSpokes M x z)).card≤m*(r+5)) ∧</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       (∀ (I:Finset V) (J:Finset U),Disjoint F I→(∀ x,π x∈I↔x∈I)→</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>         (∀ i,Disjoint (Y₀ i∪Y₁ i) J)→</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>         (M.biUnion markedWheelPhysicalResources).filter (markedInnerResource I J)=∅) ∧</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       (∀ W∈M,(W.2.val∈Finset.univ.image u∧markedWheelRows W⊆F)∨</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>         ∃ i,W.2.val∈Y₀ i∪Y₁ i∧markedWheelRows W⊆insert (v i) F∧v i∈markedWheelRows W) ∧</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>       ∀ T:Finset V,T⊆Finset.univ.image v→(∀ x,π x∈T↔x∈T)→</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>         (∀ a:E₀⊕E₁,markedStarResource T (Finset.univ.image u)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>           (Sum.inl (markedPhysicalEdge tail head ktail khead π a))→</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>           Sum.inl (markedPhysicalEdge tail head ktail khead π a)∈M.biUnion markedWheelPhysicalResources) ∧</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>         (∀ x z,H&#x27; false x z∨H&#x27; true x z→markedStarResource T (Finset.univ.image u) (Sum.inr (x,z))→</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>           Sum.inr (x,z)∈M.biUnion markedWheelPhysicalResources) :=by</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   obtain ⟨eps₀,heps₀,K,hK,zeta,hzeta,θ,hθ,hcover⟩:=marked_sample_hub_and_row_covers</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     r hr omega t rho gamma eta ho ht hrho hrho1 hg hg1 hst heta hetaSmall β aLo B pstar hβ haLo hB hpstar</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   let e:=min eps₀ (t/2)</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have he:0&lt;e:=lt_min heps₀ (by positivity)</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have he0:e≤eps₀:=min_le_left _ _</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   have het:e≤t/2:=min_le_right _ _</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   let C:=5*((r+4:ℕ)+1:ℝ)^4*(2*B/pstar^(2*(r+4)+1))</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   have hC:0≤C:=by dsimp [C];positivity</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   let delta:=min (e/(8*(r+12:ℕ))) (min (β/(4*(r+6:ℕ))) (θ/(6*(C+1))))</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   have hdelta:0&lt;delta:=lt_min (by positivity) (lt_min (by positivity) (by positivity))</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have hde:delta*(8*(r+12:ℕ):ℝ)≤e:=</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     (le_div_iff₀ (by positivity)).mp (min_le_left _ _)</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>   have hdb:delta*(4*(r+6:ℕ):ℝ)≤β:=</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     (le_div_iff₀ (by positivity)).mp ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   have hdθ:delta*(6*(C+1))≤θ:=</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     (le_div_iff₀ (by positivity)).mp ((min_le_right _ _).trans (min_le_right _ _))</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>   refine ⟨e/2,by positivity,K,hK,zeta,hzeta,θ,hθ,delta,hdelta,?_⟩</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>   intro d hd</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>   obtain ⟨N,hN,hcov⟩:=hcover d hd</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   refine ⟨N,hN,?_⟩</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>   intro V U Γ Color _ _ _ _ _ _ hn hUn hU P π hdeg hparent q s g j hq hs σ H hrp hip</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     D τ p k s₀ hDlo hDhi hp hk hs₀ hp1 hk1 hs₁ weight hw hconfigs hload DR DS hDR hDSr hDSc</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>   dsimp only</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>   intro F hF hFc hHub hhub u hu hdis hsep hratio hneigh m v hv hm hvF hdisRow hinc hout hdir hbal hmark hYavoid</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>   let n:=Fintype.card V</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>   have hnpos:0&lt;n:=lt_of_lt_of_le Nat.zero_lt_one (hN.trans hn)</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>   have hnR:0&lt;(n:ℝ):=Nat.cast_pos.mpr hnpos</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>   have hprof:=marked_neighbourhoods_after_physical_deletion P π d (r+12) Finset.univ Finset.univ</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     (rho*(((r+4:ℕ):ℝ)*t)/2) (rho*t/2) q s g j ((e/2)*n) ((e/2)*n)</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     (delta*n) (delta*n) (delta*n) (by positivity) (by positivity) (by positivity)</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     σ H hrp hip DR DS hDR hDSr hDSc</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>   have hrowerr:(e/2)*n+(r+12:ℕ)*(delta*n+delta*n)≤e*n:=by</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     have hh:=mul_le_mul_of_nonneg_right hde hnR.le</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     have hp:0≤delta*(r+12:ℕ)*n:=by positivity</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     nlinarith only [hh,hp]</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>   have hinderr:(e/2)*n+(r+12:ℕ)*(delta*n)≤e*n:=by</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     have hh:=mul_le_mul_of_nonneg_right hde hnR.le</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     have hp:0≤delta*(r+12:ℕ)*n:=by positivity</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     nlinarith only [hh,hp]</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>   have hrp&#x27;:MarkedRowsWithSpokes P π d (r+12) Finset.univ (rho*(((r+4:ℕ):ℝ)*t)/2) (rho*t/2)</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>       q s g j (e*n) (rawMarkedDeleteRims σ DR.edgeFinset) (markedDeletePhysicalSpokes H DS):=by</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     intro S T J hS hT hJ hinj</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     exact (hprof.1 S T J hS hT hJ hinj).trans_le hrowerr</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>   have hip&#x27;:MarkedIndicesWithSpokes π d (r+12) Finset.univ q s g j (e*n)</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>       (rawMarkedDeleteRims σ DR.edgeFinset) (markedDeletePhysicalSpokes H DS):=by</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>     intro J hJ hsep</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     exact (hprof.2 J hJ hsep).trans_le hinderr</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>   have hconfigs&#x27;:=marked_local_configurations_after_physical_deletion r P π d (2*β) (2*β) delta delta</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>     σ H hconfigs DR DS hDR hDSc</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>   have hbc:β≤2*β-(r+5:ℕ)*(delta+delta):=by</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>     have hd0:=hdelta.le</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     push_cast at hdb ⊢</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>     nlinarith only [hdb,hd0]</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>   have hbp:β≤2*β-(r+7:ℕ)*delta-(r+4:ℕ)*delta:=by</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>     have hd0:=hdelta.le</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>     push_cast at hdb ⊢</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>     nlinarith only [hdb,hd0]</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>   have hc&#x27;:MarkedLocalConfigurationsWithSpokes r P π d Finset.univ β β</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>       (rawMarkedDeleteRims σ DR.edgeFinset) (markedDeletePhysicalSpokes H DS):=by</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>     constructor</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>     · intro u</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>       exact (mul_le_mul_of_nonneg_right hbc (by positivity)).trans (hconfigs&#x27;.1 u)</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>     · intro u j x y hxy</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>       exact (mul_le_mul_of_nonneg_right hbp (by positivity)).trans (hconfigs&#x27;.2 u j x y hxy)</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>   have hloads&#x27;:=marked_local_spoke_loads_after_physical_deletion P π d (r+4) (by omega) hnpos</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>     D τ aLo B hDlo hDhi p k s₀ pstar hpstar hp hk hs₀ hp1 hk1 hs₁ hB weight hw</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>     (θ/2) (delta*n) (delta*n) (by positivity) (by positivity) σ H hload DR DS hDR hDSr hDSc</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>   have hloaderr:θ/2+C*(2*(delta*n)+delta*n)/n≤θ:=by</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>     have heq:C*(2*(delta*n)+delta*n)/n=3*C*delta:=by field_simp;ring</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>     rw [heq]</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>     nlinarith only [hdθ,hdelta.le]</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>   have hl&#x27;:MarkedLocalSpokeLoadsWithSpokes P π d (r+4) D p k s₀ weight θ</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>       (rawMarkedDeleteRims σ DR.edgeFinset) (markedDeletePhysicalSpokes H DS):=by</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>     intro a</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>     exact (hloads&#x27; a).trans hloaderr</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>   have hcurrentSize (i:Fin hHub):β*n≤Fintype.card</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>       (hubNeighbourClass (markedDeletePhysicalSpokes H DS false) (markedDeletePhysicalSpokes H DS true) (u i) true):=</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>     (mul_le_mul_of_nonneg_right hβt hnR.le).trans</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>       (marked_sample_hub_class_lower P π d (r+12) (by omega) _ _ t e q s g j hq het</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a>         (rawMarkedDeleteRims σ DR.edgeFinset) (markedDeletePhysicalSpokes H DS) hrp&#x27; (u i))</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>   have hen:e*n≤eps₀*n:=mul_le_mul_of_nonneg_right he0 hnR.le</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>   exact hcov V U Γ Color hn hUn hU P π hdeg</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>     (fun x=&gt;(hparent x).trans ((mul_le_mul_of_nonneg_right (by linarith only [he0,he]:e/2≤eps₀) hnR.le)))</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>     q s g j hq hs (rawMarkedDeleteRims σ DR.edgeFinset) (markedDeletePhysicalSpokes H DS)</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>     (fun S T J hS hT hJ hinj=&gt;(hrp&#x27; S T J hS hT hJ hinj).trans_le hen)</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>     (fun J hJ hsep=&gt;(hip&#x27; J hJ hsep).trans_le hen)</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>     F hF hFc hHub hhub u hu hdis hsep hcurrentSize hratio hneigh</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>     D τ p k s₀ hDlo hDhi hp hk hs₀ hp1 hk1 hs₁ weight hw hc&#x27; hl&#x27;</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>     m v hv hm hvF hdisRow hinc hout hdir hbal hmark hYavoid</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a> </span>
+<span id="L185"><a href="#L185" class="ln"> 185</a> end Oberwolfach</span></pre></html>

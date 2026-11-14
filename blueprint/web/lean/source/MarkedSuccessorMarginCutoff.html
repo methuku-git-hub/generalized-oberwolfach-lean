@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSuccessorMarginCutoff.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSuccessorMarginCutoff.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SuccessorCyclicMargin</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The marked successor-cycle threshold is below any fixed margin above</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> one half, uniformly once its internal length is sufficiently large. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_successor_margin_cutoff (α:ℝ) (hα:0&lt;α):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     ∃ K:ℕ, 2≤K ∧ ∀ k:ℕ,K≤k→successorCycleRatio k+α/4≤1/2+α/2 := by</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>   obtain ⟨K,hK⟩:=exists_nat_gt (1/α)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   refine ⟨max K 2,le_max_right _ _,?_⟩</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   intro k hk</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hKk:K≤k := (le_max_left K 2).trans hk</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hKkR:(K:ℝ)≤k := by exact_mod_cast hKk</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hkreal:(1/α:ℝ)&lt;k := lt_of_lt_of_le hK hKkR</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hkα:1&lt;α*(k:ℝ) := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     have hh:=mul_lt_mul_of_pos_left hkreal hα</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     simpa [ne_of_gt hα] using hh</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hk0:(0:ℝ)≤k := Nat.cast_nonneg _</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hden:(0:ℝ)&lt;2*((k:ℝ)+2)-1 := by linarith</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hrat:successorCycleRatio k≤1/2+α/4 := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     unfold successorCycleRatio</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     apply (div_le_iff₀ hden).mpr</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     nlinarith</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   linarith</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem marked_odd_length_successor_margin (α:ℝ) (hα:0&lt;α):</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∃ R:ℕ, ∀ r:ℕ,R≤r→Odd r→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       ∃ k:ℕ,2≤r ∧ r+4+1=(k+2)*2 ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         successorCycleRatio k+α/4≤1/2+α/2 := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   obtain ⟨K,hK,hmargin⟩:=marked_successor_margin_cutoff α hα</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   refine ⟨2*K-1,?_⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   intro r hr hodd</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   obtain ⟨j,hj⟩:=hodd</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   refine ⟨j+1,?_,?_,?_⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · omega</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · omega</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · apply hmargin</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     omega</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

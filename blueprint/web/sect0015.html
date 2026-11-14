@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Marked capacities and the ordinary fractional-threshold bridge</title>
+<link rel="next" href="sect0016.html" title="Further checked matching ingredients" />
+<link rel="prev" href="sect0014.html" title="Whole-manuscript statement inventory" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000016">B Marked capacities and the ordinary fractional-threshold bridge</h1>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:marked-capacity-complete">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">B.1</span>
+    <span class="theorem_thmtitle">Marked-capacity weights on canonical cycles</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#bp:marked-capacity-complete">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000126"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0012.html#bp:marked-position-splitting">Lemma 11.23</a></li>
+          
+          <li><a href="sect0012.html#bp:marked-copied-weights">Lemma 11.24</a></li>
+          
+          <li><a href="sect0012.html#bp:marked-cycle-representation">Lemma 11.25</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_capacity_cycle_weights_uniform_length" class="lean_decl">Oberwolfach.marked_capacity_cycle_weights_uniform_length</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.markedCycleIncidence_injective" class="lean_decl">Oberwolfach.markedCycleIncidence_injective</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.markedCycle_distinct_physical_edges" class="lean_decl">Oberwolfach.markedCycle_distinct_physical_edges</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    For fixed positive lower density and expansion constants, there is a length threshold. For each larger length, positive error and weight constants can be chosen before the separation parameter. The actual degree, two-path, large-cut and separation hypotheses give positive weights on all canonical separated marked cycles with exactly one marked arc. The weights have order \(n^{2-c}\) and exactly realise every supplied balanced vector sufficiently close to the all-one vector. The proof establishes approximation uniformly for every nearby balanced vector, then proves the positive exact correction. It also checks that distinct canonical cycles have distinct incidence vectors and that injectivity of the physical edge map gives distinct physical edges on each cycle. </p>
+<p><i class="itshape">Manuscript label:</i> thm:capacity:marked-numerical.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000126">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The position splitting and copied-cycle construction supply exact weights before separation. Deleting non-separated cycles loses at most the explicit fixed coefficient times \((2b+1)/n\) in each edge equation. A positive baseline on every admissible cycle and the proved subspace coefficient theorem give exact positive coefficients. The size threshold is chosen after \(b\) to make the displayed error smaller than one quarter of the correction radius. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:fractional-averaging-packing">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">B.2</span>
+    <span class="lemma_thmtitle">Averaging and undirected path packing</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#bp:fractional-averaging-packing">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.HasCycleDecomposition.fractional" class="lean_decl">Oberwolfach.HasCycleDecomposition.fractional</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fractionalDecomposition_of_uniform_cover" class="lean_decl">Oberwolfach.fractionalDecomposition_of_uniform_cover</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fractionalDecomposition_of_divisible_complements" class="lean_decl">Oberwolfach.fractionalDecomposition_of_divisible_complements</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.undirectedTwoPathPacking_exists" class="lean_decl">Oberwolfach.undirectedTwoPathPacking_exists</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Integral cycle decompositions give fractional decompositions. Fractional weights on a family of subgraphs covering every edge with the same positive multiplicity can be averaged to give weights on the original graph. For complements of an edge partition into \(R\) classes, that multiplicity is exactly \(R-1\). Prescribed endpoint pairs can also be connected by paths of length two with pairwise disjoint undirected edges and bounded middle usage under the explicit candidate-size inequality. The complete divisibility repair and its fractional-threshold application are proved in Node&#160;<a href="sect0015.html#bp:ordinary-fractional-threshold">B.3</a>. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:ordinary-fractional-threshold">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">B.3</span>
+    <span class="theorem_thmtitle">Ordinary cycle fractional threshold</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#bp:ordinary-fractional-threshold">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000127"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0015.html#bp:fractional-averaging-packing">Lemma B.2</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.cycle_fractional_positive_margin" class="lean_decl">Oberwolfach.cycle_fractional_positive_margin</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.dense_divisible_complement_colouring" class="lean_decl">Oberwolfach.dense_divisible_complement_colouring</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.divisible_colour_repair" class="lean_decl">Oberwolfach.divisible_colour_repair</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    For every fixed \(r\ge 3\) and \(\alpha {\gt}0\), every sufficiently large graph of minimum degree at least \((\delta _{C_r}+\alpha )n\) has a fractional \(C_r\)-decomposition. No divisibility assumptions are needed here. </p>
+<p><i class="itshape">Manuscript label:</i> eq:threshold:cycle-fractional.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000127">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Choose an even multiple \(q\) of \(r\) before the order threshold. One common colouring event controls all class degrees and all ordered colour–reserve paths. Recolour distinct reserve edges to correct edge-count residues; then pair the odd-degree vertices and switch along physically edge-disjoint paths to correct all degree parities. The reserve complement is even because \(q\) is even. Quantitative degree losses are absorbed at the fixed positive margin. Each of the \(q+1\) complements is \(C_r\)-divisible and meets the ordinary decomposition threshold. Averaging their decompositions covers each original edge with its exact multiplicity \(q\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:signed-cycle-edge-isolator">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">B.4</span>
+    <span class="lemma_thmtitle">Signed isolation of one edge</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#bp:signed-cycle-edge-isolator">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000128"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0015.html#bp:ordinary-fractional-threshold">Theorem B.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.signed_cycle_edge_isolator" class="lean_decl">Oberwolfach.signed_cycle_edge_isolator</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.signed_cycle_vertex_load" class="lean_decl">Oberwolfach.signed_cycle_vertex_load</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fractional_cycle_coefficient_le_one" class="lean_decl">Oberwolfach.fractional_cycle_coefficient_le_one</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    At a fixed positive margin above the ordinary cycle threshold, every edge can be isolated by a signed weighting of actual cycle subgraphs. Each coefficient has absolute value at most one. The vertex load is one half at each endpoint of the chosen edge and zero elsewhere. </p>
+<p><i class="itshape">Manuscript label:</i> lem:four:edge-isolator.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000128">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Subtract fractional decompositions of the original graph and the graph with the specified edge deleted. The one-edge degree loss is proved explicitly. Every positive fractional coefficient is at most one by its edge-load equation. Double-counting the incident edges of each actual cycle gives the stated vertex-load identity. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:positive-ordinary-cycle-weights">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">B.5</span>
+    <span class="theorem_thmtitle">Positive ordinary cycle weights and pair loads</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#bp:positive-ordinary-cycle-weights">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000129"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0015.html#bp:ordinary-fractional-threshold">Theorem B.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.positive_ordinary_cycle_weights" class="lean_decl">Oberwolfach.positive_ordinary_cycle_weights</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.positive_ordinary_fractional_cycle_weights" class="lean_decl">Oberwolfach.positive_ordinary_fractional_cycle_weights</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinary_cycle_adjacent_pair_load" class="lean_decl">Oberwolfach.ordinary_cycle_adjacent_pair_load</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinary_cycle_disjoint_pair_load" class="lean_decl">Oberwolfach.ordinary_cycle_disjoint_pair_load</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    For each fixed cycle length and positive degree margin, there are positive constants and an order threshold, chosen before the host graph. Every supplied edge vector sufficiently close to one has exact positive cycle coefficients bounded above and below by constants times \(n^{2-r}\). In particular, the all-one vector gives a fractional cycle decomposition. The total weight through two incident edges is \(O(1/n)\), and through two disjoint edges it is \(O(1/n^2)\), for these same coefficients. </p>
+<p><i class="itshape">Manuscript label:</i> thm:four:dense-spread.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000129">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Sample a fixed number of vertices and independently retain physical edges with probabilities determined by the supplied vector. The successful induced graph has a fractional decomposition by the proved cycle threshold. Conditional-root concentration bounds the failed samples containing each specified edge. Average using the exact two-vertex inclusion probability; the \(r\)-vertex inclusion probability bounds each coefficient. The sample size is fixed before the host graph so that the approximation error is smaller than the positive correction radius. The proved convex coefficient theorem, with a positive baseline on every actual cycle, makes the edge loads exact. Injective encodings of physical cycles give the two pair-load bounds. This formal proof establishes the needed ordinary cycle result directly; it does not assume the general balanced-decomposition theorem quoted in the manuscript. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:positive-ordinary-wheel-weights">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">B.6</span>
+    <span class="theorem_thmtitle">Positive ordinary wheel weights</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#bp:positive-ordinary-wheel-weights">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000130"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0015.html#bp:signed-cycle-edge-isolator">Lemma B.4</a></li>
+          
+          <li><a href="sect0018.html#bp:ordinary-transfer-identities">Lemma E.37</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.positive_ordinary_wheel_weights" class="lean_decl">Oberwolfach.positive_ordinary_wheel_weights</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinary_wheel_correction" class="lean_decl">Oberwolfach.ordinary_wheel_correction</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinary_spoke_correction" class="lean_decl">Oberwolfach.ordinary_spoke_correction</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    The admissible induced-subgraph and transfer-configuration counts in the manuscript imply an exact positive ordinary wheel weighting. The tolerance is chosen before the host graphs and initial weights. Every final wheel weight lies between \(b_-n^{1-r}/2\) and \((b_++b_-/2)n^{1-r}\). </p>
+<p><i class="itshape">Manuscript label:</i> thm:pr:ordinary-wheel-weights.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000130">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Lift the proved signed edge isolator to wheels at each admissible hub and average over the actual configurations. Count configurations containing the fixed rim together with the isolated edge to bound every coefficient. Sum over ordered endpoint pairs with a factor of one half, retaining the undirected-edge multiplicity explicitly. Exact rim loads and the degree balance imply zero spoke-residual sum at every rim vertex. The labelled base-cycle and rooted-row construction gives an actual single-vertex transfer. Average over its configurations and over pairs of neighbouring hubs. Only pairs containing the fixed wheel’s hub contribute, cancelling the normalization by the spoke degree. Sum the resulting bounds and choose the tolerance to preserve the positive baseline on every wheel. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:ordinary-wheel-potential-stability">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">B.7</span>
+    <span class="lemma_thmtitle">Ordinary wheel resources and potential-load stability</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#bp:ordinary-wheel-potential-stability">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000131"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0015.html#bp:positive-ordinary-wheel-weights">Theorem B.6</a></li>
+          
+          <li><a href="sect0004.html#bp:weighted-stability">Lemma 3.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinaryWheelResources_card" class="lean_decl">Oberwolfach.ordinaryWheelResources_card</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinaryWheelResources_injective" class="lean_decl">Oberwolfach.ordinaryWheelResources_injective</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinary_wheel_physical_pair_load" class="lean_decl">Oberwolfach.ordinary_wheel_physical_pair_load</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinary_active_exact_loads" class="lean_decl">Oberwolfach.ordinary_active_exact_loads</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinary_active_pair_loads" class="lean_decl">Oberwolfach.ordinary_active_pair_loads</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinaryPotentialLoad_rim_degree_stability" class="lean_decl">Oberwolfach.ordinaryPotentialLoad_rim_degree_stability</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinaryPotentialLoad_spoke_degree_stability" class="lean_decl">Oberwolfach.ordinaryPotentialLoad_spoke_degree_stability</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    An ordinary \(r\)-wheel has exactly \(2r\) physical edges, and different wheels have different edge sets. Restricting the hypergraph vertices to actual host edges gives exact fractional degree one and pair load at most \(r^4B/n\) whenever the wheel coefficients are at most \(Bn^{1-r}\). On a fixed parent wheel family with these coefficients, changing at most \(d\) incident edges per vertex changes a root-omitted potential load by at most \(8r^4Bd/n\) for a rim root and \(4r^4Bd/n\) for a spoke root. The root need not be present in either host. This node does not assert the isolator-configuration or transfer-configuration potential estimates. </p>
+<p><i class="itshape">Manuscript label:</i> eq:loads:ordinary-potential-seed.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000131">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Injective encodings bound cycles through prescribed vertices; the fixed hub and free hub cases give the actual wheel pair loads. The potential load is a product over every physical edge except the root. Its difference is bounded by the total weight through the root and each changed edge. For changed edges meeting root vertices use the \(n^{-1}\) pair bound; for other changed edges use \(n^{-2}\). Sum these bounds using the actual row and column degrees of the two difference relations. Candidate families, coefficients and root omissions remain fixed throughout. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:sparse-alternating-correction">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">B.8</span>
+    <span class="theorem_thmtitle">Alternating corrections from intersection estimates</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#bp:sparse-alternating-correction">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000132"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.sparse_alternating_correction" class="lean_decl">Oberwolfach.sparse_alternating_correction</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   For every positive lower density bound there are positive constants \(\delta _0,C\) such that the degree, pair-intersection, triple-intersection and exceptional weighted-codegree hypotheses of the manuscript imply: every edge vector with zero row and column sums is a linear combination of the alternating vectors of actual ordered four-cycles. The sum of the absolute coefficients incident with each edge is at most \(C\| z\| _\infty \). The constants precede the graph, supplied density profile, error and exceptional sets. </p>
+<p><i class="itshape">Manuscript label:</i> lem:four:sparse-alternating.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000132">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The actual four-corner averaging operator is written as \(T=I+K+L\). The two negative contributions cancel by the zero column and row sums. The weighted-codegree, degree and pair-intersection estimates bound \(L\). Expanding \(K^2\) gives the actual triple-intersection kernel. Repeated column indices and exceptional row pairs are bounded separately, giving an error proportional to \(\delta +D/|A|+1/|B|\). The support factor of \(K\) is retained on missing edges. </p>
+<p>The operator \(E=I-T\) preserves the zero-marginal subspace and satisfies \(\| E^2z\| \le \| z\| /2\). In the formal proof, finite-dimensional linear algebra replaces the manuscript’s infinite series: this bound makes \(T\) injective and therefore surjective on that subspace. If \(Tw=z\), the identity \(w=z+Ez+E^2w\) bounds \(\| w\| \) by \(2(1+\| E\| )\| z\| \). The four-cycle coefficient bounds for \(Tw\) give the claimed incident load. No extra intersection assumption is introduced. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:positive-marked-wheel-weights">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">B.9</span>
+    <span class="theorem_thmtitle">Positive marked wheel weights</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#bp:positive-marked-wheel-weights">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000133"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0015.html#bp:sparse-alternating-correction">Theorem B.8</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.positive_marked_wheel_weights_numerical" class="lean_decl">Oberwolfach.positive_marked_wheel_weights_numerical</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_wheel_correction" class="lean_decl">Oberwolfach.marked_wheel_correction</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_spoke_correction" class="lean_decl">Oberwolfach.marked_spoke_correction</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.markedWheelRimLoad_physical" class="lean_decl">Oberwolfach.markedWheelRimLoad_physical</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.markedWheelSpokeLoad_physical_exact" class="lean_decl">Oberwolfach.markedWheelSpokeLoad_physical_exact</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    The marked numerical host estimates yield positive exact wheel weights. The length threshold precedes the cycle length; all coefficient and error constants precede the separation parameter and the host order. The spoke profiles are the supplied constant densities. The common-path family uses root-first coordinates and omits the four root spokes. These spokes are supplied only by the four-cycle used in the correction. </p>
+<p><i class="itshape">Manuscript label:</i> thm:weights:marked-numerical.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000133">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The proved marked capacity theorem corrects rim loads. Averaging cycles compatible with two hubs corrects spoke column sums. The remaining spoke residuals have zero row and column sums. The proved sparse alternating correction expresses each residual by actual four-cycles. A single common path tuple, used with both roots and both hubs, supplies its four-wheel transfer. The exact signed spoke equations and zero rim equations are proved on that same tuple family. Counting only four-cycles incident with the fixed wheel’s designated position bounds each resulting coefficient. The tolerance is then chosen to retain half of the initial lower bound. </p>
+<p>The root-first orders are explicitly permuted into canonical cycle coordinates. The ordinary-root order places the marked arc from the second to the third free label. The conversion is injective and does not require separation of the two roots. Separation and physical-map injectivity give loopless, distinct physical rim edges and the cross-collision condition. The physical load identities, with disjoint spoke types, identify the typed exact equations with the manuscript’s physical edge equations. Constant spoke intersection estimates imply the inverse-density estimates by an explicit normalization, with the original exceptional sets preserved. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0014.html" title="Whole-manuscript statement inventory"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0016.html" title="Further checked matching ingredients"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

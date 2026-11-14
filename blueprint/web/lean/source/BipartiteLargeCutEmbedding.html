@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BipartiteLargeCutEmbedding.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BipartiteLargeCutEmbedding.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BipartiteNormalizedCutDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A normalized large cut survives restriction to large embedded parts.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The cutoff change is explicit; the cut coefficient is not rescaled. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 14000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {X Y A B:Type} [Fintype X] [Fintype Y] [Fintype A] [Fintype B]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [DecidableEq X] [DecidableEq Y] [DecidableEq A] [DecidableEq B]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem bipartiteLargeCut_sum_restrict (L:X→Y→ℕ) (S:Finset X) (T:Finset Y):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (∑ x,∑ y,if x∈S∧y∈T then L x y else 0:ℕ)=bipartiteMatrixCut L S T:=by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   unfold bipartiteMatrixCut</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have he (x:X) (y:Y):(if x∈S∧y∈T then L x y else 0)=</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       if x∈S then (if y∈T then L x y else 0) else 0:=by split_ifs &lt;;&gt; simp_all</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   simp only [he,Finset.sum_ite_irrel,Finset.sum_const_zero,←Finset.sum_filter,</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     Finset.filter_mem_eq_inter,Finset.univ_inter]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> theorem bipartiteMatrixCut_embedding (f:A↪X) (g:B↪Y) (L:X→Y→ℕ) (S:Finset A) (T:Finset B):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     bipartiteMatrixCut L (S.image f) (T.image g)=bipartiteMatrixCut (fun x y=&gt;L (f x) (g y)) S T:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   unfold bipartiteMatrixCut</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   rw [Finset.sum_image (fun _ _ _ _ he=&gt;f.injective he)]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   apply Finset.sum_congr rfl</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   intro x hx</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   exact Finset.sum_image (fun _ _ _ _ he=&gt;g.injective he)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> </span>
+<span id="L31"><a href="#L31" class="ln">  31</a> theorem bipartiteLargeCut_embedding (f:A↪X) (g:B↪Y) (L:X→Y→ℕ)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hA:0&lt;Fintype.card A) (hB:0&lt;Fintype.card B)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (κ δ δA h:ℝ) (hκ:0&lt;κ) (hh:0≤h)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hAsize:κ*Fintype.card X≤(Fintype.card A:ℝ))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hBsize:κ*Fintype.card Y≤(Fintype.card B:ℝ))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hcutoff:1-2*δ≤κ*(1-2*δA)) (hcut:BipartiteLargeCut L δ h):</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     BipartiteLargeCut (fun x y=&gt;L (f x) (g y)) δA h:=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hAX:Fintype.card A≤Fintype.card X:=Fintype.card_le_of_injective f f.injective</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hBY:Fintype.card B≤Fintype.card Y:=Fintype.card_le_of_injective g g.injective</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hX:0&lt;Fintype.card X:=lt_of_lt_of_le hA hAX</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hY:0&lt;Fintype.card Y:=lt_of_lt_of_le hB hBY</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have ha:(0:ℝ)&lt;Fintype.card A:=by exact_mod_cast hA</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hb:(0:ℝ)&lt;Fintype.card B:=by exact_mod_cast hB</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hx:(0:ℝ)&lt;Fintype.card X:=by exact_mod_cast hX</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hy:(0:ℝ)&lt;Fintype.card Y:=by exact_mod_cast hY</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro S T hST</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hSratio:κ*((S.card:ℝ)/Fintype.card A)≤(S.card:ℝ)/Fintype.card X:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     rw [←mul_div_assoc]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     apply (div_le_div_iff₀ ha hx).mpr</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     nlinarith only [mul_le_mul_of_nonneg_left hAsize (Nat.cast_nonneg (α:=ℝ) S.card)]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hTratio:κ*((T.card:ℝ)/Fintype.card B)≤(T.card:ℝ)/Fintype.card Y:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     rw [←mul_div_assoc]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     apply (div_le_div_iff₀ hb hy).mpr</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     nlinarith only [mul_le_mul_of_nonneg_left hBsize (Nat.cast_nonneg (α:=ℝ) T.card)]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hlarge:1-2*δ&lt;((S.image f).card:ℝ)/Fintype.card X+((T.image g).card:ℝ)/Fintype.card Y:=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     rw [Finset.card_image_of_injective _ f.injective,Finset.card_image_of_injective _ g.injective]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hscaled:=mul_lt_mul_of_pos_left hST hκ</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     nlinarith only [hscaled,hcutoff,hSratio,hTratio]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hparent:=hcut (S.image f) (T.image g) hlarge</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   rw [bipartiteLargeCut_sum_restrict,bipartiteMatrixCut_embedding,</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     bipartite_normalized_cut_scale hX hY (S.image f) (T.image g) h,</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     Finset.card_image_of_injective _ f.injective,Finset.card_image_of_injective _ g.injective] at hparent</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   rw [bipartiteLargeCut_sum_restrict,bipartite_normalized_cut_scale hA hB S T h]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   apply le_trans _ hparent</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   apply mul_le_mul_of_nonneg_left _ hh</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   apply min_le_min</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   · exact mul_le_mul_of_nonneg_right (by exact_mod_cast hBY) (Nat.cast_nonneg S.card)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   · exact mul_le_mul_of_nonneg_right (by exact_mod_cast hAX) (Nat.cast_nonneg T.card)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a> </span>
+<span id="L70"><a href="#L70" class="ln">  70</a> end Oberwolfach</span></pre></html>

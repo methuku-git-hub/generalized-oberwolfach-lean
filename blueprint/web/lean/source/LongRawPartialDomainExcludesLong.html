@@ -1,0 +1,80 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongRawPartialDomainExcludesLong.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongRawPartialDomainExcludesLong.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongRawPartialDomainCard</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongRetainedPaddedIndexSet</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A source domain made from bounded-length components excludes every long component. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {n K:ℕ} {U X:Type} [Fintype U] [DecidableEq U] [Fintype X] [DecidableEq X]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem long_raw_partial_domain_excludes_long</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hK:3≤K) (F:U→SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d m:ℕ)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (e:X↪LongRawHubResource n U)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (M:Finset (RestrictedResource (mixedCandidateResources (longRawSeedResources (U:=U) π d m</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (fun i:Fin K=&gt;longPaddedSeedExponent i+2))) e))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (C:∀a:LongRawSelectedOrdinary π d m (fun i:Fin K=&gt;longPaddedSeedExponent i+2) e M,</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (F (longRawSelectedOrdinaryWheel π d m (fun i:Fin K=&gt;longPaddedSeedExponent i+2) e M a).val.2).ConnectedComponent)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hsize:∀a,Fintype.card (C a)=longPaddedSeedExponent</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (longRawSelectedOrdinaryPayload π d m (fun i:Fin K=&gt;longPaddedSeedExponent i+2) e M a).1+2):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀u v,K&lt;Fintype.card ((F u).connectedComponentMk v)→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       v∉longRawSourceDomain F π d m (fun i:Fin K=&gt;longPaddedSeedExponent i+2) e M C u :=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   intro u v hv hm</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   obtain ⟨a,ha⟩:=hm</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let ℓ:Fin K→ℕ:=fun i=&gt;longPaddedSeedExponent i+2</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hvcomp:(F u).connectedComponentMk v=longRawComponentAtHub F π d m ℓ e M C u a:=ha</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have heq:Fintype.card (longRawComponentAtHub F π d m ℓ e M C u a)=Fintype.card (C a.val):=</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     Fintype.card_congr (factorComponentHubEquiv F</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       ⟨(longRawSelectedOrdinaryWheel π d m ℓ e M a.val).val.2,C a.val⟩ u a.property)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hb:longPaddedSeedExponent (longRawSelectedOrdinaryPayload π d m ℓ e M a.val).1+2≤K:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     rw [long_padded_seed_length_eq_exponent]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     exact long_assigned_padded_length_upper hK _</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   rw [hvcomp,heq,hsize] at hv</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   dsimp only [ℓ] at hb</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   omega</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> theorem long_raw_partial_domain_contains_long_count</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hK:3≤K) (F:U→SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d m:ℕ)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (e:X↪LongRawHubResource n U)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (M:Finset (RestrictedResource (mixedCandidateResources (longRawSeedResources (U:=U) π d m</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (fun i:Fin K=&gt;longPaddedSeedExponent i+2))) e))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (C:∀a:LongRawSelectedOrdinary π d m (fun i:Fin K=&gt;longPaddedSeedExponent i+2) e M,</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (F (longRawSelectedOrdinaryWheel π d m (fun i:Fin K=&gt;longPaddedSeedExponent i+2) e M a).val.2).ConnectedComponent)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hsize:∀a,Fintype.card (C a)=longPaddedSeedExponent</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (longRawSelectedOrdinaryPayload π d m (fun i:Fin K=&gt;longPaddedSeedExponent i+2) e M a).1+2):</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∀u,(Finset.univ.filter (fun v:Fin n=&gt;K&lt;Fintype.card ((F u).connectedComponentMk v))).card ≤</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       Fintype.card {v:Fin n // v∉longRawSourceDomain F π d m (fun i:Fin K=&gt;longPaddedSeedExponent i+2) e M C u} :=by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro u</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let L:=Finset.univ.filter (fun v:Fin n=&gt;K&lt;Fintype.card ((F u).connectedComponentMk v))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let f:L→{v:Fin n // v∉longRawSourceDomain F π d m (fun i:Fin K=&gt;longPaddedSeedExponent i+2) e M C u}:=</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     fun v=&gt;⟨v.val,long_raw_partial_domain_excludes_long hK F π d m e M C hsize u v.val (Finset.mem_filter.mp v.property).2⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hf:Function.Injective f:=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     intro a b h</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     apply Subtype.ext</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     exact congrArg (fun v:{v:Fin n // v∉longRawSourceDomain F π d m (fun i:Fin K=&gt;longPaddedSeedExponent i+2) e M C u}=&gt;v.val) h</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hcard:=Fintype.card_le_of_injective f hf</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   simpa only [Fintype.card_coe] using hcard</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> </span>
+<span id="L57"><a href="#L57" class="ln">  57</a> theorem long_raw_partial_domain_excludes_long_of_length_bound</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (F:U→SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d m:ℕ) (ℓ:Fin K→ℕ) (hℓ:∀i,ℓ i≤K)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (e:X↪LongRawHubResource n U)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (M:Finset (RestrictedResource (mixedCandidateResources (longRawSeedResources (U:=U) π d m</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       ℓ)) e))</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (C:∀a:LongRawSelectedOrdinary π d m ℓ e M,</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (F (longRawSelectedOrdinaryWheel π d m ℓ e M a).val.2).ConnectedComponent)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (hsize:∀a,Fintype.card (C a)=ℓ (longRawSelectedOrdinaryPayload π d m ℓ e M a).1):</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     ∀u v,K&lt;Fintype.card ((F u).connectedComponentMk v)→</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       v∉longRawSourceDomain F π d m ℓ e M C u :=by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   intro u v hv hm</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   obtain ⟨a,ha⟩:=hm</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hvcomp:(F u).connectedComponentMk v=longRawComponentAtHub F π d m ℓ e M C u a:=ha</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have heq:Fintype.card (longRawComponentAtHub F π d m ℓ e M C u a)=Fintype.card (C a.val):=</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     Fintype.card_congr (factorComponentHubEquiv F</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       ⟨(longRawSelectedOrdinaryWheel π d m ℓ e M a.val).val.2,C a.val⟩ u a.property)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hb:ℓ (longRawSelectedOrdinaryPayload π d m ℓ e M a.val).1≤K:=hℓ _</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   rw [hvcomp,heq,hsize] at hv</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   omega</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> </span>
+<span id="L77"><a href="#L77" class="ln">  77</a> end Oberwolfach</span></pre></html>

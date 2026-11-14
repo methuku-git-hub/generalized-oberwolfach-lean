@@ -1,0 +1,146 @@
+module
+
+public import Oberwolfach.OrdinaryClassReserveBound
+public import Oberwolfach.CandidateOrdinaryMatchingPartialEmbeddingsWithTestsSupport
+public import Oberwolfach.OrdinaryMatchingPartialEmbeddingsWithTestsSupport
+public import Oberwolfach.OrdinaryCandidateClassReservation
+public import Oberwolfach.CandidateOrdinaryAssignedApproximateDensityBoundsDirectReserve
+public import Oberwolfach.CandidateOrdinaryAssignedEligibleFiberNormalizationDirectReserve
+public import Oberwolfach.CandidateOrdinaryAssignedMassAfterBoundedDeletionDirectReserve
+public import Oberwolfach.OrdinaryCandidateMatchingLocalRowsDirectReserve
+public import Oberwolfach.CandidateOrdinaryAssignedRelativeMassAfterDeletionDirectReserve
+public import Oberwolfach.CandidateOrdinaryMatchedPartialEmbeddingsWithSizesAfterDeletionDirectReserve
+public import Oberwolfach.OrdinaryMatchedPartialEmbeddingsWithSizesAfterDeletion
+public import Oberwolfach.OrdinaryAssignedMatchingAfterDeletionSupport
+public import Oberwolfach.OrdinaryMixedGenericPhysicalMatchingSupport
+public import Oberwolfach.OrdinaryAssignedMassAfterBoundedDeletion
+public import Oberwolfach.OrdinaryAssignedEligibleFiberNormalization
+public import Oberwolfach.OrdinaryPhysicalMatchingCardinality
+
+@[expose] public section
+/-! For every bounded physical rim deletion, match the actual retained
+ordinary factor-frequency tests on the same sample and control every physical
+rim and spoke row. -/
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxSize 65536
+set_option maxHeartbeats 3000000
+open scoped BigOperators
+noncomputable section
+namespace Oberwolfach
+attribute [local instance] Classical.propDecidable
+attribute [local instance 100000] Finset.decidableDforallFinset
+
+theorem ordinary_candidate_partial_embeddings_local_rows
+    (r K m d:ℕ) (hr:2≤r) (hK3:3≤K) (hm:7≤m) (hd:2≤d)
+    (hrM:2*(m+1)≤r) (hrO:∀i:Fin K,2*(longPaddedSeedExponent i+2)≤r)
+    (θ α γ Kcd BM:ℝ) (hθ:0<θ) (hθ1:θ≤1/100) (hα:0<α) (hγ:0<γ) (hKcd:0<Kcd) (hBM:0≤BM)
+    (hαbound:α≤θ/(1600*(K:ℝ)*(K:ℝ)))
+    (BO:Fin K→ℝ) (hBO:∀i,0≤BO i)
+    (hKpair:(∑i:Option (Fin K),(16:ℝ)*(match i with
+      | none=>((m:ℝ)+1)^4*BM
+      | some i=>((longPaddedSeedExponent i:ℝ)+2)^3*BO i))≤Kcd):
+    ∃ε:ℝ,0<ε ∧ ∃N:ℕ,∀n:ℕ,N≤n→0<n→
+    ∀(U:Type) [Fintype U] [DecidableEq U],Fintype.card U≤n→
+    ∀(F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)
+      (Allowed:Set ℕ) (hAllowed:∀u,AllowedCycleLengths (F u) Allowed)
+      (i₀:Fin K) (rsv ρ D:ℝ) (hs0:0≤rsv) (hs1:rsv≤1/100)
+      (hda:1/θ≤d) (hρ:0<ρ) (hρ1:ρ≤1) (hD:0<D) (hsize:ρ*D=2*(Fintype.card U:ℝ))
+      (hClassReserve:OrdinaryClassReserveBound F hF i₀ rsv)
+      (pstar:ℝ) (hpstar:0<pstar)
+      (P Del:SimpleGraph (Fin n)) (Inner:Finset (Fin n)) (π:Equiv.Perm (Fin n)) (δ:ℝ) (hDel:∀x,(Del.degree x:ℝ)≤δ)
+      (wM:MarkedWheel (Prod.fst:Fin n×Fin n→Fin n) Prod.snd Prod.fst Prod.snd m π (3*d)
+        (fun _ (_:U)=>True) (fun _ (_:U)=>True)→ℝ)
+      (hwM:∀W,0≤wM W ∧ wM W≤BM/(n:ℝ)^m)
+      (wO:∀i:Fin K,OrderedOrdinaryWheel (U:=U) π (3*d) (longPaddedSeedExponent i+2)→ℝ)
+      (hwO:∀i W,0≤wO i W ∧ wO i W≤BO i/(n:ℝ)^(longPaddedSeedExponent i+1))
+      (σ:∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Bool Bool e)
+      (τ t countErr:ℝ) (ht:0≤t) (hτ:τ≤1/2) (hcountErr:countErr≤pstar*n/2)
+      (lam:ℝ) (hlam:0≤lam) (hτ0:0≤τ) (hcount0:0≤countErr)
+      (hτrate:τ≤lam*pstar/4) (hcountRate:countErr≤lam*pstar*n/4)
+      (hslack:lam+γ*(1-θ+lam)<θ)
+      (weights:∀i:Fin K,OrdinaryCycle (ordinaryEligibleHost P π d) (longPaddedSeedExponent i+2)→ℝ)
+      (hNamed:wO=ordinaryAssignedUnshiftedSeed F hF i₀ rsv θ ((m:ℝ)+1) D (ordinaryEligibleHost P π d) π d weights)
+      (Cres:∀u,Finset (F u).ConnectedComponent)
+      (hCres:∀u c,c∈Cres u→Fintype.card c=i₀.val+1)
+      (hres:∀u,((i₀.val+1:ℕ):ℝ)*((Cres u).card:ℝ)=rsv*n),
+    let c:ℝ:=(m:ℝ)+1
+    let a:=ordinaryAssignedLongWeight F hF K θ c
+    let b:=ordinaryAssignedShortWeight F hF K i₀ rsv θ c
+    let p:=(∑u,(a u+b u))/D
+    let η:=fun i u=>ordinaryAssignedFrequencyCoefficient F hF K i₀ rsv θ c u i
+    let raw:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=>rawExpandedApproximateCollapse e (σ e)
+    let raw':=rawMarkedDeleteRims raw Del.edgeFinset
+    let old:=typedMarkedResourceState (ordinaryShiftedPairRims (ordinaryEligibleHost P π d) π d raw) (rawMarkedPairSpokes π d raw true true)
+    let state:=typedMarkedResourceState (ordinaryShiftedPairRims (ordinaryEligibleHost P π d) π d raw') (rawMarkedPairSpokes π d raw' true true)
+    let R:=ordinaryMixedGenericResources
+      (fun W:MarkedWheel (Prod.fst:Fin n×Fin n→Fin n) Prod.snd Prod.fst Prod.snd m π (3*d)
+        (fun _ (_:U)=>True) (fun _ (_:U)=>True)=>typedMarkedOccurrenceResources W)
+      (fun i (W:OrderedOrdinaryWheel (U:=U) π (3*d) (longPaddedSeedExponent i+2))=>orderedOrdinaryResources W)
+    let w:=ordinaryMixedGenericWeight wM wO
+    let target:=ordinaryMixedIdealTarget (m:ℝ) D p a b η
+    let loss:Option (Fin K)→ℝ:=fun i=>match i with
+      | none=>22*((m:ℝ)+1)^4*BM
+      | some i=>10*((longPaddedSeedExponent i:ℝ)+2)^4*BO i
+    let terr:=t+(∑i,loss i)*δ/(n:ℝ)
+    let φ:=ordinaryMixedPhysicalResource (U:=U) π
+    let W:=PhysicalSampledActive φ state
+    let Cand:=PhysicalSampledCandidate (mixedCandidateResources R) state
+    let Q:=physicalSampledCandidateSet φ (mixedCandidateResources R) state
+    let rows:=fun j:OrdinaryPhysicalRowIndex (Fin n) U=>physicalSampledRow φ state (ordinaryPhysicalRow j)
+    let ι:W↪Sym2 (Fin n)⊕(Fin n×U):=Function.Embedding.subtype _
+    let localRows:=fun v:Fin n=>ordinaryLocalRimIncidence ι v Inner
+    let tests:=OrdinaryAssignedRetainedHubTest F hF i₀ rsv θ
+    let g:=fun z:tests=>fun c:Cand=>ordinaryAssignedRetainedHubIndicator F hF i₀ rsv θ π (3*d) m longPaddedSeedExponent z c.val;
+    (∀u,pstar≤b u)→(terr≤θ/(800*(K:ℝ)))→(terr≤lam*(θ/(100*(K:ℝ)))/4)→
+    (4*((K:ℝ)+1)*terr+τ≤ε)→
+    (∀i v,old v=true→|resourcePatternLoad (R i) (w i) (fun _ _=>true) v old-target i v|≤t+τ*target i v)→
+    (∀u,|rawMarkedRestrictedSpokeCol π d (fun e=>σ (Sum.inr e)) true true false u Finset.univ-b u*n|≤countErr)→
+    ∃L:Finset Cand,
+      let RM:=fun W:MarkedWheel (Prod.fst:Fin n×Fin n→Fin n) Prod.snd Prod.fst Prod.snd m π (3*d)
+        (fun _ (_:U)=>True) (fun _ (_:U)=>True)=>typedMarkedOccurrenceResources W
+      let A:=fun u=>OrdinaryPhysicalUnmarkedHub (K:=K) π d m RM state L u
+      let payload:=fun u=>ordinaryPhysicalUnmarkedPayload π d m RM state L u;
+      (∀z:tests,|((longPaddedSeedExponent z.val.1+2:ℕ):ℝ)*(∑x:Cand,g z x*mixedCandidateWeight w x.val)-
+        (1-θ)*ordinaryAssignedKeptFraction F hF K i₀ rsv θ z.val.2 z.val.1*n|≤
+        lam*ordinaryAssignedKeptFraction F hF K i₀ rsv θ z.val.2 z.val.1*n) ∧
+      (∀x∈L,0<mixedCandidateWeight w x.val) ∧
+      (∀x∈L,∀y∈L,x≠y→Disjoint (Q x) (Q y)) ∧
+      (∀j,(((rows j)\L.biUnion Q).card:ℝ)≤max α γ*n) ∧
+      (∀v,(((localRows v)\L.biUnion Q).card:ℝ)≤max (α*n) (γ*Inner.card)) ∧
+      (∀z,(1-γ)*(∑x:Cand,g z x*mixedCandidateWeight w x.val)≤∑x∈L,g z x) ∧
+      (∀z,(∑x∈L,g z x)≤(1+γ)*(∑x:Cand,g z x*mixedCandidateWeight w x.val)) ∧
+      ∀u,∃f:A u↪↥(Finset.univ\Cres u),
+        (∀a,Fintype.card (f a).val=(a.val.val.1.getD i₀).val+1) ∧
+        ∃g:∀a,(f a).val↪Fin n,
+          (∀a,Set.range (g a)=Set.range (payload u a).2.1.val) ∧
+          (∀a (x y:(f a).val),(f a).val.toSimpleGraph.Adj x y↔
+            (ordinaryWheelRim (orderedOrdinaryUniversalWheel (by have h:=long_padded_seed_exponent_positive (payload u a).1;omega) (payload u a).2)).Adj (g a x) (g a y)) ∧
+        ∃ψ:{v:Fin n // ∃a,v∈((f a).val).supp}↪Fin n,
+          ∀a (x:(f a).val),ψ ⟨x.val,⟨a,x.property⟩⟩=g a x :=by
+  obtain ⟨ε,hε,N,hmatch⟩:=ordinary_candidate_matching_local_rows_direct_reserve r K m d hr hK3 hm hd hrM hrO θ α γ Kcd BM hθ hθ1 hα hγ hKcd hBM hαbound BO hBO hKpair
+  refine ⟨ε,hε,N,?_⟩
+  intro n hn hn0 U _ _ hU F hF Allowed hAllowed i₀ rsv ρ D hs0 hs1 hda hρ hρ1 hD hsize hClassReserve pstar hpstar P Del Inner π δ hDel wM hwM wO hwO σ τ t countErr ht hτ hcountErr lam hlam hτ0 hcount0 hτrate hcountRate hslack weights hNamed Cres hCres hres
+    c a b p η raw raw' old state R w target loss terr φ W Cand Q rows ι localRows tests g hbstar hterr hrelative herr hload hcount
+  have hc:8≤c:=by dsimp [c];exact_mod_cast (show 8≤m+1 by omega)
+  have hdens:=ordinary_assigned_approximate_density_bounds_candidate_direct_reserve hn0 F hF K (by omega) i₀ rsv θ c ρ D d hd
+    hs0 hs1 hθ hθ1 hc hda hρ hρ1 hD hsize Allowed hAllowed hClassReserve
+  have hb:∀u,0<b u ∧ b u≤1:=by
+    intro u
+    exact ⟨lt_of_lt_of_le hdens.1 (hdens.2.2.2.1 u).1,(hdens.2.2.2.1 u).2⟩
+  obtain ⟨L,hsupp,hdis,hrows,hlocal,hlo,hhi⟩:=hmatch n hn hn0 U hU F hF Allowed hAllowed i₀ rsv ρ D
+    hs0 hs1 hda hρ hρ1 hD hsize hClassReserve pstar hpstar P Del Inner π δ hDel wM hwM wO hwO σ τ t countErr ht hτ hcountErr
+    hbstar hterr herr hload hcount
+  refine ⟨L,?_⟩
+  intro RM A payload
+  have hdev:=ordinary_assigned_relative_mass_after_bounded_deletion_candidate_direct_reserve hn0 F hF Allowed hAllowed hK3 i₀ rsv θ c
+    hs0 hs1 hθ hθ1 hc hClassReserve b (fun _=>rfl) hb pstar lam hpstar hbstar hlam π d m (by omega) wM wO BM hBM hwM BO hBO hwO
+    hU (ordinaryEligibleHost P π d) σ Del δ hDel a D p τ t countErr hτ0 ht hcount0 hτrate hcountRate hrelative hload hcount
+  refine ⟨?_,hsupp,hdis,hrows,hlocal,hlo,hhi,?_⟩
+  · convert hdev using 1 <;> (try simp only [g,tests]) <;> congr! 5
+  · have hh:=ordinary_assigned_matched_partial_embeddings_with_sizes_after_deletion_candidate_direct_reserve hn0 F hF Allowed hAllowed hK3 i₀ rsv θ c
+      hs0 hs1 hθ hθ1 hc hClassReserve b (fun _=>rfl) hb pstar lam hpstar hbstar hlam π d m (by omega) wM wO BM hBM hwM BO hBO hwO
+      hU (ordinaryEligibleHost P π d) D weights hNamed σ Del δ hDel a p τ t countErr hτ0 ht hcount0 hτrate hcountRate Cres hCres hres γ hγ.le hslack
+      hrelative hload hcount L hsupp hlo hhi hdis
+    convert hh using 1 <;> congr! 5
+end Oberwolfach

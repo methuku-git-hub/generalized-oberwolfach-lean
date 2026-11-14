@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FirstVortexSourceOutcomeWithLoad.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FirstVortexSourceOutcomeWithLoad.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FirstVortexActualSourceCompleteMatchingLoad</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongSelectedAlignedSourceOutcome</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.LongSelectedAlignedSourceWithLoad</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 3000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> local instance firstMatchingSourceOutcomeLoadFin (n:ℕ):DecidableEq (Fin n):=Classical.decEq _</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem first_vortex_source_outcome_with_complete_matching_load</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (α lam ε δ θ eps ξ:ℝ) (d K m:ℕ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hα:0&lt;α) (hlam:0&lt;lam) (hε:0&lt;ε) (hδ:0&lt;δ) (hθ:0&lt;θ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hθδ:10*θ≤δ) (hθlocal:θ≤δ/32) (hθhi:θ≤1/100)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hlamlocal:lam≤δ*ε/32) (hspacing:1/(d:ℝ)≤θ/1024)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hd:3≤d) (hK:1≤K) (hm:1≤m)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (heps:3*eps≤lam*(θ/(100*(K:ℝ)^2))) (hξ:4*ξ≤eps/2):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃N:ℕ,∀n:ℕ,N≤n→∀(U:Type) [Fintype U] [DecidableEq U]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (ℓ:Fin K→ℕ)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (Dv mm:ℕ) (β:ℝ) (Vort:Vortex U P Dv β ε mm)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hreg:P.IsRegularOfDegree Dv) (hDv:0&lt;Dv) (hρhi:initialIndexDensity U Dv≤1) (hU:0&lt;Fintype.card U) (hmm:0&lt;mm)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (σE:∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Bool Bool e)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (DelG:SimpleGraph (Fin n)) (D:Fin n→Fin n→Prop) (t:ℕ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (Jret:StartRetentionOutcome (rawStartHubSet π d (fun e=&gt;rawExpandedApproximateCollapse (Sum.inr e) (σE (Sum.inr e))) false) t),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let raw:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=&gt;rawExpandedApproximateCollapse e (σE e)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let Del:=DelG.edgeFinset</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let H:=Vort.extendedIndices 1</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let A:=Vort.extendedVertices 1</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let σ:=fun e=&gt;raw (Sum.inr e)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let R:=mixedCandidateResources (longRawSeedResources (U:=U) π d m ℓ)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let T:=bernoulliVertexSet (longRawHubState P π d raw true true)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let S:=longRawSurvivingResources P π d raw true true Del</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let hST:=long_raw_surviving_resources_subset P π d raw true true Del</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let q:=survivingCandidateEmbedding R S T hST</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let Q:=restrictedResourceSet R (Function.Embedding.subtype (·∈S))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ∀(M:Finset (RestrictedResource R (Function.Embedding.subtype (·∈S)))),</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let Used:=physicalRimCandidateUnion (markedRawSampledPhysicalEmbedding P π d raw true true)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (restrictedResourceSet R (Function.Embedding.subtype (·∈T))) (M.map q)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let P₀:=longPhysicalStateGraph P σE {0,1,2,3,4}\Used</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let Sel:=longSelectedPhysicalGraph P π d σE</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let Kbad:=longRequiredPhysicalGraph P P₀ Sel π d A D (fun x y=&gt;Used.Adj x y)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∀(F:U→SimpleGraph (Fin n)) (hF:∀w,(F w).IsRegularOfDegree 2)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (C₀ a γ δDel:ℝ) (hC:1≤C₀) (hehi:ε≤α/(1000*C₀)) (hlamhi:lam≤α/128)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hγ:0≤γ) (ha:a≤lam/(10*d)) (hγrate:γ≤lam/(10*d))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hDel:∀x,(DelG.degree x:ℝ)≤δDel) (hδDel:δDel≤ξ*n)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hrow:∀v∈A,|(((P.neighborFinset v∩A).filter (fun w=&gt;(σE (Sum.inl s(v,w))).1=4)).card:ℝ)-</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (2*(∑w:U,(1-(1/100:ℝ)-(1/100:ℝ)/(m:ℝ)-longAssignedApproxMarkedWeight F hF K m θ w-longAssignedApproxOrdinaryWeight F hF K m θ w))/(Dv:ℝ))*(P.neighborFinset v∩A).card|&lt;(n:ℝ)^(3/4:ℝ))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hmatch:∀i,((longRawIncidenceSet S i\M.biUnion Q).card:ℝ)≤max (a*n) (γ*(longRawIncidenceSet S i).card))</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hboundary:∀v∈A,((rawIntervalBoundaryHubSet π d σ H v).card:ℝ)≤4*(H.card:ℝ)/d+4*(A.card:ℝ)^(3/4:ℝ))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (absorber:U→Finset (Fin n))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (ζ ρ:ℝ) (hζ:ζ≤θ/4096) (hρ:ρ≤θ/4096) (hζ0:0≤ζ)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hscale:max a γ*n≤ρ*A.card)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hrows:RetainedRestrictionLocalGood π d σ false t A H ζ Jret)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (hfixed:∀w∈H,|rawIntervalUnassignedHubCountOn π d σ w A-</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (A.card:ℝ)*(1-(∑g,longAssignedIntervalProbability F hF K m θ w g)-</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         (∑j,longAssignedSpokeProbability F hF K m θ w j))|&lt;(A.card:ℝ)^(3/4:ℝ))</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (hcolumn:∀v∈A,|rawIntervalUnassignedColumnCount π d σ v H-</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       ∑w∈H,(1-(∑g,longAssignedIntervalProbability F hF K m θ w g)-</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (∑j,longAssignedSpokeProbability F hF K m θ w j))|&lt;(A.card:ℝ)^(3/4:ℝ))</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (hsource:LongSelectedAlignedSourceOutcome hU F P π d m ℓ raw t Jret σE (M.map q)),</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     LongSelectedAlignedSourceWithLoad hU F P π d m ℓ raw t Jret σE H A Kbad absorber δ (M.map q) :=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨N,hN⟩:=first_vortex_actual_source_complete_matching_load α lam ε δ θ eps ξ d K m hα hlam hε hδ hθ hθδ hθlocal hθhi hlamlocal hspacing hd hK hm heps hξ</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   refine ⟨N,?_⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   intro n hn U _ _ P π ℓ Dv mm β Vort hreg hDv hρhi hU hmm σE DelG D t Jret raw Del H A σ R T S hST q Q M Used P₀ Sel Kbad F hF C₀ a γ δDel hC hehi hlamhi hγ ha hγrate hDel hδDel hrow hmatch hboundary absorber ζ ρ hζ hρ hζ0 hscale hrows hfixed hcolumn hsource</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   unfold LongSelectedAlignedSourceOutcome at hsource</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   obtain ⟨Dsrc,orig,hpair,hcycles,hwhole,hArcs,E,halign,hres,ext,paths,ψ,assign,data,hprops,pieces,hgraph,harcs,Pack,hdis,hsub,hLayer,hAvoid,hhub,hsize⟩:=hsource</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hload:=hN n hn U P π ℓ Dv mm β Vort hreg hDv hρhi hmm σE DelG D t Jret M F hF assign hhub data ext ψ E paths C₀ a γ δDel hC hehi hlamhi hγ ha hγrate hDel hδDel hrow hmatch hboundary absorber ζ ρ hζ hρ hζ0 hscale hrows hfixed hcolumn hprops</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   unfold LongSelectedAlignedSourceWithLoad</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   exact ⟨Dsrc,orig,hpair,hcycles,hwhole,hArcs,E,halign,hres,ext,paths,ψ,assign,data,hprops,hload,pieces,hgraph,harcs,Pack,hdis,hsub,hLayer,hAvoid,hhub,hsize⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

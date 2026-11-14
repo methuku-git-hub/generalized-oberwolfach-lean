@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongAssignedTotalSamplingMass.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongAssignedTotalSamplingMass.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongAssignedFractionTotal</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongAssignedSamplingRecipe</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The original long-interval and retained ordinary-cycle probabilities</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> cover all but the stated θ-fraction of a factor. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 10000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem long_assigned_interval_probability_sum</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U] (hn:0&lt;n) (m:ℕ) (hm:0&lt;m)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2) (θ:ℝ) (u:U):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ((m:ℝ)+1)*(∑g:Bool,longAssignedIntervalProbability F hF K m θ u g)=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (1-θ)*ordinaryAssignedFraction F hF K u none:=by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hm0:(m:ℝ)≠0:=by exact_mod_cast (Nat.ne_of_gt hm)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hmp:(m:ℝ)+1≠0:=by positivity</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   simp only [Fintype.sum_bool,longAssignedIntervalProbability,longAssignedApproxMarkedWeight,Bool.false_eq_true,↓reduceIte]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   field_simp</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   ring</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> theorem long_assigned_sampling_mass_lower</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U] (hn:0&lt;n) (hK:0&lt;K)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (m:ℕ) (hm:0&lt;m) (F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (θ:ℝ) (hθ:0≤θ) (hθ1:θ≤1) (u:U):</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     1-(101/100:ℝ)*θ≤((m:ℝ)+1)*(∑g:Bool,longAssignedIntervalProbability F hF K m θ u g)+</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (1-θ)*(∑i:Fin K,longAssignedKeptFraction F hF K θ i u):=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hp:=long_assigned_retained_fraction_mass hn hK F hF θ hθ u</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hh:=mul_le_mul_of_nonneg_left hp (show 0≤1-θ by linarith)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   rw [long_assigned_interval_probability_sum hn m hm F hF θ u]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   nlinarith [sq_nonneg θ]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> end Oberwolfach</span></pre></html>

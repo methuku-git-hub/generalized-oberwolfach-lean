@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryExpansionRootCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryExpansionRootCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryExpansionDegrees</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.CanonicalEdgeDarts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The actual edge and spoke identifiers satisfy the endpoint counts</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> required by the finite expansion construction. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 4000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem actual_edge_endpoint_count (G : SimpleGraph V) (a : V) :</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (Finset.univ.filter (fun e : G.edgeFinset =&gt; a=e.val.out.1)).card+</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (Finset.univ.filter (fun e : G.edgeFinset =&gt; a=e.val.out.2)).card=G.degree a := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   rw [card_filter_naturalIndicator,card_filter_naturalIndicator,←Finset.sum_add_distrib]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hs : (∑ e : G.edgeFinset,naturalIndicator (a∈e.val))=G.degree a := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     rw [Finset.sum_coe_sort G.edgeFinset (fun e : Sym2 V =&gt; naturalIndicator (a∈e))]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     calc</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       _ = ∑ e∈G.edgeFinset,if a∈e then 1 else 0 := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         apply Finset.sum_congr rfl</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         intro e _</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         by_cases h : a∈e &lt;;&gt; simp [naturalIndicator,h]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       _ = (G.edgeFinset.filter (fun e =&gt; a∈e)).card := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         rw [Finset.card_eq_sum_ones,Finset.sum_filter]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       _ = G.degree a := by rw [←G.incidenceFinset_eq_filter,G.card_incidenceFinset_eq_degree]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   rw [←hs]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   apply Finset.sum_congr rfl</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro e _</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have he : s(e.val.out.1,e.val.out.2)=e.val := by rw [Sym2.mk];exact e.val.out_eq</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hm : a∈e.val ↔ a=e.val.out.1 ∨ a=e.val.out.2 := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     calc</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (a∈e.val) ↔ a∈s(e.val.out.1,e.val.out.2) := by rw [he]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       _ ↔ _ := Sym2.mem_iff</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hn := (edge_out_adj G e).ne</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   by_cases h1 : a=e.val.out.1 &lt;;&gt; by_cases h2 : a=e.val.out.2</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   all_goals simp_all [naturalIndicator]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem actual_spoke_row_count (H : V → U → Prop) (a : V) :</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (Finset.univ.filter (fun j : {e : V×U // H e.1 e.2} =&gt; a=j.val.1)).card=</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (Finset.univ.filter (H a)).card := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let e : {j : {e : V×U // H e.1 e.2} // a=j.val.1} ≃ {b : U // H a b} := {</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     toFun := fun j =&gt; ⟨j.val.val.2,by have h:=j.val.property;rw [←j.property] at h;exact h⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     invFun := fun b =&gt; ⟨⟨(a,b.val),b.property⟩,rfl⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     left_inv := by intro j;apply Subtype.ext;apply Subtype.ext;exact Prod.ext j.property rfl</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     right_inv := by intro b;rfl }</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   simpa only [Fintype.card_subtype] using Fintype.card_congr e</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> theorem actual_spoke_hub_count (H : V → U → Prop) (b : U) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (Finset.univ.filter (fun j : {e : V×U // H e.1 e.2} =&gt; b=j.val.2)).card=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (Finset.univ.filter (fun a =&gt; H a b)).card := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   let e : {j : {e : V×U // H e.1 e.2} // b=j.val.2} ≃ {a : V // H a b} := {</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     toFun := fun j =&gt; ⟨j.val.val.1,by have h:=j.val.property;rw [←j.property] at h;exact h⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     invFun := fun a =&gt; ⟨⟨(a.val,b),a.property⟩,rfl⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     left_inv := by intro j;apply Subtype.ext;apply Subtype.ext;exact Prod.ext rfl j.property</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     right_inv := by intro a;rfl }</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   simpa only [Fintype.card_subtype] using Fintype.card_congr e</span>
+<span id="L60"><a href="#L60" class="ln">  60</a> </span>
+<span id="L61"><a href="#L61" class="ln">  61</a> theorem actual_edge_spoke_expansion_balance {W : Type*} [Fintype W] [DecidableEq W]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (C : SimpleGraph W) (z o : W) (hzo : C.Adj z o) (hC : C.IsRegularOfDegree 2)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (G : SimpleGraph V) (H : V → U → Prop)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (hbal : ∀ a,G.degree a=2*(Finset.univ.filter (H a)).card) :</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     ∀ a,(ordinaryExpansionRim (J:={e : V×U // H e.1 e.2}) C z o</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (fun e : G.edgeFinset =&gt; e.val.out.1) (fun e : G.edgeFinset =&gt; e.val.out.2)).degree a=</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       2*(Finset.univ.filter (ordinaryExpansionSpokes z</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         (fun j : {e : V×U // H e.1 e.2} =&gt; j.val.1) (fun j =&gt; j.val.2) a)).card := by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   apply ordinaryExpansion_row_balance C z o hzo hC</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   intro a</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   rw [actual_edge_endpoint_count,actual_spoke_row_count,hbal]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> </span>
+<span id="L73"><a href="#L73" class="ln">  73</a> theorem actual_edge_spoke_expansion_divisibility {W : Type*} [Fintype W] [DecidableEq W]</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (G : SimpleGraph V) (H : V → U → Prop) (r : ℕ) (hW : Fintype.card W=r)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (z : W) (hdiv : ∀ b,r ∣ (Finset.univ.filter (fun a =&gt; H a b)).card) :</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     ∀ b,r ∣ (Finset.univ.filter (fun a =&gt; ordinaryExpansionSpokes (E:=G.edgeFinset) z</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       (fun j : {e : V×U // H e.1 e.2} =&gt; j.val.1) (fun j =&gt; j.val.2) a b)).card := by</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   apply ordinaryExpansion_hub_divisibility r hW</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   intro b</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   rw [actual_spoke_hub_count]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   exact hdiv b</span>
+<span id="L82"><a href="#L82" class="ln">  82</a> </span>
+<span id="L83"><a href="#L83" class="ln">  83</a> end Oberwolfach</span></pre></html>

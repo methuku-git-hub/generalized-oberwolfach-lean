@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedInnerEndpointSizesAfterPackings.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedInnerEndpointSizesAfterPackings.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedInnerNeighbourhoodsAfterDeepPacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedEndpointClassSizes</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Endpoint classes are formed in the actual host after both earlier</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> packings. The second packing avoids the entire inner star, so only the</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> first packing enters these error budgets, including at external roots. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 16000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U Γ Color E K:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   {tail head:E→V} {ktail khead:K→V} {πD:Equiv.Perm V} {mD bD:ℕ} {H₀ HK:V→U→Prop}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_inner_endpoint_sizes_after_packings</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (MD:Finset (MarkedWheel tail head ktail khead mD πD bD H₀ HK))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (A:Finset V) (B:Finset U)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hstar:(MD.biUnion markedWheelPhysicalResources).filter (markedStarResource A B)=∅)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d h:ℕ) (hh:3≤h) (hA:∀ x,π x∈A↔x∈A)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (n:ℕ) (omega t rho:ℝ) (ho:0&lt;omega) (ht:0&lt;t) (hrho:0&lt;rho) (hrho1:rho≤1)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (r:ℕ) (hst:(r+4:ℝ)*t≤1) (hBn:omega*n≤(B.card:ℝ))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (q:U→Γ→ℝ) (s:U→Color→ℝ) (g:Γ) (j:Color)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hq:∀ u∈B,q u g=t) (hs:∀ u∈B,s u j=(r+4:ℝ)*t)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (errR errI δP δR δV δU:ℝ)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (heR:0≤errR) (heI:0≤errI) (hdP:0≤δP) (hdR:0≤δR) (hdV:0≤δV) (hdU:0≤δU)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hparent:∀ x,|((P.neighborFinset x∩A).card:ℝ)-2*B.card/rho|≤δP)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hRsmall:errR+h*(δR+δU)+(6*(d:ℝ)+1)+δP≤t*omega*n/4)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hIsmall:errI+h*δV≤t*omega*n/4)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hr:MarkedRowsWithSpokes P π d h A (rho*((r+4:ℝ)*t)/2) (rho*t/2) q s g j errR σ H)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hi:MarkedIndicesWithSpokes π d h B q s g j errI σ H)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (ER:SimpleGraph V) (ES:SimpleGraph (V⊕U))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hrim:∀ x,(ER.degree x:ℝ)≤δR) (hrow:∀ x,(ES.degree (Sum.inl x):ℝ)≤δV)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hcol:∀ u,(ES.degree (Sum.inr u):ℝ)≤δU):</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let σ&#x27;:=rawMarkedDeleteRims σ (ER⊔markedPackingRimGraph MD).edgeFinset</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let H&#x27;:=markedDeletePhysicalSpokes H (ES⊔markedFiniteSpokeGraph (MD.biUnion markedWheelSpokePairs));</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (∀ mark incoming x,(t*omega/2)*n≤</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       ((markedEndpointLabels P π d A (mark,incoming,x) σ&#x27;).card:ℝ)) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ b x,(t*omega/2)*n≤((B.filter (H&#x27; b x)).card:ℝ)) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ x,((markedEndpointLabels P π d A (true,false,x) σ&#x27;).card:ℝ)+(t*omega/4)*n≤</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (B.filter (H&#x27; false x)).card):=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   intro σ&#x27; H&#x27;</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨hrows,hidx⟩:=marked_inner_neighbourhoods_after_both_packings MD A B hstar P π d h hA</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (rho*((r+4:ℝ)*t)/2) (rho*t/2) q s g j errR errI δR δV δU hdR hdV hdU σ H hr hi ER ES hrim hrow hcol</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hc:(r+5:ℕ)≥4:=by omega</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hrc:(((r+5:ℕ):ℝ)-1)=(r+4:ℝ):=by push_cast;ring</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hs&#x27;:∀ u∈B,s u j=(((r+5:ℕ):ℝ)-1)*t:=by simpa only [hrc] using hs</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hr&#x27;:MarkedRowsWithSpokes P π d h A (rho*((((r+5:ℕ):ℝ)-1)*t)/2) (rho*t/2)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       q s g j (errR+h*(δR+δU)) σ&#x27; H&#x27;:=by simpa only [hrc] using hrows</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   obtain ⟨hL,hT,hgap⟩:=marked_endpoint_class_sizes P π d h hh A B hA n omega t rho ho ht hrho hrho1</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (r+5) hc (by simpa only [hrc] using hst) hBn q s g j hq hs&#x27;</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (errR+h*(δR+δU)) (errI+h*δV) δP (t*omega/8) (by positivity) (by positivity) hdP hparent</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     hRsmall hIsmall le_rfl σ&#x27; H&#x27; hr&#x27; hidx</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   refine ⟨hL,hT,?_⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   intro x</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   convert hgap x using 1 &lt;;&gt; ring</span>
+<span id="L59"><a href="#L59" class="ln">  59</a> </span>
+<span id="L60"><a href="#L60" class="ln">  60</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,105 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RetainedIntervalIdentities.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RetainedIntervalIdentities.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RetainedIntervalFamily</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Exact retained interval degrees: each start occurs at t hubs and each</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> vertex is covered at d*t hubs. These are deterministic identities of the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> retained sample, not expectation statements. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 2200000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U Γ Color : Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem retainedIntervalCovered_unique (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (σ : RawIntervalOutcome V Γ Color) (R : V→Γ→Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hR : ∀ a g,R a g → rawIntervalColouredStart π d σ a g) (x : V) (g h : Γ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hg : retainedIntervalCovered π d R x g) (hh : retainedIntervalCovered π d R x h) : g=h := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   obtain ⟨a,ha,hxa⟩ := hg</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   obtain ⟨b,hb,hxb⟩ := hh</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   exact rawIntervalCovered_unique π d σ x g h ⟨a,hR a g ha,hxa⟩ ⟨b,hR b h hb,hxb⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem retainedIntervalState_interval_iff (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (σ : RawIntervalOutcome V Γ Color) (R : V→Γ→Prop)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hR : ∀ a g,R a g → rawIntervalColouredStart π d σ a g) (x : V) (g : Γ) :</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     retainedIntervalState π d σ R x=some (Sum.inl g) ↔ retainedIntervalCovered π d R x g := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   unfold retainedIntervalState</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   split_ifs with hg hb</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · have hh := Classical.choose_spec hg</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     constructor</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     · intro he</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       have he&#x27; : Classical.choose hg=g := Sum.inl.inj (Option.some.inj he)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       exact he&#x27; ▸ hh</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     · intro he</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       rw [retainedIntervalCovered_unique π d σ R hR x _ _ hh he]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · constructor</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     · intro he;cases he</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · intro he;exact (hg ⟨g,he⟩).elim</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   · constructor</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     · intro he</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       cases hc : σ (Sum.inr (Sum.inr x)) &lt;;&gt; simp [hc] at he</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     · intro he;exact (hg ⟨g,he⟩).elim</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> </span>
+<span id="L45"><a href="#L45" class="ln">  45</a> theorem retainedRawStart_selected_iff (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (σ : RawIntervalFamilyOutcome V U Γ Color) (g : Γ) (t : ℕ)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (J : StartRetentionOutcome (rawStartHubSet π d σ g) t) (u : U) (a : V) :</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     retainedRawStart π d σ g t J u a g ↔ u∈startRetainedHubs (rawStartHubSet π d σ g) t J a := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   constructor</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   · intro h;exact h.2 rfl</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · intro h</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have ha := startRetainedHubs_subset (rawStartHubSet π d σ g) t J a h</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hr : rawIntervalColouredStart π d (fun e=&gt;σ (u,e)) a g := (Finset.mem_filter.mp ha).2</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact ⟨hr,fun _=&gt;h⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> </span>
+<span id="L56"><a href="#L56" class="ln">  56</a> theorem retainedRawStart_card (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (σ : RawIntervalFamilyOutcome V U Γ Color) (g : Γ) (t : ℕ)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (J : StartRetentionOutcome (rawStartHubSet π d σ g) t) (a : V) :</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (Finset.univ.filter (fun u=&gt;retainedRawStart π d σ g t J u a g)).card=t := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   simp only [retainedRawStart_selected_iff,Finset.filter_mem_eq_inter,Finset.univ_inter]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   exact startRetainedHubs_card _ _ _ _</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> </span>
+<span id="L63"><a href="#L63" class="ln">  63</a> theorem retainedRawFamily_covered_hubs (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (σ : RawIntervalFamilyOutcome V U Γ Color) (g : Γ) (t : ℕ)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (J : StartRetentionOutcome (rawStartHubSet π d σ g) t) (x : V) :</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     Finset.univ.filter (fun u=&gt;retainedRawFamilyState π d σ g t J (x,u)=some (Sum.inl g))=</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (permutationWindow π (d-1) 0 x).biUnion (fun a=&gt;startRetainedHubs (rawStartHubSet π d σ g) t J a) := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   ext u</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   simp only [Finset.mem_filter,Finset.mem_univ,true_and,Finset.mem_biUnion,retainedRawFamilyState]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   rw [retainedIntervalState_interval_iff π d (fun e=&gt;σ (u,e)) (retainedRawStart π d σ g t J u)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (fun _ _ h=&gt;h.1)]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   simp only [retainedIntervalCovered,retainedRawStart_selected_iff,permutationWindow_dual]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   constructor</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   · rintro ⟨a,ha,hxa⟩;exact ⟨a,hxa,ha⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · rintro ⟨a,hxa,ha⟩;exact ⟨a,ha,hxa⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> </span>
+<span id="L77"><a href="#L77" class="ln">  77</a> theorem retainedRawFamily_covered_card (π : Equiv.Perm V) (d : ℕ) (hd : 1≤d)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (hnoshort : ∀ x l,0&lt;l → l&lt;d → (π^l) x≠x)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     (σ : RawIntervalFamilyOutcome V U Γ Color) (g : Γ) (t : ℕ)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     (J : StartRetentionOutcome (rawStartHubSet π d σ g) t) (x : V) :</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (Finset.univ.filter (fun u=&gt;retainedRawFamilyState π d σ g t J (x,u)=some (Sum.inl g))).card=d*t := by</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   rw [retainedRawFamily_covered_hubs]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   have hdisj : ((permutationWindow π (d-1) 0 x : Finset V):Set V).PairwiseDisjoint</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       (fun a=&gt;startRetainedHubs (rawStartHubSet π d σ g) t J a) := by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     intro a ha b hb hne</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     intro u hua hub</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     have hra := (retainedRawStart_selected_iff π d σ g t J u a).mpr hua</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     have hrb := (retainedRawStart_selected_iff π d σ g t J u b).mpr hub</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     have hxa := (permutationWindow_dual π (d-1) 0 x a).mp ha</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     have hxb := (permutationWindow_dual π (d-1) 0 x b).mp hb</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     exact hne (rawInterval_coloured_start_unique π d (fun e=&gt;σ (u,e)) x a b g g hra.1 hrb.1</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       (permutationWindow_mono π (le_refl 0) (Nat.sub_le d 1) a hxa)</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>       (permutationWindow_mono π (le_refl 0) (Nat.sub_le d 1) b hxb)).1</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   rw [Finset.card_biUnion hdisj]</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   simp only [startRetainedHubs_card,Finset.sum_const,nsmul_eq_mul]</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   have hc : (permutationWindow π (d-1) 0 x).card=d := by</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     have hh := permutationWindow_card π (d-1) 0 (by intro y l hl hld;exact hnoshort y l hl (by omega)) x</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     simpa only [Nat.add_zero,Nat.sub_add_cancel hd] using hh</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   simp only [hc,Nat.cast_id]</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a> </span>
+<span id="L102"><a href="#L102" class="ln"> 102</a> end Oberwolfach</span></pre></html>

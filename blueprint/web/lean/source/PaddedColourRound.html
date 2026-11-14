@@ -1,0 +1,119 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PaddedColourRound.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PaddedColourRound.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ColourRoundRealization</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PaddedColourRoundTransport</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.ColourRoundNumerics</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! One complete colouring round on the original edge and colour types.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> Auxiliary edges affect the experiment but are removed from its conclusions. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 4000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem padded_colour_round</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {V E C : Type*} [Fintype V] [Fintype E] [Fintype C]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (R : E → Finset V) (L : E → Finset C)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     {k l B s D : ℕ} (hk : 0&lt;k) (hl : 1&lt;l) (hs : 0&lt;s) (hsl : s≤l)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hsize : ∀ e,(R e).card=k) (hcard : ∀ e,(L e).card=l)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hcodeg : ∀ v w,v≠w → (Finset.univ.filter (fun e=&gt;v∈R e ∧ w∈R e)).card≤B)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hdegree : ∀ v c,(hypergraphColourClique R L v c).card≤s)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hresource : ∀ v,(hypergraphVertexClique R v).card≤D)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hcodegsmall : 2*(k^2*(k^2*B))≤l)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     {t : ℝ} (ht : 0&lt;t)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hsmall : (l : ℝ)*(4*Real.exp (-t^2/</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (12*(k : ℝ)*(l : ℝ)+4*(2+(((k+3)*(k*B) : ℕ) : ℝ))*(3+((3*k : ℕ) : ℝ))*(s : ℝ))))≤t)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hprob : 8*((k : ℝ)+1)*Real.exp (-t^2/</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (12*(k : ℝ)*(l : ℝ)+4*(2+(((k+3)*(k*B) : ℕ) : ℝ))*(3+((3*k : ℕ) : ℝ))*(s : ℝ)))≤</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       1/(4*((s*(1+k*l)*(k*(D+Fintype.card C*s)+1)^4 : ℕ) : ℝ))) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let ρ := (1-1/(l : ℝ))^(k*s)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let κ := 1-(s : ℝ)*ρ/(l : ℝ)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∃ (p : E → Option C) (L&#x27; : E → Finset C),</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ e c,p e=some c → c∈L e) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ e f,(hypergraphLineGraph R).Adj e f → ∀ c,p e=some c → p f≠some c) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ e,L&#x27; e⊆L e) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ e f,(hypergraphLineGraph R).Adj e f → ∀ c,c∈L&#x27; e → p f≠some c) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ e,(l : ℝ)*κ^k-(6*((k : ℝ)+1)*t+</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         (l : ℝ)*((2 : ℝ)^k*((k^2*(2*k^2+k+2)*B : ℕ) : ℝ)/(l : ℝ)))≤(L&#x27; e).card) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀ z c,((hypergraphColourClique (fun e : {e // p e=none}=&gt;R e.val)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (fun e=&gt;L&#x27; e.val) z c).card : ℝ)≤</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         (s : ℝ)*(1-ρ)*κ^(k-1)+6*((k : ℝ)+1)*t+</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (s : ℝ)*(1/(l : ℝ)+ρ*(2/(l : ℝ)+2*((k*s : ℕ) : ℝ)/((l : ℝ)*((l : ℝ)-1)))+</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>           (2 : ℝ)^(k-1)*(((k-1)^2*(2*k^2+k+2)*B : ℕ) : ℝ)/(l : ℝ))) := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   classical</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   dsimp only</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let Rp := paddedResources R L s</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let Lp := paddedColourList R L s l</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let H : Finset (E ⊕ ColourPaddingVertex R L s) := Finset.univ.map Function.Embedding.inl</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hH (e) (he : e∈H) : ∃ f,e=Sum.inl f := by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     obtain ⟨f,_,hf⟩ := Finset.mem_map.mp he</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     exact ⟨f,hf.symm⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hreal (e) (he : e∈H) : (Rp e).card=k := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     obtain ⟨f,rfl⟩ := hH e he</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact hsize f</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have heq (e) (he : e∈H) (v) (hv : v∈Rp e) (c) (hc : c∈Lp e) :</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (hypergraphColourClique Rp Lp v c).card=s := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     obtain ⟨f,rfl⟩ := hH e he</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     obtain ⟨b,hb,rfl⟩ := Finset.mem_map.mp hc</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact paddedColourClique_card_original R L s l hdegree v b</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   obtain ⟨σ,hσ,hlist,hremain⟩ := colour_round_realization Rp Lp H hk hl hs hsl</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (paddedResources_size R L s (by omega) (fun e=&gt;(hsize e).le)) hreal</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (paddedColourList_card R L s (by omega) hcard)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (fun v w hvw=&gt;by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       dsimp only [Rp]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       rw [paddedResources_codegree R L s v w hvw]</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       exact hcodeg v w hvw)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (paddedColourClique_degree_bound R L (by omega) l hdegree) heq</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (paddedLineGraph_degree_bound R L s (by omega) (fun e=&gt;(hsize e).le) hresource)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     hcodegsmall ht hsmall hprob</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   let p := paddedRetainedOriginal R L s l σ</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   let L&#x27; := paddedAvailableOriginal R L s l σ</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   refine ⟨p,L&#x27;,paddedRetainedOriginal_list R L s l σ (fun e=&gt;hσ (Sum.inl e)),</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     fun e f hef c hc=&gt;paddedRetainedOriginal_proper R L s l σ e f hef c hc,</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     paddedAvailableOriginal_subset R L s l σ,</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     fun e f hef c hc=&gt;paddedAvailableOriginal_avoids_retained R L s l σ e f hef c hc,?_,?_⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   · intro e</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     have hh := hlist (Sum.inl e) (Finset.mem_map.mpr ⟨e,Finset.mem_univ _,rfl⟩)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     dsimp only [Rp,paddedResources] at hh</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     rw [← paddedAvailableOriginal_card] at hh</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     have hb := (abs_le.mp hh).1</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     dsimp only [L&#x27;]</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     linarith</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   · intro z c</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     let U := realColourClass Rp Lp H z (Sum.inl c)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     have hUs : U.card≤s := (Finset.card_le_card (realColourClass_subset Rp Lp H z (Sum.inl c))).trans</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       (paddedColourClique_degree_bound R L (by omega) l hdegree z (Sum.inl c))</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     have hh := hremain z (Sum.inl c)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     dsimp only at hh</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     have htrans := padded_residual_colour_degree_bound R L s l σ (fun e=&gt;hσ (Sum.inl e)) z c</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     have htR : ((hypergraphColourClique (fun e : {e // p e=none}=&gt;R e.val)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>         (fun e=&gt;L&#x27; e.val) z c).card : ℝ)≤</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>         (remainingColourVertices (hypergraphLineGraph Rp) U (fun e=&gt;(Rp e).erase z)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>           (hypergraphVertexClique Rp) (Sum.inl c) σ).card := by exact_mod_cast htrans</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     have hρ := equalized_retention_rate_bounds (by omega : 0&lt;l) (k*s)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     have hκ := colouring_available_rate_bounds (by omega : 0&lt;l) hsl hρ</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     have hκ0 : 0≤1-(s : ℝ)*(1-1/(l : ℝ))^(k*s)/(l : ℝ) := by linarith [hρ.2,hκ.1]</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     have hUsR : (U.card : ℝ)≤s := by exact_mod_cast hUs</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     have hfactor : 0≤(1-(1-1/(l : ℝ))^(k*s))*</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>         (1-(s : ℝ)*(1-1/(l : ℝ))^(k*s)/(l : ℝ))^(k-1) :=</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>       mul_nonneg (sub_nonneg.mpr hρ.2) (pow_nonneg hκ0 _)</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     have hmpos : (0 : ℝ)&lt;(l : ℝ)-1 := by</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       have hh : (1 : ℝ)&lt;l := by exact_mod_cast hl</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>       linarith</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     have herr : 0≤1/(l : ℝ)+(1-1/(l : ℝ))^(k*s)*</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>         (2/(l : ℝ)+2*((k*s : ℕ) : ℝ)/((l : ℝ)*((l : ℝ)-1)))+</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>         (2 : ℝ)^(k-1)*(((k-1)^2*(2*k^2+k+2)*B : ℕ) : ℝ)/(l : ℝ) := by</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>       have hρ0 := hρ.1</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>       positivity</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     have hb := (abs_le.mp hh).2</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     have hc₁ := mul_le_mul_of_nonneg_right hUsR hfactor</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     have hc₂ := mul_le_mul_of_nonneg_right hUsR herr</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     dsimp only [U] at hUsR hc₁ hc₂</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     dsimp only [U] at htR</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     nlinarith</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a> </span>
+<span id="L116"><a href="#L116" class="ln"> 116</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,17 @@
+module
+
+public import Oberwolfach.OrdinaryNontriangleFeasiblePreparationFromOriginal
+public import Oberwolfach.OrdinaryTriangleNontrianglePreparationReduction
+
+@[expose] public section
+/-! Combine the ordinary component-length cases without additional assumptions. -/
+set_option autoImplicit false
+noncomputable section
+namespace Oberwolfach
+
+theorem ordinary_nontriangle_preparation_from_original : OrdinaryNontriangleProtectedPreparation :=
+  ordinary_nontriangle_feasible_reduction ordinary_nontriangle_feasible_preparation_from_original
+
+theorem ordinary_protected_preparation_from_original : OrdinaryProtectedPreparation :=
+  ordinary_triangle_nontriangle_preparation_reduction ordinary_nontriangle_preparation_from_original
+end Oberwolfach

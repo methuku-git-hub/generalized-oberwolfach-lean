@@ -1,0 +1,103 @@
+--- before
++++ after
+@@ -2710,6 +2710,67 @@
+ Lemma~\ref{lem:prelim:prescribed-degrees} gives both conclusions.
+ \end{proof}
+ 
++\begin{lemma}[Bounded perfect fractional matchings]
++\label{lem:selection:bounded-fractional-matching}
++Let $0<\beta<1/2$ and let $m\ge4/\beta$ be an integer.
++Every $m$-vertex graph $Q$ with $\delta(Q)\ge(1/2+\beta)m$
++has a perfect fractional matching $\lambda$ satisfying
++\[
++ \frac{\beta}{5m}\le\lambda(e)\le\frac5{\beta m}
++ \qquad(e\in E(Q)).
++\]
++\end{lemma}
++\begin{proof}
++Let $B$ be the bipartite graph with parts
++$V_L=\{v_L:v\in V(Q)\}$ and $V_R=\{v_R:v\in V(Q)\}$,
++where $u_Lv_R\in E(B)$ if and only if $uv\in E(Q)$.
++Both parts have size $m$, and $\delta(B)\ge(1/2+\beta)m$.
++Put $t=\lfloor\beta m/2\rfloor$, so that
++$\beta m/4\le t\le\beta m/2$.
++A greedy proper edge-colouring partitions $E(B)$ into at most
++$2m-1$ matchings. Partition each nonempty colour class into
++matchings of size at most $t$, obtaining an edge partition
++$M_1,\ldots,M_K$. Since $e(B)\le m^2$, we have
++\[
++ m/2\le\Delta(B)\le K
++ \le2m-1+e(B)/t\le5m/\beta.
++\]
++For each $i\in[K]$, put $a_i=|M_i|$ and $B_i=B-V(M_i)$.
++Both parts of $B_i$ have size $m-a_i$.
++We choose $t$ pairwise edge-disjoint perfect matchings
++$N_{i,1},\ldots,N_{i,t}$ in $B_i$.
++After choosing the first $j-1$ matchings, where $j\in[t]$,
++the remaining graph has minimum degree at least
++\[
++ (1/2+\beta)m-a_i-(j-1)\ge m/2\ge(m-a_i)/2.
++\]
++Hall's theorem therefore gives the next perfect matching.
++Thus $F_{i,j}=M_i\cup N_{i,j}$ is a perfect matching of $B$.
++For $e\in E(B)$, define
++\[
++ y(e)=\frac1{Kt}\sum_{i=1}^K\sum_{j=1}^t
++       \mathbf1_{\{e\in F_{i,j}\}}.
++\]
++Then $\sum_{e\in E_B(z)}y(e)=1$ for every $z\in V(B)$.
++Every edge $e$ belongs to exactly one $M_i$, and hence to all
++$t$ matchings $F_{i,1},\ldots,F_{i,t}$.
++For each other index $i'$, it belongs to at most one $N_{i',j}$.
++Consequently
++\[
++ \frac{\beta}{5m}\le\frac1K\le y(e)
++ \le\frac1K+\frac1t
++ \le\frac2m+\frac4{\beta m}\le\frac5{\beta m}.
++\]
++For $uv\in E(Q)$, put
++$\lambda(uv)=(y(u_Lv_R)+y(v_Lu_R))/2$.
++These weights satisfy the required bounds, and for every $v\in V(Q)$,
++\[
++ \sum_{u\in N_Q(v)}\lambda(uv)
++ =\frac12\left(\sum_{u\in N_Q(v)}y(v_Lu_R)
++              +\sum_{u\in N_Q(v)}y(u_Lv_R)\right)=1.
++\]
++\end{proof}
++
+ \subsection{Finite-dimensional convexity}
+ \label{sec:preliminaries:convexity}
+ 
+@@ -17989,17 +18050,23 @@
+ \]
+ Here $c_-,c_+>0$ depend only on $r,\alpha$.
+ If $r=3$, put $P_x=N_P(x;A)$ for each prescribed root $x$.
+-The degree bounds give
++By Proposition~\ref{prop:four:lower}, $\delta_{C_3}\ge3/4$.
++The degree bounds therefore give $|P_x|\ge3|A|/4$ and
+ \[
+  \delta(P[P_x])\ge\min_{y\in P_x}d_P(y;A)+|P_x|-|A|
+-                 \ge(1/2+\beta_0)|P_x|
+-\]
+-for a fixed $\beta_0>0$. Applying
+-\cite[Lemma~4.2]{GlockGouldJoosKuhnOsthus2021} with uniformity two
+-gives a perfect fractional matching $\lambda_{A,x}$ on $P[P_x]$.
+-Since $|P_x|$ is between fixed positive multiples of $|A|$, we may
+-take the same constants $c_-,c_+$ so that
+-$c_-/|A|\le\lambda_{A,x}(e)\le c_+/|A|$ for every edge $e$.
++ \ge|P_x|-|A|/4\ge2|P_x|/3.
++\]
++The choice of $m_*$ ensures $|P_x|\ge32$.
++Lemma~\ref{lem:selection:bounded-fractional-matching}, with
++$\beta=1/8$ and $m=|P_x|$, gives a perfect fractional matching
++$\lambda_{A,x}$ on $P[P_x]$ satisfying
++\[
++ \frac1{40|A|}\le\frac1{40|P_x|}\le\lambda_{A,x}(e)
++ \le\frac{40}{|P_x|}\le\frac{160}{3|A|}
++ \qquad(e\in E(P[P_x])).
++\]
++Decreasing $c_-$ and increasing $c_+$ if necessary gives
++$c_-/|A|\le\lambda_{A,x}(e)\le c_+/|A|$ for every such edge.
+ The choice
+ $\omega_{\rm est}\le\min\{c_-,1/c_+\}$ gives the coefficient
+ bounds in \ref{item:completion:ordinary:local}.

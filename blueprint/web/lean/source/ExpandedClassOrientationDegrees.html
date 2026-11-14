@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExpandedClassOrientationDegrees.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExpandedClassOrientationDegrees.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongPreparationPhysicalStates</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedExpandedDegreeEvent</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The sampled class consists exactly of physical states zero through four,</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> and its stored orientation is the sum of their directed indicators. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem expanded_class_orientation_degrees</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {V U Γ Color:Type} [Fintype V] [LinearOrder V] [Fintype U] [DecidableEq U] [Fintype Γ] [Fintype Color]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (P:SimpleGraph V) (σ:∀e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e) (v:V):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (∑w,sampledOrientation (longPhysicalStateGraph P σ {0,1,2,3,4}) (fun e=&gt;(σ (Sum.inl e)).2) v w)=</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ∑a∈({0,1,2,3,4}:Finset (Fin 6)),∑w,sampledColourOrientation P (fun e=&gt;σ (Sum.inl e)) a v w:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   rw [Finset.sum_comm]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   apply Finset.sum_congr rfl</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   intro w _</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   by_cases hp:P.Adj v w</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   · have hs:∃a:Fin 6,∃b:Bool,σ (Sum.inl s(v,w))=(a,b):=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       exact ⟨(σ (Sum.inl s(v,w))).1,(σ (Sum.inl s(v,w))).2,by cases σ (Sum.inl s(v,w));rfl⟩</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     obtain ⟨a,b,hab⟩:=hs</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     fin_cases a &lt;;&gt; cases b &lt;;&gt; cases hbit:orientationBit v w &lt;;&gt;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       simp [sampledOrientation,longPhysicalStateGraph,sampledColourOrientation,hp,hab,hbit]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   · simp [sampledOrientation,longPhysicalStateGraph,sampledColourOrientation,hp]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> end Oberwolfach</span></pre></html>

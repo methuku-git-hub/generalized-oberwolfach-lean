@@ -1,0 +1,129 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedMixedBoundaryFinish.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedMixedBoundaryFinish.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSelectedBoundaryRemainder</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedMixedSelectionBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedBoundaryUniformFinishParameters</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Finish the actual selected marked boundary with a prescribed small</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> inner loss. The selection bound supplies both endpoint incidence bounds</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> and the total number of paths. The reservation probability and free-row</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> cap precede the permutation radius; only the order threshold follows it. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option synthInstance.maxSize 4096</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 14000000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_mixed_boundary_finish (l:ℕ) (hl:2≤l) (β ν:ℝ) (hβ:0&lt;β) (hν:0&lt;ν):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ p₀:ℝ,0&lt;p₀∧p₀≤1∧∀ p:ℝ,0&lt;p→p≤p₀→∀ b:ℕ,∃ n₀:ℕ,</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ (V U E T J I:Type) [Fintype V] [Fintype U] [Fintype E] [Fintype T] [Fintype J] [Fintype I]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       [DecidableEq V] [DecidableEq U] [DecidableEq E] [DecidableEq T] [DecidableEq J] [DecidableEq I],</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       n₀≤Fintype.card (V⊕U)→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (tail head:E→V) (ktail khead:T→V) (H₀ HK:V→U→Prop) (π:Equiv.Perm V)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (X:Finset V) (Q:MarkedBoundaryExtensionCounts tail head ktail khead H₀ HK X (β*Fintype.card (V⊕U)))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hb:1≤b) (hphys:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hX:∀ x,π x∈X↔x∈X) (root:J↪V) (hrootX:∀ j,root j∉X)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (A₀ A₁ X₀ X₁:J→Finset V) (Y₀ Y₁:J→Finset U)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (P:∀ j,MarkedEndpointPairing (A₀ j) (A₁ j) (X₀ j) (X₁ j) (Y₀ j) (Y₁ j) H₀ HK π b)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (incoming:∀ j,(A₀ j⊕A₁ j)↪E⊕T) (outgoing:∀ j,(X₀ j⊕X₁ j)↪E⊕T)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hinhead:∀ j a,Sum.elim head khead (incoming j a)=root j)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hintail:∀ j a,Sum.elim tail ktail (incoming j a)=taggedSubsetValue (A₀ j) (A₁ j) a)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (houttail:∀ j a,Sum.elim tail ktail (outgoing j a)=root j)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (houthead:∀ j a,Sum.elim head khead (outgoing j a)=taggedSubsetValue (X₀ j) (X₁ j) a)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hintype:∀ j a,(incoming j a).isRight=a.isRight)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (houttype:∀ j a,(outgoing j a).isRight=a.isRight)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hAX:∀ j,A₀ j∪A₁ j⊆X) (hXX:∀ j,X₀ j∪X₁ j⊆X)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hsepA:∀ j a,a∈A₀ j∪A₁ j→¬PermutationClose π b a (root j))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hsepX:∀ j a,a∈X₀ j∪X₁ j→¬PermutationClose π b a (root j))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hY₀:∀ j u,u∈Y₀ j→H₀ (root j) u) (hY₁:∀ j u,u∈Y₁ j→HK (root j) u)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (Z:Finset U) (hYZ:∀ j,Y₀ j∪Y₁ j⊆Z)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hub:I↪U) (houtside:∀ j,hub j∉Z) (Y:I→Finset V) (hYX:∀ j,Y j⊆X)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (F:∀ j,MarkedHubFactorOn tail head ktail khead (l+3) π b H₀ HK (hub j) (Y j))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hFsep:∀ j v z,H₀ v (hub j)→HK z (hub j)→v≠π z)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hcross:∀ i j:I⊕J,i≠j→Disjoint</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (Sum.elim (fun j=&gt;(F j).graph) (fun j=&gt;(P j).graph) i)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (Sum.elim (fun j=&gt;(F j).graph) (fun j=&gt;(P j).graph) j))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hdegree:∀ w,((⨆ i:I⊕J,Sum.elim (fun j=&gt;(F j).graph) (fun j=&gt;(P j).graph) i).degree w:ℝ)≤</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       56*p*Fintype.card (V⊕U))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hroots:∀ v∉X,∃ j,root j=v) (hhubs:∀ u∉Z,∃ i,hub i=u)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hinAll:∀ j a,Sum.elim head khead a=root j→∃ w,incoming j w=a)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (houtAll:∀ j a,Sum.elim tail ktail a=root j→∃ w,outgoing j w=a)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hrowAll:∀ j u,H₀ (root j) u∨HK (root j) u→u∈Y₀ j∪Y₁ j)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hcolAll:∀ i v,H₀ v (hub i)∨HK v (hub i)→v∈Y i)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hH:∀ v u,¬(H₀ v u∧HK v u))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hAS:MarkedRemainderDivisible tail head ktail khead HK Finset.univ</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (Finset.univ.filter (fun s:V×U=&gt;H₀ s.1 s.2∨HK s.1 s.2)) (l+3)),</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ∃ M:Finset (MarkedWheel tail head ktail khead (l+3) π b H₀ HK),</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (∀ W∈M,∀ W&#x27;∈M,W≠W&#x27;→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources W&#x27;))∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (∀ v,((spanningRestriction (markedPackingRimGraph M) X).degree v:ℝ)≤ν*Fintype.card (V⊕U))∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (∀ v∈X,((Z.filter (markedPackingSpokes M v)).card:ℝ)≤ν*Fintype.card (V⊕U))∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       (∀ u∈Z,((Finset.univ.filter (fun v=&gt;markedPackingSpokes M v u)).card:ℝ)≤ν*Fintype.card (V⊕U))∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (let A&#x27;:=Finset.univ\M.biUnion markedWheelArcs</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>        let S&#x27;:=(Finset.univ.filter (fun s:V×U=&gt;H₀ s.1 s.2∨HK s.1 s.2))\M.biUnion markedWheelSpokePairs</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>        MarkedRemainderDivisible tail head ktail khead HK A&#x27; S&#x27; (l+3)∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>          (∀ a∈A&#x27;,Sum.elim tail ktail a∈X∧Sum.elim head khead a∈X)∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>          (∀ s∈S&#x27;,s.1∈X∧s.2∈Z)∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>          (A&#x27;.image (fun a=&gt;Sum.inl (markedPhysicalEdge tail head ktail khead π a))∪S&#x27;.image Sum.inr)=</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>            (Finset.univ.image (fun a:E⊕T=&gt;Sum.inl (markedPhysicalEdge tail head ktail khead π a))∪</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>              (Finset.univ.filter (fun s:V×U=&gt;H₀ s.1 s.2∨HK s.1 s.2)).image Sum.inr)\</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>              M.biUnion markedWheelPhysicalResources) := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   obtain ⟨p₀,hp₀,hp₀1,hbase⟩:=marked_boundary_finish_parameters_upto l 57 β ν (by norm_num) hβ hν</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   refine ⟨p₀,hp₀,hp₀1,?_⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   intro p hp hpp b</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   obtain ⟨N,hN⟩:=hbase p hp hpp b</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   refine ⟨max N (Nat.ceil (1/p)),?_⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   intro V U E T J I _ _ _ _ _ _ _ _ _ _ _ _ hn tail head ktail khead H₀ HK π</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     X Q hb hphys hX root hrootX A₀ A₁ X₀ X₁ Y₀ Y₁ P incoming outgoing</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     hinhead hintail houttail houthead hintype houttype hAX hXX hsepA hsepX hY₀ hY₁</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     Z hYZ hub houtside Y hYX F hFsep hcross hdegree hroots hhubs hinAll houtAll hrowAll hcolAll hH hAS</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   let n:=Fintype.card (V⊕U)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   let D:=Nat.ceil (56*p*n)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have hn0:(0:ℝ)≤n:=Nat.cast_nonneg _</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hscale:1≤p*n:=by</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     have he:1/p≤(n:ℝ):=(Nat.le_ceil _).trans (Nat.cast_le.mpr (show Nat.ceil (1/p)≤n by omega))</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     have hh:=(div_le_iff₀ hp).mp he</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     linarith only [hh]</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have hD:(D:ℝ)≤57*p*n:=by</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     have he: (D:ℝ)&lt;56*p*n+1:=Nat.ceil_lt_add_one (by positivity)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     nlinarith only [he,hscale]</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   have hdeg:∀ w,(⨆ i:I⊕J,Sum.elim (fun j=&gt;(F j).graph) (fun j=&gt;(P j).graph) i).degree w≤D:=by</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     intro w</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     exact_mod_cast (hdegree w).trans (Nat.le_ceil (56*p*n))</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   obtain ⟨hFcross,hPcross,hFrim,hPdegree,hcount⟩:=marked_mixed_selection_bounds hub Y F</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     A₀ A₁ X₀ X₁ Y₀ Y₁ P D hcross hdeg</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   have hU:(Fintype.card U:ℝ)≤n:=by</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     exact_mod_cast (show Fintype.card U≤n by dsimp [n];simp only [Fintype.card_sum];omega)</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   have hcount&#x27;:(Fintype.card (Σ j,Y₀ j⊕Y₁ j):ℝ)≤57*p*(n:ℝ)^2:=by</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     have he:(Fintype.card (Σ j,Y₀ j⊕Y₁ j):ℝ)≤Fintype.card U*(D:ℝ):=by exact_mod_cast hcount</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     have h₁:=mul_le_mul_of_nonneg_right hU (Nat.cast_nonneg (α:=ℝ) D)</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     have h₂:=mul_le_mul_of_nonneg_left hD hn0</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     nlinarith only [he,h₁,h₂]</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   obtain ⟨hK,hbudget,hrow,hcol⟩:=hN n (Fintype.card (Σ j,Y₀ j⊕Y₁ j)) D (by omega) D hcount&#x27; hD hD</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   let K:=Nat.ceil (Real.sqrt p*n)</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   obtain ⟨M,hM,hR,hS,hU&#x27;,hrem⟩:=marked_selected_boundary_divisible_remainder</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     X Q hl hb hphys hX root hrootX A₀ A₁ X₀ X₁ Y₀ Y₁ P hPcross incoming outgoing</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     hinhead hintail houttail houthead hintype houttype hAX hXX hsepA hsepX hY₀ hY₁</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     D K hK hPdegree Z hYZ hub houtside Y hYX F hFcross hFsep D (Nat.cast_nonneg _)</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     (fun v=&gt;Nat.cast_le.mpr (hFrim v)) hbudget</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     hroots hhubs hinAll houtAll hrowAll hcolAll hH hAS</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   refine ⟨M,hM,?_,?_,?_,hrem⟩</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>   · intro v</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     have hh:=hR v</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     change (D:ℝ)+(5*(K+D):ℕ)≤ν*n at hrow</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     push_cast at hh hrow</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     have hnn:0≤(K:ℝ)+(D:ℝ):=by positivity</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     linarith only [hh,hrow,hnn]</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>   · intro v hv</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     have hh:(↑((Z.filter (markedPackingSpokes M v)).card):ℝ)≤(K+D:ℕ):=by exact_mod_cast hS v hv</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     change (D:ℝ)+(5*(K+D):ℕ)≤ν*n at hrow</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     push_cast at hh hrow</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     have hK0:0≤(K:ℝ):=Nat.cast_nonneg _</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     have hD0:0≤(D:ℝ):=Nat.cast_nonneg _</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     linarith only [hh,hrow,hK0,hD0]</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>   · intro u hu</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     exact (Nat.cast_le.mpr (hU&#x27; u hu)).trans hcol</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a> </span>
+<span id="L126"><a href="#L126" class="ln"> 126</a> end Oberwolfach</span></pre></html>

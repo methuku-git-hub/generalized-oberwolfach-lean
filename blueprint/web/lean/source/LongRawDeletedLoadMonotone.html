@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongRawDeletedLoadMonotone.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongRawDeletedLoadMonotone.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongRawDeletedStateBool</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ResourceRootOmittedMonotonicity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.BernoulliVertexSampling</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The fixed nonnegative root-omitted load can only decrease under a</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> physical rim deletion, including at roots that are themselves deleted. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 8000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {n:ℕ} {U I:Type} [Fintype U] [DecidableEq U] [Fintype I]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem long_raw_pattern_load_nonincreasing_after_rim_deletion</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d:ℕ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool) (F:Finset (Sym2 (Fin n)))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (R:I→Finset (LongRawHubResource n U)) (w:I→ℝ) (hw:∀i,0≤w i)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (root:LongRawHubResource n U):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     resourcePatternLoad R w (fun _ _=&gt;true) root</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         (longRawHubState P π d (rawMarkedDeleteRims raw F) g j) ≤</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       resourcePatternLoad R w (fun _ _=&gt;true) root (longRawHubState P π d raw g j) :=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   let old:=longRawHubState P π d raw g j</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let new:=longRawHubState P π d (rawMarkedDeleteRims raw F) g j</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hsub:∀a,a∈bernoulliVertexSet new→a∈bernoulliVertexSet old:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     intro a ha</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     rw [←long_raw_surviving_state_is_raw_rim_deletion P π d raw g j F] at ha</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     exact (long_raw_surviving_resources_subset P π d raw g j F) ha</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hh:=resourceRootOmittedLoad_mono R w hw (fun a=&gt;a∈bernoulliVertexSet old)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (fun a=&gt;a∈bernoulliVertexSet new) hsub root</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   rw [bernoulli_root_load_pattern,bernoulli_root_load_pattern] at hh</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   exact hh</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> end Oberwolfach</span></pre></html>

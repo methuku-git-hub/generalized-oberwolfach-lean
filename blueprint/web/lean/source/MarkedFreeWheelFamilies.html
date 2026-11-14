@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedFreeWheelFamilies.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedFreeWheelFamilies.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFreeCycleFamilies</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedCycleFamilyFreshHubs</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedCrossFamilyPacking</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.ResourceFamilyIndicators</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! A genuine disjoint marked-wheel family, with actual globally injective</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> row and hub maps and its resulting resource decomposition. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 18000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E K I:Type} [Fintype V] [Fintype U] [Fintype I]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [DecidableEq V] [DecidableEq U] [DecidableEq I]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b l:ℕ} {c ch:ℝ}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem marked_free_wheel_families</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (Q:MarkedHostExtensionCounts tail head ktail khead H₀ HK π b l c ch)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hl:2≤l) (v₀:V) (W Z:Finset V) (B:Finset U)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hbudget:(W.card:ℝ)+(Fintype.card I*(l+5)+Z.card+l+13)*(2*b+1)&lt;c)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hB:(B.card:ℝ)+Fintype.card I&lt;ch):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃ C:I→MarkedWheel tail head ktail khead (l+4) π b H₀ HK,</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       Function.Injective (fun z:I×Fin (l+5)=&gt;(C z.1).1.val z.2)∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       Function.Injective (fun i=&gt;(C i).2.val)∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ i,(C i).2.val∉B)∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ i k,(C i).1.val k∉W∧(C i).1.val k∉Z∧∀ z∈Z,¬PermutationClose π b ((C i).1.val k) z)∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ i j k k&#x27;,((i,k):I×Fin (l+5))≠(j,k&#x27;)→¬PermutationClose π b ((C i).1.val k) ((C j).1.val k&#x27;))∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ i j,i≠j→Disjoint (markedWheelPhysicalResources (C i)) (markedWheelPhysicalResources (C j)))∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       HasResourceDecomposition (fun C:MarkedWheel tail head ktail khead (l+4) π b H₀ HK=&gt;markedWheelPhysicalResources C) (Finset.univ.biUnion (fun i=&gt;markedWheelPhysicalResources (C i))):=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨D,hD,hdis,hsep⟩:=marked_free_cycle_families (I:=I) Q hl v₀ W Z hbudget</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   obtain ⟨h,hh,hH⟩:=marked_cycle_family_fresh_hubs Q D B hB</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let C:I→MarkedWheel tail head ktail khead (l+4) π b H₀ HK:=fun i=&gt;⟨D i,⟨h i,hH i⟩⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hpack:∀ i j,i≠j→Disjoint (markedWheelPhysicalResources (C i)) (markedWheelPhysicalResources (C j)):=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     intro i j hij</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hn:∀ k k&#x27;,(D i).val k≠(D j).val k&#x27;:=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       intro k k&#x27; he</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       exact Finset.disjoint_left.mp (hdis i j hij) (Finset.mem_image.mpr ⟨k,Finset.mem_univ _,rfl⟩)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (Finset.mem_image.mpr ⟨k&#x27;,Finset.mem_univ _,he.symm⟩)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     exact marked_wheels_disjoint_of_shared_labels hp (C i) (C j) ∅</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (fun k k&#x27; he=&gt;False.elim (hn k k&#x27; he)) (by simp) (fun k k&#x27; he=&gt;False.elim (hn k k&#x27; he))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   refine ⟨C,?_,h.injective,hh,hD,hsep,hpack,?_⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   · rintro ⟨i,k⟩ ⟨j,k&#x27;⟩ he</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     by_contra hne</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     exact hsep i j k k&#x27; hne (Or.inl he)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   · exact resource_indexed_family_decomposition markedWheelPhysicalResources C hpack</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> end Oberwolfach</span></pre></html>

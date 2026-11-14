@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ProtectedPartitionFamily.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ProtectedPartitionFamily.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ProtectedRegularSample</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ProtectedSets</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The protected-set and colour-specific-error formulation used by the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> manuscript. Both families of lower bounds precede the choice of the order</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> threshold; the protected graphs are selected only after the colouring. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 2000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem protectedRegularPartition_family_highProbability</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {k : ℕ} (hk : 0 &lt; k) {α : ℝ} (hα : 0 &lt; α)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (r ξ : Fin k → ℝ) (hr : ∀ a, 0 &lt; r a) (hξ : ∀ a, 0 &lt; ξ a) (B : ℕ) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ N₀ : ℕ, ∀ n ≥ N₀, ∀ (G : SimpleGraph (Fin n)) (D : ℕ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (m : Fin k → ℕ) (ρ : Fin k → ℝ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (hρ : ∀ a, 0 ≤ ρ a) (htotal : ∑ a, ρ a = 1),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       G.IsRegularOfDegree D → Even D → (1 / 2 + α) * n ≤ (D : ℝ) →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∑ a, m a = D / 2) → (∀ a, ρ a / 2 * D = (m a : ℝ)) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀ a, r a ≤ ρ a) → ∀ I : Fin k → Finset (Fin n),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       ((∑ a, (I a).card : ℕ) : ℝ) ≤ α / 100000 * n →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       1 - 1 / (n : ℝ) ^ 10 ≤</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         (FiniteLaw.pi (fun _ : Sym2 (Fin n) =&gt; FiniteLaw.categorical ρ hρ htotal)).probability</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>           (fun c =&gt; ∀ A : Fin k → SimpleGraph (Fin n),</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>             (∀ a, A a ≤ edgeColourGraph G c a) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>             (∑ a, (A a).edgeFinset.card) ≤ B →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>             ∃ H : Fin k → SimpleGraph (Fin n),</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>               EdgePartition G H ∧ (∀ a, (H a).IsRegularOfDegree (2 * m a)) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>               (∀ a, A a ≤ H a) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>               (∀ a b x, x ∈ I b → ∀ y, y ∈ I b →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>                 ((H a).Adj x y ↔ (edgeColourGraph G c a).Adj x y)) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>               (∀ a x, ((Finset.univ.filter (fun y =&gt;</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>                 Xor ((H a).Adj x y) ((edgeColourGraph G c a).Adj x y))).card : ℝ) ≤ ξ a * n)) := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   obtain ⟨r₀, hr₀, hrle⟩ := positive_common_lower_bound hk r hr</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   obtain ⟨ξ₀, hξ₀, hξle⟩ := positive_common_lower_bound hk ξ hξ</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨N₀, hN⟩ := protectedRegularPartition_highProbability k hα hr₀ hξ₀ B</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨N₀, fun n hn G D m ρ hρ htotal hreg heven hmin hsum hm hrlow I hI =&gt; ?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let Z := protectedInducedUnion G I</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hZ (x : Fin n) : (Z.degree x : ℝ) ≤ α / 100000 * n := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hh : (Z.degree x : ℝ) ≤ (∑ a, (I a).card : ℕ) := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       exact_mod_cast protectedInducedUnion_degree G I x</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact hh.trans hI</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hp := hN n hn G Z D m ρ hρ htotal hreg heven hmin hsum hm</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (fun a =&gt; (hrle a).trans (hrlow a)) hZ</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   apply hp.trans</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   apply finiteLaw_probability_mono</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro c hc A hA hsize</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let U := Finset.univ.biUnion (fun a =&gt; (A a).edgeFinset)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   let F := SimpleGraph.fromEdgeSet (U : Set (Sym2 (Fin n)))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hF (x : Fin n) : F.degree x ≤ B := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hu : U.card ≤ ∑ a, (A a).edgeFinset.card := Finset.card_biUnion_le</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hh := (graphFromFiniteEdges_degree U x).trans (hu.trans hsize)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     simpa only [← SimpleGraph.ncard_neighborSet] using hh</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   obtain ⟨H, hH, hregH, hfixed, hdiff⟩ := hc F (fun x =&gt; by simpa only [← SimpleGraph.ncard_neighborSet] using hF x)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hret (a : Fin k) : A a ≤ H a := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     intro x y hxy</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have he : s(x,y) ∈ U := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       apply Finset.mem_biUnion.mpr</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       exact ⟨a, Finset.mem_univ _, by simpa using hxy⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     have hf : F.Adj x y := ⟨he, (A a).ne_of_adj hxy⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     exact (hfixed a x y (Or.inr hf)).mpr (hA a hxy)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hind (a b : Fin k) (x : Fin n) (hx : x ∈ I b) (y : Fin n) (hy : y ∈ I b) :</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (H a).Adj x y ↔ (edgeColourGraph G c a).Adj x y := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     by_cases hg : G.Adj x y</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     · have hz : Z.Adj x y := ⟨hg, b, hx, hy⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       exact hfixed a x y (Or.inl hz)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     · have hh : ¬ (H a).Adj x y := fun h =&gt; hg ((hH x y).1.mpr ⟨a, h⟩)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       have hc&#x27; : ¬ (edgeColourGraph G c a).Adj x y := fun h =&gt; hg h.1</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       simp [hh, hc&#x27;]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   exact ⟨H, hH, hregH, hret, hind, fun a x =&gt;</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (hdiff a x).trans (mul_le_mul_of_nonneg_right (hξle a) (Nat.cast_nonneg n))⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a> </span>
+<span id="L76"><a href="#L76" class="ln">  76</a> end Oberwolfach</span></pre></html>

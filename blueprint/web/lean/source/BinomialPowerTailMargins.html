@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BinomialPowerTailMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BinomialPowerTailMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Data.Nat.Choose.Bounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Uniform binomial union bounds when the deletion probability tends to</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> zero polynomially. The order threshold is independent of the tested set size. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1800000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open Filter</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem binomial_tail_le_geometric (M k : ℕ) (p a : ℝ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hp : 0≤p) (hp1 : p≤1) (ha : 0≤a) (hk : a*M≤(k:ℝ)) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (M.choose k:ℝ)*p^k≤(2*p^a)^M := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hc : (M.choose k:ℝ)≤(2:ℝ)^M := by exact_mod_cast Nat.choose_le_two_pow M k</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have he : p^k≤(p^a)^M := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     rw [← Real.rpow_natCast,← Real.rpow_natCast,← Real.rpow_mul hp]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     exact Real.rpow_le_rpow_of_exponent_ge&#x27; hp hp1 (by positivity) hk</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   calc</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     _ ≤ (2:ℝ)^M*((p^a)^M) := mul_le_mul hc he (by positivity) (by positivity)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     _ = _ := (mul_pow _ _ _).symm</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem eventually_binomial_deletion_tail (K a b : ℝ) (hK : 0≤K) (ha : 0&lt;a) (hb : 0&lt;b) :</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ N : ℕ,1≤N ∧ ∀ n : ℕ,N≤n → ∀ M k : ℕ,∀ p : ℝ,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       0≤p → p≤K*(n:ℝ)^(-b) → a*M≤(k:ℝ) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (M.choose k:ℝ)*p^k≤(n:ℝ)^(-(a*b/2)*M) := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let c := a*b/2</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hc : 0&lt;c := by dsimp [c];positivity</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hlim₁ := ((tendsto_rpow_neg_atTop hb).const_mul K).comp tendsto_natCast_atTop_atTop</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hlim₂ := ((tendsto_rpow_neg_atTop hc).const_mul (2*K^a)).comp tendsto_natCast_atTop_atTop</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   simp only [mul_zero] at hlim₁ hlim₂</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   obtain ⟨N₁,hN₁⟩ := eventually_atTop.mp (hlim₁.eventually (eventually_lt_nhds (by norm_num : (0:ℝ)&lt;1)))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   obtain ⟨N₂,hN₂⟩ := eventually_atTop.mp (hlim₂.eventually (eventually_lt_nhds (by norm_num : (0:ℝ)&lt;1)))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   refine ⟨max 1 (max N₁ N₂),le_max_left _ _,?_⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   intro n hn M k p hp hrate hk</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hnpos : (0:ℝ)&lt;n := by exact_mod_cast (show 0&lt;n by omega)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hsmall₁ : K*(n:ℝ)^(-b)≤1 := (hN₁ n (by omega)).le</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hsmall₂ : (2*K^a)*(n:ℝ)^(-c)≤1 := (hN₂ n (by omega)).le</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hbase : 2*p^a≤(n:ℝ)^(-c) := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have heq : 2*(K*(n:ℝ)^(-b))^a=((2*K^a)*(n:ℝ)^(-c))*(n:ℝ)^(-c) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       rw [Real.mul_rpow hK (by positivity),← Real.rpow_mul hnpos.le]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       have he : -b*a = -c + -c := by dsimp [c];ring</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       rw [he,Real.rpow_add hnpos]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       ring</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     calc</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       _ ≤ 2*(K*(n:ℝ)^(-b))^a := mul_le_mul_of_nonneg_left (Real.rpow_le_rpow hp hrate ha.le) (by norm_num)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       _ = _ := heq</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       _ ≤ 1*(n:ℝ)^(-c) := mul_le_mul_of_nonneg_right hsmall₂ (by positivity)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       _ = _ := one_mul _</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   calc</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     _ ≤ (2*p^a)^M := binomial_tail_le_geometric M k p a hp (hrate.trans hsmall₁) ha.le hk</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     _ ≤ ((n:ℝ)^(-c))^M := pow_le_pow_left₀ (by positivity) hbase M</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     _ = (n:ℝ)^(-(a*b/2)*M) := by rw [← Real.rpow_natCast,← Real.rpow_mul hnpos.le]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> </span>
+<span id="L56"><a href="#L56" class="ln">  56</a> end Oberwolfach</span></pre></html>

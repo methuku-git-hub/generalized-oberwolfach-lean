@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceActualDensities.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceActualDensities.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedSeedDensities</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The marked reference event with the manuscript&#x27;s fixed lower densities</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> and actual formulas p = rho*s/2, k = p/m, t = s/m. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1800000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem marked_reference_actual_densities</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (m : ℕ) (hm : 1≤m) (ε δ γ κ ρstar sstar : ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hε : 0&lt;ε) (hδ : 0&lt;δ) (hγ : 0&lt;γ) (hγ1 : γ≤1/2)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hκ : 0&lt;κ) (hρstar : 0&lt;ρstar) (hsstar : 0&lt;sstar) (hsstar1 : sstar≤1/100)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (d : ℕ) (hd : 2≤d) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let kstar := ρstar*sstar/(2*m)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let tstar := sstar/m</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let c := min (markedReferenceExponent ε δ γ kstar tstar κ d) (markedCutExponent γ kstar tstar κ d)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     0&lt;c ∧ ∃ N : ℕ,1≤N ∧ ∀ (V U Γ Color : Type)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [LinearOrder V] [DecidableEq U],</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       N≤Fintype.card V → κ*Fintype.card V≤(Fintype.card U:ℝ) → Fintype.card U≤Fintype.card V →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀ (P : SimpleGraph V) (π : Equiv.Perm V),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀ ρ s₀ : ℝ,ρstar≤ρ → ρ≤1 → sstar≤s₀ → s₀≤1/100 →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀ δP : ℝ,0≤δP → δP≤ε/4 →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ x,|(P.degree x:ℝ)-2*Fintype.card U/ρ|≤δP*Fintype.card V) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ x,(1/2+γ)*Fintype.card V≤(P.degree x:ℝ)) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∀ (q : U→Γ→ℝ) (hq : ∀ u g,0≤q u g) (hQ : ∀ u,∑ g,q u g≤1/8)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (g : Γ) (j : Color),(∀ u,q u g=s₀/m) → (∀ u,s u j=s₀) →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∀ (hp : 0≤ρ*s₀/2) (hk : 0≤(ρ*s₀/2)/m) (hsum : 2*(ρ*s₀/2)+2*((ρ*s₀/2)/m)≤1),</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     1-72*(Fintype.card V:ℝ)^3*Real.exp (-c*Fintype.card V)≤</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (FiniteLaw.pi (rawMarkedWheelLaw (ρ*s₀/2) ((ρ*s₀/2)/m) hp hk hsum d hd q hq hQ s hs hS)).probability</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (fun σ=&gt;MarkedReferenceStatistics P π d g j (2*Fintype.card U/ρ) ε δ γ (ρ*s₀/2) ((ρ*s₀/2)/m) s₀ (s₀/m) σ ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         MarkedReferenceCutFamilies P π d g j γ (ρ*s₀/2) ((ρ*s₀/2)/m) tstar σ) := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   intro kstar tstar c</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hm1 : (1:ℝ)≤m := by exact_mod_cast hm</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hm0 : (0:ℝ)&lt;m := by linarith</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hkstar : 0&lt;kstar := by dsimp [kstar];positivity</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have htstar : 0&lt;tstar := by dsimp [tstar];positivity</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have htstar1 : tstar≤1 := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     dsimp [tstar]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     apply (div_le_iff₀ hm0).mpr</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     linarith</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   refine ⟨lt_min</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (markedReferenceExponent_pos ε δ γ kstar tstar κ d hε hδ hγ hkstar htstar hκ)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (markedCutExponent_pos γ kstar tstar κ d hγ hkstar htstar hκ),?_⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   obtain ⟨N,hN1,hN⟩ := marked_reference_event ε δ γ kstar tstar κ hε hδ hγ hγ1 hkstar htstar htstar1 hκ d hd</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   refine ⟨N,hN1,?_⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   intro V U Γ Color _ _ _ _ _ _ hn hmlo hmhi P π hnoshort ρ s₀ hρlo hρhi hslo hshi δP hδP hδε hPreg hP q hq hQ s hs hS g j hg hj hp hk hsum</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hden := marked_seed_density_bounds m hm ρ s₀ ρstar sstar hρstar hsstar hρlo hρhi hslo hshi</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have htlo : tstar≤s₀/m := div_le_div_of_nonneg_right hslo hm0.le</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have htordinary : tstar≤s₀ := by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hss : sstar/m≤sstar := (div_le_iff₀ hm0).mpr (by nlinarith only [hm1,hsstar])</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact hss.trans hslo</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   exact hN V U Γ Color hn hmlo hmhi P π hnoshort (ρ*s₀/2) ((ρ*s₀/2)/m)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     hp hk hsum hden.2.1 hden.2.2.1 (2*Fintype.card U/ρ) δP hδP hδε hPreg hP</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     q hq hQ s hs hS g j s₀ (s₀/m) hg hj htordinary htlo</span>
+<span id="L63"><a href="#L63" class="ln">  63</a> </span>
+<span id="L64"><a href="#L64" class="ln">  64</a> end Oberwolfach</span></pre></html>

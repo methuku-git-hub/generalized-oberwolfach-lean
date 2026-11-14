@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PreparationTargetErrorsBalance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PreparationTargetErrorsBalance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PreparationConcentratedBalance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Add the actual sampled marked and ordinary loads after each has been</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> compared with its fixed target, retaining its own concentration error. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> open scoped BigOperators</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem preparation_target_errors_balanced_sum {I:Type} [Fintype I]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (τ a x t:ℝ) (b z errors:I→ℝ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hbalance:a+∑ i,b i=1)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hx:|x-a|&lt;t+τ*a)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hz:∀ i,|z i-b i|&lt;errors i+τ*b i):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     |x+∑ i,z i-1|&lt;t+(∑ i,errors i)+τ:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hh:=preparation_concentrated_balanced_sum 0 a a x (t+τ*a) b z b</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (fun i=&gt;errors i+τ*b i) hbalance (by simp) (by intro i;simp) hx hz</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have heq:t+τ*a+(∑ i,(errors i+τ*b i))+0=t+(∑ i,errors i)+τ:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     rw [Finset.sum_add_distrib,← Finset.mul_sum]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     have hmul:=congrArg (fun v:ℝ=&gt;τ*v) hbalance</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     nlinarith [hmul]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   rwa [heq] at hh</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> end Oberwolfach</span></pre></html>

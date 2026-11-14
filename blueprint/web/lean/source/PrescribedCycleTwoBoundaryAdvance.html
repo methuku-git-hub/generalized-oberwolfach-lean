@@ -1,0 +1,115 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedCycleTwoBoundaryAdvance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedCycleTwoBoundaryAdvance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedOrderedPathFamilyAdvance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedCycleTwoBoundarySplit</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Process a source cycle with two prescribed vertices by splitting it into</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> two ordered paths with distinct prescribed boundaries. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 2000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {I X V:Type} [Fintype I] [Fintype X] [Fintype V] [DecidableEq I] [DecidableEq X] [DecidableEq V]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem prescribed_cycle_two_boundary_advance</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (QV:I→Finset X) (Q:I→SimpleGraph X) (A₀:I→Finset X) (ψ:I→X→V)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (E₀:I→Finset (Sym2 V)) (J:SimpleGraph V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (β δ:ℝ) (hβ:0&lt;β) (hβ1:β≤1) (hδ:0&lt;δ) (hδbound:δ≤(β/100)^2)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hnβ:100/β≤(Fintype.card V:ℝ)) (hn:2/Real.sqrt δ≤(Fintype.card V:ℝ))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hI:(Fintype.card I:ℝ)≤Fintype.card V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hQsize:∀ i,((QV i).card:ℝ)≤δ*Fintype.card V) (hQdegree:∀ i x,(Q i).degree x≤2)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hold:∀ v,((Finset.univ.filter (fun i=&gt;∃ x,x∈A₀ i ∧ ψ i x=v)).card:ℝ)≤δ*Fintype.card V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hJ:∀ v,(J.degree v:ℝ)≤δ*Fintype.card V)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (k:I) (Dsrc:X→X→Prop) (Fsrc:SimpleGraph X) (hDQ:∀ x y,Dsrc x y→(Q k).Adj x y)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (D:V→V→Prop) (L:Finset V) (hext:IsExtendingList D L β)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (a b:X) (xs:List X) (hnodup:(a::xs).Nodup) (ha:a∈A₀ k) (hb:b∈A₀ k) (hbin:b∈xs)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hsourcecycle:DirectedCycleThrough Dsrc Fsrc (a::xs))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (st:PrescribedFamilyState I X V)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hvalid:st.Valid QV Q A₀ ψ E₀ J (Real.sqrt δ*Fintype.card V))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hinit:prescribedInducedSourceEdges (Q k) (A₀ k)⊆st.sourceEdges k)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hfree:∀ x∈a::xs,x∉A₀ k→x∉st.assigned k) (hsubset:∀ x∈a::xs,x∈QV k):</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∃ st&#x27;:PrescribedFamilyState I X V,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       st&#x27;.Valid QV Q A₀ ψ E₀ J (Real.sqrt δ*Fintype.card V) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       st&#x27;.assigned=Function.update st.assigned k (st.assigned k∪(a::xs).toFinset) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i,st.assigned i⊆st&#x27;.assigned i) ∧ (∀ i,st.sourceEdges i⊆st&#x27;.sourceEdges i) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ i x,x∈st.assigned i→st&#x27;.vertexMap i x=st.vertexMap i x) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ x∈a::xs,x∉A₀ k→st&#x27;.vertexMap k x∈L) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ e∈prescribedDirectedPathEdges ((a::xs)++[a]),</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         (e.1∈A₀ k ∧ e.2∈A₀ k) ∨ D (st&#x27;.vertexMap k e.1) (st&#x27;.vertexMap k e.2)) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (a::xs).toFinset⊆st&#x27;.assigned k ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       prescribedOrderedPathEdges ((a::xs)++[a])⊆st&#x27;.sourceEdges k := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨pre,post,hxs,hp1,hp2,hinter,hphysical,hdirected⟩:=</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     prescribed_cycle_two_boundary_split a b xs (List.nodup_cons.mp hnodup).1 (List.nodup_cons.mp hnodup).2 hbin</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let p1:List X:=a::pre++[b]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let p2:List X:=b::post++[a]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hmem1:∀ x∈p1,x∈a::xs:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     intro x hx;simp [p1,hxs] at hx ⊢;tauto</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hmem2:∀ x∈p2,x∈a::xs:=by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     intro x hx;simp [p2,hxs] at hx ⊢;tauto</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hcover:∀ x∈a::xs,x∈p1 ∨ x∈p2:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     intro x hx;simp [p1,p2,hxs] at hx ⊢;tauto</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hc:List.IsChain (fun x y=&gt;Dsrc x y ∧ ¬Fsrc.Adj x y) ((a::xs)++[a]):=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     exact (prescribed_path_through_chain Dsrc Fsrc xs a a).mp hsourcecycle</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hc1:List.IsChain (fun x y=&gt;Dsrc x y ∧ ¬Fsrc.Adj x y) p1:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     apply hc.infix</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     refine ⟨[],post++[a],?_⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     simp [p1,hxs,List.append_assoc]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hc2:List.IsChain (fun x y=&gt;Dsrc x y ∧ ¬Fsrc.Adj x y) p2:=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     apply hc.infix</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     refine ⟨a::pre,[],?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     simp [p2,hxs,List.append_assoc]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hf1:∀ x∈p1,x∉A₀ k→x∉st.assigned k:=by intro x hx;exact hfree x (hmem1 x hx)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hs1:∀ x∈p1,x∈QV k:=by intro x hx;exact hsubset x (hmem1 x hx)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   obtain ⟨mid,hm,hmExact,hmA,hmE,hmPres,hmL,_,hmArcs,hmVertices,hmEdges⟩:=</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     prescribed_ordered_path_family_advance QV Q A₀ ψ E₀ J β δ hβ hβ1 hδ hδbound hnβ hn hI</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       hQsize hQdegree hold hJ k Dsrc Fsrc hDQ D L hext p1 hp1 hc1 st hvalid hinit hf1 hs1</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hinitmid:prescribedInducedSourceEdges (Q k) (A₀ k)⊆mid.sourceEdges k:=hinit.trans (hmE k)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hf2:∀ x∈p2,x∉A₀ k→x∉mid.assigned k:=by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     intro x hx hnot hmid</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     rw [hmExact,Function.update_self] at hmid</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     rcases Finset.mem_union.mp hmid with hold&#x27;|hnew</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · exact hfree x (hmem2 x hx) hnot hold&#x27;</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     · have hh:=hinter x (List.mem_toFinset.mp hnew) hx</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       rcases hh with rfl|rfl &lt;;&gt; contradiction</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hs2:∀ x∈p2,x∈QV k:=by intro x hx;exact hsubset x (hmem2 x hx)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   obtain ⟨last,hl,hlExact,hlA,hlE,hlPres,hlL,_,hlArcs,hlVertices,hlEdges⟩:=</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     prescribed_ordered_path_family_advance QV Q A₀ ψ E₀ J β δ hβ hβ1 hδ hδbound hnβ hn hI</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       hQsize hQdegree hold hJ k Dsrc Fsrc hDQ D L hext p2 hp2 hc2 mid hm hinitmid hf2 hs2</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have hunion:p1.toFinset∪p2.toFinset=(a::xs).toFinset:=by</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     ext x</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     simp only [Finset.mem_union,List.mem_toFinset]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     exact ⟨fun h=&gt;h.elim (hmem1 x) (hmem2 x),hcover x⟩</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   refine ⟨last,hl,?_,?_,?_,?_,?_,?_,?_,?_⟩</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   · rw [hlExact,hmExact]</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     funext i</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     by_cases hi:i=k</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     · subst i</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       simp only [Function.update_self,Finset.union_assoc,hunion]</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     · simp [Function.update_of_ne hi]</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   · intro i;exact (hmA i).trans (hlA i)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   · intro i;exact (hmE i).trans (hlE i)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   · intro i x hx;exact (hlPres i x (hmA i hx)).trans (hmPres i x hx)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   · intro x hx hnot</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     rcases hcover x hx with hx1|hx2</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     · rw [hlPres k x (hmVertices (List.mem_toFinset.mpr hx1))]</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       exact hmL x hx1 hnot</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     · exact hlL x hx2 hnot</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   · intro e he</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     rw [hdirected] at he</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     rcases Finset.mem_union.mp he with he1|he2</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     · rcases hmArcs e he1 with hboth|hnew</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>       · exact Or.inl hboth</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>       · right</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>         have hend:=prescribed_directed_path_edge_endpoints p1 e he1</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>         rw [hlPres k e.1 (hmVertices (List.mem_toFinset.mpr hend.1)),</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>             hlPres k e.2 (hmVertices (List.mem_toFinset.mpr hend.2))]</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>         exact hnew</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     · exact hlArcs e he2</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>   · intro x hx</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     rcases hcover x (List.mem_toFinset.mp hx) with hx1|hx2</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     · exact hlA k (hmVertices (List.mem_toFinset.mpr hx1))</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     · exact hlVertices (List.mem_toFinset.mpr hx2)</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>   · rw [hphysical]</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     exact Finset.union_subset (hmEdges.trans (hlE k)) hlEdges</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a> end Oberwolfach</span></pre></html>

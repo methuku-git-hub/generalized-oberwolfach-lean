@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryTransformerVertexStageRealization.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryTransformerVertexStageRealization.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryTransformerEdgeStage</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.TransformerSpokeDefectIdentity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.TransformerOriginalEdgeIdentity</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Construct, rather than assume, the complete vertex-wheel stage over</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> already selected rim/spoke paths and their edge-wheel pairs. The result</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> is two actual decompositions with precisely the remaining hub-switch defect. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 11000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> open scoped BigOperators</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a>  theorem ordinary_transformer_vertex_stage_realization</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (G Q F:SimpleGraph V) (H₀ H:V→U→Prop) (φ:V→V) (ψ:U→U)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (b:∀ v,G.neighborSet v≃({u:U // H₀ v u}×Fin 2))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (σ:∀ v,Equiv.Perm (G.neighborSet v)) (hσ:∀ v w,σ v w≠w)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (p:(G.edgeFinset⊕{e:V×U // H₀ e.1 e.2})→(Σ a:V,Σ c:V,Q.Walk a c))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (A R W:Finset V) (B:Finset U) (hRW:R⊆W)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hbalance:∀ v,G.degree v=2*((Finset.univ:Finset U).filter (H₀ v)).card)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hroot:∀ v∈G.support,v∈R∧φ v∈R)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hcross:∀ v∈G.support,∀ w∈G.support,φ v≠w)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hφQ:∀ v w,G.Adj v w→Q.Adj (φ v) (φ w))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hφedge:Function.Injective (fun i:G.edgeFinset=&gt;s(φ i.val.out.1,φ i.val.out.2)))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hψedge:Function.Injective (fun i:{e:V×U // H₀ e.1 e.2}=&gt;(φ i.val.1,ψ i.val.2)))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hB:∀ e:{e:V×U // H₀ e.1 e.2},e.val.2∈B∧ψ e.val.2∈B)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hp:∀ i,(p i).2.2.IsPath) (hlen:∀ i,0&lt;(p i).2.2.length)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hpW:∀ i,∀ v∈(p i).2.2.support,v∈W∧v∉R)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hdis:∀ i j,i≠j→Disjoint (p i).2.2.support.toFinset (p j).2.2.support.toFinset)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hFF:∀ i j,∀ v∈(p i).2.2.support,∀ w∈(p j).2.2.support,¬F.Adj v w)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hFR:∀ i,∀ v∈(p i).2.2.support,∀ w∈R,¬F.Adj v w)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hends:∀ e:G.edgeFinset,Q.Adj e.val.out.1 (p (.inl e)).1 ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       Q.Adj (φ e.val.out.1) (p (.inl e)).1 ∧ Q.Adj e.val.out.2 (p (.inl e)).2.1 ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       Q.Adj (φ e.val.out.2) (p (.inl e)).2.1)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hspends:∀ e:{e:V×U // H₀ e.1 e.2},Q.Adj e.val.1 (p (.inr e)).1 ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       Q.Adj (φ e.val.1) (p (.inr e)).1 ∧ Q.Adj e.val.1 (p (.inr e)).2.1 ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       Q.Adj (φ e.val.1) (p (.inr e)).2.1)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (r:ℕ) (hr:4≤r) (L t:ℝ) (hL:0≤L) (hF:∀ v,(F.degree v:ℝ)≤L)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hcount:∀ u v w,t≤(((A.filter (fun x=&gt;H x u))∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hbudget:W.card+Fintype.card (Σ v,G.neighborSet v)*r+((r:ℝ)+4)*(L+1)&lt;t)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (E:OrdinaryActualRimWheels G Q F H₀ H φ r B b σ p)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (S:OrdinaryActualSpokeWheels G Q F H₀ H φ ψ r p):</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     ∃ D:∀ d:Σ v,G.neighborSet v,</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       OrdinaryVertexWheelPair Q F H r d.1 (φ d.1)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         (transformerRimEndpoint G Q H₀ p d) (transformerSpokeEndpoint G Q H₀ b p d)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         (transformerAssignedHub G σ E.hub d),</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let Plus:=Sum.elim E.first (Sum.elim S.first (fun d=&gt;(D d).second))</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     let Minus:=Sum.elim E.second (Sum.elim S.second (fun d=&gt;(D d).first))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     let Z:U→Finset V:=fun u=&gt;(Finset.univ.filter (fun i:{e:V×U // H₀ e.1 e.2}=&gt;i.val.2=u)).biUnion</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (fun i=&gt;(p (.inr i)).2.2.support.toFinset)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (∀ d,∀ v∈rootWheelInternal (D d).first d.1 (transformerRimEndpoint G Q H₀ p d)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (transformerSpokeEndpoint G Q H₀ b p d),v∈A∧v∉W∧v≠φ d.1) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (∀ i j,i≠j→Disjoint (ordinaryWheelResources (Plus i)) (ordinaryWheelResources (Plus j))) ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (∀ i j,i≠j→Disjoint (ordinaryWheelResources (Minus i)) (ordinaryWheelResources (Minus j))) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     HasOrdinaryWheelDecomposition (wheelFamilyRim Plus) (wheelFamilySpokes Plus) r ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     HasOrdinaryWheelDecomposition (wheelFamilyRim Minus) (wheelFamilySpokes Minus) r ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     ∀ e:Sym2 V⊕(V×U),</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (if e∈ordinaryHostResources (wheelFamilyRim Plus) (wheelFamilySpokes Plus) then (1:ℤ) else 0)-</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (if e∈ordinaryHostResources (wheelFamilyRim Minus) (wheelFamilySpokes Minus) then 1 else 0)=</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (if e∈ordinaryHostResources G H₀ then 1 else 0)-</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (if e∈transformerImageResources G H₀ φ ψ then 1 else 0)+</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       ∑ u:U,((if e∈(Z u).image (fun v=&gt;Sum.inr (v,u)) then 1 else 0)-</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         (if e∈(Z u).image (fun v=&gt;Sum.inr (v,ψ u)) then 1 else 0)):=by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hrd (d:Σ v,G.neighborSet v):d.1∈R∧φ d.1∈R∧d.1≠φ d.1:=by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     have hd:G.Adj d.1 d.2.val:=d.2.property</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hs:=hd.mem_support_left</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     exact ⟨(hroot _ hs).1,(hroot _ hs).2,(hcross _ hs _ hs).symm⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨D,hD,hd₁,hd₂,_,_⟩:=ordinary_actual_vertex_wheels G Q F H₀ H φ b σ E.hub p A R W hRW</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     hrd (fun v w hvw=&gt;(hφQ v w hvw).ne) hp hlen hpW hdis hFF hFR hends hspends</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     E.root_hub_adjacency E.attachments r hr L t hL hF hcount hbudget</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hh:=ordinary_transformer_edge_stage G Q F H₀ H φ ψ r (by omega) R W B hRW b σ hσ p</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     hbalance hroot hcross hB hpW hdis E S D (fun d v hv=&gt;(hD d v hv).2) hd₁ hd₂</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   dsimp only at hh</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   refine ⟨D,hD,hh.1,hh.2.1,hh.2.2.1,hh.2.2.2.1,?_⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   intro e</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   rw [hh.2.2.2.2 e,transformer_original_edge_identity G H₀ φ ψ hφedge hψedge]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   rw [transformer_spoke_defect_identity Q H₀ ψ (fun i=&gt;p (.inr i))</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (fun i j hij=&gt;hdis (.inr i) (.inr j) (fun he=&gt;hij (Sum.inr.inj he)))]</span>
+<span id="L82"><a href="#L82" class="ln">  82</a> </span>
+<span id="L83"><a href="#L83" class="ln">  83</a> end Oberwolfach</span></pre></html>

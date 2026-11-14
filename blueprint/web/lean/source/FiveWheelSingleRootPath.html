@@ -1,0 +1,114 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FiveWheelSingleRootPath.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FiveWheelSingleRootPath.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SeparatedDirectedPrefixes</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! For a wheel with five ordinary rim arcs and one marked rim arc, expose</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> the marked step before the final ordinary two-edge join to a single closing root. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 10000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V U:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem five_wheel_path_to_single_root (F:SimpleGraph V)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (R₀ RK:V→V→Prop) (H₀ HK:V→U→Prop) (x y:V) (u:U) (j:Bool)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (W Z:Finset V) (d c:ℝ) (hd:0≤d) (hF:∀ v,(F.degree v:ℝ)≤d)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hyZ:y∈Z)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hopen:c≤((Finset.univ.filter (fun a=&gt;R₀ x a∧H₀ a u)).card:ℝ))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hstep:∀ t:Bool,∀ v,c≤((Finset.univ.filter (fun a=&gt;</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (if t then RK v a else R₀ v a)∧(if t then HK a u else H₀ a u))).card:ℝ))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hjoin:∀ v,v≠y→c≤((Finset.univ.filter (fun z=&gt;R₀ v z∧R₀ z y∧H₀ z u)).card:ℝ))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hbudget:(W.card:ℝ)+((Z.card:ℝ)+5)*(d+1)&lt;c):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ p:Fin 4↪V,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       R₀ x (p 0)∧R₀ (p 3) y∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀ i:Fin 3,if j=false∧i.val=1 then RK (p i.castSucc) (p i.succ)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         else R₀ (p i.castSucc) (p i.succ))∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ i,if j=false∧i.val=2 then HK (p i) u else H₀ (p i) u)∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ i,p i∉W∧p i∉Z∧∀ z∈Z,¬F.Adj (p i) z)∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       ∀ i k,¬F.Adj (p i) (p k):=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hstart:(W.card:ℝ)+(Z.card:ℝ)*(d+1)&lt;c:=by nlinarith only [hbudget,hd]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   obtain ⟨a,ha,haW,haZ,haF⟩:=candidate_vertex_avoiding F _ W Z d c hF hopen hstart</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let D:ℕ→V→V→Prop:=fun i v w=&gt;if j=false∧i=1 then RK v w else R₀ v w</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let A:ℕ→Finset V:=fun i=&gt;Finset.univ.filter (fun v=&gt;if j=false∧i=2 then HK v u else H₀ v u)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   letI (i:ℕ) (v z:V):Decidable (D i v z):=Classical.propDecidable _</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have haA:a∈A 0:=by simpa [A] using (Finset.mem_filter.mp ha).2.2</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hcount:∀ i&lt;2,∀ v∈A i,c≤(((A (i+1)).filter (D i v)).card:ℝ):=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     intro i hi v hv</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have he:(j=false∧i+1=2)↔(j=false∧i=1):=by constructor &lt;;&gt; rintro ⟨hj,hi⟩ &lt;;&gt; exact ⟨hj,by omega⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     by_cases ht:j=false∧i=1</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     · have hs:(A (i+1)).filter (D i v)=Finset.univ.filter (fun z=&gt;RK v z∧HK z u):=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         ext z</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         simp only [A,D,Finset.mem_filter,Finset.mem_univ,true_and,he,ht,ite_true]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         tauto</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       rw [hs];exact hstep true v</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     · have hs:(A (i+1)).filter (D i v)=Finset.univ.filter (fun z=&gt;R₀ v z∧H₀ z u):=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         ext z</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         simp only [A,D,Finset.mem_filter,Finset.mem_univ,true_and,he,ht,ite_false]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         tauto</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       rw [hs];exact hstep false v</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hpBudget:(W.card:ℝ)+((Z.card:ℝ)+2+1)*(d+1)&lt;c:=by nlinarith only [hbudget,hd]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   obtain ⟨p,hp0,hpA,hpD,hpF⟩:=separated_directed_prefix F D A W Z d c hd hF 2 a haA haW haZ haF hcount hpBudget</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   let S:Finset V:=Finset.univ.image p</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hS:S.card=3:=by dsimp only [S];rw [Finset.card_image_of_injective _ p.injective,Finset.card_univ,Fintype.card_fin]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hZS:((Z∪S).card:ℝ)≤Z.card+3:=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hh:((Z∪S).card:ℝ)≤Z.card+S.card:=by exact_mod_cast Finset.card_union_le Z S</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     rw [hS] at hh</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     push_cast at hh</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     exact hh</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hchoice:(W.card:ℝ)+((Z∪S).card:ℝ)*(d+1)&lt;c:=by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hh:=mul_le_mul_of_nonneg_right hZS (show 0≤d+1 by linarith)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     nlinarith only [hh,hbudget,hd]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hp2ne:p 2≠y:=fun h=&gt;(hpA 2).2.2.1 (h ▸ hyZ)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   obtain ⟨z,hz,hzW,hzZS,hzF⟩:=candidate_vertex_avoiding F</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (Finset.univ.filter (fun z=&gt;R₀ (p 2) z∧R₀ z y∧H₀ z u)) W (Z∪S) d c hF (hjoin (p 2) hp2ne) hchoice</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hzout:z∉Set.range p:=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     rintro ⟨i,hi⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     exact hzZS (Finset.mem_union_right _ (Finset.mem_image.mpr ⟨i,Finset.mem_univ _,hi⟩))</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   let q:Fin 4↪V:=⟨Fin.snoc p z,Fin.snoc_injective_of_injective p.injective hzout⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hqold (i:Fin 3):q i.castSucc=p i:=by simp only [q,Function.Embedding.coeFn_mk,Fin.snoc_castSucc]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hq0:q 0=p 0:=by simpa using hqold 0</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hq1:q 1=p 1:=by simpa using hqold 1</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hq2:q 2=p 2:=by simpa using hqold 2</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hqlast:q (Fin.last 3)=z:=by simp only [q,Function.Embedding.coeFn_mk,Fin.snoc_last]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hq3:q 3=z:=by simpa using hqlast</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hzP: R₀ (p 2) z ∧ R₀ z y ∧ H₀ z u:=(Finset.mem_filter.mp hz).2</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   refine ⟨q,?_,?_,?_,?_,?_,?_⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · rw [hq0,hp0];exact (Finset.mem_filter.mp ha).2.1</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   · rw [hq3];exact hzP.2.1</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   · intro i</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     fin_cases i &lt;;&gt; norm_num</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     · change R₀ (q 0) (q 1)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       rw [hq0,hq1]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       simpa [D] using hpD 0</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     · rw [hq1,hq2]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       cases j &lt;;&gt; simpa [D] using hpD 1</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     · change R₀ (q 2) (q 3)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       rw [hq2,hq3];exact hzP.1</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   · intro i</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     fin_cases i &lt;;&gt; norm_num</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     · change H₀ (q 0) u</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>       rw [hq0];simpa [A] using (hpA 0).1</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     · change H₀ (q 1) u</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>       rw [hq1];simpa [A] using (hpA 1).1</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     · rw [hq2]</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       cases j &lt;;&gt; simpa [A] using (hpA 2).1</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     · change H₀ (q 3) u</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>       rw [hq3];exact hzP.2.2</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   · intro i</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     refine Fin.lastCases ?_ (fun t=&gt;?_) i</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     · rw [hqlast]</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>       exact ⟨hzW,fun h=&gt;hzZS (Finset.mem_union_left _ h),fun w hw=&gt;hzF w (Finset.mem_union_left _ hw)⟩</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     · rw [hqold];exact (hpA t).2</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   · intro i k</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     refine Fin.lastCases ?_ (fun i=&gt;?_) i</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     · rw [hqlast]</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>       refine Fin.lastCases ?_ (fun k=&gt;?_) k</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>       · rw [hqlast];exact F.loopless.irrefl _</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       · rw [hqold];exact hzF _ (Finset.mem_union_right _ (Finset.mem_image.mpr ⟨k,Finset.mem_univ _,rfl⟩))</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     · rw [hqold]</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>       refine Fin.lastCases ?_ (fun k=&gt;?_) k</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>       · rw [hqlast];exact fun h=&gt;hzF _ (Finset.mem_union_right _ (Finset.mem_image.mpr ⟨i,Finset.mem_univ _,rfl⟩)) h.symm</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       · rw [hqold];exact hpF i k</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a> end Oberwolfach</span></pre></html>

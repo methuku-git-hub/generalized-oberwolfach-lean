@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ClassCorrectionFromCommonEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ClassCorrectionFromCommonEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ExpandedClassInitialBalance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ClassBalancedCorrection</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.SelectedRoutingFromClassEdits</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.ClassRoutingNumericalSupply</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The retained state-degree and two-path tests, together with regularisation</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> edits, yield the protected balanced class orientation and its bounded deletion. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem class_correction_from_common_event</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {V U Γ Color:Type} [Fintype V] [LinearOrder V] [Fintype U] [DecidableEq U] [Fintype Γ] [Fintype Color]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (P S Protected:SimpleGraph V) (π:Equiv.Perm V) (d m L:ℕ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (σ:∀e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (mass:Fin 6→ℝ) (ρ D t b ε α p err f:ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hregular:S.IsRegularOfDegree (2*m)) (hn:0&lt;Fintype.card V) (hL:0&lt;L)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hρ:0≤ρ) (ht:0≤t) (hb:0≤b) (hε:0≤ε) (hα:0&lt;α) (hp:0&lt;p) (hf:0≤f)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hmass:(∑a∈({0,1,2,3,4}:Finset (Fin 6)),mass a)=ρ) (hsize:ρ*D=2*m)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hdegree:∀v,|(P.degree v:ℝ)-D|≤ε)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hcol:∀a v,|((∑w,sampledColourOrientation P (fun e=&gt;σ (Sum.inl e)) a v w:ℕ):ℝ)-</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       mass a/2*P.degree v|≤t)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hedit:∀v,((changed ((longPhysicalStateGraph P σ {0,1,2,3,4}).neighborFinset v) (S.neighborFinset v)).card:ℝ)≤b)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hprotected:∀x y,Protected.Adj x y→(S.Adj x y↔(longPhysicalStateGraph P σ {0,1,2,3,4}).Adj x y))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hforbid:∀v,(Protected.degree v:ℝ)≤f)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hmin:∀v,(1/2+α)*(Fintype.card V:ℝ)≤P.degree v)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (htest:∀x y,x≠y→((P.neighborFinset x∩P.neighborFinset y).card:ℝ)*p^2-err≤</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       ((Finset.univ.filter (fun z=&gt;</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         0&lt;markedPhysicalRim P π (3*d) (fun e=&gt;markedExpandedPhysicalCollapse (σ (Sum.inl e))) false x z ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         0&lt;markedPhysicalRim P π (3*d) (fun e=&gt;markedExpandedPhysicalCollapse (σ (Sum.inl e))) false z y)).card:ℝ))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hsupply:err+2*b≤α*p^2*Fintype.card V)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hrouting:(Fintype.card V:ℝ)*(5*t+ρ/2*ε+b)/L+2*(5*t+ρ/2*ε+b)+4*L+2*f&lt;α*p^2*Fintype.card V):</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∃M:V→V→ℕ,</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀x y,M x y+M y x=if S.Adj x y then 1 else 0) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀v,(∑w,M v w)=m ∧ (∑w,M w v)=m) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀v,((orientationDisagreementGraph (longPhysicalStateGraph P σ {0,1,2,3,4})</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         (fun e=&gt;(σ (Sum.inl e)).2) M).degree v:ℝ)≤b+(5*t+ρ/2*ε+b)+2*L) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀x y,(orientationDisagreementGraph (longPhysicalStateGraph P σ {0,1,2,3,4})</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (fun e=&gt;(σ (Sum.inl e)).2) M).Adj x y→¬Protected.Adj x y):=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let a:=5*t+ρ/2*ε+b</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let β:=α*p^2</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have ha:0≤a:=by dsimp [a];positivity</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hβ:0&lt;β:=by dsimp [β];positivity</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have herr:=expanded_class_initial_outdegree_error P S σ mass ρ D t b ε m hρ hmass hsize hdegree hcol hedit</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hnum:=class_routing_numerical_supply P α p err b hmin hsupply</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hpaths:=selected_routing_paths_from_class_edits P S π d σ p err b β hb hedit htest hnum</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   exact class_balanced_correction (longPhysicalStateGraph P σ {0,1,2,3,4}) S Protected</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (fun e=&gt;(σ (Sum.inl e)).2) m L hregular hL hn a f β b ha hf hβ hprotected hedit herr hforbid hpaths hrouting</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> end Oberwolfach</span></pre></html>

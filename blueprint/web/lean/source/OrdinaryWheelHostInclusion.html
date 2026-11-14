@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryWheelHostInclusion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryWheelHostInclusion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryFactorWheels</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A wheel in a remaining rim graph is a wheel in the original host.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The physical edge set is preserved, so the transport does not change</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> multiplicities, forbidden-pair restrictions, or spoke coverage. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 2400000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U : Type*} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   {P Q F : SimpleGraph V} {H : V→U→Prop} {r : ℕ}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def ordinaryWheelInclude (hQP : Q≤P) (W : OrdinaryWheel Q F H r) : OrdinaryWheel P F H r :=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   ⟨(⟨W.val.1.val,W.val.1.property.trans hQP⟩,W.val.2),W.property⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem ordinaryWheelInclude_resources (hQP : Q≤P) (W : OrdinaryWheel Q F H r) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ordinaryWheelResources (ordinaryWheelInclude hQP W)=ordinaryWheelResources W := rfl</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem ordinaryWheelInclude_rimGraph (hQP : Q≤P) (M : Finset (OrdinaryWheel Q F H r)) :</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ordinaryWheelRimGraph (M.image (ordinaryWheelInclude hQP))=ordinaryWheelRimGraph M := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   ext x y</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   simp only [ordinaryWheelRimGraph,SimpleGraph.iSup_adj,Finset.mem_image]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   constructor</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · rintro ⟨_,⟨W,hW,rfl⟩,hxy⟩;exact ⟨W,hW,hxy⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   · rintro ⟨W,hW,hxy⟩;exact ⟨ordinaryWheelInclude hQP W,⟨W,hW,rfl⟩,hxy⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem ordinaryWheelInclude_union (hQP : Q≤P) (M : Finset (OrdinaryWheel Q F H r)) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (M.image (ordinaryWheelInclude hQP)).biUnion ordinaryWheelResources=M.biUnion ordinaryWheelResources := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   ext e</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   simp only [Finset.mem_biUnion,Finset.mem_image]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   constructor</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   · rintro ⟨_,⟨W,hW,rfl⟩,he⟩;exact ⟨W,hW,he⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · rintro ⟨W,hW,he⟩;exact ⟨ordinaryWheelInclude hQP W,⟨W,hW,rfl⟩,he⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a> theorem ordinary_factor_wheels_avoiding (D : SimpleGraph V) (T : Finset V)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (u : U) (hH : ∀ v∈T,H v u)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hfactor : HasResourceDecomposition (localOrdinaryVertices (Q:=Q\D) (F:=F) (T:=T) (r:=r)) T) :</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     ∃ M : Finset (OrdinaryWheel Q F H r),</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (∀ W∈M,∀ Z∈M,W≠Z → Disjoint (ordinaryWheelResources W) (ordinaryWheelResources Z)) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       M.biUnion ordinaryWheelResources=(ordinaryWheelRimGraph M).edgeFinset.image Sum.inl ∪</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         T.image (fun v=&gt;Sum.inr (v,u)) ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∀ v,(ordinaryWheelRimGraph M).degree v≤2) ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (∀ W∈M,ordinaryWheelHub W=u) ∧ Disjoint (ordinaryWheelRimGraph M) D := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   obtain ⟨M,hM,hunion,hdeg,hhub,_⟩:=ordinary_factor_wheels (Q:=Q\D) u hH hfactor</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let f:=ordinaryWheelInclude (P:=Q) (Q:=Q\D) (F:=F) (H:=H) (r:=r) sdiff_le</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hgraph : ordinaryWheelRimGraph (M.image f)=ordinaryWheelRimGraph M:=ordinaryWheelInclude_rimGraph sdiff_le M</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   refine ⟨M.image f,?_,?_,?_,?_,?_⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   · intro W hW Z hZ hne</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     obtain ⟨W&#x27;,hW&#x27;,rfl⟩:=Finset.mem_image.mp hW</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     obtain ⟨Z&#x27;,hZ&#x27;,rfl⟩:=Finset.mem_image.mp hZ</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     exact hM W&#x27; hW&#x27; Z&#x27; hZ&#x27; (fun h=&gt;hne (congrArg f h))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   · rw [ordinaryWheelInclude_union,hgraph]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     exact hunion</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   · intro v</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     rw [hgraph]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     exact hdeg v</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   · intro W hW</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     obtain ⟨W&#x27;,hW&#x27;,rfl⟩:=Finset.mem_image.mp hW</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact hhub W&#x27; hW&#x27;</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   · rw [hgraph]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     apply disjoint_iff_inf_le.mpr</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     intro x y hxy</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     exact ((ordinaryWheelRimGraph_subhost M hxy.1).2 hxy.2).elim</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a> end Oberwolfach</span></pre></html>

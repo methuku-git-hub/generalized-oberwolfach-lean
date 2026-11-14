@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryBoundedTwoFactors.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryBoundedTwoFactors.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SingleClassBoundedFactors</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.CanonicalGraphPairs</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MappedFactorGraph</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.ForbiddenGraphPairs</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! The actual two ordinary cycle factors used in a wheel transformer.</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> Their bounded vertex set is chosen before the forbidden-set and conflict</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> bounds. Physical edge disjointness follows from canonical edge pairs. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option synthInstance.maxSize 512</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 6500000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> open scoped BigOperators</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> noncomputable section</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> namespace Oberwolfach</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> variable {Tpl:Type} [Fintype Tpl] [DecidableEq Tpl]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem ordinary_bounded_two_factors (r:ℕ) (hr:3≤r)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (S:Tpl→VertexAbsorberTemplate r) (α b B:ℝ) (hα:0&lt;α) (hb:0&lt;b) (hB:0&lt;B):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ η:ℝ,0&lt;η ∧ ∀ q:ℕ,∃ t:ℕ,1≤t ∧ ∀ F₀ D:ℝ,0≤F₀→0≤D→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ∃ k₀:ℝ,1&lt;k₀ ∧ ∀ k:ℝ,k₀≤k→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ∀ (V:Type) [Fintype V] [DecidableEq V],</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       ∀ (Q F:SimpleGraph V) (T:Finset V),(T.card:ℝ)=r*k→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ v,(F.degree v:ℝ)≤D)→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       ∀ w:LocalOrdinaryCycle Q F T r→ℝ,</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ C,b/k^(r-1)≤w C ∧ w C≤B/k^(r-1))→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ v∈T,|1-hypergraphWeightedDegree localOrdinaryVertices w v|≤η)→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ X:Finset V,X⊆T→X.card=r→α*k^(r*r)≤</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         Fintype.card (LabelledAbsorberFamily (localOrdinaryVertices (Q:=Q) (F:=F) (T:=T) (r:=r)) S X))→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       ∀ (I Z:Finset V) (z:ℕ),(I.card:ℝ)≤F₀→Z⊆T→Z.card=r*z→z≤q→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ∃ A:Finset V,∃ D₀ D₁:Finset (LocalOrdinaryCycle Q F T r),</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         A⊆T ∧ Disjoint A (Z∪I) ∧ A.card=r*t ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         (∀ x∈A,∀ y∈A,¬F.Adj x y) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         ((∀ x∈D₀,∀ y∈D₀,x≠y→Disjoint (localOrdinaryVertices x) (localOrdinaryVertices y)) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>           D₀.biUnion localOrdinaryVertices=A) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         ((∀ x∈D₁,∀ y∈D₁,x≠y→Disjoint (localOrdinaryVertices x) (localOrdinaryVertices y)) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>           D₁.biUnion localOrdinaryVertices=A∪Z) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         Disjoint (localOrdinaryFactorGraph D₀) (localOrdinaryFactorGraph D₁) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         ∀ C∈D₁,(localOrdinaryVertices C∩Z).card≤1:=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hJ:1≤r^r:=by have hpos:0&lt;r^r:=pow_pos (by omega) _;omega</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   obtain ⟨η,hη,hbase⟩:=single_class_bounded_factors r (r^r) hr hJ S α b B hα hb hB</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   refine ⟨η,hη,?_⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   intro q</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨t,ht,hbase⟩:=hbase q</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   refine ⟨t,ht,?_⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro F₀ D hF₀ hD</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨k₀,hk₀,hbase⟩:=hbase F₀ (r*D) hF₀ (by positivity)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   refine ⟨k₀,hk₀,?_⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro k hk V _ _ Q F T hT hF w hw herr habs I Z z hI hZT hZ hz</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let P:LocalOrdinaryCycle Q F T r→Finset (V×V):=fun C=&gt;canonicalGraphPairs C.val.val.val</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hP (C:LocalOrdinaryCycle Q F T r) (p:V×V) (hp:p∈P C):</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       p.1≠p.2∧p.1∈localOrdinaryVertices C∧p.2∈localOrdinaryVertices C:=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have he:=canonicalGraphPairs_adj C.val.val.val p hp</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     exact ⟨C.val.val.val.ne_of_adj he,Set.mem_toFinset.mpr he.mem_support_left,Set.mem_toFinset.mpr he.mem_support_right⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hPc (C:LocalOrdinaryCycle Q F T r):(P C).card≤r:=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     dsimp only [P]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     rw [canonicalGraphPairs_card,C.val.val.property.edgeFinset_card]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hPd (C:LocalOrdinaryCycle Q F T r) (v:V):((P C).filter (fun p=&gt;v=p.1∨v=p.2)).card≤2:=by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     dsimp only [P]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     rw [canonicalGraphPairs_incidence]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     rcases C.val.val.property.degree_zero_or_two v with h|h &lt;;&gt; omega</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hEc:((forbiddenGraphPairs F T).card:ℝ)≤(r*D)*k:=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     apply (forbiddenGraphPairs_card F T D hF).trans</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     rw [hT];ring_nf;exact le_rfl</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   obtain ⟨A,D₀,D₁,hAT,hAI,hAc,hAE,hD₀,hD₁,hdis,hcap⟩:=hbase k hk V (LocalOrdinaryCycle Q F T r)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     T localOrdinaryVertices w hT (fun C v hv=&gt;C.property.1 v (Set.mem_toFinset.mp hv))</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     localOrdinaryVertices_card (local_ordinary_multiplicity Q F T) hw herr habs I Z z hI hZT hZ hz</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (forbiddenGraphPairs F T) (forbiddenGraphPairs_distinct F T) hEc P hP hPc hPd</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   refine ⟨A,D₀,D₁,hAT,hAI,hAc,forbiddenGraphPairs_avoidance F T A hAT hAE,hD₀,hD₁,?_,hcap⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   apply disjoint_iff_inf_le.mpr</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   intro v u hvu</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   obtain ⟨C,hC,hCu⟩:=(localOrdinaryFactorGraph_adj D₀ v u).mp hvu.1</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   obtain ⟨C&#x27;,hC&#x27;,hC&#x27;u⟩:=(localOrdinaryFactorGraph_adj D₁ v u).mp hvu.2</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   exact (Finset.disjoint_left.mp hdis</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     (Finset.mem_biUnion.mpr ⟨C,hC,Finset.mem_image.mpr ⟨s(v,u),SimpleGraph.mem_edgeFinset.mpr hCu,rfl⟩⟩)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     (Finset.mem_biUnion.mpr ⟨C&#x27;,hC&#x27;,Finset.mem_image.mpr ⟨s(v,u),SimpleGraph.mem_edgeFinset.mpr hC&#x27;u,rfl⟩⟩)).elim</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> </span>
+<span id="L79"><a href="#L79" class="ln">  79</a> end Oberwolfach</span></pre></html>

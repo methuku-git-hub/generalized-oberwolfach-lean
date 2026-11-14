@@ -1,0 +1,128 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExpandedPreparationAllMarkedContributions.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExpandedPreparationAllMarkedContributions.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawMarkedOrdinaryArcConcentration</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawMarkedClosingArcConcentration</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.RawMarkedOrdinarySpokeConcentration</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.ExpandedPreparationApproximateCommon</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedVariableHubSeedBound</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.RawMarkedVariableSpokeConcentrationTarget</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> import Oberwolfach.MarkedExpandedApproximatePotentialHigh</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> import Oberwolfach.RawIntervalUnassignedHighProbability</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> import Oberwolfach.ExpandedUnassignedRimHighProbability</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> import Oberwolfach.RawIntervalHubStartHighProbability</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> import Oberwolfach.MarkedExpandedStartHighProbability</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> import Oberwolfach.MarkedExpandedDegreeStrong</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> import Oberwolfach.MarkedExpandedTwoPathEvent</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> import Oberwolfach.MarkedExpandedRawCommonEvent</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> /-! The colour-degree event is available simultaneously with any selected</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> retained event of probability at least 7/10, without assuming the former. -/</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> set_option autoImplicit false</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> set_option maxHeartbeats 12000000</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> open scoped BigOperators</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> noncomputable section</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> namespace Oberwolfach</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem raw_expanded_selected_preparation_with_all_marked_contributions (d m:ℕ) (hd:2≤d) (hm:3≤m) (B t pstar:ℝ) (hB:0&lt;B) (ht:0&lt;t) (hpstar:0&lt;pstar) :</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∃ N:ℕ,∀ (V:Type) [Fintype V] [LinearOrder V],</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     N≤Fintype.card V→∀ (U Γ Color:Type) [Fintype U] [Fintype Γ] [Fintype Color] [DecidableEq U]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hm:0&lt;Fintype.card U) (hmn:Fintype.card U≤Fintype.card V) (hΓ:Fintype.card Γ≤2)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (G Z T:SimpleGraph V) (hTG:T≤G) (π:Equiv.Perm V) (I:Finset V) (J:Finset U) (hJ:J.Nonempty)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (p k p₂ k₂ u:ℝ) (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hnoshort:∀ x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x) (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (s:U→Color→ℝ) (hs:∀ u j,0≤s u j) (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (g:Γ) (j:Color) (D τ Aweight:ℝ)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hDlo:(Fintype.card V:ℝ)/2≤D) (hDhi:D≤2*Fintype.card V)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hp₂lo:pstar≤p₂) (hk₂lo:pstar≤k₂) (hslo:∀ v,pstar≤s v j) (hbalance:∑ v,q v g=D*k₂)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (weight:(Fin (m+1)→V)→ℝ)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hw:SuccessorSequenceWeightConditions G π (3*d) D τ Aweight B weight)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (F:RawMarkedOutcome V U Γ Color→Type) [∀ a,Fintype (F a)] (ν:∀ a,FiniteLaw (F a)) (E:(Σ a,F a)→Prop),</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (7:ℝ)/10≤((FiniteLaw.pi (rawMarkedWheelLaw (V:=V) p k hp hk (by linarith) d hd q hq hQ s hs hS)).sigma ν).probability E→</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let ρ:=markedExpandedPhysicalProbability p k p₂ k₂ u</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let f:=fun (ω:∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e) e=&gt;rawExpandedMarkedCollapse e (ω e)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     let H₀:=fun (_:V) (_:U)=&gt;True</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     let Hₖ:=fun (_:V) (_:U)=&gt;True</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let w:=fun W:MarkedWheel (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd m π (3*d) H₀ Hₖ=&gt;</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       weight W.1.val/(D*p₂^m*k₂*(s W.2.val j)^m)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let Extra:=fun z:(Σ ω:(∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e),F (f ω))=&gt;∀ root,</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       |typedMarkedPotentialLoad w (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) root-</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         ∑ W,(if root∈typedMarkedOccurrenceResources W then w W else 0)*</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>           ∏ a∈typedMarkedOccurrenceResources W\{root},rawMarkedWheelMarginal G π d p₂ k₂ q s g j a|&lt;t;</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     ∃ z,0&lt;(μ.sigma (fun ω=&gt;ν (f ω))).mass z ∧ E ⟨f z.1,z.2⟩ ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       expandedPhysicalDegreeGood G Z ρ (fun e=&gt;z.1 (Sum.inl e)) ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (∀ x y,x≠y→|(eligibleTwoPathCount T (sampledColourOrientation G (fun e=&gt;markedExpandedClass (z.1 (Sum.inl e))) 0) x y:ℝ)-</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         ((T.neighborFinset x∩T.neighborFinset y).card:ℝ)*((2*p+2*k+2*p₂+2*k₂+u)/2)^2|&lt;(Fintype.card V:ℝ)^(3/5:ℝ)) ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (∀ g a,|((rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) g a).card:ℝ)-(∑ u,q u g/(d:ℝ))|&lt;(Fintype.card V:ℝ)^(3/5:ℝ)) ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       (∀ u g,|rawIntervalHubStartCount π d g (fun e=&gt;z.1 (Sum.inr e)) u-(Fintype.card V:ℝ)*q u g/d|&lt;</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (Fintype.card V:ℝ)^(3/4:ℝ)/d) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       ((∀ w,|rawIntervalUnassignedHubCountOn π d (fun e=&gt;z.1 (Sum.inr e)) w I-(I.card:ℝ)*(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)) ∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>        (∀ v,|rawIntervalUnassignedColumnCount π d (fun e=&gt;z.1 (Sum.inr e)) v J-∑ w∈J,(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ))) ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       ((∀ w,|rawIntervalUnassignedHubCountOn π d (fun e=&gt;z.1 (Sum.inr e)) w Finset.univ-(Fintype.card V:ℝ)*(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)) ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>        (∀ v,|rawIntervalUnassignedColumnCount π d (fun e=&gt;z.1 (Sum.inr e)) v Finset.univ-∑ w,(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ))) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (∀ x,|(((G.neighborFinset x∩I).filter (fun y=&gt;(z.1 (Sum.inl s(x,y))).1=4)).card:ℝ)-u*(G.neighborFinset x∩I).card|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)) ∧ Extra z ∧</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (∀ x v,q v g≠0→|typedMarkedPotentialLoad w</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inr (true,x,v))-1|&lt;t+τ) ∧</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       (∀ x v,|typedMarkedPotentialLoad w</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inr (false,x,v))-(m:ℝ)*q v g/s v j|&lt;t+τ*((m:ℝ)*q v g/s v j)) ∧</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       (∀ x y,¬PermutationClose π (3*d) x y→G.Adj x (π y)→|typedMarkedPotentialLoad w</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inl (Sum.inr (x,y)))-1|&lt;t+τ) ∧</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       (∀ x y,¬PermutationClose π (3*d) x y→G.Adj x y→|typedMarkedPotentialLoad w</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>         (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inl (Sum.inl (x,y)))-(m:ℝ)*k₂/p₂|&lt;t+τ*((m:ℝ)*k₂/p₂)) := by</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   let Bseed:ℝ:=2*B/pstar^(2*m+1)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   have hBseed:0&lt;Bseed:=by dsimp [Bseed];positivity</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   obtain ⟨N₀,hBase⟩:=raw_expanded_selected_preparation_with_approx_potentials d m hd hm Bseed t hBseed ht</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   refine ⟨max N₀ 1,?_⟩</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   intro V _ _ hn U Γ Color _ _ _ _ hmU hmn hΓ G Z T hTG π I J hJ p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum hnoshort q hq hQ s hs hS g j D τ Aweight hDlo hDhi hp₂lo hk₂lo hslo hbalance weight hw F _ ν E hE ρ μ f H₀ Hₖ w Extra</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have hnV:0&lt;Fintype.card V:=by omega</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   have hnR:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hnV</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have hD:0&lt;D:=(half_pos hnR).trans_le hDlo</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hp₂pos:0&lt;p₂:=hpstar.trans_le hp₂lo</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hk₂pos:0&lt;k₂:=hpstar.trans_le hk₂lo</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   have hp₂one:p₂≤1:=by linarith</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   have hk₂one:k₂≤1:=by linarith</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   have hsone:∀ v,s v j≤1:=by</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     intro v</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     have hsingle:s v j≤∑ j,s v j:=Finset.single_le_sum (fun i _=&gt;hs v i) (Finset.mem_univ j)</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     have hQ0:0≤∑ g,q v g:=Finset.sum_nonneg (fun i _=&gt;hq v i)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     have hfactor:0≤(1+1/(d:ℝ))*(∑ g,q v g):=mul_nonneg (by positivity) hQ0</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     have hh:=hS v</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     unfold intervalUncoveredProbability at hh</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     linarith</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hseed:∀ W,0≤w W ∧ w W≤Bseed/(Fintype.card V:ℝ)^m:=by</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     exact marked_variable_hub_seed_upper G π m (3*d) (by omega) D τ Aweight B p₂ k₂ pstar hnV hDlo hDhi hpstar hp₂lo hk₂lo hp₂one hk₂one</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       (fun v=&gt;s v j) hslo hsone hB.le weight hw</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   obtain ⟨z,hz,hEz,hDeg,hPath,hStart,hHub,hRest,hAll,hRim,hExtra⟩:=</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     hBase V (le_trans (le_max_left _ _) hn) U Γ Color hmU hmn hΓ G Z T hTG π I J hJ p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum hnoshort q hq hQ s hs hS H₀ Hₖ w hseed g j F ν E hE</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   have hTarget:∀ x v,q v g≠0→|typedMarkedPotentialLoad w</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>         (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inr (true,x,v))-1|&lt;t+τ:=by</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     exact rawMarked_variable_marked_spoke_concentration_target G π p₂ k₂ hp₂pos hk₂pos (by linarith) d hd q hq hQ s hs hS hnoshort m (by omega) g j D τ Aweight B t hD</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>       (fun v=&gt;hpstar.trans_le (hslo v)) weight hw (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) hExtra</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   have hOrdinary:∀ x v,|typedMarkedPotentialLoad w</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>         (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inr (false,x,v))-(m:ℝ)*q v g/s v j|&lt;t+τ*((m:ℝ)*q v g/s v j):=by</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     exact rawMarked_variable_ordinary_spoke_concentration_target G π p₂ k₂ hp₂pos hk₂pos (by linarith) d hd q hq hQ s hs hS hnoshort m (by omega) g j D τ Aweight B t hD</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>       (fun v=&gt;hpstar.trans_le (hslo v)) weight hw (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) hExtra</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   have hMarkedRim:∀ x y,¬PermutationClose π (3*d) x y→G.Adj x (π y)→|typedMarkedPotentialLoad w</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>         (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inl (Sum.inr (x,y)))-1|&lt;t+τ:=by</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     exact rawMarked_closing_arc_concentration_target G π p₂ k₂ hp₂pos hk₂pos (by linarith) d hd q hq hQ s hs hS hnoshort m (by omega) g j D τ Aweight B t hD</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>       (fun v=&gt;hpstar.trans_le (hslo v)) hbalance weight hw (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) hExtra</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>   have hOrdinaryRim:∀ x y,¬PermutationClose π (3*d) x y→G.Adj x y→|typedMarkedPotentialLoad w</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>         (rawMarkedPairRims G π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inl (Sum.inl (x,y)))-(m:ℝ)*k₂/p₂|&lt;t+τ*((m:ℝ)*k₂/p₂):=by</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     exact rawMarked_ordinary_arc_concentration_target G π p₂ k₂ hp₂pos hk₂pos (by linarith) d hd q hq hQ s hs hS hnoshort m (by omega) g j D τ Aweight B t hD</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>       (fun v=&gt;hpstar.trans_le (hslo v)) hbalance weight hw (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) hExtra</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>   exact ⟨z,hz,hEz,hDeg,hPath,hStart,hHub,hRest,hAll,hRim,hExtra,hTarget,hOrdinary,hMarkedRim,hOrdinaryRim⟩</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a> end Oberwolfach</span></pre></html>

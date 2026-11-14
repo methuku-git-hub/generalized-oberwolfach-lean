@@ -1,0 +1,78 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongProtectedPairEdgeLabels.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongProtectedPairEdgeLabels.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongProtectedPairCandidateHubs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The canonical protected labels discharge the outer, size, old-shield and</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> forbidden-hub hypotheses for every edge of a simple bad graph. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 5000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem long_protected_pair_edge_labels</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {n:ℕ} {U Color:Type} [Fintype U] [DecidableEq U] [Fintype Color]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (π:Equiv.Perm (Fin n)) (d:ℕ) (hd:0&lt;d)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (σ:RawIntervalFamilyOutcome (Fin n) U Bool Color)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (r:ℕ) (J:StartRetentionOutcome (rawStartHubSet π d σ false) r)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (Old:U→Finset (Fin n)) (inner:Finset U) (θ ρ₀ ρ D:ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hθ:0&lt;θ) (hρ₀:0&lt;ρ₀) (hρlo:ρ₀≤ρ) (hDlo:(n:ℝ)/2≤D) (hsize:ρ*D=2*Fintype.card U)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hspace:1/(4*(d:ℝ))≤(5/64:ℝ)*θ^2)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hN:5*(n:ℝ)^(3/4:ℝ)≤(5*θ^2*ρ₀/1024)*n)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hinner:(inner.card:ℝ)≤(5*θ^2*ρ₀/1024)*n)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hOld:∀u,Disjoint (rawIntervalProtectedUnassignedList π d σ false true r J u) (Old u))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hpair:∀x y,x≠y→((5/32:ℝ)*θ^2-1/(4*(d:ℝ)))*Fintype.card U-5*(n:ℝ)^(3/4:ℝ)≤</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (rawProtectedPairHubs π d σ false true r J x y).card)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (Kbad:SimpleGraph (Fin n)):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let Lists:=rawIntervalProtectedUnassignedList π d σ false true r J</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let L:=protectedPairEdgeHubs Lists inner</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀e∈Kbad.edgeFinset,Disjoint (L e) inner) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀u e v,e∈Kbad.edgeFinset→v∈e.toFinset→v∈Old u→u∈L e→u∈(∅:Finset U)) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀e∈Kbad.edgeFinset,(2*(5*θ^2*ρ₀/1024))*(n:ℝ)≤(L e).card) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀v:Fin n,(((∅:Finset U).card):ℝ)≤(0:ℝ)*n):=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro Lists L</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨hout,hshield,hcard⟩:=long_protected_pair_candidate_hubs π d hd σ r J Old inner θ ρ₀ ρ D</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     hθ hρ₀ hρlo hDlo hsize hspace hN hinner hOld hpair</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   refine ⟨fun e _=&gt;hout e,?_,?_,by simp⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · intro u e v he hv ho hu</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     exact False.elim (hshield u e v hv ho hu)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · intro e he</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     induction e using Sym2.ind with</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     | _ x y =&gt;</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       have hxy:x≠y:=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         intro h</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         subst y</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         exact Kbad.loopless.irrefl x (by simpa only [SimpleGraph.mem_edgeFinset,SimpleGraph.mem_edgeSet] using he)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       exact hcard x y hxy</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> </span>
+<span id="L46"><a href="#L46" class="ln">  46</a> /-- The precise hypotheses consumed by the residual assignment theorem. -/</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> theorem long_protected_pair_matching_hypotheses</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     {n:ℕ} {U Color:Type} [Fintype U] [DecidableEq U] [Fintype Color]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (π:Equiv.Perm (Fin n)) (d:ℕ) (hd:0&lt;d)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (σ:RawIntervalFamilyOutcome (Fin n) U Bool Color)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (r:ℕ) (J:StartRetentionOutcome (rawStartHubSet π d σ false) r)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (Old:U→Finset (Fin n)) (inner:Finset U) (θ ρ₀ ρ D α b:ℝ)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hθ:0&lt;θ) (hρ₀:0&lt;ρ₀) (hρlo:ρ₀≤ρ) (hDlo:(n:ℝ)/2≤D) (hsize:ρ*D=2*Fintype.card U)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hspace:1/(4*(d:ℝ))≤(5/64:ℝ)*θ^2)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hN:5*(n:ℝ)^(3/4:ℝ)≤(5*θ^2*ρ₀/1024)*n)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (hinner:(inner.card:ℝ)≤(5*θ^2*ρ₀/1024)*n)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (hOld:∀u,Disjoint (rawIntervalProtectedUnassignedList π d σ false true r J u) (Old u))</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (hpair:∀x y,x≠y→((5/32:ℝ)*θ^2-1/(4*(d:ℝ)))*Fintype.card U-5*(n:ℝ)^(3/4:ℝ)≤</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (rawProtectedPairHubs π d σ false true r J x y).card)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (hα:α≤2*(5*θ^2*ρ₀/1024)) (hb:0≤b) (Kbad:SimpleGraph (Fin n)):</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     let Lists:=rawIntervalProtectedUnassignedList π d σ false true r J</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     let L:=protectedPairEdgeHubs Lists inner</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (∀e∈Kbad.edgeFinset,Disjoint (L e) inner) ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (∀u e v,e∈Kbad.edgeFinset→v∈e.toFinset→v∈Old u→u∈L e→u∈(∅:Finset U)) ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (∀e∈Kbad.edgeFinset,α*(n:ℝ)≤(L e).card) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (∀v:Fin n,(((∅:Finset U).card):ℝ)≤b*n):=by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   intro Lists L</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   obtain ⟨hout,hshield,hcard,hbad⟩:=long_protected_pair_edge_labels π d hd σ r J Old inner θ ρ₀ ρ D</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     hθ hρ₀ hρlo hDlo hsize hspace hN hinner hOld hpair Kbad</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   refine ⟨hout,hshield,?_,?_⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   · intro e he</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     exact (mul_le_mul_of_nonneg_right hα (by positivity)).trans (hcard e he)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   · intro v</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     simpa using mul_nonneg hb (show (0:ℝ)≤n by positivity)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedActiveConfigurationsFromScale.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedActiveConfigurationsFromScale.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedProtectedActiveConfigurationLowerBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Common cycle, root-omitted path and compatible-hub inputs after the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> actual active restriction, with one simultaneous original-order allowance. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 12000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V W U Z Γ Color:Type} [Fintype V] [Fintype W] [Fintype U] [Fintype Z]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   [Fintype Γ] [Fintype Color] [LinearOrder V] [LinearOrder W] [DecidableEq U] [DecidableEq Z]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem marked_active_configurations_from_scale</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (f:W↪oV) (g:Z↪U) (π:Equiv.Perm V) (ρ:Equiv.Perm W)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hf:∀ x,f (ρ x)=π (f x)) (P:SimpleGraph V) (d r:ℕ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (DR:SimpleGraph V) (DS:SimpleGraph (V⊕U)) (β kappa:ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hβ:0≤β) (hκ:0≤kappa)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hDR:∀ x,((DR.comap f).degree x:ℝ)≤kappa*Fintype.card V)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hDSrow:∀ x,((DS.comap (Sum.map f g)).degree (Sum.inl x):ℝ)≤kappa*Fintype.card V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hDScol:∀ u,((DS.comap (Sum.map f g)).degree (Sum.inr u):ℝ)≤kappa*Fintype.card V)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hparent:MarkedCommonConfigurationsWithSpokes r P π d β kappa σ H)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hRsize:((Finset.univ\Finset.univ.image f).card:ℝ)≤kappa*Fintype.card V)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hUsize:((Finset.univ\Finset.univ.image g).card:ℝ)≤kappa*Fintype.card V)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hcycle:8*(r+5:ℝ)*kappa≤12*β)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hhub:(1+2*(r+5:ℝ))*kappa≤28*β):</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let σA:=rawMarkedRestrictPair f g (rawMarkedDeleteRims σ DR.edgeFinset)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let HA:=fun b x u=&gt;markedDeletePhysicalSpokes H DS b (f x) (g u)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let EA:=MarkedSampleArc (P.comap f) ρ (3*d) (fun e=&gt;σA (Sum.inl e)) false</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let KA:=MarkedSampleArc (P.comap f) ρ (3*d) (fun e=&gt;σA (Sum.inl e)) true;</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∀ C:MarkedCycleTuple (fun e:EA=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:KA=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (r+4) ρ (3*d),4*β*Fintype.card W≤(Fintype.card {u // MarkedHubCompatible (HA false) (HA true) C.val u}:ℝ))∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀ u u&#x27;:Z,u≠u&#x27;→4*β*(Fintype.card W:ℝ)^(r+5)≤</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (Fintype.card (CommonMarkedCycle (fun e:EA=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:KA=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         (r+4) ρ (3*d) (HA false) (HA true) u u&#x27;):ℝ))∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (∀ j (x x&#x27;:W) (u u&#x27;:Z),x≠x&#x27;→u≠u&#x27;→4*β*(Fintype.card W:ℝ)^(r+4)≤</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (Fintype.card (CanonicalCommonMarkedPath (fun e:EA=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (fun e:KA=&gt;e.val.1) (fun e=&gt;e.val.2) (r+4) ρ (3*d) (HA false) (HA true)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         ((markedRootOrder (r+4) j).symm 0) x x&#x27; u u&#x27;):ℝ)) :=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hn:0≤(Fintype.card V:ℝ):=Nat.cast_nonneg _</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hcycleN:=mul_le_mul_of_nonneg_right hcycle hn</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hhubN:=mul_le_mul_of_nonneg_right hhub hn</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hR:=mul_le_mul_of_nonneg_left hRsize (show 0≤2*(r+5:ℝ) by positivity)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   apply marked_protected_active_configuration_lower_bounds f g π ρ hf P d r σ H DR DS β kappa</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (kappa*Fintype.card V) hβ hκ (by positivity) hDR hDSrow hDScol hparent</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   · nlinarith only [hR,hcycleN]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   · nlinarith only [hUsize,hhubN]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> </span>
+<span id="L50"><a href="#L50" class="ln">  50</a> end Oberwolfach</span></pre></html>

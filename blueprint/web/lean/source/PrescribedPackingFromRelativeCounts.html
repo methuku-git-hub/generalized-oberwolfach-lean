@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedPackingFromRelativeCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedPackingFromRelativeCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedRelativeExtensionCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedEdgePacking</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PrescribedEdgeParameters</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Prescribed inner edges are covered from the actual relative counts.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> The cap and all deletion margins are chosen here; no wheel-extension</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> existence assumption is supplied by the caller. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 7000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem prescribed_inner_packing_from_relative_counts (r:ℕ) (hr:3≤r) (p₀ γ ω:ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hp₀:0&lt;p₀) (hp₀1:p₀≤1) (hγ:0&lt;γ) (hγ1:γ≤1) (hω:0&lt;ω):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∃ α₀:ℝ,0&lt;α₀ ∧ α₀≤1 ∧ ∀ α L:ℝ,0&lt;α → α≤α₀ → 0≤L → ∃ m₀:ℕ,</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ (V U:Type) [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U],</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ (P Q F:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (A I X:Finset V) (U₀ J B:Finset U) (hIX:Disjoint I X) (hJB:Disjoint J B)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (Nr Ns D₀:ℕ)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (x y:Fin Nr→V) (hx:∀ i,x i∈I) (hy:∀ i,y i∈I)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hxy:∀ i,Q.Adj (x i) (y i)) (hFxy:∀ i,¬F.Adj (x i) (y i))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hedge:∀ i j,i≠j → ¬((x i=x j∧y i=y j)∨(x i=y j∧y i=x j)))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hend:∀ a,(Finset.univ.filter (fun i=&gt;a=x i∨a=y i)).card≤D₀)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (z:Fin Ns→V) (u:Fin Ns→U) (hz:∀ i,z i∈I) (hu:∀ i,u i∈J) (hH:∀ i,H (z i) (u i))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hspoke:Function.Injective (fun i=&gt;(z i,u i)))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hsend:∀ a,(Finset.univ.filter (fun i=&gt;a=z i)).card≤D₀)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hshub:∀ v,(Finset.univ.filter (fun i=&gt;u i=v)).card≤D₀)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hJB0:J∪B⊆U₀) (hm:m₀≤A.card)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hN:((Nr+Ns:ℕ):ℝ)≤α^2*(A.card:ℝ)^2) (hD:(D₀:ℝ)≤α*A.card)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hωU:ω*A.card≤(U₀.card:ℝ)) (hF:∀ a,(F.degree a:ℝ)≤L)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (q p ε:ℝ) (hq:p₀≤q) (hp:p₀≤p) (hε:ε≤p₀^6*γ/4)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hdeg:∀ v,(1/2+γ)*A.card≤((A∩P.neighborFinset v).card:ℝ))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hXA:((A\X).card:ℝ)≤p₀^6*γ*A.card/8)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hBU:((U₀\B).card:ℝ)≤p₀^6*γ*U₀.card/8)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hrow:∀ S:Finset V,∀ J&#x27;:Finset U,J&#x27;⊆U₀ → S.card≤2 → J&#x27;.card≤1 →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       |((common (common A S (fun v=&gt;Q.neighborFinset v)) J&#x27;</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u))).card:ℝ)-</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         q^S.card*p^J&#x27;.card*(common A S (fun v=&gt;P.neighborFinset v)).card|≤ε*A.card)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hindex:∀ S:Finset V,S.card≤2 → (∀ v∈S,∀ w∈S,¬F.Adj v w) →</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       |((common U₀ S (fun v=&gt;Finset.univ.filter (H v))).card:ℝ)-p^S.card*U₀.card|≤ε*U₀.card),</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∃ C:(Fin Nr⊕Fin Ns)→OrdinaryWheel Q F H r,</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∀ i j,i≠j → Disjoint (ordinaryWheelResources (C i)) (ordinaryWheelResources (C j))) ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (∀ i,ordinaryWheelResources (C i)∩ordinaryHostResources (spanningRestriction Q I)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         (fun a v=&gt;H a v∧a∈I∧v∈J)=</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         {Sum.elim (fun j=&gt;Sum.inl s(x j,y j)) (fun j=&gt;Sum.inr (z j,u j)) i}) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∀ a,((wheelFamilyRim C).degree a:ℝ)≤12*α*A.card) ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀ a,((Finset.univ.filter (fun v=&gt;wheelFamilySpokes C a v)).card:ℝ)≤6*α*A.card) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (∀ v,((Finset.univ.filter (fun a=&gt;wheelFamilySpokes C a v)).card:ℝ)≤3*α*A.card*r) :=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let b:ℝ:=p₀^6*γ/8*min 1 ω</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hb:0&lt;b:=by dsimp [b];positivity</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   obtain ⟨α₀,hα₀,hα₀1,hparams⟩:=prescribed_edge_cap_parameters r b hb</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   refine ⟨α₀,hα₀,hα₀1,?_⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   intro α L hα hαsmall hL</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   obtain ⟨m₀,hm₀⟩:=hparams α L hα hαsmall hL</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   refine ⟨m₀,?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   intro V U _ _ _ _ P Q F H A I X U₀ J B hIX hJB Nr Ns D₀ x y hx hy hxy hFxy hedge hend</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     z u hz hu hH hspoke hsend hshub hJB0 hm hN hD hωU hF q p ε hq hp hε hdeg hXA hBU hrow hindex</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   let K:=⌈α*A.card⌉₊</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   obtain ⟨hK,hKhi,hbR,hbU,hbS⟩:=hm₀ A.card (Nr+Ns) D₀ hm hN hD</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hext:=prescribed_relative_extension_counts P Q F H A X U₀ B p₀ q p γ ε</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     hp₀ hp₀1 hq hp hγ hγ1 hε hdeg hXA hBU hrow hindex</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hbA:b*A.card≤(p₀^6*γ/8)*A.card:=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have hh:=mul_le_mul_of_nonneg_left (min_le_left (1:ℝ) ω) (show 0≤p₀^6*γ/8 by positivity)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hh&#x27;:=mul_le_mul_of_nonneg_right hh (Nat.cast_nonneg A.card)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     dsimp [b];nlinarith only [hh&#x27;]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hbU0:b*A.card≤(p₀^6*γ/8)*U₀.card:=by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hh:=mul_le_mul_of_nonneg_right (min_le_right (1:ℝ) ω) (Nat.cast_nonneg A.card)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     have hh&#x27;:=mul_le_mul_of_nonneg_left (hh.trans hωU) (show 0≤p₀^6*γ/8 by positivity)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     dsimp [b];nlinarith only [hh&#x27;]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hK0:(0:ℝ)≤K:=Nat.cast_nonneg _</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hRfrac:((Nr*r:ℕ):ℝ)/K≤(((Nr+Ns)*r:ℕ):ℝ)/K:=</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     div_le_div_of_nonneg_right (Nat.cast_le.mpr (Nat.mul_le_mul_right r (Nat.le_add_right _ _))) hK0</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hRfrac&#x27;:(Nr:ℝ)/K≤((Nr+Ns:ℕ):ℝ)/K:=</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     div_le_div_of_nonneg_right (Nat.cast_le.mpr (Nat.le_add_right _ _)) hK0</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have hSfrac:((Ns*r:ℕ):ℝ)/K≤(((Nr+Ns)*r:ℕ):ℝ)/K:=</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     div_le_div_of_nonneg_right (Nat.cast_le.mpr (Nat.mul_le_mul_right r (Nat.le_add_left _ _))) hK0</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   obtain ⟨C,hC,hinner,hCr,hCs,hCc⟩:=prescribed_inner_edge_wheel_packing Q F H I X J B hIX hJB</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     Nr Ns r K D₀ hr hK x y hx hy hxy hFxy hedge hend z u hz hu hH hspoke hsend hshub L (b*A.card) (b*A.card) hL hF</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (fun v hv a c=&gt;hbA.trans (hext.1 v (hJB0 hv) a c))</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     (fun i=&gt;hbU0.trans (hext.2 (x i) (y i) (hFxy i)))</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     (by linarith only [hbR,hRfrac]) (by linarith only [hbU,hRfrac&#x27;]) (by linarith only [hbS,hSfrac])</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have hKD:((K+D₀:ℕ):ℝ)≤3*α*A.card:=by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     simp only [Nat.cast_add]</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     linarith only [hKhi,hD]</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   refine ⟨C,hC,hinner,?_,?_,?_⟩</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   · intro a</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     have hh:((wheelFamilyRim C).degree a:ℝ)≤4*(K+D₀:ℕ):=by exact_mod_cast hCr a</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     linarith only [hh,hKD]</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   · intro a</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     have hh:((Finset.univ.filter (fun v=&gt;wheelFamilySpokes C a v)).card:ℝ)≤2*(K+D₀:ℕ):=by exact_mod_cast hCs a</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     linarith only [hh,hKD]</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   · intro v</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     have hh:((Finset.univ.filter (fun a=&gt;wheelFamilySpokes C a v)).card:ℝ)≤(K+D₀:ℕ)*r:=by exact_mod_cast hCc v</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     have hs:=mul_le_mul_of_nonneg_right hKD (Nat.cast_nonneg r)</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     nlinarith only [hh,hs]</span>
+<span id="L98"><a href="#L98" class="ln">  98</a> </span>
+<span id="L99"><a href="#L99" class="ln">  99</a> end Oberwolfach</span></pre></html>

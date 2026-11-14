@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedFiniteResourcesEmbedding.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedFiniteResourcesEmbedding.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFiniteResourceOperations</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedWheelVertexEmbedding</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Finite typed resources commute with invariant row and hub embeddings.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The equality records each marked physical successor, not just the number</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> of occurrences. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 4000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U V&#x27; U&#x27; E K E&#x27; K&#x27;:Type}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [Fintype V] [Fintype U] [Fintype E] [Fintype K]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   [Fintype V&#x27;] [Fintype U&#x27;] [Fintype E&#x27;] [Fintype K&#x27;]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   [DecidableEq V] [DecidableEq U] [DecidableEq E] [DecidableEq K]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   [DecidableEq V&#x27;] [DecidableEq U&#x27;] [DecidableEq E&#x27;] [DecidableEq K&#x27;]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem markedFiniteResources_embedding</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (tail head:E→V) (ktail khead:K→V) (tail&#x27; head&#x27;:E&#x27;→V&#x27;) (ktail&#x27; khead&#x27;:K&#x27;→V&#x27;)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (f:V↪V&#x27;) (g:U↪U&#x27;) (ρ:Equiv.Perm V) (π:Equiv.Perm V&#x27;) (hf:∀ x,f (ρ x)=π (f x))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (e:E↪E&#x27;) (k:K↪K&#x27;) (het:∀ a,tail&#x27; (e a)=f (tail a)) (heh:∀ a,head&#x27; (e a)=f (head a))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hkt:∀ a,ktail&#x27; (k a)=f (ktail a)) (hkh:∀ a,khead&#x27; (k a)=f (khead a))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (A:Finset (E⊕K)) (S:Finset (V×U)):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (markedFiniteResources tail head ktail khead ρ A S).image (markedResourceEmbedding f g)=</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       markedFiniteResources tail&#x27; head&#x27; ktail&#x27; khead&#x27; π (A.image (e.sumMap k)) (S.image (Prod.map f g)):=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hp (a:E⊕K):(markedPhysicalEdge tail head ktail khead ρ a).image f=</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       markedPhysicalEdge tail&#x27; head&#x27; ktail&#x27; khead&#x27; π ((e.sumMap k) a):=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     cases a &lt;;&gt; simp only [markedPhysicalEdge,Sum.elim_inl,Sum.elim_inr,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       Function.Embedding.sumMap,Function.Embedding.coeFn_mk,Sum.map_inl,Sum.map_inr,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       Finset.image_insert,Finset.image_singleton,het,heh,hkt,hkh,hf]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   unfold markedFiniteResources</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   rw [Finset.image_union,Finset.image_image,Finset.image_image,Finset.image_image,Finset.image_image]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   congr 1</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · apply Finset.image_congr</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     intro a _</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     change Sum.inl ((markedPhysicalEdge tail head ktail khead ρ a).image f)=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (Sum.inl (markedPhysicalEdge tail&#x27; head&#x27; ktail&#x27; khead&#x27; π ((e.sumMap k) a)):Finset V&#x27;⊕(V&#x27;×U&#x27;))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     rw [hp]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

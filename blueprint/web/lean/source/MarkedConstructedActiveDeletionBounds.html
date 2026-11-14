@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedConstructedActiveDeletionBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedConstructedActiveDeletionBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedActiveDeletionSeparateBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedTwoStageDeletionScale</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Apply the actual prescribed-packing and deep-cover bounds on the active</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> complement. There is no maximum-degree requirement at a covered deep root. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 14000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U VA UA E K E&#x27; K&#x27;:Type} [Fintype V] [Fintype U] [Fintype VA] [Fintype UA]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [LinearOrder V] [DecidableEq U] [DecidableEq VA] [DecidableEq UA]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   {tail head:E→V} {ktail khead:K→V} {π:Equiv.Perm V} {m b:ℕ} {H₀ HK:V→U→Prop}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   {tail&#x27; head&#x27;:E&#x27;→V} {ktail&#x27; khead&#x27;:K&#x27;→V} {π&#x27;:Equiv.Perm V} {m&#x27; b&#x27;:ℕ} {H₀&#x27; HK&#x27;:V→U→Prop}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_constructed_active_deletion_bounds</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (ME:Finset (MarkedWheel tail head ktail khead m π b H₀ HK))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (MD:Finset (MarkedWheel tail&#x27; head&#x27; ktail&#x27; khead&#x27; m&#x27; π&#x27; b&#x27; H₀&#x27; HK&#x27;))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (I T:Finset V) (J W:Finset U)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hstar:(MD.biUnion markedWheelPhysicalResources).filter (markedStarResource (I\T) (J\W))=∅)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (f:VA↪V) (g:UA↪U) (hf:∀ x,f x∉T) (hg:∀ u,g u∉W)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (r K₀:ℕ) (etaE xi kappa:ℝ) (he:0≤etaE) (hxi:0≤xi)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hT:(T.card:ℝ)≤xi*Fintype.card V) (hW:(W.card:ℝ)≤xi*Fintype.card V)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hE:(4*K₀+3*r+50:ℝ)*etaE≤kappa/2) (hXi:(4*K₀+3*r+50:ℝ)*xi≤kappa/2)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hER:∀ x,((markedPackingRimGraph ME).degree x:ℝ)≤24*etaE*Fintype.card V)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hEV:∀ x,((Finset.univ.filter (markedPackingSpokes ME x)).card:ℝ)≤6*etaE*Fintype.card V)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hEU:∀ u,((Finset.univ.filter (fun x=&gt;markedPackingSpokes ME x u)).card:ℝ)≤3*(r+5)*etaE*Fintype.card V)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hDR:∀ x∉I,(markedPackingRimGraph MD).degree x≤2*W.card+T.card*(4*(K₀+4))+2*T.card)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hDV:∀ x∉I,(Finset.univ.filter (markedPackingSpokes MD x)).card≤W.card+T.card*(K₀+4))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hDU:∀ u∉W,(Finset.univ.filter (fun x=&gt;markedPackingSpokes MD x u)).card≤T.card*(r+5)):</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let DR:=markedPackingRimGraph ME⊔markedPackingRimGraph MD</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let DS:=markedFiniteSpokeGraph (ME.biUnion markedWheelSpokePairs)⊔markedFiniteSpokeGraph (MD.biUnion markedWheelSpokePairs);</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀ x,((DR.comap f).degree x:ℝ)≤kappa*Fintype.card V)∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (∀ x,((DS.comap (Sum.map f g)).degree (Sum.inl x):ℝ)≤kappa*Fintype.card V)∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∀ u,((DS.comap (Sum.map f g)).degree (Sum.inr u):ℝ)≤kappa*Fintype.card V):=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   intro DR DS</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hsp:=markedFiniteSpokeGraph_packing_degrees ME</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨hR,hV,hU⟩:=marked_active_total_deletion_bounds_separate MD I T J W hstar f g hf hg</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (markedPackingRimGraph ME) (markedFiniteSpokeGraph (ME.biUnion markedWheelSpokePairs))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (24*etaE*Fintype.card V) (6*etaE*Fintype.card V) (3*(r+5)*etaE*Fintype.card V)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (2*W.card+T.card*(4*(K₀+4))+2*T.card) (W.card+T.card*(K₀+4)) (T.card*(r+5))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     hER (fun x=&gt;by rw [hsp.1];exact hEV x) (fun u=&gt;by rw [hsp.2];exact hEU u)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (by positivity) (by positivity)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (fun x hx=&gt;by exact_mod_cast hDR x hx) (fun x hx=&gt;by exact_mod_cast hDV x hx)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (fun u hu=&gt;by exact_mod_cast hDU u hu)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hb:=marked_two_stage_deletion_scale r K₀ (Fintype.card V) T.card W.card etaE xi kappa</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (Nat.cast_nonneg _) he hxi hT hW hE hXi</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   exact ⟨fun x=&gt;(hR x).trans (by simpa only [add_assoc] using hb.1),fun x=&gt;(hV x).trans (by simpa only [add_assoc] using hb.2.1),fun u=&gt;(hU u).trans hb.2.2⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> end Oberwolfach</span></pre></html>

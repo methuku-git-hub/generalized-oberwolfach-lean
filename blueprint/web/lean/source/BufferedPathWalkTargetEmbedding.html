@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BufferedPathWalkTargetEmbedding.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BufferedPathWalkTargetEmbedding.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BufferedPathFamilyTargetEmbedding</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SimpleWalkLengthEmbedding</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Use simple target walks, rather than separately supplied target vertex</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> embeddings, in the buffered source-path partial embedding. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem regular_two_buffered_paths_to_disjoint_simple_walks</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {V W I:Type*} [Fintype V] [DecidableEq V] [DecidableEq W] [DecidableEq I]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (G:SimpleGraph V) (hG:G.IsRegularOfDegree 2) (H:SimpleGraph W)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (n:I→ℕ) (ext:∀i,Fin (n i+5)↪V) (inner:∀i,Fin (n i+1)↪V)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hinner:∀i k,inner i k=ext i ⟨k.val+2,by omega⟩)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hwalk:∀i,∃p:G.Walk (ext i ⟨0,by omega⟩) (ext i ⟨n i+4,by omega⟩),</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       p.length=n i+4 ∧ p.support=List.ofFn (ext i))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hdis:∀i j,i≠j→Disjoint (Finset.univ.image (ext i)) (Finset.univ.image (ext j)))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (A:Finset I) (start finish:I→W) (q:∀i,H.Walk (start i) (finish i))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hq:∀i,(q i).IsPath) (hlen:∀i,(q i).length=n i)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hqdis:∀i∈A,∀j∈A,i≠j→Disjoint (q i).support.toFinset (q j).support.toFinset):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃φ:{x // x∈A.biUnion (fun i=&gt;Finset.univ.image (inner i))}↪W,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀i (hi:i∈A) (k:Fin (n i+1)),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         φ ⟨inner i k,Finset.mem_biUnion.mpr ⟨i,hi,Finset.mem_image.mpr ⟨k,Finset.mem_univ _,rfl⟩⟩⟩=</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>           simpleWalkLengthEmbedding H (q i) (hq i) (n i) (hlen i) k) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀x y,G.Adj x.val y.val→H.Adj (φ x) (φ y)):=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   classical</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let target (i:I):Fin (n i+1)↪W:=simpleWalkLengthEmbedding H (q i) (hq i) (n i) (hlen i)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have htarget:∀i (k:Fin (n i)),H.Adj (target i ⟨k.val,by omega⟩) (target i ⟨k.val+1,by omega⟩):=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     intro i k</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     exact simple_walk_length_embedding_adjacent H (q i) (hq i) (n i) (hlen i) k</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hmem (i:I) {x:W}:x∈Set.range (target i)→x∈(q i).support.toFinset:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     rintro ⟨k,rfl⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     rw [←simple_walk_length_embedding_support H (q i) (hq i) (n i) (hlen i)]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     exact Finset.mem_image.mpr ⟨k,Finset.mem_univ _,rfl⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have htargetDis:∀i∈A,∀j∈A,i≠j→Disjoint (Set.range (target i)) (Set.range (target j)):=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     intro i hi j hj hij</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     apply Set.disjoint_left.mpr</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     intro x hxi hxj</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact Finset.disjoint_left.mp (hqdis i hi j hj hij) (hmem i hxi) (hmem j hxj)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   exact regular_two_buffered_path_family_target_embedding G hG H n ext inner hinner hwalk hdis A target htarget htargetDis</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

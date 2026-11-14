@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryRelativeAttachmentRoot.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryRelativeAttachmentRoot.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinarySparseExpansionHubs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryAttachmentRootEmbedding</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! An attached wheel in the relative common-neighbour host, together</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> with the otherwise unused private zero label. New labels avoid the given</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> sets and all old-row separation neighbourhoods. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 8000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem ordinary_relative_attachment_root (Q F : SimpleGraph V) (H : V → U → Prop)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (A W R : Finset V) (B : Finset U) (x : V) (hx : x∈R) (r : ℕ) (hr : 3≤r) (d c cH : ℝ) (hd : 0≤d)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hF : ∀ v,(F.degree v:ℝ)≤d)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hcount : ∀ v w,c≤((A∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hbudget : W.card+((R.card:ℝ)+r+6)*(d+1)&lt;c)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hhub : ∀ T:Finset V,T.card≤r → (∀ v∈T,∀ w∈T,¬F.Adj v w) →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       cH≤((common Finset.univ T (fun v =&gt; Finset.univ.filter (H v))).card:ℝ))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hB : (B.card:ℝ)&lt;cH) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ (f : Fin r ↪ V) (u : U),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ i j,i≠⟨0,by omega⟩ → j≠⟨0,by omega⟩ →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (SimpleGraph.cycleGraph r).Adj i j → Q.Adj (f i) (f j)) ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ j,(SimpleGraph.cycleGraph r).Adj ⟨0,by omega⟩ j → Q.Adj x (f j)) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       H x u ∧ (∀ j,j≠⟨0,by omega⟩ → H (f j) u) ∧ u∉B ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ i j,¬F.Adj (f i) (f j)) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       ∀ j,f j∈A ∧ f j∉W ∧ f j∉R ∧ ∀ v∈R,¬F.Adj (f j) v := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hd1 : 0≤d+1 := by linarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   obtain ⟨g,hg0,hg,hind,havoid⟩ := sparse_rooted_cycle_embedding Q F A W R x hx r hr d c hd hF hcount</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (by nlinarith only [hbudget,hd1])</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   let z : Fin r := ⟨0,by omega⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let T := Finset.univ.image g</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hTc : T.card≤r := Finset.card_image_le.trans (by simp)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hTF : ∀ v∈T,∀ w∈T,¬F.Adj v w := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     intro v hv w hw</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     obtain ⟨i,_,rfl⟩ := Finset.mem_image.mp hv</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     obtain ⟨j,_,rfl⟩ := Finset.mem_image.mp hw</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     exact hind i j</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   obtain ⟨u,hu,hHu⟩ := common_hub_from_count H T B cH (hhub T hTc hTF) hB</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hRT : ((R∪T).card:ℝ)≤R.card+r := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hh := Finset.card_union_le R T</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     exact_mod_cast hh.trans (Nat.add_le_add_left hTc R.card)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨a,haA,haW,haRT,_hxa,_hxa&#x27;,haF⟩ := sparse_common_neighbour_avoiding Q F A W (R∪T) x x d c hd hF</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hcount x x) (by nlinarith only [hbudget,hRT,hd1])</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hga : ∀ i,g i≠a := by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     intro i he</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     exact haRT (Finset.mem_union_right _ (Finset.mem_image.mpr ⟨i,Finset.mem_univ _,he⟩))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   let f := replaceEmbeddingVertex g z a hga</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hf0 : f z=a := replaceEmbeddingVertex_at g z a hga</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hfn (i : Fin r) (hi : i≠z) : f i=g i := replaceEmbeddingVertex_ne g z a hga i hi</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   refine ⟨f,u,?_,?_,?_,?_,hu,?_,?_⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   · intro i j hi hj hij</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     rw [hfn i hi,hfn j hj]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     exact hg i j hij</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   · intro j hj</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     rw [hfn j hj.ne.symm,←hg0]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact hg z j hj</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   · exact hHu _ (Finset.mem_image.mpr ⟨z,Finset.mem_univ _,hg0⟩)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   · intro j hj</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     rw [hfn j hj]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     exact hHu _ (Finset.mem_image.mpr ⟨j,Finset.mem_univ _,rfl⟩)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   · intro i j</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     by_cases hi : i=z &lt;;&gt; by_cases hj : j=z</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     · rw [hi,hj,hf0];exact F.loopless.irrefl a</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     · rw [hi,hf0,hfn j hj]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       exact haF _ (Finset.mem_union_right _ (Finset.mem_image.mpr ⟨j,Finset.mem_univ _,rfl⟩))</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · rw [hj,hf0,hfn i hi]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       exact fun h =&gt; haF _ (Finset.mem_union_right _ (Finset.mem_image.mpr ⟨i,Finset.mem_univ _,rfl⟩)) h.symm</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     · rw [hfn i hi,hfn j hj];exact hind i j</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   · intro j</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     by_cases hj : j=z</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     · rw [hj,hf0]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       exact ⟨haA,haW,(fun h =&gt; haRT (Finset.mem_union_left _ h)),</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>         fun v hv =&gt; haF v (Finset.mem_union_left _ hv)⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     · rw [hfn j hj]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       exact havoid j hj</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

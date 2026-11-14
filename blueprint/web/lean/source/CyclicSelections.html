@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CyclicSelections.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CyclicSelections.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CanonicalCycleSupport</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Part-respecting cycles as selections of one vertex in each tagged class. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> def taggedClass {I X : Type*} : (I × X) ⊕ (I × X) → I ⊕ I</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   | Sum.inl a =&gt; Sum.inl a.1</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   | Sum.inr a =&gt; Sum.inr a.1</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def taggedValue {I X : Type*} : (I × X) ⊕ (I × X) → X</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   | Sum.inl a =&gt; a.2</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   | Sum.inr a =&gt; a.2</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem taggedEncoding_injective {I X : Type*} :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     Function.Injective (fun v : (I × X) ⊕ (I × X) =&gt; (taggedClass v, taggedValue v)) := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   intro u v h</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   cases u with</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   | inl a =&gt;</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     cases v with</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     | inl b =&gt; simpa only [taggedClass, taggedValue, Prod.mk.injEq, Sum.inl.injEq, Prod.ext_iff] using h</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     | inr b =&gt; simp [taggedClass] at h</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   | inr a =&gt;</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     cases v with</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     | inl b =&gt; simp [taggedClass] at h</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     | inr b =&gt; simpa only [taggedClass, taggedValue, Prod.mk.injEq, Sum.inr.injEq, Prod.ext_iff] using h</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> </span>
+<span id="L31"><a href="#L31" class="ln">  31</a> def cyclicSelectionGraph {k : ℕ} {X : Type*}</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (f : Fin (k + 2) ⊕ Fin (k + 2) → X) :</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     SimpleGraph ((Fin (k + 2) × X) ⊕ (Fin (k + 2) × X)) :=</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   alternatingTupleGraph (cyclicTupleOfVertices (fun i =&gt; (f (Sum.inl i), f (Sum.inr i))))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> </span>
+<span id="L36"><a href="#L36" class="ln">  36</a> theorem cyclicSelectionGraph_injective {k : ℕ} {X : Type*} :</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     Function.Injective (cyclicSelectionGraph (k := k) (X := X)) := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   intro f g h</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have he := canonicalCycleGraph_injective h</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   funext i</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   cases i with</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   | inl i =&gt; exact congrArg Prod.fst (congrFun he i)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   | inr i =&gt; exact congrArg Prod.snd (congrFun he i)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> </span>
+<span id="L45"><a href="#L45" class="ln">  45</a> def cyclicSelectionOfTuple {k : ℕ} {X : Type*}</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (p : Fin (k + 2) → X × X × X) : Fin (k + 2) ⊕ Fin (k + 2) → X :=</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   Sum.elim (fun i =&gt; (p i).1) (fun i =&gt; (p i).2.1)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> theorem cyclicSelectionGraph_ofTuple {k : ℕ} {X : Type*}</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (p : Fin (k + 2) → X × X × X) :</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     cyclicSelectionGraph (cyclicSelectionOfTuple p) = alternatingTupleGraph p := rfl</span>
+<span id="L52"><a href="#L52" class="ln">  52</a> </span>
+<span id="L53"><a href="#L53" class="ln">  53</a> theorem cyclicSelection_adj_forces {k : ℕ} {X : Type*}</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (f : Fin (k + 2) ⊕ Fin (k + 2) → X)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (u v : (Fin (k + 2) × X) ⊕ (Fin (k + 2) × X))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (h : (cyclicSelectionGraph f).Adj u v) :</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     f (taggedClass u) = taggedValue u ∧ f (taggedClass v) = taggedValue v := by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   cases u with</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   | inl a =&gt;</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     cases v with</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     | inl b =&gt; exact False.elim ((alternatingTupleGraph_no_same _).1 a b h)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     | inr b =&gt;</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       have hh := (alternatingTupleGraph_adj_cross _ a.1 b.1 a.2 b.2).mp h</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       exact hh.2</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   | inr a =&gt;</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     cases v with</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     | inr b =&gt; exact False.elim ((alternatingTupleGraph_no_same _).2 a b h)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     | inl b =&gt;</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       have hh := (alternatingTupleGraph_adj_cross _ b.1 a.1 b.2 a.2).mp h.symm</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       exact ⟨hh.2.2, hh.2.1⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

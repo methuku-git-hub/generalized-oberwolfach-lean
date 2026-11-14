@@ -1,0 +1,34 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RetentionRestrictionLocalFamily.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RetentionRestrictionLocalFamily.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RetentionRestrictionLocalEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteHighEventsCommon</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> open scoped BigOperators</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem retained_restriction_local_family</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (π:Equiv.Perm V) (d:ℕ) (σ:RawIntervalFamilyOutcome V U Γ Color) (g₀:Γ) (t:ℕ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (ht:∀a,t≤(rawStartHubSet π d σ g₀ a).card)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (I:Type) (T:Finset I) (A:I→Finset V) (H:I→Finset U) (hA:∀i∈T,∀x,π x∈A i↔x∈A i)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (ζ p:ℝ) (Fr Fc:I→ℝ) (hζ:0≤ζ) (hp:0≤p)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hrate:∀a,(((rawStartHubSet π d σ g₀ a).card-t:ℕ):ℝ)/(rawStartHubSet π d σ g₀ a).card≤p)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hrow:∀i∈T,((A i).card.choose (Nat.ceil (ζ*(A i).card/(d+1:ℕ))):ℝ)*p^(Nat.ceil (ζ*(A i).card/(d+1:ℕ)))≤Fr i)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hcol:∀i∈T,((H i).card.choose (Nat.ceil (ζ*(H i).card/(d+1:ℕ))):ℝ)*p^(Nat.ceil (ζ*(H i).card/(d+1:ℕ)))≤Fc i):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let μ:=startRetentionLaw (rawStartHubSet π d σ g₀) t ht</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     1-(∑i∈T,(((H i).card:ℝ)*Fr i+((A i).card:ℝ)*((d+1:ℕ)*Fc i))) ≤</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       μ.probability (fun J=&gt;∀i∈T,RetainedRestrictionLocalGood π d σ g₀ t (A i) (H i) ζ J):=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   intro μ</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let E:=fun i=&gt;RetainedRestrictionLocalGood π d σ g₀ t (A i) (H i) ζ</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hEach:∀i∈T,1-(((H i).card:ℝ)*Fr i+((A i).card:ℝ)*((d+1:ℕ)*Fc i))≤μ.probability (E i):=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     intro i hi</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have hh:=retained_restriction_local_event π d σ g₀ t ht (A i) (H i) (hA i hi) ζ p (Fr i) (Fc i) hζ hp hrate (hrow i hi) (hcol i hi)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     dsimp only at hh</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     linarith only [hh]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   exact finiteLaw_high_events_common μ T E (fun i=&gt;((H i).card:ℝ)*Fr i+((A i).card:ℝ)*((d+1:ℕ)*Fc i)) hEach</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> end Oberwolfach</span></pre></html>

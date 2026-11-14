@@ -1,0 +1,170 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CappedRootWheelPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CappedRootWheelPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SparsePathDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RootWheelCoverage</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Successive wheel completion at one row root. The internal-use cap</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> controls the deleted rim degree away from that root. No factor or wheel</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> existence statement is left as an assumption. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 512</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 6000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U : Type*} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem capped_ordinary_root_wheels (Q F:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (r N K:ℕ) (hr:4≤r) (hK:0&lt;K) (x:V) (v w:Fin N→V) (u:Fin N→U)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hu:Function.Injective u) (hvw:∀ i,v i≠w i)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hpair:∀ i j,i≠j → Disjoint ({v i,w i}:Finset V) {v j,w j})</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (A:Fin N→Finset V) (hxA:∀ i,x∉A i)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hxv:∀ i,Q.Adj x (v i)) (hxw:∀ i,Q.Adj x (w i))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hFroot:∀ i,∀ a∈({x,v i,w i}:Finset V),∀ b∈({x,v i,w i}:Finset V),¬F.Adj a b)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hHroot:∀ i,H x (u i)∧H (v i) (u i)∧H (w i) (u i))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hHA:∀ i,∀ a∈A i,H a (u i))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (L b:ℝ) (hL:0≤L) (hF:∀ a,(F.degree a:ℝ)≤L)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hcount:∀ i,∀ a,a≠x → ∀ b&#x27;,b&#x27;≠x →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       b≤((A i∩Q.neighborFinset a∩Q.neighborFinset b&#x27;).card:ℝ))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hbudget:(N*r:ℕ)/(K:ℝ)+((r:ℝ)+3)*(L+1)+4*(K+1)&lt;b) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∃ C:Fin N→OrdinaryWheel Q F H r,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ i,ordinaryWheelHub (C i)=u i ∧ (ordinaryWheelRim (C i)).Adj x (v i) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         (ordinaryWheelRim (C i)).Adj x (w i) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (∀ a∈(ordinaryWheelRim (C i)).support,a∈({x,v i,w i}:Finset V) ∨ a∈A i)) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ i j,i≠j → Disjoint (ordinaryWheelResources (C i)) (ordinaryWheelResources (C j))) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ a,rootWheelInternalLoad C x v w a≤K) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ a,a≠x → (wheelFamilyRim C).degree a≤2*(K+1)) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ a,(wheelFamilyRim C).Adj x a ↔ ∃ i,a=v i∨a=w i) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (∀ b&#x27;,wheelFamilySpokes C x b&#x27; ↔ ∃ i,u i=b&#x27;) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀ a,a≠x → (Finset.univ.filter (fun b&#x27;=&gt;wheelFamilySpokes C a b&#x27;)).card≤K+1) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (∀ b&#x27;,(Finset.univ.filter (fun a=&gt;wheelFamilySpokes C a b&#x27;)).card≤r) := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let Good (i:Fin N) (C:OrdinaryWheel Q F H r):=</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     ordinaryWheelHub C=u i ∧ (ordinaryWheelRim C).Adj x (v i) ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (ordinaryWheelRim C).Adj x (w i) ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       ∀ a∈(ordinaryWheelRim C).support,a∈({x,v i,w i}:Finset V) ∨ a∈A i</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hprefix : ∀ k:ℕ,∀ hk:k≤N,∃ C:Fin k→OrdinaryWheel Q F H r,</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (∀ i,Good ⟨i.val,lt_of_lt_of_le i.isLt hk⟩ (C i)) ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (∀ i j,i≠j → Disjoint (ordinaryWheelResources (C i)) (ordinaryWheelResources (C j))) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       ∀ a,rootWheelInternalLoad C x (fun i=&gt;v ⟨i.val,lt_of_lt_of_le i.isLt hk⟩)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         (fun i=&gt;w ⟨i.val,lt_of_lt_of_le i.isLt hk⟩) a≤K:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     intro k</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     induction k with</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     | zero =&gt;</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       intro hk</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       refine ⟨Fin.elim0,fun i=&gt;Fin.elim0 i,fun i=&gt;Fin.elim0 i,?_⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       intro a</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       simp [rootWheelInternalLoad]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     | succ k ih =&gt;</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       intro hk</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       have hkN:k≤N:=by omega</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       obtain ⟨C,hG,hdis,hcap⟩:=ih hkN</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       let e:Fin k↪Fin N:=⟨fun j=&gt;⟨j.val,lt_of_lt_of_le j.isLt hkN⟩,by intro a b h;exact Fin.ext (congrArg (fun z:Fin N=&gt;z.val) h)⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       let i:Fin N:=⟨k,by omega⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       let vv:Fin k→V:=fun j=&gt;v (e j)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       let ww:Fin k→V:=fun j=&gt;w (e j)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       let D:=wheelFamilyRim C</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       let S:=Finset.univ.filter (fun a=&gt;K≤rootWheelInternalLoad C x vv ww a)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       have hcap&#x27;:∀ a,rootWheelInternalLoad C x vv ww a≤K:=hcap</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       have hend (a:V):(Finset.univ.filter (fun j=&gt;a=vv j∨a=ww j)).card≤1:=</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         disjoint_pairs_endpoint_count vv ww (fun a b hab=&gt;hpair (e a) (e b) (fun he=&gt;hab (e.injective he))) a</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       have hD (a:V) (hax:a≠x):(D.degree a:ℝ)≤2*(K+1):=by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         exact_mod_cast rootWheelFamily_degree C x vv ww K hend hcap&#x27; a hax</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       have hScard:(S.card:ℝ)≤(N*r:ℕ)/(K:ℝ):=by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>         apply (le_div_iff₀ (Nat.cast_pos.mpr hK)).mpr</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         have hh:K*S.card≤N*r:=by</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>           have hh:=rootWheelInternal_saturated C x vv ww K</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>           simp only [Fintype.card_fin] at hh</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>           exact hh.trans (Nat.mul_le_mul_right r hkN)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>         exact_mod_cast (by simpa only [Nat.mul_comm] using hh)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       have hnew (a:V) (ha:a∈({v i,w i}:Finset V)):¬D.Adj x a:=by</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>         intro hDa</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>         obtain ⟨j,hj⟩:=SimpleGraph.iSup_adj.mp hDa</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>         have hne:e j≠i:=by intro he;have he&#x27;:=congrArg Fin.val he;have hj&#x27;:=j.isLt;dsimp [e,i] at he&#x27;;omega</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>         have hn:=ordinaryWheel_root_neighbors (C j) x (vv j) (ww j) (hvw (e j)) (hG j).2.1 (hG j).2.2.1</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>         have haj:a∈({vv j,ww j}:Finset V):=by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>           rw [←hn];exact ((ordinaryWheelRim (C j)).mem_neighborFinset x a).mpr hj</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>         exact Finset.disjoint_left.mp (hpair (e j) i hne) haj ha</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       obtain ⟨B,hBu,hBv,hBw,hBD,hBA⟩:=ordinary_root_wheel_after_local_deletion Q D F H (A i) S x (v i) (w i) (u i)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>         (hxA i) (hvw i) (hxv i) (hxw i) (hnew _ (by simp)) (hnew _ (by simp))</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>         (hFroot i) (hHroot i) (hHA i) r hr L (2*(K+1)) b hL hF hD (hcount i)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>         (by linarith only [hScard,hbudget])</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>       have hB:Good i B:=⟨hBu,hBv,hBw,fun a ha=&gt;(hBA a ha).imp_right And.left⟩</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>       have hcross (j:Fin k):Disjoint (ordinaryWheelResources (C j)) (ordinaryWheelResources B):=by</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>         apply Finset.disjoint_left.mpr</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>         intro z hz hzB</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>         cases z with</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>         | inl edge =&gt;</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>           rw [ordinaryWheelResources_rim] at hz hzB</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>           induction edge using Sym2.inductionOn with</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>           | _ a b&#x27; =&gt;</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>             have hDab:D.Adj a b&#x27;:=SimpleGraph.iSup_adj.mpr ⟨j,hz⟩</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>             exact disjoint_graphs_no_common_edge _ _ hBD a b&#x27; hzB hDab</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>         | inr au =&gt;</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>           rw [ordinaryWheelResources_spoke] at hz hzB</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>           have hhub:u (e j)=u i:=(hG j).1.symm.trans (hz.1.trans (hzB.1.symm.trans hBu))</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>           have he:=congrArg Fin.val (hu hhub)</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>           have hj&#x27;:=j.isLt</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>           dsimp [e,i] at he</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>           omega</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>       have hload:∀ a,rootWheelInternalLoad (Fin.snoc C B) x (Fin.snoc vv (v i)) (Fin.snoc ww (w i)) a≤K:=by</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>         intro a</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>         rw [rootWheelInternalLoad_snoc]</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>         by_cases ha:a∈rootWheelInternal B x (v i) (w i)</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>         · rw [if_pos ha]</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>           have hsupport:a∈(ordinaryWheelRim B).support:=Set.mem_toFinset.mp (Finset.mem_sdiff.mp ha).1</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>           have hnot:a∉S:=by</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>             rcases hBA a hsupport with hroots|hA</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>             · exact ((Finset.mem_sdiff.mp ha).2 hroots).elim</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>             · exact hA.2</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>           have hh:rootWheelInternalLoad C x vv ww a&lt;K:=by simpa only [S,Finset.mem_filter,Finset.mem_univ,true_and,not_le] using hnot</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>           omega</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>         · rw [if_neg ha,Nat.add_zero];exact hcap&#x27; a</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>       have hvprefix:(fun j:Fin (k+1)=&gt;v ⟨j.val,lt_of_lt_of_le j.isLt hk⟩)=Fin.snoc vv (v i):=by</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>         funext j</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>         refine Fin.lastCases ?_ (fun j=&gt;?_) j</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>         · simp only [Fin.snoc_last];rfl</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>         · simp only [Fin.snoc_castSucc];rfl</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>       have hwprefix:(fun j:Fin (k+1)=&gt;w ⟨j.val,lt_of_lt_of_le j.isLt hk⟩)=Fin.snoc ww (w i):=by</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>         funext j</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>         refine Fin.lastCases ?_ (fun j=&gt;?_) j</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>         · simp only [Fin.snoc_last];rfl</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>         · simp only [Fin.snoc_castSucc];rfl</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>       refine ⟨Fin.snoc C B,?_,?_,?_⟩</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>       · intro j</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>         refine Fin.lastCases ?_ (fun j=&gt;?_) j</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>         · simpa only [Fin.snoc_last,Fin.val_last,i] using hB</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>         · simpa only [Fin.snoc_castSucc,Fin.val_castSucc] using hG j</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>       · intro j l</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>         refine Fin.lastCases ?_ (fun j&#x27;=&gt;?_) j</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>         · refine Fin.lastCases ?_ (fun l&#x27;=&gt;?_) l</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>           · intro hne;exact (hne rfl).elim</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>           · intro _;simpa only [Fin.snoc_last,Fin.snoc_castSucc] using (hcross l&#x27;).symm</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>         · refine Fin.lastCases ?_ (fun l&#x27;=&gt;?_) l</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>           · intro _;simpa only [Fin.snoc_last,Fin.snoc_castSucc] using hcross j&#x27;</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>           · intro hne</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>             simpa only [Fin.snoc_castSucc] using hdis j&#x27; l&#x27; (fun he=&gt;hne (congrArg Fin.castSucc he))</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>       · rw [hvprefix,hwprefix]</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>         exact hload</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>   obtain ⟨C,hC,hdis,hcap⟩:=hprefix N le_rfl</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>   have he:(fun i:Fin N=&gt;v ⟨i.val,lt_of_lt_of_le i.isLt le_rfl⟩)=v:=rfl</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>   have he&#x27;:(fun i:Fin N=&gt;w ⟨i.val,lt_of_lt_of_le i.isLt le_rfl⟩)=w:=rfl</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>   rw [he,he&#x27;] at hcap</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>   have hdegree:∀ a,a≠x → (wheelFamilyRim C).degree a≤2*(K+1):=</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>     fun a ha=&gt;rootWheelFamily_degree C x v w K (disjoint_pairs_endpoint_count v w hpair) hcap a ha</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>   have hexact:=root_wheel_family_exact_edges C x v w u hvw (fun i=&gt;(hC i).1)</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>     (fun i=&gt;(hC i).2.1) (fun i=&gt;(hC i).2.2.1)</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>   refine ⟨C,hC,hdis,hcap,hdegree,hexact.1,hexact.2,?_,?_⟩</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>   · intro a ha</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>     have hd:=hdegree a ha</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>     rw [wheelFamily_rim_degree_spoke_degree C hdis a] at hd</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>     omega</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>   · intro b&#x27;</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>     apply wheelFamily_injective_hub_degree C ?_ b&#x27;</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>     intro i j he</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>     apply hu</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>     exact (hC i).1.symm.trans (he.trans (hC j).1)</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a> </span>
+<span id="L167"><a href="#L167" class="ln"> 167</a> end Oberwolfach</span></pre></html>

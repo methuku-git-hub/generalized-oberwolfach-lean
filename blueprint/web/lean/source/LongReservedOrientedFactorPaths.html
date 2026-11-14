@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongReservedOrientedFactorPaths.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongReservedOrientedFactorPaths.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongReservedBlockAllocation</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongReservedSigmaBlocks</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Realize the reserved paths using the supplied cyclic orderings. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 12000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem long_reserved_oriented_factor_paths</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {V I J:Type*} [Fintype V] [DecidableEq V] [Fintype I] [Fintype J]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (G:SimpleGraph V) (hG:G.IsRegularOfDegree 2)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (components:I↪G.ConnectedComponent)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (e:∀i:I,SimpleGraph.cycleGraph (Fintype.card (components i)) ≃g (components i).toSimpleGraph)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (c d:ℕ) (t:J→ℕ) (ht:∀a,t a≤d)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hcapacity:Fintype.card J≤∑i:I,Fintype.card (components i)/(c*d+5)):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃index:J↪LongReservedBlockIndex G components c d,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃f:∀a:J,Fin (c*t a+5)↪V,</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (∀a,f a=longReservedSigmaBlock G components c d e (index a) (t a) (ht a)) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀(a:J) (j:Fin (c*t a+4)),G.Adj</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         (f a ⟨j.val,by omega⟩) (f a ⟨j.val+1,by omega⟩)) ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀a j,f a j ∈ (components (index a).1).supp) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀a b:J,a≠b→Disjoint (Finset.univ.image (f a)) (Finset.univ.image (f b))) := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   obtain ⟨index⟩:=long_reserved_requests_fit_blocks (fun i:I=&gt;Fintype.card (components i)/(c*d+5)) hcapacity</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hthree (i:I):3≤Fintype.card (components i):=(component_regular_two_cycle_iso G hG (components i)).1</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let f:∀a:J,Fin (c*t a+5)↪V:=fun a=&gt;longReservedSigmaBlock G components c d e (index a) (t a) (ht a)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨index,f,?_,?_,?_,?_⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · intro a; rfl</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · intro a j</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     exact long_reserved_sigma_block_edges G components c d e hthree (index a) (t a) (ht a) j</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   · intro a j</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     exact (longReservedComponentBlock G (components (index a).1) (e (index a).1) c d (t a) (index a).2.val (ht a)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (long_reserved_sigma_block_fit G components c d (index a)) j).property</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · intro a b hab</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     apply long_reserved_sigma_blocks_disjoint G components c d e (index a) (index b) (t a) (t b) (ht a) (ht b)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     intro heq</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact hab (index.injective heq)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedShortRowEventBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedShortRowEventBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSameDirectionDomains</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedTransformerRowBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Read one- and two-arc intersections with up to two fixed hubs from</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> the simultaneous row event. All error terms retain the original outer</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> domain. The marginal arrays and the sampled outcome are unchanged. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 12000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [LinearOrder V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_short_row_event_lower</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d h:ℕ) (hh:2≤h) (A:Finset V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (p k:ℝ) (q:U→Γ→ℝ) (s:U→Color→ℝ) (g:Γ) (j:Color) (ε γ pstar:ℝ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hpstar:0&lt;pstar) (hpstar1:pstar≤1) (hγ:0&lt;γ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hp:pstar≤p) (hk:pstar≤k) (hq:∀ u,pstar≤q u g) (hs:∀ u,pstar≤s u j)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hε:ε≤pstar^4*γ/4)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hrows:MarkedRowsWithSpokes P π d h A p k q s g j (ε*A.card) σ H)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (T:Finset (Bool×Bool×V)) (J:Finset (Bool×U)) (hT:T.card≤2) (hJ:J.card≤2)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hinj:Set.InjOn (fun a:Bool×U=&gt;a.2) J)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hdom:γ*A.card/2≤((markedRowDomain P π (3*d) A T ∅).card:ℝ)):</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (pstar^4*γ/4)*A.card≤</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       ((A.filter (fun z=&gt;(∀ a∈T,rawMarkedPairRims P π d σ (markedRowRim a z))∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         ∀ a∈J,H a.1 z a.2)).card:ℝ):=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have he:=hrows T ∅ J (hT.trans hh) (by simp) (hJ.trans hh) hinj</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hlo:=(abs_lt.mp he).1</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   apply marked_transformer_row_lower P π (3*d) (rawMarkedPairRims P π d σ) H A T J</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     γ pstar p k ε (γ*A.card/2) (fun t u=&gt;if t then q u g else s u j)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     hγ hpstar hpstar1 hp hk (by intro t u;cases t;exact hs u;exact hq u) hT hJ</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (by linarith only [hdom]) (le_refl _) hε</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   change (∏ a∈T,if a.1 then k else p)*(∏ a∈J,if a.1 then q a.2 g else s a.2 j)*</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (markedRowDomain P π (3*d) A T ∅).card-ε*A.card≤</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       markedRowCountWithSpokes P π d σ H (markedRowDomain P π (3*d) A T ∅) T J</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   linarith only [hlo]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> </span>
+<span id="L43"><a href="#L43" class="ln">  43</a> theorem marked_short_same_direction_row_bound</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d h:ℕ) (hh:2≤h) (A:Finset V) (hA:A.image π=A)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (p k:ℝ) (q:U→Γ→ℝ) (s:U→Color→ℝ) (g:Γ) (j:Color) (ε γ pstar:ℝ)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hpstar:0&lt;pstar) (hpstar1:pstar≤1) (hγ:0&lt;γ) (hγ1:γ≤1)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hp:pstar≤p) (hk:pstar≤k) (hq:∀ u,pstar≤q u g) (hs:∀ u,pstar≤s u j)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hε:ε≤pstar^4*γ/4) (hloss:2*(2*(3*d:ℕ)+1:ℝ)≤γ*A.card/2)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hdeg:∀ x,(1/2+γ/2)*A.card≤((A∩P.neighborFinset x).card:ℝ))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hrows:MarkedRowsWithSpokes P π d h A p k q s g j (ε*A.card) σ H)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (t a:Bool) (X:Finset V) (hX:X.card≤2) (J:Finset (Bool×U)) (hJ:J.card≤2)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hinj:Set.InjOn (fun a:Bool×U=&gt;a.2) J):</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (pstar^4*γ/4)*A.card≤</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       ((A.filter (fun z=&gt;(∀ x∈X,rawMarkedPairRims P π d σ (markedRowRim (t,a,x) z))∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         ∀ a∈J,H a.1 z a.2)).card:ℝ):=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hdom:=marked_same_direction_set_domain_lower P π (3*d) A hA t a X hX γ hγ1 hdeg</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hhdom:γ*A.card/2≤((markedRowDomain P π (3*d) A (markedSameDirectionSetRequests t a X) ∅).card:ℝ):=by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     push_cast at hloss hdom</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     linarith only [hdom,hloss]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have he:=marked_short_row_event_lower P π d h hh A p k q s g j ε γ pstar hpstar hpstar1 hγ</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     hp hk hq hs hε σ H hrows (markedSameDirectionSetRequests t a X) J</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     ((Finset.card_image_le).trans hX) hJ hinj hhdom</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   simpa only [markedSameDirectionSetRequests,Finset.forall_mem_image] using he</span>
+<span id="L65"><a href="#L65" class="ln">  65</a> </span>
+<span id="L66"><a href="#L66" class="ln">  66</a> end Oberwolfach</span></pre></html>

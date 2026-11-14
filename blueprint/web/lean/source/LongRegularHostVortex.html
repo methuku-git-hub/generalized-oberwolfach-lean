@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongRegularHostVortex.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongRegularHostVortex.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongRegularHostNumericInputs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.VortexPermutation</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A regular host at the original threshold has a vortex and a shared</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> short-cycle-free permutation, uniformly in the allowed length set. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem long_regular_host_vortex_with_permutation</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (α β ε ρ₀:ℝ) (hα:0&lt;α) (hb:0&lt;β) (he:0&lt;ε) (he1:ε&lt;1/4) (hρ₀:0&lt;ρ₀) (d:ℕ):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∃m₀:ℕ,1≤m₀ ∧ ∀ (Allowed:Set ℕ),Allowed.Nonempty→(∀r∈Allowed,3≤r)→</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∀n:ℕ,0&lt;n→∀(U:Type) [Fintype U] (G:SimpleGraph (Fin n)) (D m:ℕ),</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       G.IsRegularOfDegree D→(allowedThreshold Allowed+α)*n≤(D:ℝ)→</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ρ₀ ≤ initialIndexDensity U D→initialIndexDensity U D≤1→m₀≤m→m≤n→</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ∃Q:Vortex U G D β ε m,∃π:Equiv.Perm (Fin n),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>         (∀i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i) ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>         (∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x) := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   obtain ⟨m₀,hm₀,hvortex⟩:=vortex_with_permutation_exists (β:=β) (ε:=ε) (ρ₀:=ρ₀) hb he he1 hρ₀ (2*d+1)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   refine ⟨m₀,hm₀,?_⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   intro Allowed hAllowed hvalid n hn U _ G D m hreg hmin hρlo hρhi hm hmn</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hnum:=long_regular_host_numeric_inputs n D hn U Allowed hAllowed hvalid α hα G hreg hmin</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   obtain ⟨Q,π,hpres,_,hshort⟩:=hvortex (Fin n) U G D m hreg (by simpa using hnum.2.1) hρlo hρhi hm (by simpa using hmn)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   exact ⟨Q,π,hpres,hshort⟩</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> end Oberwolfach</span></pre></html>

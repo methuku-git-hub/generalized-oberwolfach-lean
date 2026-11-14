@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>UniformIncomingFraction.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>UniformIncomingFraction.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BipartiteOneSidedRounding</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A head distributes its prescribed integer demand uniformly across its</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> eligible incoming edges. The zero-demand empty-head case uses zero weight. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 3000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {Y E : Type} [Fintype Y] [Fintype E]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> def eligibleIncoming (head : E → Y) (eligible : E → Prop) (y : Y) : Finset E :=</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   Finset.univ.filter (fun e =&gt; eligible e ∧ head e = y)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def uniformIncomingWeight (head : E → Y) (eligible : E → Prop) (t : Y → ℕ) (e : E) : ℝ :=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   if eligible e then (t (head e):ℝ)/(eligibleIncoming head eligible (head e)).card else 0</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem uniform_incoming_weight_bounds (head : E → Y) (eligible : E → Prop) (t : Y → ℕ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (ht : ∀ y, t y ≤ (eligibleIncoming head eligible y).card) (e : E) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     0 ≤ uniformIncomingWeight head eligible t e ∧ uniformIncomingWeight head eligible t e ≤ 1 := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   unfold uniformIncomingWeight</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   split_ifs with he</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · have hle : (t (head e):ℝ) ≤ (eligibleIncoming head eligible (head e)).card := by exact_mod_cast ht (head e)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     have hn : 0 ≤ ((eligibleIncoming head eligible (head e)).card:ℝ) := by positivity</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     constructor</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     · exact div_nonneg (by positivity) hn</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     · by_cases hzero : (eligibleIncoming head eligible (head e)).card = 0</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       · simp [hzero]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       · have hpos : 0 &lt; ((eligibleIncoming head eligible (head e)).card:ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hzero</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         exact (div_le_one₀ hpos).2 hle</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · norm_num</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> </span>
+<span id="L33"><a href="#L33" class="ln">  33</a> theorem uniform_incoming_weight_columns (head : E → Y) (eligible : E → Prop) (t : Y → ℕ)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (ht : ∀ y, t y ≤ (eligibleIncoming head eligible y).card) (y : Y) :</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (∑ e, if head e=y then uniformIncomingWeight head eligible t e else 0) = t y := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let S := eligibleIncoming head eligible y</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have heq : (∑ e, if head e=y then uniformIncomingWeight head eligible t e else 0) =</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∑ e∈S, (t y:ℝ)/(S.card:ℝ) := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     simp only [S,eligibleIncoming,Finset.sum_filter]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     apply Finset.sum_congr rfl</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     intro e _</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     by_cases he : eligible e &lt;;&gt; by_cases hy : head e=y &lt;;&gt;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       simp [S,eligibleIncoming,uniformIncomingWeight,he,hy]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   rw [heq,Finset.sum_const, nsmul_eq_mul]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   by_cases hS : S.card = 0</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   · have ht0 : t y = 0 := by have hh:=ht y; change t y ≤ S.card at hh; omega</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     simp [hS,ht0]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   · have hpos : (S.card:ℝ) ≠ 0 := by exact_mod_cast hS</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     field_simp</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> end Oberwolfach</span></pre></html>

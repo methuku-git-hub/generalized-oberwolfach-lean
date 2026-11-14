@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHubRimDeletionCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHubRimDeletionCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPathRestrictionCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedHubFixedWeightRestriction</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.CommonMarkedCycleConstraintCounts</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Counts of cycles and common paths at a fixed hub after deletion of</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> rim occurrences. All spoke classes and both path roots stay fixed. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 15000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E K:Type} [Fintype V] [Fintype E] [Fintype K] [DecidableEq V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {tail head:E→V} {ktail khead:K→V} {m b:ℕ} {π:Equiv.Perm V} {H₀ Hₖ:V→U→Prop}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem hub_marked_cycle_rim_deletion_count (hm:1≤m) (PE:E→Prop) (PK:K→Prop) (u:U)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (d:ℝ) (hd:0≤d)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hEout:∀ x,(∑ e,if ¬PE e∧tail e=x then (1:ℝ) else 0)≤d)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hKout:∀ x,(∑ e,if ¬PK e∧ktail e=x then (1:ℝ) else 0)≤d):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (Fintype.card (HubMarkedCycle tail head ktail khead m π b H₀ Hₖ u):ℝ)-</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       Fintype.card (HubMarkedCycle (fun e:{e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         (fun e:{e // PK e}=&gt;ktail e.val) (fun e=&gt;khead e.val) m π b H₀ Hₖ u)≤</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       3*((m:ℝ)+1)*d*(Fintype.card V:ℝ)^m:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   rw [Fintype.card_congr (hubMarkedCycleCommonEquiv u),Fintype.card_congr (hubMarkedCycleCommonEquiv u)]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   exact commonMarkedCycle_deletion_count hm tail head ktail khead π b PE PK</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     H₀ Hₖ H₀ Hₖ u u d hEout hKout (by intro u;simpa using hd) (by intro u;simpa using hd)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem hub_marked_path_rim_deletion_count (hm:1≤m) (PE:E→Prop) (PK:K→Prop)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (u:U) (j:Bool) (v v&#x27;:V) (d:ℝ) (hd:0≤d)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hEout:∀ x,(∑ e,if ¬PE e∧tail e=x then (1:ℝ) else 0)≤d)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hEin:∀ x,(∑ e,if ¬PE e∧head e=x then (1:ℝ) else 0)≤d)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hKout:∀ x,(∑ e,if ¬PK e∧ktail e=x then (1:ℝ) else 0)≤d)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hKin:∀ x,(∑ e,if ¬PK e∧khead e=x then (1:ℝ) else 0)≤d):</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m π b H₀ Hₖ j v v&#x27; u u):ℝ)-</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       Fintype.card (RootFirstCommonMarkedPath (fun e:{e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (fun e:{e // PK e}=&gt;ktail e.val) (fun e=&gt;khead e.val) m π b H₀ Hₖ j v v&#x27; u u)≤</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       4*((m:ℝ)+1)*d*(Fintype.card V:ℝ)^(m-1):=</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   rootFirstCommonMarkedPath_deletion_count hm PE PK H₀ Hₖ j v v&#x27; u u d</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     hEout hEin hKout hKin (by intro u;simpa using hd) (by intro u;simpa using hd)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

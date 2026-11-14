@@ -1,0 +1,178 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>WeightedMatchingLargeScales.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>WeightedMatchingLargeScales.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MatchingGaussianBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MatchingPowerScales</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MatchingCommonBounds</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Weighted matching with one explicit, polynomial-times-exponential failure</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> margin. All constants and the colour threshold are fixed before the graph,</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> weight functions and partition order. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 2000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency true</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem weighted_matching_large_scales (k : ℕ) (hk : 2≤k)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (η K a : ℝ) (hη : 0&lt;η) (hη1 : η≤1/100) (hK : 0&lt;K) (ha : 0&lt;a) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ c : ℝ,0&lt;c ∧ ∃ H : ℕ,2≤H ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ h n D J : ℕ,H≤h → h^(64*k)≤n → n≤D → D≤h^J →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     10*(h : ℝ)^(16+3*J)*Real.exp (-c*h)&lt;1 →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ (V E A : Type) [Fintype V] [Fintype E] [Fintype A] [DecidableEq V],</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (R : E → Finset V) (w : A → E → ℝ) (b W : A → ℝ),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     Fintype.card V≤h^J → Fintype.card A≤h^J →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀ e,(R e).card=k) → (∀ v,0&lt;Fintype.card (HypergraphEdgesAt R v)) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀ v,Fintype.card (HypergraphEdgesAt R v)≤D) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀ v z,v≠z → ((Finset.univ.filter (fun e=&gt;v∈R e ∧ z∈R e)).card : ℝ)≤K*D/n) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ i,0&lt;b i) → (∀ i e,0≤w i e ∧ w i e≤b i) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀ i,∑ e,w i e=W i) → (∀ i,a*b i*D*n≤W i) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∃ M : Finset E,(∀ e∈M,∀ f∈M,e≠f → Disjoint (R e) (R f)) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ∀ i,|(∑ e∈M,w i e)-W i/D|&lt;10*η*W i/D := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   obtain ⟨N,hN⟩ := finite_weighted_hypergraph_matching k hk η (1/2) hη (by linarith) (by norm_num) (by norm_num)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let c := min (2*η^2/(K*k)) (min (2*η^2*a/k) (min (η^2/8) (min (1/2) (a/8))))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hkR : (1 : ℝ)&lt;k := by exact_mod_cast hk</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hc : 0&lt;c := by dsimp [c];repeat&#x27; apply lt_min &lt;;&gt; positivity</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hc₀ : c≤2*η^2/(K*k) := min_le_left _ _</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hc₁ : c≤2*η^2*a/k := (min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hc₂ : c≤η^2/8 := (min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hc₃ : c≤1/2 := (min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _)))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hc₄ : c≤a/8 := (min_le_right _ _).trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _)))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let H := max (max (max 2 N) ⌈2*K⌉₊) ⌈1/η⌉₊</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hH2 : 2≤H := by dsimp [H];omega</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   refine ⟨c,hc,H,hH2,?_⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   intro h n D J hH hn hDn hDJ hsmall V E A _ _ _ _ R w b W hV hA hsize hpositive hdegree hcodeg hb hw htotal hweight</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hh : 2≤h := hH2.trans hH</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hh0 : 0&lt;h := by omega</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hhR : (1 : ℝ)≤h := by exact_mod_cast (show 1≤h by omega)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hn0 : 0&lt;n := lt_of_lt_of_le (pow_pos hh0 _) hn</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hD0 : 0&lt;D := hn0.trans_le hDn</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hnR : (0 : ℝ)&lt;n := Nat.cast_pos.mpr hn0</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hDR : (0 : ℝ)&lt;D := Nat.cast_pos.mpr hD0</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hKh : 2*K≤h := by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have hh&#x27; : ⌈2*K⌉₊≤h := by dsimp [H] at hH;omega</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     exact (Nat.le_ceil _).trans (Nat.cast_le.mpr hh&#x27;)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hηh : 1≤η*(h : ℝ)^4 := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hh&#x27; : ⌈1/η⌉₊≤h := by dsimp [H] at hH;omega</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have he : 1/η≤(h : ℝ) := (Nat.le_ceil _).trans (Nat.cast_le.mpr hh&#x27;)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hm := (div_le_iff₀ hη).mp he</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hp : (h : ℝ)≤(h : ℝ)^4 := by simpa only [pow_one] using pow_le_pow_right₀ hhR (by norm_num : 1≤4)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     nlinarith [mul_le_mul_of_nonneg_left hp hη.le]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   let p := h^16</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   let q := D/h^(16*k-12)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   let d := ⌈(1+4*η)*(h : ℝ)^4⌉₊</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   let l := ⌈(1+η)*(d : ℝ)⌉₊</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hbase : h^(16*k)≤D :=</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (Nat.pow_le_pow_right (by omega) (by omega : 16*k≤64*k)).trans (hn.trans hDn)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   obtain ⟨hq,hqD,hd,hl₀,hl₁,hDl,hlD,hmean⟩ := matching_edge_split_scale k h D hk hh η hη hη1 hηh hbase</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   change 0&lt;q at hq</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   change q≤D at hqD</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   change h^4≤d at hd</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   change (D : ℝ)≤(p : ℝ)^(k-1)*q*l at hDl</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   change (p : ℝ)^(k-1)*q*l≤(1+8*η)*D at hlD</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   change (1+η)*(D : ℝ)/((p : ℝ)^(k-1)*q)≤(1+3*η)*(h : ℝ)^4 at hmean</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hp : 0&lt;p := pow_pos hh0 _</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hpR : (0 : ℝ)&lt;p := Nat.cast_pos.mpr hp</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hqR : (0 : ℝ)&lt;q := Nat.cast_pos.mpr hq</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have hp1 : (1 : ℝ)≤p := by exact_mod_cast hp</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have hdN : N≤d := by</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hNh : N≤h := by dsimp [H] at hH;omega</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     have hp4 : h≤h^4 := by simpa only [pow_one] using Nat.pow_le_pow_right (by omega : 0&lt;h) (by norm_num : 1≤4)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     exact hNh.trans (hp4.trans hd)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have hcodeSmall : (h : ℝ)≤(d : ℝ)^(1-(1/2 : ℝ)) := by</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     rw [show 1-(1/2 : ℝ)=1/2 by norm_num,← Real.sqrt_eq_rpow]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     apply Real.le_sqrt_of_sq_le</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     have he : (h : ℝ)^4≤d := by exact_mod_cast hd</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     exact (pow_le_pow_right₀ hhR (by norm_num : 2≤4)).trans he</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   obtain ⟨hs0,hs1,hs2,hs3⟩ := matching_power_scales k h D n hk hh hDn hn K hK hKh</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hpCast : (p : ℝ)=(h : ℝ)^16 := by dsimp [p];push_cast;rfl</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   rw [← hpCast] at hs0 hs1 hs2</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   change (h : ℝ)*(p : ℝ)^k*q≤(D : ℝ)*n at hs1</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   change (D : ℝ)^2*(p : ℝ)*h≤4*((p : ℝ)^k)^2*q^2 at hs2</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   change (K*D/n)/(q : ℝ)≤1 at hs3</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   have hW : ∀ i,0&lt;W i := fun i=&gt;(mul_pos (mul_pos (mul_pos ha (hb i)) hDR) hnR).trans_le (hweight i)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   have hL : ∀ i v,hypergraphWeightedDegree R (w i) v≤b i*D := by</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     intro i v</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     unfold hypergraphWeightedDegree</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     calc</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>       _ ≤ ∑ e : E,if v∈R e then b i else 0 := by apply Finset.sum_le_sum;intro e _;split_ifs &lt;;&gt; simp_all only [le_refl,hw]</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>       _ = b i*Fintype.card (HypergraphEdgesAt R v) := by</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>         rw [← Finset.sum_filter,Finset.sum_const]</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>         simp only [nsmul_eq_mul,HypergraphEdgesAt,Fintype.card_subtype]</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>         ring</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       _ ≤ _ := mul_le_mul_of_nonneg_left (Nat.cast_le.mpr (hdegree v)) (hb i).le</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   have hsroot : (h : ℝ)*((p : ℝ)^(k-1))^2≤n := by</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     calc</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>       _ = (h : ℝ)*(p : ℝ)^(2*(k-1)) := by rw [← pow_mul];congr 2;omega</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       _ ≤ (h : ℝ)*(p : ℝ)^(2*k) := mul_le_mul_of_nonneg_left (pow_le_pow_right₀ hp1 (by omega)) (by positivity)</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>       _ ≤ _ := hs0</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>   have hsweight : (h : ℝ)*((p : ℝ)^k)^2≤n := by simpa only [← pow_mul,Nat.mul_comm k 2] using hs0</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   letI : NeZero p := ⟨by omega⟩</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>   letI : NeZero q := ⟨by omega⟩</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>   let f₀ := fun v : V=&gt;-2*(η*D/(p : ℝ)^(k-1))^2/((K*D/n)*((k : ℝ)-1)*Fintype.card (HypergraphEdgesAt R v))</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>   let f₁ := fun i : A=&gt;-2*(η*W i/(p : ℝ)^k)^2/(b i*D*k*W i)</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>   let f₂ := ((D : ℝ)/(p : ℝ)^(k-1)+η*D/(p : ℝ)^(k-1))/q*(Real.exp (η/4)-1)-(η/4)*((d : ℝ)+1)</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   let f₃ := (K*D/n)/(q : ℝ)*(Real.exp 1-1)-((h : ℝ)+1)</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>   let f₄ := fun i : A=&gt;(((W i/(p : ℝ)^k+η*W i/(p : ℝ)^k)/q*(Real.exp (1/4)-1)-(1/4)*(2*W i/((p : ℝ)^k*q)))/b i)</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>   let f₅ := fun i : A=&gt;-2*(η*W i/D)^2/((p : ℝ)*(2*W i/((p : ℝ)^k*q))^2)</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>   have hf₀ : ∀ v,f₀ v≤-c*h := by</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     intro v</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     exact (matching_root_exponent hη hDR (by positivity) hK hkR hnR (by positivity)</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>       (Nat.cast_pos.mpr (hpositive v)) (Nat.cast_le.mpr (hdegree v)) hsroot).trans</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>       (by nlinarith [mul_le_mul_of_nonneg_right hc₀ (show (0 : ℝ)≤h by positivity)])</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>   have hf₁ : ∀ i,f₁ i≤-c*h := by</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     intro i</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     exact (matching_vertex_weight_exponent hη (hW i) (by positivity) (hb i) hDR (by linarith) ha</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>       (by positivity) hsweight (hweight i)).trans</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>       (by nlinarith [mul_le_mul_of_nonneg_right hc₁ (show (0 : ℝ)≤h by positivity)])</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>   have hf₂ : f₂≤-c*h := by</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     have hm : ((D : ℝ)/(p : ℝ)^(k-1)+η*D/(p : ℝ)^(k-1))/q≤(1+3*η)*(h : ℝ)^4 := by</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>       convert hmean using 1 &lt;;&gt; field_simp &lt;;&gt; ring</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     have he := matching_degree_exponent hη hη1 (show (0 : ℝ)≤h by positivity) hm (Nat.le_ceil _)</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     change f₂≤_ at he</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     have hp4 : (h : ℝ)≤(h : ℝ)^4 := by simpa only [pow_one] using pow_le_pow_right₀ hhR (by norm_num : 1≤4)</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     have hc&#x27; := mul_le_mul_of_nonneg_right hc₂ (show (0 : ℝ)≤h by positivity)</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     have he&#x27; := mul_le_mul_of_nonneg_left hp4 (show 0≤η^2/8 by positivity)</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     exact he.trans (by nlinarith)</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>   have hf₃ : f₃≤-c*h :=</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     (matching_codegree_exponent (by exact_mod_cast hh) hs3).trans</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>       (by nlinarith [mul_le_mul_of_nonneg_right hc₃ (show (0 : ℝ)≤h by positivity)])</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>   have hf₄ : ∀ i,f₄ i≤-c*h := by</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>     intro i</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     exact (matching_edge_weight_exponent hη.le hη1 (hW i) (by positivity) hqR (hb i) hDR ha</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>       (by positivity) hs1 (hweight i)).trans</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>       (by nlinarith [mul_le_mul_of_nonneg_right hc₄ (show (0 : ℝ)≤h by positivity)])</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>   have hf₅ : ∀ i,f₅ i≤-c*h := by</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>     intro i</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     exact (matching_selected_weight_exponent hη (hW i) hDR (by positivity) hpR hqR (by positivity) hs2).trans</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>       (by nlinarith [mul_le_mul_of_nonneg_right hc₂ (show (0 : ℝ)≤h by positivity)])</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>   obtain ⟨hvEvent,heEvent,hsEvent⟩ := matching_failure_sums V (Fin p) (Fin q) A ((h : ℝ)^J) (-c*h)</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>     (one_le_pow₀ hhR) (by exact_mod_cast hV) (by simp only [Fintype.card_fin];exact_mod_cast hqD.trans hDJ)</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>     (by exact_mod_cast hA) f₀ f₁ f₄ f₅ f₂ f₃ hf₀ hf₁ hf₂ hf₃ hf₄ hf₅</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>     (by</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>       simpa only [Fintype.card_fin,hpCast,← pow_mul,← pow_add,Nat.mul_comm J 3,mul_assoc] using hsmall)</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>   obtain ⟨M,hM,hMw⟩ := hN d h hdN hcodeSmall V E (Fin p) (Fin q) A R w b W</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>     (fun i=&gt;b i*D) (fun i=&gt;η*W i/(p : ℝ)^k) (fun i=&gt;2*W i/((p : ℝ)^k*q)) (fun i=&gt;η*W i/D)</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>     D (K*D/n) (η*D/(p : ℝ)^(k-1)) (η/4) 1 (1/4) hsize hpositive</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>     (fun v=&gt;Nat.cast_le.mpr (hdegree v)) hcodeg (by positivity) (by positivity) (by positivity)</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>     hb hw htotal hW hL (fun i=&gt;by have hi := hW i;positivity) (fun i=&gt;by have hi := hW i;positivity) (by positivity) (by norm_num) (by norm_num)</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>     (by simpa only [Fintype.card_fin,f₀,f₁] using hvEvent)</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>     (by simpa only [Fintype.card_fin,f₂,f₃,f₄,one_mul] using heEvent)</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>     (by simpa only [Fintype.card_fin,Finset.sum_const,Finset.card_univ,nsmul_eq_mul,f₅] using hsEvent)</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>   refine ⟨M,hM,fun i=&gt;?_⟩</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>   apply matching_normalization_error (hW i).le hDR hη.le hDl hlD</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>   have hlR : (0 : ℝ)&lt;l := by dsimp [l];exact Nat.cast_pos.mpr (Nat.ceil_pos.mpr (by positivity))</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>   have hi := hMw i</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>   simp only [Fintype.card_fin] at hi</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>   change |(∑ e∈M,w i e)-W i/((p : ℝ)^(k-1)*q*l)|&lt;</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>     η*W i/D+(p : ℝ)*(η*W i/(p : ℝ)^k)/(q*l) at hi</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>   have heq : (p : ℝ)*(η*W i/(p : ℝ)^k)/(q*l)=η*W i/((p : ℝ)^(k-1)*q*l) := by</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>     rw [show k=(k-1)+1 by omega,pow_succ]</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>     simp only [Nat.add_sub_cancel]</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>     field_simp</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>   rw [heq] at hi</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>   exact hi</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a> </span>
+<span id="L175"><a href="#L175" class="ln"> 175</a> end Oberwolfach</span></pre></html>

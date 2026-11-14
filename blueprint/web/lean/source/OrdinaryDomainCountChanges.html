@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryDomainCountChanges.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryDomainCountChanges.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FixedDomainNeighbourhoodStability</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Stability from realised neighbourhood changes restricted to the fixed</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> counting domain. Changes to edges outside that domain are unrestricted. Density targets and normalising domains are unchanged. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 3000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem ordinary_relative_counts_under_domain_changes (P Q Q&#x27; F:SimpleGraph V) (H H&#x27;:V→U→Prop)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (A:Finset V) (q p ε ε&#x27; L:ℝ) (hL:0≤L)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hrowbudget:ε*A.card+3*L≤ε&#x27;*A.card)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hindexbudget:ε*Fintype.card U+3*L≤ε&#x27;*Fintype.card U)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hQ:∀ v,((changed (A∩Q.neighborFinset v) (A∩Q&#x27;.neighborFinset v)).card:ℝ)≤L)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hHr:∀ v,((changed (Finset.univ.filter (H v)) (Finset.univ.filter (H&#x27; v))).card:ℝ)≤L)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hHc:∀ u,((changed (A∩Finset.univ.filter (fun v=&gt;H v u)) (A∩Finset.univ.filter (fun v=&gt;H&#x27; v u))).card:ℝ)≤L)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hrow:∀ S:Finset V,∀ J:Finset U,S.card≤2 → J.card≤1 →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       |((common (common A S (fun v=&gt;Q.neighborFinset v)) J</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>         (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u))).card:ℝ)-</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         q^S.card*p^J.card*(common A S (fun v=&gt;P.neighborFinset v)).card|≤ε*A.card)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hindex:∀ S:Finset V,S.card≤3 → (∀ v∈S,∀ w∈S,¬F.Adj v w) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       |((common Finset.univ S (fun v=&gt;Finset.univ.filter (H v))).card:ℝ)-p^S.card*Fintype.card U|≤ε*Fintype.card U):</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀ S:Finset V,∀ J:Finset U,S.card≤2 → J.card≤1 →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       |((common (common A S (fun v=&gt;Q&#x27;.neighborFinset v)) J</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (fun u=&gt;Finset.univ.filter (fun v=&gt;H&#x27; v u))).card:ℝ)-</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         q^S.card*p^J.card*(common A S (fun v=&gt;P.neighborFinset v)).card|≤ε&#x27;*A.card) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ S:Finset V,S.card≤3 → (∀ v∈S,∀ w∈S,¬F.Adj v w) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       |((common Finset.univ S (fun v=&gt;Finset.univ.filter (H&#x27; v))).card:ℝ)-p^S.card*Fintype.card U|≤ε&#x27;*Fintype.card U):=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   constructor</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   · intro S J hS hJ</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hh:=fixed_domain_mixed_target_stability A S J</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (fun v=&gt;Q.neighborFinset v) (fun v=&gt;Q&#x27;.neighborFinset v)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u)) (fun u=&gt;Finset.univ.filter (fun v=&gt;H&#x27; v u))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       L L (q^S.card*p^J.card*(common A S (fun v=&gt;P.neighborFinset v)).card) (ε*A.card)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (fun v _=&gt;hQ v) (fun u _=&gt;hHc u) (hrow S J hS hJ)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hs:(S.card:ℝ)≤2:=by exact_mod_cast hS</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hj:(J.card:ℝ)≤1:=by exact_mod_cast hJ</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hl:=mul_le_mul_of_nonneg_right (add_le_add hs hj) hL</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     linarith only [hh,hl,hrowbudget]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   · intro S hS hI</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hh:=target_stability (neighbourhood_stability Finset.univ S</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (fun v=&gt;Finset.univ.filter (H v)) (fun v=&gt;Finset.univ.filter (H&#x27; v)) L (fun v _=&gt;hHr v))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (hindex S hS hI)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hs:(S.card:ℝ)≤3:=by exact_mod_cast hS</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have hl:=mul_le_mul_of_nonneg_right hs hL</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     linarith only [hh,hl,hindexbudget]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> end Oberwolfach</span></pre></html>

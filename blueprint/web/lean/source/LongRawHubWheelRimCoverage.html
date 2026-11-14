@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongRawHubWheelRimCoverage.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongRawHubWheelRimCoverage.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongRawSelectedWheelRimCoverage</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongRawMatchingHubPacking</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.AssignedOrdinaryWheelReindex</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The actual hub packing and its reindexed assigned ordinary wheels use</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> only the matching&#x27;s physical rim resources at that hub. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 22000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> local instance longRawHubWheelRimDecEqFin (n:ℕ):DecidableEq (Fin n):=Classical.decEq _</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem long_raw_hub_marked_rims_covered</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d m:ℕ) (ℓ:Fin K→ℕ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let state:=longRawHubState P π d raw g j</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let e:{z // z∈bernoulliVertexSet state}↪_:=Function.Embedding.subtype _</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let R:=longRawSeedResources (U:=U) π d m ℓ</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀M:Finset (RestrictedResource (mixedCandidateResources R) e),∀w W,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       W∈longRawMarkedWheelsAtHub P π d m ℓ raw g j M w→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       markedCyclePhysicalEdges _ _ _ _ m π (3*d) W.1⊆longRawPhysicalHubRims P π d m ℓ raw g j M w:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro state e R M w W hW x hx</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   unfold longRawMarkedWheelsAtHub at hW</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   obtain ⟨a,ha,rfl⟩:=Finset.mem_image.mp hW</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hub: (longRawSelectedMarkedWheel P π d m ℓ raw g j M a).2.val=w:=(Finset.mem_filter.mp ha).2</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hh:=(long_raw_selected_wheel_rims_covered P π d m ℓ raw g j M).1 a x hx</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   simpa only [hub] using hh</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> </span>
+<span id="L31"><a href="#L31" class="ln">  31</a> theorem reindexed_ordinary_rim_covered</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     {V U A J:Type} [Fintype V] [LinearOrder V] [Fintype U] [DecidableEq U]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (π:Equiv.Perm V) (b:ℕ) (r:A→ℕ) (Q:∀a,OrderedOrdinaryWheel (U:=U) π b (r a))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (n:J→ℕ) (select:J→A) (hlen:∀j,r (select j)=n j+1) (Pack:Finset (Finset V))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hQ:∀j (i:Fin (r (select j))),{(Q (select j)).1.val i,(Q (select j)).1.val (cycleNext i)}∈Pack):</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∀j (i:Fin (n j+1)),</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       {(reindexedOrdinaryWheel π b r Q n select hlen j).1.val i,</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>        (reindexedOrdinaryWheel π b r Q n select hlen j).1.val (cycleNext i)}∈Pack:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   intro j i</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   dsimp only [reindexedOrdinaryWheel]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   rw [cast_ordinary_wheel_vertex,cast_ordinary_wheel_vertex,cycleNext_cast (hlen j) i]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   exact hQ j _</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedMixedBoundarySelection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedMixedBoundarySelection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedHubFactorOn</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedEndpointPairingConstruction</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.IndexedGraphSelection</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Simultaneous physical selection of marked hub factors and marked row</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> endpoint assignments. The endpoint choices are constructed from the five</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> actual degree/cut blocks. The factor input is discharged by the fresh</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> marked hub theorem in its sampling caller. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option synthInstance.maxSize 512</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 12000000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem select_mixed_marked_boundary (p:ℝ) (hp:0&lt;p):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ N:ℕ,∀ (V U E K J I:Type) [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       [Fintype J] [DecidableEq J] [Fintype I] [DecidableEq I],N≤Fintype.card (V⊕U)→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ (tail head:E→V) (ktail khead:K→V) (m b:ℕ) (π:Equiv.Perm V) (H₀ HK:V→U→Prop)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (u:J→U) (Y:J→Finset V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (A₀ A₁ X₀ X₁:I→Finset V) (Y₀ Y₁:I→Finset U),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀ j v z,H₀ v (u j)→HK z (u j)→v≠π z)→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀ i,Disjoint (Y₀ i) (Y₁ i))→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀ i,(A₀ i).card+(A₁ i).card=(Y₀ i).card+(Y₁ i).card)→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀ i,(X₀ i).card+(X₁ i).card=(Y₀ i).card+(Y₁ i).card)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ i,(A₁ i).card=(Y₁ i).card)→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀ degree tau lam loss:ℝ,0&lt;tau→0&lt;lam→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     2*tau+(2*(2*b+1):ℕ)≤degree→(2*(2*b+1):ℕ)&lt;lam*tau→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ i,((X₁ i).card:ℝ)+2*tau≤(Y₀ i).card)→loss≤lam*tau→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈A₁ i) (fun y=&gt;y∈Y₁ i) (degree+loss) tau (2*lam))→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈A₀ i) (fun y=&gt;y∈Y₀ i) (degree+loss) tau (2*lam))→</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (∀ i,BipartiteBlockBounds HK (fun a=&gt;a∈X₁ i) (fun y=&gt;y∈Y₀ i) (degree+loss) tau (2*lam))→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈X₀ i) (fun y=&gt;y∈Y₀ i) (degree+loss) tau (2*lam))→</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈X₀ i) (fun y=&gt;y∈Y₁ i) (degree+loss) tau (2*lam))→</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     4*(p*Real.sqrt p*Fintype.card (V⊕U))+4*(Nat.ceil (4*(p*Real.sqrt p*Fintype.card (V⊕U))):ℝ)≤loss→</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (∀ j,∀ F:SimpleGraph V,(∀ v,(F.degree v:ℝ)≤loss)→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∃ P:MarkedHubFactorOn tail head ktail khead m π b H₀ HK (u j) (Y j),Disjoint P.rim F)→</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let S:J⊕I→Finset (V⊕U):=Sum.elim</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (fun j=&gt;(Y j∪(Y j).image π).image Sum.inl)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (fun i=&gt;ordinaryInnerVertices (A₀ i∪A₁ i∪(X₀ i∪X₁ i)) (Y₀ i∪Y₁ i))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ i j,i≠j→((S i∩S j).card:ℝ)≤p^2*Fintype.card (V⊕U))→</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (∀ z,((Finset.univ.filter (fun i=&gt;z∈S i)).card:ℝ)≤p*Fintype.card (V⊕U))→</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∃ P:∀ j,MarkedHubFactorOn tail head ktail khead m π b H₀ HK (u j) (Y j),</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     ∃ Q:∀ i,MarkedEndpointPairing (A₀ i) (A₁ i) (X₀ i) (X₁ i) (Y₀ i) (Y₁ i) H₀ HK π b,</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     let G:J⊕I→SimpleGraph (V⊕U):=Sum.elim (fun j=&gt;(P j).graph) (fun i=&gt;(Q i).graph);</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (∀ i j,i≠j→Disjoint (G i) (G j)) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       ∀ z,((⨆ i,G i).degree z:ℝ)≤4*(p*Fintype.card (V⊕U)) := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   obtain ⟨N,hN⟩:=bounded_degree_selection_indexed p hp</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨N,?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   intro V U E K J I _ _ _ _ _ _ _ _ hn tail head ktail khead m b π H₀ HK u Y</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     A₀ A₁ X₀ X₁ Y₀ Y₁ hsep hY hbalA hbalX hmarked degree tau lam loss htau hlam</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     hdegree hmargin hgap hloss B₁ B₂ B₃ B₄ B₅ hbudget hfactor S hinter hmem</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   let family:J⊕I→Set (SimpleGraph (V⊕U)):=Sum.elim</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (fun j G=&gt;∃ P:MarkedHubFactorOn tail head ktail khead m π b H₀ HK (u j) (Y j),P.graph=G)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (fun i G=&gt;∃ Q:MarkedEndpointPairing (A₀ i) (A₁ i) (X₀ i) (X₁ i) (Y₀ i) (Y₁ i) H₀ HK π b,Q.graph=G)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hchoice (i:J⊕I) (F:SimpleGraph (V⊕U)) (_hF:F≤spanningRestriction ⊤ (S i))</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (hdeg:∀ z,(F.degree z:ℝ)≤(4:ℕ)*(p*Real.sqrt p*Fintype.card (V⊕U))+</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         (4:ℕ)*(Nat.ceil (4*(p*Real.sqrt p*Fintype.card (V⊕U))):ℝ)):</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       ∃ G:SimpleGraph (V⊕U),G∈family i ∧ G≤spanningRestriction ⊤ (S i) ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (∀ z,G.degree z≤4) ∧ Disjoint G F := by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hFdeg (z:V⊕U):(F.degree z:ℝ)≤loss:=(hdeg z).trans (by simpa using hbudget)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     cases i with</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     | inl j=&gt;</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       obtain ⟨P,hP⟩:=hfactor j (F.comap (Sum.inl:V→V⊕U)) (fun v=&gt;</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         (Nat.cast_le.mpr (graph_comap_degree_le F ⟨Sum.inl,Sum.inl_injective⟩ v)).trans (hFdeg (Sum.inl v)))</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       exact ⟨P.graph,⟨P,rfl⟩,P.graph_restriction,fun z=&gt;(P.graph_degree (hsep j) z).trans (by decide),P.graph_disjoint F hP⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     | inr i=&gt;</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       obtain ⟨Q,hQ⟩:=marked_endpoint_pairing_after_physical_deletion (A₀ i) (A₁ i) (X₀ i) (X₁ i)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         (Y₀ i) (Y₁ i) (hY i) H₀ HK π b (hbalA i) (hbalX i) (hmarked i)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         degree tau lam loss htau hlam hdegree hmargin (hgap i) hloss</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         (B₁ i) (B₂ i) (B₃ i) (B₄ i) (B₅ i) F hFdeg</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       refine ⟨Q.graph,⟨Q,rfl⟩,?_,Q.graph_degree,hQ⟩</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       intro z w hzw</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       exact (spanningRestriction_adj _ _ _ _).mpr ⟨Q.graph.ne_of_adj hzw,Q.graph_support z w hzw⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   obtain ⟨G,hG,hdis,hdeg⟩:=hN (V⊕U) (J⊕I) hn 4 ⊤ S family hinter hmem hchoice</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have hP (j:J):∃ P:MarkedHubFactorOn tail head ktail khead m π b H₀ HK (u j) (Y j),P.graph=G (Sum.inl j):=(hG (Sum.inl j)).1</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hQ (i:I):∃ Q:MarkedEndpointPairing (A₀ i) (A₁ i) (X₀ i) (X₁ i) (Y₀ i) (Y₁ i) H₀ HK π b,Q.graph=G (Sum.inr i):=(hG (Sum.inr i)).1</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   choose P hP using hP</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   choose Q hQ using hQ</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have heq (i:J⊕I):Sum.elim (fun j=&gt;(P j).graph) (fun i=&gt;(Q i).graph) i=G i:=by</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     cases i with</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     | inl j=&gt;exact hP j</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     | inr i=&gt;exact hQ i</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   refine ⟨P,Q,?_,?_⟩</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   · intro i j hij;rw [heq,heq];exact hdis i j hij</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   · intro z</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     have he:(⨆ i,Sum.elim (fun j=&gt;(P j).graph) (fun i=&gt;(Q i).graph) i)=⨆ i,G i:=iSup_congr heq</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     rw [he];simpa using hdeg z</span>
+<span id="L90"><a href="#L90" class="ln">  90</a> </span>
+<span id="L91"><a href="#L91" class="ln">  91</a> end Oberwolfach</span></pre></html>

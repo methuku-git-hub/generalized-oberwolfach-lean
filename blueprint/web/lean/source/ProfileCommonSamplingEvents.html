@@ -1,0 +1,80 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ProfileCommonSamplingEvents.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ProfileCommonSamplingEvents.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ProfileEligibleRoots</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! One outcome satisfying all vertex tests, all eligible profile-root</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> tests, and a further event. The candidate labels are fixed before the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> sample; the bound uses their number present in one outcome. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency true</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 3000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {I : Type*} [Fintype I] [DecidableEq I]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {V : I → Type*} [∀ i,Fintype (V i)] [∀ i,DecidableEq (V i)]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem finiteLaw_vertices_bad_probability {Ω W : Type*} [Fintype Ω] [Fintype W] [DecidableEq W]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (μ : FiniteLaw Ω) (Y : Ω → Finset W) (M : ℕ) (hM : ∀ ω,(Y ω).card ≤ M)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (Bad : W → Ω → Prop) (ε : ℝ) (hε : 0 ≤ ε)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (h : ∀ v,μ.probability (fun ω =&gt; v∈Y ω ∧ Bad v ω) ≤</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ε*μ.probability (fun ω =&gt; v∈Y ω)) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     μ.probability (fun ω =&gt; ∃ v∈Y ω,Bad v ω) ≤ ε*M := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hcard (ω) : ((Finset.univ.filter (fun v : W =&gt; v∈Y ω)).card:ℝ) ≤ M := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     have he : Finset.univ.filter (fun v : W =&gt; v∈Y ω)=Y ω := by ext v;simp</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     rw [he]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     exact_mod_cast hM ω</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hh := finiteLaw_eligible_bad_probability μ Finset.univ (fun v ω =&gt; v∈Y ω) Bad M ε hε</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (fun ω =&gt; by convert hcard ω using 1 &lt;;&gt; congr!) (fun v _ =&gt; h v)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   simpa only [Finset.mem_univ,exists_const,true_and] using hh</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem profile_roots_bad_probability {Ω : Type*} [Fintype Ω]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (μ : FiniteLaw Ω) (a : I → ℕ) (c : ℕ) (ha : ∑ i,a i=c)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (Y : Ω → Finset (Σ i,V i)) (M : ℕ) (hM : ∀ ω,(Y ω).card ≤ M)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (Bad : (∀ i,FixedSubset (V i) (a i)) → Ω → Prop) (ε : ℝ) (hε : 0 ≤ ε)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (h : ∀ ρ,μ.probability (fun ω =&gt; profileRootSet ρ⊆Y ω ∧ Bad ρ ω) ≤</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       ε*μ.probability (fun ω =&gt; profileRootSet ρ⊆Y ω)) :</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     μ.probability (fun ω =&gt; ∃ ρ,profileRootSet ρ⊆Y ω ∧ Bad ρ ω) ≤ ε*(M:ℝ)^c := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hg := profile_roots_common_event μ a c ha Y M hM Bad ε hε h</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hc := finiteLaw_probability_compl μ (fun ω =&gt; ∃ ρ,profileRootSet ρ⊆Y ω ∧ Bad ρ ω)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   simp only [not_exists,not_and] at hc</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   linarith</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> theorem profile_all_sampling_tests_exists {Ω : Type*} [Fintype Ω]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (μ : FiniteLaw Ω) (a : I → ℕ) (c : ℕ) (ha : ∑ i,a i=c)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (Y : Ω → Finset (Σ i,V i)) (M : ℕ) (hM : ∀ ω,(Y ω).card ≤ M)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (BadV : (Σ i,V i) → Ω → Prop)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (BadR : (∀ i,FixedSubset (V i) (a i)) → Ω → Prop) (BadOther : Ω → Prop)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (εv εr δ : ℝ) (hεv : 0 ≤ εv) (hεr : 0 ≤ εr)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hV : ∀ v,μ.probability (fun ω =&gt; v∈Y ω ∧ BadV v ω) ≤</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       εv*μ.probability (fun ω =&gt; v∈Y ω))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hR : ∀ ρ,μ.probability (fun ω =&gt; profileRootSet ρ⊆Y ω ∧ BadR ρ ω) ≤</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       εr*μ.probability (fun ω =&gt; profileRootSet ρ⊆Y ω))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hOther : μ.probability BadOther ≤ δ)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hsmall : εv*M+εr*(M:ℝ)^c+δ &lt; 1) :</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     ∃ ω,0 &lt; μ.mass ω ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (∀ v∈Y ω,¬BadV v ω) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (∀ ρ,profileRootSet ρ⊆Y ω → ¬BadR ρ ω) ∧ ¬BadOther ω := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   let A := fun j : Fin 3 =&gt; if j=0 then (fun ω =&gt; ∃ v∈Y ω,BadV v ω)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     else if j=1 then (fun ω =&gt; ∃ ρ,profileRootSet ρ⊆Y ω ∧ BadR ρ ω) else BadOther</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   let p := fun j : Fin 3 =&gt; if j=0 then εv*M else if j=1 then εr*(M:ℝ)^c else δ</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have htests : ∀ j∈Finset.univ,μ.probability (A j) ≤ p j := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     intro j _</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     fin_cases j &lt;;&gt; norm_num [A,p]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     · simpa only [Sigma.exists] using finiteLaw_vertices_bad_probability μ Y M hM BadV εv hεv hV</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     · exact profile_roots_bad_probability μ a c ha Y M hM BadR εr hεr hR</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     · exact hOther</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hp : ∑ j∈(Finset.univ : Finset (Fin 3)),p j &lt; 1 := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     simpa [p,Fin.sum_univ_succ,add_assoc] using hsmall</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   obtain ⟨ω,hω,hgood⟩ := finiteLaw_common_event_exists μ Finset.univ A p htests hp</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hv := hgood 0 (Finset.mem_univ _)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hr := hgood 1 (Finset.mem_univ _)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have ho := hgood 2 (Finset.mem_univ _)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   simp only [A,ite_true,not_exists,not_and] at hv</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   simp only [A,show (1 : Fin 3)≠0 by decide,ite_false,ite_true,not_exists,not_and] at hr</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   simp only [A,show (2 : Fin 3)≠0 by decide,show (2 : Fin 3)≠1 by decide,ite_false] at ho</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   exact ⟨ω,hω,hv,hr,ho⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> </span>
+<span id="L77"><a href="#L77" class="ln">  77</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,80 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPaddingAssignments.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPaddingAssignments.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPaddingDegrees</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Padding every exceptional row eliminates exactly the obstruction in</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> the Hall assignment. The statement permits coincident marked heads on the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> image side, and does not assert injectivity of a row homomorphism. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 14000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V A S I:Type} [Fintype A] [Fintype S] [Fintype I] [DecidableEq V]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem padding_root_count_le (m:ℕ) (C:I→Fin (m+1)→V) (v:V):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     Fintype.card {i:I // C i 0=v}≤Fintype.card {z:I×Fin (m+1) // C z.1 z.2=v}:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   apply Fintype.card_le_of_injective (fun i=&gt;⟨(i.val,0),i.property⟩)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   intro i j h</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   apply Subtype.ext</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   exact congrArg (fun z=&gt;z.val.1) h</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem padding_no_exceptional_row (dst:A→V) (jr:A→Bool) (m:ℕ) (C:I→Fin (m+1)→V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hroots:∀ i,Fintype.card {e:A // dst e=C i 0}=1∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (Finset.univ.filter (fun e:{e:A // dst e=C i 0}=&gt;jr e.val=true)).card=1)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hcover:∀ v,Fintype.card {e:A // dst e=v}=1→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (Finset.univ.filter (fun e:{e:A // dst e=v}=&gt;jr e.val=true)).card=1→∃ i,C i 0=v):</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ v,¬(Fintype.card {e // paddingRimHead dst C e=v}=1∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (Finset.univ.filter (fun e:{e // paddingRimHead dst C e=v}=&gt;paddingRimType jr m e.val=true)).card=1):=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   intro v ⟨hd,hk⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   rw [finite_card_sum_predicate (fun e=&gt;paddingRimHead dst C e=v)] at hd</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   simp only [paddingRimHead,Sum.elim_inl,Sum.elim_inr,padding_cycle_incoming_count] at hd</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   rw [finite_card_marked_fiber,</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     finite_card_sum_predicate (fun e=&gt;paddingRimHead dst C e=v∧paddingRimType jr m e=true)] at hk</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   simp only [paddingRimHead,paddingRimType,Sum.elim_inl,Sum.elim_inr,padding_cycle_marked_incoming_count] at hk</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hle:=padding_root_count_le m C v</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   by_cases hz:Fintype.card {i:I // C i 0=v}=0</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · have hd&#x27;:Fintype.card {e:A // dst e=v}=1:=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       have hkm:Fintype.card {e:A // dst e=v∧jr e=true}≤Fintype.card {e:A // dst e=v}:=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         apply Fintype.card_le_of_injective (fun e=&gt;⟨e.val,e.property.1⟩)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         intro e f h</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         exact Subtype.ext (congrArg (fun z:{e:A // dst e=v}=&gt;z.val) h)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       omega</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hk&#x27;:(Finset.univ.filter (fun e:{e:A // dst e=v}=&gt;jr e.val=true)).card=1:=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       rw [finite_card_marked_fiber]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       omega</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     obtain ⟨i,hi⟩:=hcover v hd&#x27; hk&#x27;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hp:0&lt;Fintype.card {i:I // C i 0=v}:=Fintype.card_pos_iff.mpr ⟨⟨i,hi⟩⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     omega</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   · have hp:0&lt;Fintype.card {i:I // C i 0=v}:=Nat.pos_of_ne_zero hz</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     obtain ⟨⟨i,hi⟩⟩:=Fintype.card_pos_iff.mp hp</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have hb:Fintype.card {e:A // dst e=v}=1:=by simpa only [hi] using (hroots i).1</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     omega</span>
+<span id="L52"><a href="#L52" class="ln">  52</a> </span>
+<span id="L53"><a href="#L53" class="ln">  53</a> theorem padding_constructed_row_assignments (src dst:A→V) (row:S→V) (jr:A→Bool) (js:S→Bool)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (m:ℕ) (C:I→Fin (m+1)→V)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hbal:∀ v,Fintype.card {e:A // dst e=v}=Fintype.card {e:A // src e=v}∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       Fintype.card {e:A // dst e=v}=Fintype.card {s:S // row s=v})</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (hmark:∀ v,(Finset.univ.filter (fun e:{e:A // dst e=v}=&gt;jr e.val=true)).card=</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (Finset.univ.filter (fun s:{s:S // row s=v}=&gt;js s.val=true)).card)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (hroots:∀ i,Fintype.card {e:A // dst e=C i 0}=1∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       (Finset.univ.filter (fun e:{e:A // dst e=C i 0}=&gt;jr e.val=true)).card=1)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (hcover:∀ v,Fintype.card {e:A // dst e=v}=1→</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (Finset.univ.filter (fun e:{e:A // dst e=v}=&gt;jr e.val=true)).card=1→∃ i,C i 0=v):</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     let s:=paddingRimTail src C</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     let t:=paddingRimHead dst C</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     let r:=paddingSpokeRow row C</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     ∃ τ:∀ v,Equiv.Perm (DirectedIncidence s t v),</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     ∃ a:∀ v,{e // t e=v}≃{e // r e=v},∃ d:∀ v,{e // s e=v}≃{e // r e=v},</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (∀ v i,τ v i≠i)∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (∀ v,∀ e:{e // t e=v},paddingSpokeType js m (a v e).val=</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         markedIncidenceSpokeType (paddingRimType jr m) (τ v (Sum.inl e)))∧</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       ∀ v,∀ e:{e // s e=v},markedIncidenceSpokeType (paddingRimType jr m) (τ v (Sum.inr e))=false:=by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   dsimp only</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   obtain ⟨hb,hm⟩:=padding_row_balance src dst row jr js m C hbal hmark</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   exact marked_row_assignment_types _ _ _ _ _ hb hm</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (padding_no_exceptional_row dst jr m C hroots hcover)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> </span>
+<span id="L77"><a href="#L77" class="ln">  77</a> end Oberwolfach</span></pre></html>

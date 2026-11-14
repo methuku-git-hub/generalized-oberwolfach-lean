@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedWheelCorrection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedWheelCorrection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSpokeCorrection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Assembly of the marked rim and spoke corrections. The zero residual</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> row sums are derived from the exact rim equations and graph degrees. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 2400000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def markedWheelCorrectionConstant (m : ℕ) (β L C : ℝ) : ℝ :=</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   C+markedSpokeCorrectionConstant m β L*(1+(m+1)*C)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_wheel_correction {V U E K : Type*} [Fintype V] [Fintype U] [Fintype E] [Fintype K]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     [DecidableEq V] [DecidableEq U]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     {tail head : E → V} {ktail khead : K → V} {m : ℕ} {π : Equiv.Perm V} {b : ℕ}</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     {H₀ Hₖ : V → U → Prop}</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (β η L δ D C : ℝ) (hβ : 0&lt;β) (hη : 0≤η) (hC : 0≤C)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hn : 0&lt;Fintype.card V) (hu : 0&lt;Fintype.card U)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (p q : Bool → U → ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hdata : ∀ j,SparseIntersectionData (if j then Hₖ else H₀) (p j) (q j) L δ D)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hsmall : δ+D/(Fintype.card V:ℝ)+1/(Fintype.card U:ℝ)≤1/(200*L^6))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (i : Bool → Fin (m+1)) (hipos : ∀ j,markedPositionType (i j)=j)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hcommon : ∀ u u&#x27; : U,u≠u&#x27; → β*(Fintype.card V:ℝ)^(m+1)≤</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (Fintype.card (CommonMarkedCycle tail head ktail khead m π b H₀ Hₖ u u&#x27;):ℝ))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hpaths : ∀ j,∀ Q : BipartiteFourCycle (if j then Hₖ else H₀),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       β*(Fintype.card V:ℝ)^m≤</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (Fintype.card (MarkedReplacementPair tail head ktail khead m π b H₀ Hₖ (i j)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         Q.val.1.1 Q.val.1.2 Q.val.2.1 Q.val.2.2):ℝ))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hinj : Function.Injective (fun e =&gt; (tail e,head e)))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hkinj : Function.Injective (fun e =&gt; (ktail e,khead e)))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hK : ∀ v,occurrenceDegree khead v=∑ u,if Hₖ v u then (1:ℝ) else 0)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hout : ∀ v,occurrenceDegree (Sum.elim tail ktail) v=</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∑ u,if H₀ v u then (1:ℝ) else 0)+(∑ u,if Hₖ v u then (1:ℝ) else 0))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hhub : ∀ u,(∑ v,if H₀ v u then (1:ℝ) else 0)=(m:ℝ)*(∑ v,if Hₖ v u then (1:ℝ) else 0))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (ψ R : MarkedWheel tail head ktail khead m π b H₀ Hₖ → ℝ)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hR : ∀ e,markedWheelRimLoad R e=1-markedWheelRimLoad ψ e)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hRb : ∀ W,|R W|≤C*η/(Fintype.card V:ℝ)^m)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hRsp : ∀ j v u,|markedWheelSpokeLoad R j v u|≤(m+1)*C*η)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (herr : ∀ j v u,|markedSpokeResidual ψ j v u|≤η) :</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∃ w : MarkedWheel tail head ktail khead m π b H₀ Hₖ → ℝ,</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∀ e,markedWheelRimLoad w e=1) ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (∀ j v u,markedWheelSpokeLoad w j v u=if (if j then Hₖ v u else H₀ v u) then 1 else 0) ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (∀ W,|w W-ψ W|≤markedWheelCorrectionConstant m β L C*η/(Fintype.card V:ℝ)^m) := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let ψ₁ := ψ+R</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hR1 (e : E⊕K) : markedWheelRimLoad ψ₁ e=1 := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     change markedWheelRimLoad (ψ+R) e=1</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     rw [markedWheelRimLoad_add,hR]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     ring</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hrow : ∀ j v,(∑ u,markedSpokeResidual ψ₁ j v u)=0 :=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     markedSpokeResidual_zero_rows hinj hkinj hK hout ψ₁ hR1</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hcol : ∀ u,(∑ v,markedSpokeResidual ψ₁ false v u)=(m:ℝ)*(∑ v,markedSpokeResidual ψ₁ true v u) :=</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     markedSpokeResidual_column_ratio hhub ψ₁</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   let η₁ := (1+(m+1)*C)*η</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hη₁ : 0≤η₁ := by dsimp [η₁];positivity</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have herr₁ (j : Bool) (v : V) (u : U) : |markedSpokeResidual ψ₁ j v u|≤η₁ := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have he : markedSpokeResidual ψ₁ j v u=markedSpokeResidual ψ j v u-markedWheelSpokeLoad R j v u := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       unfold markedSpokeResidual</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       change (if (if j then Hₖ v u else H₀ v u) then 1 else 0)-markedWheelSpokeLoad (ψ+R) j v u=_</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       rw [markedWheelSpokeLoad_add]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       ring</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     rw [he]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have hh := abs_sub_le (markedSpokeResidual ψ j v u) 0 (markedWheelSpokeLoad R j v u)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     simp only [sub_zero,zero_sub,abs_neg] at hh</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     calc</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       _ ≤ η+(m+1)*C*η := hh.trans (add_le_add (herr j v u) (hRsp j v u))</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       _ = _ := by dsimp only [η₁];ring</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   obtain ⟨S,hSrim,hSspoke,hSb⟩ := marked_spoke_correction β η₁ L δ D hβ hη₁ hn hu p q hdata hsmall</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     i hipos hcommon hpaths ψ₁ hrow hcol herr₁</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   refine ⟨ψ₁+S,?_,?_,?_⟩</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   · intro e</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     rw [markedWheelRimLoad_add,hR1,hSrim,add_zero]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · intro j v u</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     rw [markedWheelSpokeLoad_add,hSspoke,markedSpokeResidual]</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     ring</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   · intro W</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     have he : (ψ₁+S) W-ψ W=R W+S W := by dsimp only [ψ₁,Pi.add_apply];ring</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     rw [he]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     calc</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       _ ≤ |R W|+|S W| := abs_add_le _ _</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       _ ≤ C*η/(Fintype.card V:ℝ)^m+markedSpokeCorrectionConstant m β L*η₁/(Fintype.card V:ℝ)^m :=</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>         add_le_add (hRb W) (hSb W)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       _ = _ := by dsimp only [markedWheelCorrectionConstant,η₁];ring</span>
+<span id="L86"><a href="#L86" class="ln">  86</a> </span>
+<span id="L87"><a href="#L87" class="ln">  87</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSampleBalanceErrorBudgets.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSampleBalanceErrorBudgets.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Tactic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The sampled balance error is measured on its fixed domain, and also</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> fits the original ambient-order budget. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_sample_balance_error_budgets</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (c:ℕ) (epsBal ζBal etaBal x n M:ℝ)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (heps:0≤epsBal) (hζ:0≤ζBal) (hM:0≤M) (hMn:M≤n)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hlocal:epsBal+(c+2:ℕ)*ζBal≤etaBal/2)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hambient:epsBal+(c+2:ℕ)*ζBal≤x/4):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     let err:=(epsBal+(c+2:ℕ)*ζBal)*M;</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     0≤err ∧ err≤(etaBal/2)*M ∧ err≤(x/4)*n := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   intro err</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hcoef:0≤epsBal+(c+2:ℕ)*ζBal:=by positivity</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hx:0≤x/4:=hcoef.trans hambient</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   refine ⟨mul_nonneg hcoef hM,mul_le_mul_of_nonneg_right hlocal hM,?_⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   exact (mul_le_mul_of_nonneg_right hambient hM).trans (mul_le_mul_of_nonneg_left hMn hx)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,87 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPathChoiceEdges.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPathChoiceEdges.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPathChoices</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Graph assertions obtained from the endpoint-first greedy choices.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> These assertions keep the two distinct root variables and their actual</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> successor heads visible. No root spoke is required. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1800000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V : Type*} [DecidableEq V]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem markedPathChoice_opening</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (P : SimpleGraph V) (π : Equiv.Perm V) (b r : ℕ) (j : Bool)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (T₀ TK : Finset V) (v v&#x27; : V) (f : Fin (r+4)→V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hf : MixedGreedyGood P π b (markedPathChoiceClass j T₀ TK) (markedPathChoiceHead π j)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (markedPathChoiceRequests π j (r+4) v v&#x27;) {v,v&#x27;} f) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     P.Adj v (f 0) ∧ P.Adj v&#x27; (f 0) := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have h := hf.2.2.2 0</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   simpa [markedPathChoiceRequests,markedPathChoiceHead] using h</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem markedPathChoice_closing</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (P : SimpleGraph V) (π : Equiv.Perm V) (b r : ℕ) (j : Bool)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (T₀ TK : Finset V) (v v&#x27; : V) (f : Fin (r+4)→V)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hf : MixedGreedyGood P π b (markedPathChoiceClass j T₀ TK) (markedPathChoiceHead π j)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (markedPathChoiceRequests π j (r+4) v v&#x27;) {v,v&#x27;} f) :</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     P.Adj (f 1) (if j then π v else v) ∧ P.Adj (f 1) (if j then π v&#x27; else v&#x27;) := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have h := hf.2.2.2 (1:Fin (r+4))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hv : (1:Fin (r+4)).val=1 := by simp [Nat.mod_eq_of_lt (show 1&lt;r+4 by omega)]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   simp only [hv] at h</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have h&#x27; : P.Adj (if j then π v else v) (f 1) ∧ P.Adj (if j then π v&#x27; else v&#x27;) (f 1) := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     simpa [markedPathChoiceRequests,markedPathChoiceHead] using h</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   exact ⟨h&#x27;.1.symm,h&#x27;.2.symm⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a> theorem markedPathChoice_first_internal</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (P : SimpleGraph V) (π : Equiv.Perm V) (b r : ℕ) (j : Bool)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (T₀ TK : Finset V) (v v&#x27; : V) (f : Fin (r+4)→V)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hf : MixedGreedyGood P π b (markedPathChoiceClass j T₀ TK) (markedPathChoiceHead π j)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (markedPathChoiceRequests π j (r+4) v v&#x27;) {v,v&#x27;} f) : P.Adj (f 0) (f 2) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have h := hf.2.2.2 (2:Fin (r+4))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hv : (2:Fin (r+4)).val=2 := by simp [Nat.mod_eq_of_lt (show 2&lt;r+4 by omega)]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   simp only [hv] at h</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hp : greedyPrefix f (2:Fin (r+4)) ⟨0,by change 0&lt;(2:Fin (r+4)).val;rw [hv];omega⟩=f 0 := by unfold greedyPrefix;congr 1</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   simpa [markedPathChoiceRequests,markedPathChoiceHead,hp,Nat.mod_eq_of_lt (show 2&lt;r+4 by omega),greedyPrefix] using h</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> theorem markedPathChoice_internal</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (P : SimpleGraph V) (π : Equiv.Perm V) (b r : ℕ) (j : Bool)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (T₀ TK : Finset V) (v v&#x27; : V) (f : Fin (r+4)→V)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hf : MixedGreedyGood P π b (markedPathChoiceClass j T₀ TK) (markedPathChoiceHead π j)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (markedPathChoiceRequests π j (r+4) v v&#x27;) {v,v&#x27;} f)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (n : ℕ) (hn : 3≤n) (hnr : n&lt;r+4) :</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     P.Adj (f ⟨n-1,by omega⟩) (markedPathChoiceHead π j n (f ⟨n,hnr⟩)) := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have h := hf.2.2.2 ⟨n,hnr⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   apply h</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   change f ⟨n-1,by omega⟩∈markedPathChoiceRequests π j (r+4) v v&#x27; n (greedyPrefix f ⟨n,hnr⟩)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   unfold markedPathChoiceRequests</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   rw [if_neg (by omega),if_neg (by omega),dif_neg (by omega),dif_pos (by omega)]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   exact Finset.mem_union_left _ (Finset.mem_singleton_self _)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> theorem markedPathChoice_last_internal</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (P : SimpleGraph V) (π : Equiv.Perm V) (b r : ℕ) (hr : 1≤r) (j : Bool)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (T₀ TK : Finset V) (v v&#x27; : V) (f : Fin (r+4)→V)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (hf : MixedGreedyGood P π b (markedPathChoiceClass j T₀ TK) (markedPathChoiceHead π j)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (markedPathChoiceRequests π j (r+4) v v&#x27;) {v,v&#x27;} f) :</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     P.Adj (f (Fin.last (r+3))) (f 1) := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have h := hf.2.2.2 (Fin.last (r+3))</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hp : greedyPrefix f (Fin.last (r+3)) ⟨1,by change 1&lt;r+3;omega⟩=f 1 := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     unfold greedyPrefix</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     congr 1</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hm : f 1∈markedPathChoiceRequests π j (r+4) v v&#x27; (r+3) (greedyPrefix f (Fin.last (r+3))) := by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     unfold markedPathChoiceRequests</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     rw [if_neg (by omega),if_neg (by omega),dif_neg (by omega),dif_pos (by omega),if_pos (by omega)]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     rw [hp]</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     exact Finset.mem_union_right _ (Finset.mem_singleton_self _)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have hh := h (f 1) hm</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have he : markedPathChoiceHead π j (r+3)=Equiv.refl V := by</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     unfold markedPathChoiceHead</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     rw [if_neg (by rintro ⟨_,he⟩;omega)]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   rw [show (Fin.last (r+3)).val=r+3 from rfl,he] at hh</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   exact hh.symm</span>
+<span id="L83"><a href="#L83" class="ln">  83</a> </span>
+<span id="L84"><a href="#L84" class="ln">  84</a> end Oberwolfach</span></pre></html>

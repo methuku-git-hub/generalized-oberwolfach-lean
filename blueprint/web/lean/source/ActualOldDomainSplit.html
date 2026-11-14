@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualOldDomainSplit.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualOldDomainSplit.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ActualOldPieceDomain</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ActualOldPiecesAvoidFinal</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! After removing final-path interiors, the old source domain consists of</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> prescribed anchors and the actual selected runs and cycles. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 9000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem actual_old_domain_without_final_interiors</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {X K J:Type} [Fintype X] [DecidableEq X] [DecidableEq K] [DecidableEq J]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {G:SimpleGraph X} (data:ActualResidualData (K:=K) (J:=J) G) (hG:G.IsRegularOfDegree 2)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hCycle:data.t.biUnion (fun j=&gt;(data.C j).support.toFinset)⊆data.Cembed):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     data.oldDomain\data.additionalSelectedInteriors=data.prescribed ∪</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       Finset.univ.biUnion (fun z:actualOldPieceIndex data=&gt;(actualOldPieceWalk data z).support.toFinset):=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   classical</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let A:=Finset.univ.biUnion (fun z:actualOldPieceIndex data=&gt;(actualOldPieceWalk data z).support.toFinset)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let D:=data.additionalSelectedInteriors</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hcycle:data.Cembed=data.t.biUnion (fun j=&gt;(data.C j).support.toFinset):=Finset.Subset.antisymm data.hEmbed hCycle</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hA:A=(Finset.univ.biUnion (fun r:SelectedRunIndex data.s₂ data.d data.T=&gt;(data.path (.inr r)).support.toFinset)) ∪ data.Cembed:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     dsimp [A]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     rw [actual_old_piece_domain_eq data,hcycle]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hdomain:data.oldDomain=(data.prescribed ∪ A) ∪ D:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     rw [hA]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     simp only [ActualResidualData.oldDomain,D,Finset.union_assoc]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hDdeleted:D⊆data.deletedVertices:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     intro x hx</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     apply Finset.mem_union_right</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     obtain ⟨i,_,hi⟩:=Finset.mem_biUnion.mp hx</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     exact Finset.mem_biUnion.mpr ⟨.inl i,Finset.mem_univ _,hi⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hpres:Disjoint data.prescribed D:=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     intro x hx hy</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hr: x∈data.remaining:=(data.graph_facts hG).2.1 hx</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact (Finset.mem_sdiff.mp hr).2 (hDdeleted hy)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hAfinal:Disjoint A D:=actual_old_piece_paths_avoid_final_interiors data</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   rw [hdomain,Finset.union_sdiff_distrib,Finset.sdiff_self,Finset.union_empty,</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     Finset.union_sdiff_distrib,Finset.sdiff_eq_self_of_disjoint hpres,Finset.sdiff_eq_self_of_disjoint hAfinal]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

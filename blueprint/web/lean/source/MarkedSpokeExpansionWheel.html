@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSpokeExpansionWheel.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSpokeExpansionWheel.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedAttachedCycle</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedExclusionBudget</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Expand a formal spoke by constructing its private hub, crossed spoke</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> and marked wheel. The formal old spoke is not required to be present. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 20000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U E K:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b l:ℕ} {c ch:ℝ}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_single_spoke_fresh_hub</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (Q:MarkedHostExtensionCounts tail head ktail khead H₀ HK π b l c ch)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (j:Bool) (v:V) (B:Finset U) (hB:(B.card:ℝ)&lt;ch):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ u∉B,if j then HK v u else H₀ v u:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hsep:∀ x∈({v}:Finset V),∀ y∈({v}:Finset V),x≠y→¬PermutationClose π b x y:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     intro x hx y hy hne</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     exact False.elim (hne ((Finset.mem_singleton.mp hx).trans (Finset.mem_singleton.mp hy).symm))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hc:ch≤((Finset.univ.filter (fun u=&gt;if j then HK v u else H₀ v u)).card:ℝ):=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     cases j</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     · simpa using Q.hubs {v} ∅ (by simp) (by simp) (by simpa using hsep)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     · simpa using Q.hubs ∅ {v} (by simp) (by simp) (by simpa using hsep)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hn:B.card&lt;(Finset.univ.filter (fun u=&gt;if j then HK v u else H₀ v u)).card:=by exact_mod_cast hB.trans_le hc</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨u,hu,huB⟩:=Finset.exists_mem_notMem_of_card_lt_card hn</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   exact ⟨u,huB,(Finset.mem_filter.mp hu).2⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem marked_spoke_expansion_wheel</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (Q:MarkedHostExtensionCounts tail head ktail khead H₀ HK π b l c ch)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hl:2≤l) (j:Bool) (W Z:Finset V) (B:Finset U) (x:V) (u:U) (hx:x∈Z)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hbudget:(W.card:ℝ)+(Z.card+l+16)*(2*b+1)&lt;c) (hB:(B.card:ℝ)&lt;ch):</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∃ C:MarkedWheel tail head ktail khead (l+4) π b H₀ HK,</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       C.2.val∉B∧(if j then HK x C.2.val else H₀ x C.2.val)∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (if j then HK (C.1.val (markedExpansionSpokePosition (l+4) (by omega) j)) u</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         else H₀ (C.1.val (markedExpansionSpokePosition (l+4) (by omega) j)) u)∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∀ i,C.1.val i∉W∧C.1.val i∉Z∧∀ z∈Z,¬PermutationClose π b (C.1.val i) z:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨u&#x27;,hu&#x27;,hxu&#x27;⟩:=marked_single_spoke_fresh_hub Q j x B hB</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hb0:(W.card:ℝ)+Z.card*(2*b+1)&lt;c:=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hh:=marked_exclusion_budget_mono W Z Z 0 (l+16) b c (by omega)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (by simpa only [Nat.cast_add,Nat.cast_ofNat,add_assoc] using hbudget)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     simpa using hh</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   obtain ⟨v,hv,hvW,hvZ,hvs⟩:=marked_candidate_avoiding (π:=π)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (Finset.univ.filter (fun v=&gt;markedArcPresent tail head ktail khead false x v∧markedSpokesTo H₀ HK j {u,u&#x27;} v))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     W Z (Q.outgoing false j x {u,u&#x27;} (by simpa using Finset.card_insert_le u {u&#x27;})) hb0</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hvsp:= (markedSpokesTo_pair H₀ HK j v u u&#x27;).mp (Finset.mem_filter.mp hv).2.2</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hi:=Finset.card_insert_le v Z</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hbc:(W.card:ℝ)+((insert v Z).card+l+12)*(2*b+1)&lt;c:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have hh:=marked_exclusion_budget_mono W Z (insert v Z) (l+12) (l+16) b c (by omega)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (by simpa only [Nat.cast_add,Nat.cast_ofNat,add_assoc] using hbudget)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     simpa only [Nat.cast_add,Nat.cast_ofNat,add_assoc] using hh</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   obtain ⟨D,hD,hav,hDu⟩:=marked_cycle_at_typed_position Q hl j {u&#x27;} (by simp) W (insert v Z) v</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (Finset.mem_insert_self _ _) ((markedSpokesTo_singleton H₀ HK j v u&#x27;).mpr hvsp.2) hbc</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   let C:MarkedWheel tail head ktail khead (l+4) π b H₀ HK:=⟨D,⟨u&#x27;,hDu u&#x27; (Finset.mem_singleton_self _)⟩⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   refine ⟨C,hu&#x27;,hxu&#x27;,?_,?_⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   · change if j then HK (D.val _) u else H₀ (D.val _) u</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     rw [hD];exact hvsp.1</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   · intro i</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     by_cases he:i=markedExpansionSpokePosition (l+4) (by omega) j</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     · subst i;change D.val _∉W∧D.val _∉Z∧_;rw [hD];exact ⟨hvW,hvZ,hvs⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     · exact ⟨(hav i he).1,fun hh=&gt;(hav i he).2.1 (Finset.mem_insert_of_mem hh),</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         fun z hz=&gt;(hav i he).2.2 z (Finset.mem_insert_of_mem hz)⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

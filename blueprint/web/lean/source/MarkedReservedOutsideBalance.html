@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReservedOutsideBalance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReservedOutsideBalance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedOutsideBalance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Actual local balances after reserving inner edges and removing a</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> physical wheel packing. The reserved graph is not assumed divisible. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 3000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U E K:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   [DecidableEq E] [DecidableEq K]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   {tail head:E→V} {ktail khead:K→V} {HK H₀:V→U→Prop} {m b:ℕ} {π:Equiv.Perm V}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_reserved_outside_balance</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (A KA:Finset (E⊕K)) (S KS:Finset (V×U)) (I:Finset V) (J:Finset U)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hA:∀ a∈KA,Sum.elim tail ktail a∈I∧Sum.elim head khead a∈I)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hS:∀ s∈KS,s.1∈I∧s.2∈J)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hdiv:MarkedRemainderDivisible tail head ktail khead HK A S m)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hH:∀ x u,¬(H₀ x u∧HK x u))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ HK))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hM:∀ W∈M,∀ Z∈M,W≠Z→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources Z))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hMA:M.biUnion markedWheelArcs⊆A\KA) (hMS:M.biUnion markedWheelSpokePairs⊆S\KS):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     MarkedOutsideBalance tail head ktail khead HK</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (A\(KA∪M.biUnion markedWheelArcs)) (S\(KS∪M.biUnion markedWheelSpokePairs)) m I J:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have h:=MarkedOutsideBalance.sdiff (A\KA) (M.biUnion markedWheelArcs)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (S\KS) (M.biUnion markedWheelSpokePairs) I J hMA hMS</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (MarkedOutsideBalance.remove_inner A KA S KS I J hA hS (hdiv.outside A S I J))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (marked_packing_finite_divisible hH M hM)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hAE:(A\KA)\M.biUnion markedWheelArcs=A\(KA∪M.biUnion markedWheelArcs):=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ext a;simp only [Finset.mem_sdiff,Finset.mem_union];tauto</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hSE:(S\KS)\M.biUnion markedWheelSpokePairs=S\(KS∪M.biUnion markedWheelSpokePairs):=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ext s;simp only [Finset.mem_sdiff,Finset.mem_union];tauto</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   rw [hAE,hSE] at h</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   exact h</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a> end Oberwolfach</span></pre></html>

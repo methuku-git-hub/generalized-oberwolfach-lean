@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedCapacityCycleWeights.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedCapacityCycleWeights.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedCapacityApproximation</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PositiveMarkedCycleWeights</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The marked-capacity theorem on canonical typed cycles. All ingredients,</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> including approximation on every nearby balanced target, are discharged</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> from the original graph hypotheses. Only the final size threshold depends</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> on the separation parameter. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> universe u v w</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> set_option maxHeartbeats 2400000 in</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_capacity_cycle_weights (α p₀ : ℝ) (hα : 0&lt;α) (hαmax : α≤1)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hp₀ : 0&lt;p₀) (hp₀max : p₀≤1/2) (t k : ℕ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (ht : 1+3*⌈Real.log (10*(100/p₀+1))/(-Real.log (1-α/200))⌉₊≤t)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hc : 12*t+4≤k+2) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ ε κ a A : ℝ,0&lt;ε ∧ 0&lt;κ ∧ 0&lt;a ∧ 0&lt;A ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ b : ℕ,∃ n₀ : ℕ,</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (V : Type u) (E : Type v) (K : Type w)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       [Fintype V] [Fintype E] [Fintype K] [DecidableEq V],</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀ (tail head : E → V) (ktail khead : K → V),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     Function.Injective (fun e =&gt; (tail e,head e)) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     Function.Injective (fun e =&gt; (ktail e,khead e)) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀ (p D : ℝ),p₀≤p → p≤1/2 → n₀≤Fintype.card V →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (Fintype.card V:ℝ)/2≤D → D≤2*Fintype.card V →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ x,|occurrenceDegree tail x-p*D|≤ε*Fintype.card V) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ x,|occurrenceDegree head x-p*D|≤ε*Fintype.card V) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∀ x,|occurrenceDegree ktail x-p*D/(k+1:ℝ)|≤ε*Fintype.card V) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (∀ x,|occurrenceDegree khead x-p*D/(k+1:ℝ)|≤ε*Fintype.card V) →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀ x y,x≠y → α*p^2*Fintype.card V≤</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       ((Finset.univ.filter (fun z =&gt; (∃ e,tail e=x ∧ head e=z) ∧ (∃ e,tail e=z ∧ head e=y))).card:ℝ)) →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∀ S T : Finset V,(1-2*min (α/16) (p/128))*Fintype.card V&lt;(S.card:ℝ)+T.card →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (α*p/16)*Fintype.card V*min (S.card:ℝ) T.card≤</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ((Finset.univ.filter (fun e =&gt; tail e∈S ∧ head e∈T)).card:ℝ)) →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     ∀ π : Equiv.Perm V,</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ e,¬PermutationClose π b (tail e) (head e)) →</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ e,¬PermutationClose π b (ktail e) (khead e)) →</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     ∀ w : E⊕K → ℝ,w∈markedBalanceSubspace tail head ktail khead (k+1) →</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ‖w-(fun _ =&gt; (1:ℝ))‖≤κ →</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∃ q : MarkedCycleTuple tail head ktail khead (k+1) π b → ℝ,</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (∀ C,0&lt;q C ∧ a/(Fintype.card V:ℝ)^k≤q C ∧ q C≤A/(Fintype.card V:ℝ)^k) ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (∑ C,q C • markedCycleIncidence tail head ktail khead (k+1) C.val)=w := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨ε,κ,B,hε,hκ,hκsmall,hB,happrox⟩ := marked_capacity_approximation α p₀ hα hαmax hp₀ hp₀max t k ht hc</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let a := κ/(4*(k+1:ℝ))</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have ha : 0&lt;a := by dsimp [a];positivity</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨ε,κ/4,a,a+B,hε,by positivity,ha,add_pos ha hB,?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   intro b</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   let C : ℝ := (k+1:ℝ)*((k+2:ℝ)^2*(2*b+1)*B)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   let N : ℕ := ⌈max (10/p₀) (4*C/κ)⌉₊+1</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   refine ⟨N,?_⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   intro V E K instV instE instK instDec tail head ktail khead hinj hkinj p D hp hpmax hN hDlo hDhi hdt hdh hdkt hdkh hcommon hcut π hsep hksep w hw hwclose</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hn : 0&lt;Fintype.card V := by dsimp only [N] at hN;omega</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hnr : (0:ℝ)&lt;Fintype.card V := Nat.cast_pos.mpr hn</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hNreal : (⌈max (10/p₀) (4*C/κ)⌉₊:ℝ)+1≤Fintype.card V := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact_mod_cast hN</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hceil := Nat.le_ceil (max (10/p₀) (4*C/κ))</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hsize : 10/p₀≤(Fintype.card V:ℝ) := by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hh := (le_max_left (10/p₀) (4*C/κ)).trans hceil</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     linarith</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have herr : C/(Fintype.card V:ℝ)&lt;κ/4 := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have hh := (le_max_right (10/p₀) (4*C/κ)).trans hceil</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hlt : 4*C/κ&lt;(Fintype.card V:ℝ) := by linarith</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     have hm := (div_lt_iff₀ hκ).mp hlt</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     apply (div_lt_iff₀ hnr).mpr</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     nlinarith</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   obtain ⟨q,hq,he⟩ := exact_positive_marked_cycle_weights tail head ktail khead hinj hkinj</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (k+1) (by omega) π b hn w κ (C/(Fintype.card V:ℝ)) B hκ herr hw hwclose</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       intro w&#x27; hw&#x27; hw&#x27;close</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       obtain ⟨q,hq,he⟩ := happrox V E K tail head ktail khead hinj hkinj p D hp hpmax hn hsize hDlo hDhi</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>         hdt hdh hdkt hdkh hcommon hcut π b hsep hksep w&#x27; hw&#x27; hw&#x27;close</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       refine ⟨q,?_,he⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       simpa only [Nat.add_sub_cancel] using hq)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   refine ⟨q,?_,he⟩</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   simpa only [a,Nat.cast_add,Nat.cast_one,Nat.add_sub_cancel] using hq</span>
+<span id="L80"><a href="#L80" class="ln">  80</a> </span>
+<span id="L81"><a href="#L81" class="ln">  81</a> end Oberwolfach</span></pre></html>

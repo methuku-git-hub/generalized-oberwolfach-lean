@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryFactorFrequencyPartition.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryFactorFrequencyPartition.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongPreparationFactorFractions</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Remove the reserved short-cycle fraction from the actual component</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> frequencies of a prescribed 2-factor. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem ordinary_factor_frequency_partition {n:ℕ} (hn:0&lt;n)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (F:SimpleGraph (Fin n)) (hF:F.IsRegularOfDegree 2)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (K:ℕ) (hK:0&lt;K) (i₀:Fin K) (s:ℝ) (hs:0≤s)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hreserve:s≤((Finset.univ.filter (fun v=&gt;longPreparationCycleClass F hF K v=some i₀)).card:ℝ)/n):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     let fraction:Option (Fin K)→ℝ:=fun j=&gt;</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ((Finset.univ.filter (fun v=&gt;longPreparationCycleClass F hF K v=j)).card:ℝ)/n</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     let f:Fin K→ℝ:=fun i=&gt;fraction (some i)-(if i=i₀ then s else 0);</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (∀ i,0≤f i) ∧ 0≤fraction none ∧ (∑ i,f i)+fraction none=1-s := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   intro fraction f</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hfr:=long_preparation_vertex_fractions (V:=Fin n) (by simpa using hn) K (longPreparationCycleClass F hF K)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hn0:(0:ℝ)≤n:=by positivity</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hf0:∀ i,0≤fraction (some i):=fun i=&gt;by dsimp [fraction];positivity</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hlong0:0≤fraction none:=by dsimp [fraction];positivity</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hsum:fraction none+(∑ i,fraction (some i))=1:=by simpa [fraction] using hfr.2</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hreserve&#x27;:s≤fraction (some i₀):=by simpa [fraction] using hreserve</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   refine ⟨?_,hlong0,?_⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · intro i</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     dsimp [f]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     by_cases hi:i=i₀</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     · subst i;simp [hreserve&#x27;]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     · simp [hi,hf0]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · dsimp [f]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     rw [Finset.sum_sub_distrib]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hind:(∑ i:Fin K,(if i=i₀ then s else 0))=s:=by simp</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     rw [hind]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     linarith</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> end Oberwolfach</span></pre></html>

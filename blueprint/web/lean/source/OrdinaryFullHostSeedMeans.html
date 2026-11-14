@@ -1,0 +1,118 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryFullHostSeedMeans.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryFullHostSeedMeans.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryRawMeanFactors</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinarySeedLift</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrdinaryAdmissibleCycleLoads</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Expected loads of the manuscript&#x27;s fixed full-host seed weighting,</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> including the exact normalization and explicit conflict-exclusion error. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 150000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U Γ Color : Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [DecidableEq V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> def ordinaryFullHostSeed (P F : SimpleGraph V) (r : ℕ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (weight : OrdinaryCycle P r → ℝ) (pR pH : ℝ) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     OrdinaryWheel P F (fun _ : V=&gt;fun _ : U=&gt;True) r → ℝ :=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   ordinaryCycleWheelWeight P F r weight ((Fintype.card U:ℝ)*pR^(r-1)*pH^r)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> variable (P F : SimpleGraph V) (r : ℕ) (hr : 1≤r)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (π : Equiv.Perm V) (d : ℕ) (hd : 2≤d)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hF : permutationConflictGraph π (3*d)≤F)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hnoshort : ∀ x k,0&lt;k → k&lt;2*d+1 → (π^k) x≠x)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (pR pH : ℝ) (hpR : 0&lt;pR) (hpR1 : pR≤1) (hpH : 0&lt;pH)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hm : 0&lt;Fintype.card U)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (q : U → Γ → ℝ) (hq : ∀ u g,0≤q u g) (hQ : ∀ u,∑ g,q u g≤1/8)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (s : U → Color → ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (j : Color) (hj : ∀ u,s u j=pH)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (weight : OrdinaryCycle P r → ℝ)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> local notation &quot;μwheel&quot; =&gt; rawWheelLaw (fun _ : Sym2 V=&gt;pR) (fun _=&gt;hpR.le) (fun _=&gt;hpR1) d hd q hq hQ s hs hS</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> local notation &quot;wseed&quot; =&gt; ordinaryFullHostSeed (U:=U) P F r weight pR pH</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L38"><a href="#L38" class="ln">  38</a> </span>
+<span id="L39"><a href="#L39" class="ln">  39</a> include hr hF hnoshort hpH hm hj</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem ordinaryFullHostSeed_rim_mean (x y : V) :</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (FiniteLaw.pi μwheel).expectation (fun σ=&gt;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       ordinaryPotentialLoad wseed (Sum.inl s(x,y)) (rawWheelGraph P σ) (rawWheelSpokes π d σ j))=</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       ∑ C,if C.val.val.Adj x y ∧ (∀ v∈C.val.val.support,∀ z∈C.val.val.support,¬F.Adj v z)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         then weight C else 0 := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hh := ordinaryRawPotentialLoad_rim_mean P F (fun _ : V=&gt;fun _ : U=&gt;True) r hr π d hd hF hnoshort</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     pR pH hpR hpR1 hpH q hq hQ s hs hS j hj wseed x y</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   erw [hh]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   unfold ordinaryFullHostSeed</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   rw [ordinaryCycleWheelWeight_rim_load]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hm0 : (Fintype.card U:ℝ)≠0 := by exact_mod_cast (Nat.ne_of_gt hm)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   field_simp [hm0,hpR.ne&#x27;,hpH.ne&#x27;] &lt;;&gt; ring</span>
+<span id="L53"><a href="#L53" class="ln">  53</a> </span>
+<span id="L54"><a href="#L54" class="ln">  54</a> theorem ordinaryFullHostSeed_spoke_mean (v : V) (u : U) :</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (FiniteLaw.pi μwheel).expectation (fun σ=&gt;</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       ordinaryPotentialLoad wseed (Sum.inr (v,u)) (rawWheelGraph P σ) (rawWheelSpokes π d σ j))=</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       pR/((Fintype.card U:ℝ)*pH) *</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         ∑ C,if v∈C.val.val.support ∧ (∀ x∈C.val.val.support,∀ y∈C.val.val.support,¬F.Adj x y)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>           then weight C else 0 := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hh := ordinaryRawPotentialLoad_spoke_mean P F (fun _ : V=&gt;fun _ : U=&gt;True) r hr π d hd hF hnoshort</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     pR pH hpR hpR1 hpH q hq hQ s hs hS j hj wseed v u</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   erw [hh]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   unfold ordinaryFullHostSeed</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   rw [ordinaryCycleWheelWeight_spoke_load]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hm0 : (Fintype.card U:ℝ)≠0 := by exact_mod_cast (Nat.ne_of_gt hm)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hrpow : r-1+1=r := Nat.sub_add_cancel hr</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hR : pR^r=pR*pR^(r-1) := by rw [← pow_succ&#x27;,Nat.sub_add_cancel hr]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hH : pH^r=pH*pH^(r-1) := by rw [← pow_succ&#x27;,Nat.sub_add_cancel hr]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   rw [hR,hH]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   field_simp [hm0,hpR.ne&#x27;,hpH.ne&#x27;] &lt;;&gt; ring</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> </span>
+<span id="L73"><a href="#L73" class="ln">  73</a> theorem ordinaryFullHostSeed_rim_mean_error (hr2 : 2≤r) (hn : 0&lt;Fintype.card V)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (hweight : ∀ C,0≤weight C) (B : ℝ) (hB : 0≤B)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (hb : ∀ C,weight C≤B/(Fintype.card V:ℝ)^(r-2))</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     (L : ℝ) (hdeg : ∀ v,(F.degree v:ℝ)≤L)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     (he : ∀ x y,(∑ C,if C.val.val.Adj x y then weight C else 0)=if P.Adj x y then 1 else 0)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (x y : V) (hxy : P.Adj x y) (hFxy : ¬F.Adj x y) :</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     |(FiniteLaw.pi μwheel).expectation (fun σ=&gt;</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       ordinaryPotentialLoad wseed (Sum.inl s(x,y)) (rawWheelGraph P σ) (rawWheelSpokes π d σ j))-1|≤</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       5*(r:ℝ)^4*B*L/Fintype.card V := by</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   rw [ordinaryFullHostSeed_rim_mean P F r hr π d hd hF hnoshort pR pH hpR hpR1 hpH hm</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     q hq hQ s hs hS j hj weight x y]</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   convert ordinary_admissible_cycle_edge_load P F r hr2 hn weight hweight B hB hb L hdeg he x y hxy hFxy using 1 &lt;;&gt; congr!</span>
+<span id="L85"><a href="#L85" class="ln">  85</a> </span>
+<span id="L86"><a href="#L86" class="ln">  86</a> theorem ordinaryFullHostSeed_spoke_mean_error (hr2 : 2≤r) (hn : 0&lt;Fintype.card V)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (hweight : ∀ C,0≤weight C) (B : ℝ) (hB : 0≤B)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     (hb : ∀ C,weight C≤B/(Fintype.card V:ℝ)^(r-2))</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     (L : ℝ) (hdeg : ∀ v,(F.degree v:ℝ)≤L)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     (he : ∀ x y,(∑ C,if C.val.val.Adj x y then weight C else 0)=if P.Adj x y then 1 else 0)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     (D₀ : ℝ) (hD₀ : 0&lt;D₀) (hbalance : pR*D₀=2*(Fintype.card U:ℝ)*pH)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     (v : V) (u : U) :</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     |(FiniteLaw.pi μwheel).expectation (fun σ=&gt;</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>       ordinaryPotentialLoad wseed (Sum.inr (v,u)) (rawWheelGraph P σ) (rawWheelSpokes π d σ j))-</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>         (P.degree v:ℝ)/D₀|≤6*(r:ℝ)^4*B*L/D₀ := by</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   rw [ordinaryFullHostSeed_spoke_mean P F r hr π d hd hF hnoshort pR pH hpR hpR1 hpH hm</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     q hq hQ s hs hS j hj weight v u]</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have hm0 : (0:ℝ)&lt;Fintype.card U := by exact_mod_cast hm</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hco : pR/((Fintype.card U:ℝ)*pH)=2/D₀ := by</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     apply (div_eq_div_iff (by positivity) hD₀.ne&#x27;).mpr</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     nlinarith only [hbalance]</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   rw [hco]</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   let S : ℝ := ∑ C,if v∈C.val.val.support ∧ (∀ x∈C.val.val.support,∀ y∈C.val.val.support,¬F.Adj x y)</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     then weight C else 0</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have hcycle : |S-(P.degree v:ℝ)/2|≤3*(r:ℝ)^4*B*L := by</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     convert ordinary_admissible_cycle_vertex_load P F r hr2 hn weight hweight B hB hb L hdeg he v using 1 &lt;;&gt; congr!</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>   change |2/D₀*S-(P.degree v:ℝ)/D₀|≤_</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>   calc</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     _ = (2/D₀)*|S-(P.degree v:ℝ)/2| := by</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       have halg : 2/D₀*S-(P.degree v:ℝ)/D₀=(2/D₀)*(S-(P.degree v:ℝ)/2) := by ring</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       rw [halg,abs_mul,abs_of_pos (div_pos (by norm_num) hD₀)]</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     _ ≤ (2/D₀)*(3*(r:ℝ)^4*B*L) := mul_le_mul_of_nonneg_left hcycle (by positivity)</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     _ = _ := by ring</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a> </span>
+<span id="L115"><a href="#L115" class="ln"> 115</a> end Oberwolfach</span></pre></html>

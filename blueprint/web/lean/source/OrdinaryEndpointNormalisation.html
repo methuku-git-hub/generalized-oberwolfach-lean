@@ -1,0 +1,88 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryEndpointNormalisation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryEndpointNormalisation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryEndpointRelativeCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Conversion of ordinary endpoint counts to their actual part sizes.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The original errors retain |A| and |B|; no random subdomain replaces either. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 4500000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a>  theorem endpoint_spoke_normalisation (m b c p p₀ ε e:ℝ)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hb:0≤b) (hp₀:0&lt;p₀) (hp:p₀≤p) (hp1:p≤1) (hε:0≤ε)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (he:0≤e) (hεsmall:ε≤p₀/2) (hεe:4*ε≤e*p₀)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hm:|m-p*b|≤ε*b) :</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     p₀*b/2≤m ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (|c-p^2*b|≤ε*b → (p-e)*m≤c) ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (c≤p^3*b+ε*b → c≤(p^2+e)*m) := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hp0:0≤p:=hp₀.le.trans hp</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hp2:0≤p^2:=sq_nonneg p</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hp21:p^2≤1:=by nlinarith only [hp0,hp1]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hmlo:= (abs_le.mp hm).1</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hmhi:= (abs_le.mp hm).2</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hpB:=mul_le_mul_of_nonneg_right hp hb</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have heB:=mul_le_mul_of_nonneg_right hεsmall hb</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hm&#x27;:p₀*b/2≤m:=by linarith only [hmlo,hpB,heB]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have heM:=mul_le_mul_of_nonneg_left hm&#x27; he</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hee:=mul_le_mul_of_nonneg_right hεe hb</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hbudget:2*ε*b≤e*m:=by nlinarith only [heM,hee]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   refine ⟨hm&#x27;,?_,?_⟩</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · intro hc</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hmul:=mul_le_mul_of_nonneg_left hmhi hp0</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hεp:=mul_le_mul_of_nonneg_right hp1 (mul_nonneg hε hb)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     nlinarith only [hmul,hεp,hbudget,(abs_le.mp hc).1]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · intro hc</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hmul:=mul_le_mul_of_nonneg_left hmlo hp2</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hεp:=mul_le_mul_of_nonneg_right hp21 (mul_nonneg hε hb)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     nlinarith only [hmul,hεp,hbudget,hc]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem endpoint_column_normalisation (m b c a q p ε:ℝ)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hp:0≤p) (hp1:p≤1) (hεa:0≤ε*a)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hsize:|2*m-q*b|≤ε*a) (hcount:|c-q*p*b|≤ε*a)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hbudget:2*ε*a≤p*m) : p*m≤c := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hh:=mul_le_mul_of_nonneg_left (abs_le.mp hsize).2 hp</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have he:=mul_le_mul_of_nonneg_right hp1 hεa</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   nlinarith only [hh,he,hbudget,(abs_le.mp hcount).1]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> variable {V U:Type*} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> </span>
+<span id="L50"><a href="#L50" class="ln">  50</a> theorem ordinary_endpoint_counts_normalised (P R F:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (A:Finset V) (B:Finset U) (x:V) (q p p₀ ε e:ℝ)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hRP:R≤P) (hFx:∀ v,R.Adj x v → ¬F.Adj x v)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hp₀:0&lt;p₀) (hp:p₀≤p) (hp1:p≤1) (hε:0≤ε) (he:0≤e)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hεsmall:ε≤p₀/2) (hεe:4*ε≤e*p₀)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hbal:(A∩R.neighborFinset x).card=2*(B.filter (H x)).card)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (hbudget:2*ε*A.card≤p*(B.filter (H x)).card)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (hrow:∀ S:Finset V,∀ J:Finset U,S.card≤1 → J.card≤1 →</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       |((common (common A S (fun v=&gt;R.neighborFinset v)) J</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         (fun u=&gt;Finset.univ.filter (fun v=&gt;H v u))).card:ℝ)-</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         q^S.card*p^J.card*(common A S (fun v=&gt;P.neighborFinset v)).card|≤ε*A.card)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (hindex:∀ S:Finset V,S.card≤3 → (∀ v∈S,∀ w∈S,¬F.Adj v w) →</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       |((common B S (fun v=&gt;Finset.univ.filter (H v))).card:ℝ)-p^S.card*B.card|≤ε*B.card) :</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     let S:=A∩R.neighborFinset x</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     let T:=B.filter (H x)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     p₀*B.card/2≤(T.card:ℝ) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (∀ v∈S,(p-e)*T.card≤((T.filter (H v)).card:ℝ)) ∧</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (∀ u∈B,p*T.card≤((S.filter (fun v=&gt;H v u)).card:ℝ)) ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (∀ v∈S,∀ w∈S,v≠w → ¬F.Adj v w →</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       ((T.filter (fun u=&gt;H v u∧H w u)).card:ℝ)≤(p^2+e)*T.card) := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   dsimp only</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨hS,hT,hrows,hcols,hcodeg⟩:=ordinary_endpoint_counts_from_common P R F H A B x q p ε hRP hFx hrow hindex</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hnorm (c:ℝ):=endpoint_spoke_normalisation (B.filter (H x)).card B.card c p p₀ ε e</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (Nat.cast_nonneg _) hp₀ hp hp1 hε he hεsmall hεe hT</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   refine ⟨(hnorm 0).1,?_,?_,?_⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · intro v hv</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     exact (hnorm _).2.1 (hrows v hv)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   · intro u hu</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hS&#x27;:|2*(B.filter (H x)).card-q*(A∩P.neighborFinset x).card|≤ε*A.card:=by</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       simpa only [hbal,Nat.cast_mul,Nat.cast_ofNat] using hS</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     exact endpoint_column_normalisation _ _ _ _ q p ε (hp₀.le.trans hp) hp1 (by positivity)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       hS&#x27; (hcols u hu) hbudget</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   · intro v hv w hw hvw hfw</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     exact (hnorm _).2.2 (hcodeg v hv w hw hvw hfw)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a> </span>
+<span id="L85"><a href="#L85" class="ln">  85</a> end Oberwolfach</span></pre></html>

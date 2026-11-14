@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RetainedActualResidualSpokes.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RetainedActualResidualSpokes.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ActualOutsidePathAvoidance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RetainedMarkedMatchingInputs</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedVariableResidualSpokeBalance</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The retained marked roots lie in the residual spokes using avoidance only</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> on the source vertices outside the final paths. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 20000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {X V U Γ Color Kbad Jbad:Type} [Fintype X] [DecidableEq X]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U] [Fintype Γ] [Fintype Color]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   [DecidableEq Kbad] [DecidableEq Jbad]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem retained_actual_residual_spoke_identities</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (π:Equiv.Perm V) (c d:ℕ) (hd:2≤d)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (sample:RawIntervalFamilyOutcome V U Γ Color) (colour:Γ) (t:ℕ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (J:StartRetentionOutcome (rawStartHubSet π d sample colour) t) (w:U)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (F:SimpleGraph X) (data:ActualResidualData (K:=Kbad) (J:=Jbad) F)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hCycle:data.t.biUnion (fun j=&gt;(data.C j).support.toFinset)⊆data.Cembed)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (ext:∀i:retainedMarkedIndex π d sample colour t J w,Fin (c*d+5)↪X)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (inner:∀i:retainedMarkedIndex π d sample colour t J w,Fin (c*d+1)↪X)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hinner:∀i p,inner i p=ext i ⟨p.val+2,by omega⟩)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hdis:∀i j,i≠j→Disjoint (Finset.univ.image (ext i)) (Finset.univ.image (ext j)))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (fC:{x // x∉bufferedPathStrictInterior (fun _=&gt;c*d) inner}↪V)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hcard:Fintype.card X=Fintype.card V)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hend:∀i,fC (bufferedEndpointInComplement (fun _=&gt;c*d) ext inner hinner hdis i)=(π^d) i.val)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (ψ:X→V) (Φ g:{x // x∈data.remaining}→V)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (Anchors:Finset {x // x∈data.remaining}) (Lists:Finset V)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hold:∀(x:{x // x∉bufferedPathStrictInterior (fun _=&gt;c*d) inner}),</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       x.val∈data.oldDomain→fC x=ψ x.val)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hnew:∀(x:{x // x∉bufferedPathStrictInterior (fun _=&gt;c*d) inner}) (hx:x.val∈data.remaining),</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       fC x=Φ ⟨x.val,hx⟩)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hAnchor:∀x∈Anchors,Φ x=g x) (hFree:∀x,x∉Anchors→Φ x∈Lists):</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let Y:=markedIntervalRootSet π (fun _ : retainedMarkedIndex π d sample colour t J w=&gt;d) Subtype.val</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let B:=Finset.univ.image (fun i:retainedMarkedIndex π d sample colour t J w=&gt;(π^d) i.val)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let Z:=outsideBufferedPathImage (fun _=&gt;c*d) inner fC</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let R:=Finset.univ\(Z∪B)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀x,x∈data.oldDomain→x∉bufferedPathFullDomain (fun _=&gt;c*d) inner→ψ x∉Y)→</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (∀x∈Anchors,x.val∉bufferedPathFullDomain (fun _=&gt;c*d) inner → g x∉Y)→</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     Disjoint Lists Y→</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     Y⊆R ∧ R.card=c*Y.card ∧ Disjoint (R\Y) (Y.image π):=by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro Y B Z R hOldAvoid hAnchorAvoid hListAvoid</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hgeom:=retained_marked_interval_geometry π d (by omega) hnoshort sample colour t J</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have havoid:Disjoint Z Y:=actual_outside_buffered_path_image_avoids_reserved F data hCycle</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (fun _=&gt;c*d) inner fC ψ Φ g Anchors Lists Y hold hnew hAnchor hFree hOldAvoid hAnchorAvoid hListAvoid</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨?_,?_,?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · exact marked_interval_roots_in_residual π (fun _ : retainedMarkedIndex π d sample colour t J w=&gt;d) Subtype.val</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (hgeom.1 w) (hgeom.2.1 w) Z R havoid.symm rfl</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   · exact marked_variable_residual_spoke_balance c (fun _ : retainedMarkedIndex π d sample colour t J w=&gt;d)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       ext inner hinner hdis fC hcard (fun i=&gt;(π^d) i.val) hend R rfl π Subtype.val (hgeom.1 w) (hgeom.2.1 w)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   · exact marked_residual_ordinary_avoids_successors π (fun _ : retainedMarkedIndex π d sample colour t J w=&gt;d)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       Subtype.val Z R rfl</span>
+<span id="L57"><a href="#L57" class="ln">  57</a> end Oberwolfach</span></pre></html>

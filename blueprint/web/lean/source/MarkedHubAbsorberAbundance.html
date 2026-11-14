@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHubAbsorberAbundance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHubAbsorberAbundance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedHubAbsorberCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Uniform order threshold for the one-hub paired-absorber construction.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The positive count coefficient and order threshold precede the host graph,</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> permutation, separation distance, hub, and root choices. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 4500000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem paired_absorber_order_threshold (m : ℕ) (β : ℝ) (hβ : 0&lt;β) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ N : ℕ,∀ n : ℕ,N≤n →</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       2*(m+1:ℝ)^2≤β*n ∧ 2*(m:ℝ)*(2*(m+1)+(m+1)*m)≤β*n := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   obtain ⟨N,hN⟩ := exists_nat_gt (max (2*(m+1:ℝ)^2/β)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (2*(m:ℝ)*(2*(m+1)+(m+1)*m)/β))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   refine ⟨N,?_⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   intro n hn</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hNn : (N:ℝ)≤n := by exact_mod_cast hn</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have h₁ := (le_max_left (2*(m+1:ℝ)^2/β) _).trans (hN.le.trans hNn)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have h₂ := (le_max_right _ (2*(m:ℝ)*(2*(m+1)+(m+1)*m)/β)).trans (hN.le.trans hNn)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   exact ⟨by nlinarith only [(div_le_iff₀ hβ).mp h₁],</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     by nlinarith only [(div_le_iff₀ hβ).mp h₂]⟩</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem marked_hub_paired_absorber_abundance (m : ℕ) (hm : 3&lt;m+1)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (β : ℝ) (hβ : 0&lt;β) :</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∃ a : ℝ,0&lt;a ∧ ∃ N : ℕ,</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       ∀ (V U E K : Type) [Fintype V] [DecidableEq V],N≤Fintype.card V →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ∀ (tail head : E → V) (ktail khead : K → V)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (π : Equiv.Perm V) (b : ℕ) (H₀ Hₖ : V → U → Prop) (w : U),</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       β*(Fintype.card V:ℝ)^(m+1)≤</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         Fintype.card (HubMarkedCycle tail head ktail khead m π b H₀ Hₖ w) →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ j : Bool,∀ v v&#x27; : V,v≠v&#x27; →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         (if j then Hₖ v w else H₀ v w) → (if j then Hₖ v&#x27; w else H₀ v&#x27; w) →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         β*(Fintype.card V:ℝ)^m≤</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>           Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m π b H₀ Hₖ j v v&#x27; w w)) →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∀ x : Fin (m+1) → V,Function.Injective x → MarkedHubCompatible H₀ Hₖ x w →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       a*(Fintype.card V:ℝ)^((m+1)*(m+1))≤</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         Fintype.card (LabelledCycleRecord</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>           (hubMarkedCycleVertices (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>             (m:=m) (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=Hₖ) w)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>           (pairedAbsorberTemplate (m+1)).val (Finset.univ.image x)) := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   obtain ⟨N,hN⟩ := paired_absorber_order_threshold m β hβ</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   refine ⟨(β/2)^(m+2),by positivity,N,?_⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro V U E K _ _ hn tail head ktail khead π b H₀ Hₖ w hbase hpath x hx hxhub</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   exact marked_hub_paired_absorber_count hm w x hx hxhub β hβ hbase hpath</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hN _ hn).1 (hN _ hn).2</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> </span>
+<span id="L50"><a href="#L50" class="ln">  50</a> end Oberwolfach</span></pre></html>

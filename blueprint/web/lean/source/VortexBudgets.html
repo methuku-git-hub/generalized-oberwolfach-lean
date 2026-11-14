@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>VortexBudgets.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>VortexBudgets.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Tactic</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! One parameter threshold supplies the degree and rounding margins at all later sizes. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open Filter</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped Topology</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem eventually_vortex_error_budget {β ε ρ : ℝ}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hb : 0 &lt; β) (he : 0 &lt; ε) (he1 : ε &lt; 1) (hp : 0 &lt; ρ) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ N : ℕ, 1 ≤ N ∧ ∀ m : ℕ, N ≤ m →</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       2 ≤ ε * m ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (m : ℝ) ^ (-1 / 3 : ℝ) / (1 - ε ^ (1 / 3 : ℝ)) ≤ β / 2 ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       3 / ρ ≤ β * ε * m / 4 := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hq : ε ^ (1 / 3 : ℝ) &lt; 1 := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have hh := Real.rpow_lt_rpow he.le he1 (by norm_num : (0 : ℝ) &lt; 1 / 3)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     simpa using hh</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hden : 0 &lt; 1 - ε ^ (1 / 3 : ℝ) := by linarith</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have ht := (tendsto_rpow_neg_atTop (y := (1 / 3 : ℝ)) (by norm_num)).comp</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     tendsto_natCast_atTop_atTop</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hevent : ∀ᶠ m : ℕ in atTop, (m : ℝ) ^ (-1 / 3 : ℝ) &lt;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       β / 2 * (1 - ε ^ (1 / 3 : ℝ)) := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     simpa only [neg_div, Function.comp_apply] using ht.eventually</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (eventually_lt_nhds (show 0 &lt; β / 2 * (1 - ε ^ (1 / 3 : ℝ)) by positivity))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   obtain ⟨N₁, h₁⟩ := eventually_atTop.mp hevent</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨max 1 (max N₁ (max (Nat.ceil (2 / ε)) (Nat.ceil (12 / (ρ * β * ε))))), le_max_left _ _, ?_⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro m hm</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hm1 := h₁ m (by omega)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hm2 : 2 ≤ ε * m := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hh : (Nat.ceil (2 / ε) : ℝ) ≤ m := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       exact_mod_cast (show Nat.ceil (2 / ε) ≤ m by omega)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hdiv := (div_le_iff₀ he).mp ((Nat.le_ceil (2 / ε)).trans hh)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     nlinarith</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hceil : (Nat.ceil (12 / (ρ * β * ε)) : ℝ) ≤ m := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     exact_mod_cast (show Nat.ceil (12 / (ρ * β * ε)) ≤ m by omega)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hm3 := (Nat.le_ceil (12 / (ρ * β * ε))).trans hceil</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨hm2, (div_le_iff₀ hden).mpr hm1.le, ?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hprod : 0 &lt; ρ * β * ε := by positivity</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hh := (div_le_iff₀ hprod).mp hm3</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   apply (div_le_iff₀ hp).mpr</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   nlinarith</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> </span>
+<span id="L46"><a href="#L46" class="ln">  46</a> end Oberwolfach</span></pre></html>

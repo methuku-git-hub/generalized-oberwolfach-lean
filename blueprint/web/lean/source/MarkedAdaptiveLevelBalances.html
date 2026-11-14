@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedAdaptiveLevelBalances.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedAdaptiveLevelBalances.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The four density identities at a level reduce to two centre equalities. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option maxHeartbeats 3000000</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem marked_adaptive_level_balances</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (ρ s₀ m Dbal Dload B H:ℝ) (hm:0&lt;m)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (hcentre:(ρ*s₀/2)*Dbal=s₀*B)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hload:H*s₀=Dload*(ρ*s₀/2)):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (ρ*(s₀/m)/2)*Dbal=(s₀/m)*B ∧</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     H*(s₀/m)=Dload*(ρ*(s₀/m)/2) ∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     H*(s₀/m)*m=Dload*(ρ*s₀/2) := by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hcentre&#x27;:=((congrArg (fun x:ℝ=&gt;x/m) hcentre))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hload&#x27;:=((congrArg (fun x:ℝ=&gt;x/m) hload))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   refine ⟨?_,?_,?_⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   · convert hcentre&#x27; using 1 &lt;;&gt; ring</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   · convert hload&#x27; using 1 &lt;;&gt; ring</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   · have hm0:m≠0:=ne_of_gt hm</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     field_simp</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     nlinarith only [hload]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> end Oberwolfach</span></pre></html>

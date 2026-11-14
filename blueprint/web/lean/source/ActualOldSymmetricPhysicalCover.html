@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualOldSymmetricPhysicalCover.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualOldSymmetricPhysicalCover.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ActualOldArcContainment</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ActualReindexedFinalEdgeUnion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.ActualSourceOrientationProperties</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.PhysicalPackingSym2Family</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The actual old directed edge containment gives physical coverage of the</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> symmetric old-edge family used in residual degrees. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 16000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem actual_old_symmetric_edges_physically_covered</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {X V K J I:Type} [Fintype X] [DecidableEq X] [Fintype V] [DecidableEq V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     [DecidableEq K] [DecidableEq J] [Fintype I]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (G:SimpleGraph X) (data:ActualResidualData (K:=K) (J:=J) G)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (E:∀C:G.ConnectedComponent,SimpleGraph.cycleGraph (Fintype.card C) ≃g C.toSimpleGraph)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (pieces:List (PrescribedSourcePiece X)) (D:X→X→Prop)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hpair:pieces.Pairwise (fun p q=&gt;Disjoint p.vertices.toFinset q.vertices.toFinset))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hvalid:∀p∈pieces,p.OriginalValid D) (hEdges:sourcePieceEdgesUnion pieces=G.edgeFinset)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hArcs:∀x y,D x y↔(x,y)∈sourcePieceArcsUnion pieces)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (halign:∀x,D x (factorCycleOrientation G E x))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (ψ:X→V) (Pack:Finset (Finset V))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hold:ActualOldArcContainment data ψ E (fun x y=&gt;({x,y}:Finset V)∈Pack))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (b:I≃{i // i∈data.s₁}) (ext:∀i:I,Fin (data.c*data.d+5)↪X)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (inner:∀i:I,Fin (data.c*data.d+1)↪X)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hinner:∀i k,inner i k=ext i ⟨k.val+2,by omega⟩)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hsupp:∀i,(data.P (b i).val).support=List.ofFn (ext i))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (p:∀i:I,G.Walk (inner i 0) (inner i (Fin.last (data.c*data.d))))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hp:∀i,(p i).support=List.ofFn (inner i)):</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∀e∈(data.deletedEdges\(Finset.univ.biUnion (fun i:I=&gt;(p i).edges.toFinset))).image (Sym2.map ψ),</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       e.toFinset∈Pack:=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have horient:∀x y,G.Adj x y→D x y ∨ D y x:=</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (actual_source_orientation_covers_and_has_unique_incoming G pieces D hpair hvalid hEdges hArcs).1</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   apply physical_cover_gives_symmetric_old_edge_cover data _ ψ D horient Pack</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   intro x y hxy hd</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have heq:=actual_reindexed_final_edge_union data b ext inner hinner hsupp p hp</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   rw [heq] at hxy</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   exact hold pieces D hpair hvalid hArcs halign x y hxy hd</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

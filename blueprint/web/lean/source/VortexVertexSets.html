@@ -1,0 +1,93 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>VortexVertexSets.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>VortexVertexSets.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.VortexSetSequence</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.VortexStopping</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.VortexSummation</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.NestedCounts</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.VortexBudgets</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> /-! Vertex sets with the two-level external-root degree estimates required by a vortex. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 1000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> universe a</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> structure VertexVortex {V : Type a} [Fintype V] (G : SimpleGraph V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (D : ℕ) (η ε : ℝ) (m : ℕ) where</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   length : ℕ</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   length_pos : 0 &lt; length</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   vertices : ℕ → Finset V</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   initial : vertices 0 = Finset.univ</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   sizes : ∀ i ≤ length, (vertices i).card = floorOrbit ε (Fintype.card V) i</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   nested : ∀ i &lt; length, vertices (i + 1) ⊆ vertices i</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   terminal_lower : ε * m / 2 ≤ ((vertices length).card : ℝ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   terminal_upper : (vertices length).card &lt; m</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   degrees : ∀ i ≤ length, 0 &lt; i → ∀ x ∈ vertices (i - 2),</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     |((G.neighborFinset x ∩ vertices i).card : ℝ) -</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       ((D : ℝ) / Fintype.card V) * (vertices i).card| ≤ η * (vertices i).card</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> </span>
+<span id="L31"><a href="#L31" class="ln">  31</a> theorem vertexVortex_exists {η ε : ℝ} (hη : 0 &lt; η) (he : 0 &lt; ε) (he1 : ε &lt; 1) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∃ m₀ : ℕ, 1 ≤ m₀ ∧ ∀ (V : Type a) [Fintype V] (G : SimpleGraph V) (D m : ℕ),</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       G.IsRegularOfDegree D → m₀ ≤ m → m ≤ Fintype.card V →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       Nonempty (VertexVortex G D η ε m) := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   obtain ⟨N₁, hN₁2, hN₁⟩ := vortex_set_sequence.{a} he he1</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨N₂, hN₂1, hN₂⟩ := eventually_vortex_error_budget (β := 2 * η)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (ρ := 1) (by positivity) he he1 (by norm_num)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   refine ⟨max N₁ N₂, by omega, ?_⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   intro V _ G D m hreg hm hmn</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hmpos : 0 &lt; m := by omega</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   obtain ⟨hlarge, hbudget, _⟩ := hN₂ m (by omega)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hbudget&#x27; : (m : ℝ) ^ (-1 / 3 : ℝ) / (1 - ε ^ (1 / 3 : ℝ)) ≤ η := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     nlinarith [hbudget]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   obtain ⟨ℓ, hlpos, hlupper, hlbefore, hllower⟩ := floorOrbit_stopping he he1 hmpos hmn hlarge</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨B, hB0, hBcard, hBstep⟩ := hN₁ V Finset.univ (fun x =&gt; G.neighborFinset x) ℓ</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (by intro i hi; simpa only [Finset.card_univ] using (show N₁ ≤ floorOrbit ε (Fintype.card V) i from (by have := hlbefore i hi; omega)))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hcard : ∀ i ≤ ℓ, (B i).card = floorOrbit ε (Fintype.card V) i := by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     simpa only [Finset.card_univ] using hBcard</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hsub : ∀ i &lt; ℓ, B (i + 1) ⊆ B i := fun i hi =&gt; (hBstep i hi).1</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨⟨ℓ, hlpos, B, hB0, hcard, hsub, ?_, ?_, ?_⟩⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · rw [hcard ℓ (by omega)]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact hllower ℓ (by omega)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   · rw [hcard ℓ (by omega)]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact hlupper</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   · intro i hi hipos x hx</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have htel := nested_normalized_count_estimate B (fun x =&gt; G.neighborFinset x)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (fun j =&gt; ((B j).card : ℝ) ^ (-1 / 3 : ℝ)) ℓ hsub</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (fun j hj y hy =&gt; ((hBstep j hj).2 y hy).le) hi hx</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hsum : ∑ j ∈ Finset.range i, ((B j).card : ℝ) ^ (-1 / 3 : ℝ) ≤ η := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       have hisucc : i - 1 + 1 = i := by omega</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       have hs := vortex_accumulated_error he he1 (show (0 : ℝ) &lt; m by exact_mod_cast hmpos)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         (fun j =&gt; (floorOrbit ε (Fintype.card V) j : ℝ)) (i - 1)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         (by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>           intro j hj</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>           have hh := hlbefore j (by omega)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>           exact_mod_cast (show 0 &lt; floorOrbit ε (Fintype.card V) j by omega))</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         (fun j _ =&gt; floorOrbit_shrinks he.le _ j)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         (by exact_mod_cast hlbefore (i - 1) (by omega))</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       rw [hisucc] at hs</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       have heq : (∑ j ∈ Finset.range i, ((B j).card : ℝ) ^ (-1 / 3 : ℝ)) =</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>           ∑ j ∈ Finset.range i, (floorOrbit ε (Fintype.card V) j : ℝ) ^ (-1 / 3 : ℝ) := by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         apply Finset.sum_congr rfl</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>         intro j hj</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         rw [hcard j (by have := Finset.mem_range.mp hj; omega)]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       rw [heq]</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       exact hs.trans hbudget&#x27;</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     have hnorm := htel.trans hsum</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     rw [hB0, Finset.inter_univ, Finset.card_univ,</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       SimpleGraph.card_neighborFinset_eq_degree, hreg x] at hnorm</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     have hpos : (0 : ℝ) &lt; (B i).card := by</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       have hh : ε * m / 2 ≤ ((B i).card : ℝ) := by rw [hcard i hi]; exact hllower i hi</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       linarith</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     have heq : (((G.neighborFinset x ∩ B i).card : ℝ) -</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>         ((D : ℝ) / Fintype.card V) * (B i).card) / (B i).card =</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>         ((G.neighborFinset x ∩ B i).card : ℝ) / (B i).card - (D : ℝ) / Fintype.card V := by</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       field_simp</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     rw [← heq, abs_div, abs_of_pos hpos] at hnorm</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     exact (div_le_iff₀ hpos).mp hnorm</span>
+<span id="L89"><a href="#L89" class="ln">  89</a> </span>
+<span id="L90"><a href="#L90" class="ln">  90</a> end Oberwolfach</span></pre></html>

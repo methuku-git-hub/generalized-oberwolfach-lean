@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RetainedActualComplementFromBufferedParents.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RetainedActualComplementFromBufferedParents.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RetainedActualComplementSpokeConstruction</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ActualBufferedFinalPathIdentification</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.ActualFinalInteriorDeletion</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.ActualFinalEndpointAgreement</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.RetainedActualResidualSpokes</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Construct the final-path complement injection and its retained spoke</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> identities from compatible old and newly embedded source data. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 24000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {X V U Γ Color Kbad Jbad:Type} [Fintype X] [DecidableEq X]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   [Fintype V] [DecidableEq V] [Nonempty V] [Fintype U] [DecidableEq U]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   [Fintype Γ] [Fintype Color] [DecidableEq Kbad] [DecidableEq Jbad]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem retained_actual_complement_from_buffered_parents</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (F:SimpleGraph X) (hF:F.IsRegularOfDegree 2)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (data:ActualResidualData (K:=Kbad) (J:=Jbad) F)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (π:Equiv.Perm V) (hd:2≤data.d)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hnoshort:∀x l,0&lt;l→l&lt;2*data.d+1→(π^l) x≠x)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (sample:RawIntervalFamilyOutcome V U Γ Color) (colour:Γ) (t:ℕ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (J:StartRetentionOutcome (rawStartHubSet π data.d sample colour) t) (w:U)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hCycle:data.t.biUnion (fun j=&gt;(data.C j).support.toFinset)⊆data.Cembed)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (ext:∀i:retainedMarkedIndex π data.d sample colour t J w,Fin (data.c*data.d+5)↪X)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (inner:∀i:retainedMarkedIndex π data.d sample colour t J w,Fin (data.c*data.d+1)↪X)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hinner:∀i p,inner i p=ext i ⟨p.val+2,by omega⟩)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hdis:∀i j,i≠j→Disjoint (Finset.univ.image (ext i)) (Finset.univ.image (ext j)))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (index:retainedMarkedIndex π data.d sample colour t J w→{i // i∈data.s₁})</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hParent:∀i,(data.P (index i).val).support=List.ofFn (ext i))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hcard:Fintype.card X=Fintype.card V)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (ψ:X→V) (hψ:Set.InjOn ψ (↑(data.oldDomain\bufferedPathStrictInterior (fun _=&gt;data.c*data.d) inner):Set X))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hψstart:∀i,ψ (data.start (.inl (index i)))=i.val)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hψfinish:∀i,ψ (data.finish (.inl (index i)))=(π^data.d) i.val)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (B:Finset {x // x∈data.remaining}) (g Φ:{x // x∈data.remaining}→V) (L C Z:Finset V)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hA₀B:residualSubtypeSet data.remaining data.prescribed⊆B) (hΦ:Function.Injective Φ)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hg:∀x∈residualSubtypeSet data.remaining data.prescribed,g x=ψ x.val) (hΦg:∀x∈B,Φ x=g x)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (himage:B.image g=(residualSubtypeSet data.remaining data.prescribed).image (fun x=&gt;ψ x.val)∪C∪Z)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hOldC:Disjoint ((data.oldDomain\bufferedPathStrictInterior (fun _=&gt;data.c*data.d) inner).image ψ) C)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hOldZ:Disjoint ((data.oldDomain\bufferedPathStrictInterior (fun _=&gt;data.c*data.d) inner).image ψ) Z)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hfree:∀x,x∉B→Φ x∈L) (hL:Disjoint L ((data.oldDomain\bufferedPathStrictInterior (fun _=&gt;data.c*data.d) inner).image ψ)):</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let Y:=markedIntervalRootSet π (fun _ : retainedMarkedIndex π data.d sample colour t J w=&gt;data.d) Subtype.val</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (∀x,x∈data.oldDomain→x∉bufferedPathFullDomain (fun _=&gt;data.c*data.d) inner→ψ x∉Y)→</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     Disjoint C Y→Disjoint Z Y→Disjoint L Y→</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     ∃fC:{x // x∉bufferedPathStrictInterior (fun _=&gt;data.c*data.d) inner}↪V,</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∀x:{x // x∉bufferedPathStrictInterior (fun _=&gt;data.c*data.d) inner},x.val∈data.oldDomain→fC x=ψ x.val) ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀x:{x // x∈data.remaining},∀hx:x.val∉bufferedPathStrictInterior (fun _=&gt;data.c*data.d) inner,fC ⟨x.val,hx⟩=Φ x) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (∀i,fC (bufferedInitialEndpointInComplement (fun _=&gt;data.c*data.d) ext inner hinner hdis i)=i.val) ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (∀i,fC (bufferedEndpointInComplement (fun _=&gt;data.c*data.d) ext inner hinner hdis i)=(π^data.d) i.val) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       let R:=Finset.univ\(outsideBufferedPathImage (fun _=&gt;data.c*data.d) inner fC ∪</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         Finset.univ.image (fun i:retainedMarkedIndex π data.d sample colour t J w=&gt;(π^data.d) i.val))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       Y⊆R ∧ R.card=data.c*Y.card ∧ Disjoint (R\Y) (Y.image π):=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   intro Y hOldAvoid hCY hZY hLY</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hpaths (i:retainedMarkedIndex π data.d sample colour t J w):=</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     actual_final_path_matches_buffered_sequence data (index i) (ext i) (inner i) (hinner i) (hParent i)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   exact retained_actual_complement_and_spoke_construction π data.c data.d hd hnoshort sample colour t J w</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     F hF data hCycle ext inner hinner hdis index (fun i=&gt;(hpaths i).1) (fun i=&gt;(hpaths i).2.1)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (fun i=&gt;(hpaths i).2.2) hcard ψ hψ hψstart hψfinish B g Φ L C Z hA₀B hΦ hg hΦg himage hOldC hOldZ</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     hfree hL hOldAvoid hCY hZY hLY</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> end Oberwolfach</span></pre></html>

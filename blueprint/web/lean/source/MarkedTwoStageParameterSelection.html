@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedTwoStageParameterSelection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedTwoStageParameterSelection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedTwoStageCanonicalDensities</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Choose the inner-set and first-packing scales after both sampled</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> cover-down theorems have fixed their constants. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem marked_two_stage_choose_inner_and_packing_scales</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (r:ℕ) (beta zeta delta eta₀:ℝ)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (hb:0&lt;beta) (hz:0&lt;zeta) (hd:0&lt;delta) (he:0&lt;eta₀):</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     ∃ xi etaE:ℝ,0&lt;xi ∧ 0&lt;etaE ∧ xi≤beta/10 ∧ xi≤zeta ∧ etaE≤eta₀ ∧</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>       xi+24*etaE≤delta ∧ xi+6*etaE≤delta ∧ xi+3*((r:ℝ)+5)*etaE≤delta:=by</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   let xi:=min (beta/20) (min (zeta/2) (delta/4))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   let den:ℝ:=12*((r:ℝ)+5)+96</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   let etaE:=min (eta₀/2) (delta/den)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hr:0≤(r:ℝ):=Nat.cast_nonneg _</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hden:0&lt;den:=by dsimp [den];positivity</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hxi:0&lt;xi:=by dsimp [xi];positivity</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have heta:0&lt;etaE:=by dsimp [etaE];positivity</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hxib:xi≤beta/20:=min_le_left _ _</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hxiz:xi≤zeta/2:=(min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hxid:xi≤delta/4:=(min_le_right _ _).trans (min_le_right _ _)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hetae:etaE≤eta₀/2:=min_le_left _ _</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hetad:etaE≤delta/den:=min_le_right _ _</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hmul:0≤(delta/den-etaE)*den:=mul_nonneg (sub_nonneg.mpr hetad) hden.le</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hcancel:(delta/den)*den=delta:=div_mul_cancel₀ delta (ne_of_gt hden)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hrprod:0≤(r:ℝ)*etaE:=mul_nonneg hr heta.le</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   dsimp only [den] at hmul hcancel</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   refine ⟨xi,etaE,hxi,heta,?_,?_,?_,?_,?_,?_⟩ &lt;;&gt; nlinarith</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> end Oberwolfach</span></pre></html>

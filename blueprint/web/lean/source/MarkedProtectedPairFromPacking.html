@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedProtectedPairFromPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedProtectedPairFromPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedInnerDeletionBudgets</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A packing that avoids the inner star adds no physical change inside</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> the protected pair. Existing prescribed changes are accounted for exactly. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 6000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V U E K:Type} [Fintype V] [Fintype U] [LinearOrder V] [DecidableEq U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   {tail head:E→V} {ktail khead:K→V} {π:Equiv.Perm V} {m b:ℕ} {H₀ HK:V→U→Prop}</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem marked_protected_pair_avoided_by_packing</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ HK)) (I:Finset V) (J:Finset U)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hstar:(M.biUnion markedWheelPhysicalResources).filter (markedStarResource I J)=∅)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (ER:SimpleGraph V) (ES:SimpleGraph (V⊕U))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hER:∀ x∈I,∀ y∈I,¬ER.Adj x y)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hES:∀ x∈I,∀ u∈J,¬ES.Adj (Sum.inl x) (Sum.inr u)):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let FR:=ER⊔markedPackingRimGraph M</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let FS:=ES⊔markedFiniteSpokeGraph (M.biUnion markedWheelSpokePairs)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ x∈I,∀ y∈I,¬FR.Adj x y) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ x∈I,∀ u∈J,¬FS.Adj (Sum.inl x) (Sum.inr u)) :=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   intro FR FS</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hr:=marked_inner_deletion_has_only_prescribed_cost M I J hstar ER ES</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   constructor</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · intro x hx y hy hxy</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have hh:y∈FR.neighborFinset x∩I:=Finset.mem_inter.mpr ⟨(SimpleGraph.mem_neighborFinset _ _ _).mpr hxy,hy⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     rw [hr.1 x] at hh</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     exact hER x hx y hy ((SimpleGraph.mem_neighborFinset _ _ _).mp (Finset.mem_inter.mp hh).1)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · intro x hx u hu hxu</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hh:Sum.inr u∈FS.neighborFinset (Sum.inl x)∩J.image Sum.inr:=</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       Finset.mem_inter.mpr ⟨(SimpleGraph.mem_neighborFinset _ _ _).mpr hxu,Finset.mem_image.mpr ⟨u,hu,rfl⟩⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     rw [hr.2.2.1 (Sum.inl x)] at hh</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     exact hES x hx u hu ((SimpleGraph.mem_neighborFinset _ _ _).mp (Finset.mem_inter.mp hh).1)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> end Oberwolfach</span></pre></html>

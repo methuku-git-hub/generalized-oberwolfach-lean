@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AllCutsExponentialMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AllCutsExponentialMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! An exponential number of cut tests with a quadratic exponential tail</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> still has a uniform linear exponential failure bound. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem eventually_allCuts_failure_exponential {c : ℝ} (hc : 0&lt;c) :</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ N : ℕ,1≤N ∧ ∀ n : ℕ,N≤n → ∀ C : ℝ,0≤C →</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       C*(4:ℝ)^n*Real.exp (-c*(n:ℝ)^2)≤C*Real.exp (-(c/2)*n) := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   let N := max 1 (Nat.ceil (2*Real.log 4/c))</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   refine ⟨N,le_max_left _ _,?_⟩</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   intro n hn C hC</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hn1 : (1:ℝ)≤n := by exact_mod_cast (show 1≤n by dsimp [N] at hn;omega)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hn0 : (0:ℝ)≤n := Nat.cast_nonneg n</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hceil : (Nat.ceil (2*Real.log 4/c):ℝ)≤n := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     exact_mod_cast (show Nat.ceil (2*Real.log 4/c)≤n by dsimp [N] at hn;omega)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hh : 2*Real.log 4/c≤(n:ℝ) := (Nat.le_ceil _).trans hceil</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hlog := (div_le_iff₀ hc).mp hh</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hmul := mul_le_mul_of_nonneg_right hlog hn0</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hexp : (n:ℝ)*Real.log 4-c*(n:ℝ)^2≤-(c/2)*(n:ℝ)^2 := by nlinarith only [hmul]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have heq : (4:ℝ)^n=Real.exp ((n:ℝ)*Real.log 4) := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     rw [Real.exp_nat_mul,Real.exp_log (by norm_num : (0:ℝ)&lt;4)]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   calc</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     _ = C*Real.exp ((n:ℝ)*Real.log 4-c*(n:ℝ)^2) := by rw [heq,Real.exp_sub];rw [div_eq_mul_inv,← Real.exp_neg];ring</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     _ ≤ C*Real.exp (-(c/2)*(n:ℝ)^2) := mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr hexp) hC</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     _ ≤ _ := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       apply mul_le_mul_of_nonneg_left _ hC</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       apply Real.exp_le_exp.mpr</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       have hn2 : (n:ℝ)≤(n:ℝ)^2 := by nlinarith only [hn1]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       exact mul_le_mul_of_nonpos_left hn2 (by linarith)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> end Oberwolfach</span></pre></html>

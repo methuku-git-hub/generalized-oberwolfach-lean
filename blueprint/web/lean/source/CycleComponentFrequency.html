@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CycleComponentFrequency.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CycleComponentFrequency.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.UniformFiberCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongPreparationFactorFractions</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Convert a vertex frequency into the actual number of components of</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> the specified size. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem component_size_vertex_count {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (G:SimpleGraph V) (r:ℕ):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     let T:=Finset.univ.filter (fun C:G.ConnectedComponent=&gt;Fintype.card C=r)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (Finset.univ.filter (fun v:V=&gt;Fintype.card (G.connectedComponentMk v)=r)).card=r*T.card :=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   intro T</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hs:∀C∈T,(Finset.univ.filter (fun v:V=&gt;G.connectedComponentMk v=C)).card=r:=by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     intro C hC</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     have hCsize:Fintype.card C=r:=(Finset.mem_filter.mp hC).2</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have hset:Finset.univ.filter (fun v:V=&gt;G.connectedComponentMk v=C)=C.supp.toFinset:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ext v</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       simp only [Finset.mem_filter,Finset.mem_univ,true_and,Set.mem_toFinset,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>         SimpleGraph.ConnectedComponent.mem_supp_iff]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     rw [hset]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     rw [Set.toFinset_card]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have heq:Fintype.card C.supp=Fintype.card C:=Fintype.card_congr (Equiv.refl _)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     exact heq.trans hCsize</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have h:=card_of_uniform_fibers G.connectedComponentMk T r hs</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   apply Eq.trans ?_ h</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   congr 1</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   ext v</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   simp only [Finset.mem_filter,Finset.mem_univ,true_and,T]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> end Oberwolfach</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> namespace Oberwolfach</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a> theorem component_fraction_times_order_div_size {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (G:SimpleGraph V) (r:ℕ) (hr:0&lt;r) (hV:0&lt;Fintype.card V):</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let T:=Finset.univ.filter (fun C:G.ConnectedComponent=&gt;Fintype.card C=r)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (((Finset.univ.filter (fun v:V=&gt;Fintype.card (G.connectedComponentMk v)=r)).card:ℝ)/</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (Fintype.card V:ℝ))*(Fintype.card V:ℝ)/(r:ℝ)=(T.card:ℝ) :=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   intro T</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hn:(Fintype.card V:ℝ)≠0:=by exact_mod_cast (Nat.ne_of_gt hV)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hrr:(r:ℝ)≠0:=by exact_mod_cast (Nat.ne_of_gt hr)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hc:=component_size_vertex_count G r</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   dsimp only at hc</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   rw [hc]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   push_cast</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   field_simp</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   rfl</span>
+<span id="L51"><a href="#L51" class="ln">  51</a> end Oberwolfach</span>
+<span id="L52"><a href="#L52" class="ln">  52</a> </span>
+<span id="L53"><a href="#L53" class="ln">  53</a> namespace Oberwolfach</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> </span>
+<span id="L56"><a href="#L56" class="ln">  56</a> theorem long_preparation_fraction_component_count {n K:ℕ} (hn:0&lt;n)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (F:SimpleGraph (Fin n)) (hF:F.IsRegularOfDegree 2) (i:Fin K):</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     let fraction:=((Finset.univ.filter (fun v=&gt;longPreparationCycleClass F hF K v=some i)).card:ℝ)/n</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     let T:=Finset.univ.filter (fun C:F.ConnectedComponent=&gt;Fintype.card C=i.val+1)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     fraction*n/((i.val+1:ℕ):ℝ)=(T.card:ℝ) :=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   intro fraction T</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hset:Finset.univ.filter (fun v=&gt;longPreparationCycleClass F hF K v=some i)=</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       Finset.univ.filter (fun v=&gt;Fintype.card (F.connectedComponentMk v)=i.val+1):=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     ext v</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     simp only [Finset.mem_filter,Finset.mem_univ,true_and]</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     exact (long_preparation_cycle_class F hF K v).2 i</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   dsimp only [fraction]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   rw [hset]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   simpa only [Fintype.card_fin] using</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     component_fraction_times_order_div_size F (i.val+1) (by omega) (by simpa only [Fintype.card_fin] using hn)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> end Oberwolfach</span></pre></html>

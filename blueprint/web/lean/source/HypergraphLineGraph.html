@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>HypergraphLineGraph.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>HypergraphLineGraph.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.JointColourRetention</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.HypergraphWeightMoments</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The line graph retains hyperedge identifiers, including parallel</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> hyperedges. Cliques and overlap bounds are derived from resource sets. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1500000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def hypergraphLineGraph {V E : Type*} (R : E → Finset V) : SimpleGraph E where</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   Adj e f := e≠f ∧ ¬Disjoint (R e) (R f)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   symm := ⟨fun e f h=&gt;⟨Ne.symm h.1,fun hd=&gt;h.2 hd.symm⟩⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   loopless := ⟨fun e h=&gt;h.1 rfl⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> def hypergraphVertexClique {V E : Type*} [Fintype E]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (R : E → Finset V) (v : V) : Finset E :=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   Finset.univ.filter (fun e=&gt;v∈R e)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> theorem hypergraphVertexClique_isClique {V E : Type*} [Fintype E]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (R : E → Finset V) (v : V) :</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀ e∈hypergraphVertexClique R v,∀ f∈hypergraphVertexClique R v,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       e≠f → (hypergraphLineGraph R).Adj e f := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   intro e he f hf hne</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   refine ⟨hne,?_⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   intro hd</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   exact Finset.disjoint_left.mp hd (Finset.mem_filter.mp he).2 (Finset.mem_filter.mp hf).2</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem hypergraphLineGraph_degree_bound</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     {V E : Type*} [Fintype E] [DecidableEq E] (R : E → Finset V)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     {k D : ℕ} (hsize : ∀ e,(R e).card≤k)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hdegree : ∀ v,(hypergraphVertexClique R v).card≤D) (e : E) :</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (Finset.univ.filter (fun f=&gt;(hypergraphLineGraph R).Adj e f)).card≤k*D := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   classical</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hsub : Finset.univ.filter (fun f=&gt;(hypergraphLineGraph R).Adj e f)⊆</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (R e).biUnion (hypergraphVertexClique R) := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     intro f hf</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     obtain ⟨_,hdis⟩ := (Finset.mem_filter.mp hf).2</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     obtain ⟨v,hve,hvf⟩ := Finset.not_disjoint_iff.mp hdis</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     exact Finset.mem_biUnion.mpr ⟨v,hve,Finset.mem_filter.mpr ⟨Finset.mem_univ _,hvf⟩⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   calc</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     _ ≤ ((R e).biUnion (hypergraphVertexClique R)).card := Finset.card_le_card hsub</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     _ ≤ (R e).card*D := Finset.card_biUnion_le_card_mul _ _ _ (fun v _=&gt;hdegree v)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     _ ≤ _ := Nat.mul_le_mul_right _ (hsize e)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> theorem hypergraphLineGraph_common_neighbours</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     {V E : Type*} [Fintype E] [DecidableEq E] (R : E → Finset V)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     {k B : ℕ} (hsize : ∀ e,(R e).card≤k)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hcodeg : ∀ v w,v≠w →</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (Finset.univ.filter (fun e=&gt;v∈R e ∧ w∈R e)).card≤B)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (e f : E) (hdis : Disjoint (R e) (R f)) :</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (Finset.univ.filter (fun g=&gt;(hypergraphLineGraph R).Adj e g ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (hypergraphLineGraph R).Adj f g)).card≤k^2*B := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   classical</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   let A : V×V → Finset E := fun p=&gt;Finset.univ.filter (fun g=&gt;p.1∈R g ∧ p.2∈R g)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hsub : Finset.univ.filter (fun g=&gt;(hypergraphLineGraph R).Adj e g ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       (hypergraphLineGraph R).Adj f g)⊆((R e)×ˢ(R f)).biUnion A := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     intro g hg</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     obtain ⟨hg₁,hg₂⟩ := (Finset.mem_filter.mp hg).2</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     obtain ⟨v,hve,hvg⟩ := Finset.not_disjoint_iff.mp hg₁.2</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     obtain ⟨w,hwf,hwg⟩ := Finset.not_disjoint_iff.mp hg₂.2</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     exact Finset.mem_biUnion.mpr ⟨(v,w),Finset.mem_product.mpr ⟨hve,hwf⟩,</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       Finset.mem_filter.mpr ⟨Finset.mem_univ _,hvg,hwg⟩⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hA (p : V×V) (hp : p∈(R e)×ˢ(R f)) : (A p).card≤B := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     apply hcodeg</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     intro he</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     exact Finset.disjoint_left.mp hdis (Finset.mem_product.mp hp).1</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       (he ▸ (Finset.mem_product.mp hp).2)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   calc</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     _ ≤ (((R e)×ˢ(R f)).biUnion A).card := Finset.card_le_card hsub</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     _ ≤ ((R e)×ˢ(R f)).card*B := Finset.card_biUnion_le_card_mul _ _ _ hA</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     _ = ((R e).card*(R f).card)*B := by rw [Finset.card_product]</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     _ ≤ (k*k)*B := Nat.mul_le_mul_right _ (Nat.mul_le_mul (hsize e) (hsize f))</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     _ = _ := by ring</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> </span>
+<span id="L79"><a href="#L79" class="ln">  79</a> theorem hypergraphVertexClique_intersection</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     {V E : Type*} [Fintype E] [DecidableEq E] (R : E → Finset V) (v w : V) :</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     hypergraphVertexClique R v∩hypergraphVertexClique R w=</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       Finset.univ.filter (fun e=&gt;v∈R e ∧ w∈R e) := by</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   ext e</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   simp [hypergraphVertexClique]</span>
+<span id="L85"><a href="#L85" class="ln">  85</a> </span>
+<span id="L86"><a href="#L86" class="ln">  86</a> end Oberwolfach</span></pre></html>

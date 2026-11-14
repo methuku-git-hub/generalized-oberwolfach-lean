@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryRowResources.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryRowResources.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawOrdinaryPatternSampling</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The physical resources for one ordinary common-neighbour count.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> A physical edge contributes to at most its two endpoint positions. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 2500000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def ordinaryRowResources (S:Finset V) (J:Finset U) (z:V):Finset (Sym2 V⊕(V×U)):=</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   (S.image (fun x=&gt;Sum.inl s(x,z)))∪(J.image (fun u=&gt;Sum.inr (z,u)))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem ordinaryRowResources_rim (S:Finset V) (J:Finset U) (z:V) (e:Sym2 V):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     Sum.inl e∈ordinaryRowResources S J z ↔ ∃ x∈S,s(x,z)=e:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   simp [ordinaryRowResources]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem ordinaryRowResources_spoke (S:Finset V) (J:Finset U) (z:V) (a:V×U):</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     Sum.inr a∈ordinaryRowResources S J z ↔ a.1=z ∧ a.2∈J:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   rcases a with ⟨a,u⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   simp [ordinaryRowResources,eq_comm,and_comm]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem ordinaryRowResources_card (S:Finset V) (J:Finset U) (z:V):</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (ordinaryRowResources S J z).card≤S.card+J.card:=</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   (Finset.card_union_le _ _).trans (Nat.add_le_add Finset.card_image_le Finset.card_image_le)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem ordinaryRowResources_incidence (S:Finset V) (J:Finset U) (C:Finset V)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (e:Sym2 V⊕(V×U)):(C.filter (fun z=&gt;e∈ordinaryRowResources S J z)).card≤2:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   cases e with</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   | inl e=&gt;</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     induction e using Sym2.ind with</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     | _ a b=&gt;</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       have hsub:C.filter (fun z=&gt;Sum.inl s(a,b)∈ordinaryRowResources S J z)⊆{a,b}:=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         intro z hz</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         obtain ⟨x,hx,he⟩:=(ordinaryRowResources_rim S J z s(a,b)).mp (Finset.mem_filter.mp hz).2</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         have hh:=Sym2.eq_iff.mp he</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         simp only [Finset.mem_insert,Finset.mem_singleton]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         rcases hh with h|h &lt;;&gt; tauto</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       exact (Finset.card_le_card hsub).trans Finset.card_le_two</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   | inr a=&gt;</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hsub:C.filter (fun z=&gt;Sum.inr a∈ordinaryRowResources S J z)⊆{a.1}:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       intro z hz</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       exact Finset.mem_singleton.mpr ((ordinaryRowResources_spoke S J z a).mp (Finset.mem_filter.mp hz).2).1.symm</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hh:=Finset.card_le_card hsub</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     simp only [Finset.card_singleton] at hh</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     omega</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> theorem ordinaryRowResources_load (S:Finset V) (J:Finset U) (C:Finset V) (e:Sym2 V⊕(V×U)):</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (∑ z:C,if e∈ordinaryRowResources S J z.val then (1:ℝ) else 0)≤2:=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   rw [Finset.sum_coe_sort C (fun z:V=&gt;if e∈ordinaryRowResources S J z then (1:ℝ) else 0)]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   rw [←Finset.sum_filter]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   simp only [Finset.sum_const,nsmul_eq_mul,mul_one]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   exact_mod_cast ordinaryRowResources_incidence S J C e</span>
+<span id="L57"><a href="#L57" class="ln">  57</a> </span>
+<span id="L58"><a href="#L58" class="ln">  58</a> theorem ordinaryRowResources_disjoint (π:Equiv.Perm V) (d:ℕ) (S:Finset V) (J:Finset U) (z:V)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (a b:Sym2 V⊕(V×U)) (ha:a∈ordinaryRowResources S J z)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (hb:b∈ordinaryRowResources S J z) (hne:a≠b):</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     Disjoint (rawWheelResourceCoordinates π d a) (rawWheelResourceCoordinates π d b):=by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   apply rawWheelResourceCoordinates_disjoint π d a b hne</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   intro v u w t he hf</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   subst a;subst b</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hz:=(ordinaryRowResources_spoke S J z (v,u)).mp ha</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hz&#x27;:=(ordinaryRowResources_spoke S J z (w,t)).mp hb</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   left</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   intro hut</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   apply hne</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   exact congrArg Sum.inr (Prod.ext (hz.1.trans hz&#x27;.1.symm) hut)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

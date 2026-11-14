@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TwoClassRootOrder.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TwoClassRootOrder.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ProfileRootSampling</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedHubAbsorberAbundance</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Enumerate a root set with one marked-class vertex and m ordinary-class</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> vertices. This is an actual bijective enumeration, not an assumed ordering. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 4000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def twoClassProfile (m : ℕ) (i : Bool) : ℕ := if i then 1 else m</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> variable {m : ℕ} {V : Bool → Type*} [∀ i,Fintype (V i)] [∀ i,DecidableEq (V i)]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem twoClassProfile_sum (m : ℕ) : ∑ i,twoClassProfile m i=m+1 := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   simp [twoClassProfile,Nat.add_comm]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem exists_twoClass_root_order (σ : ∀ i,FixedSubset (V i) (twoClassProfile m i)) :</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∃ x : Fin (m+1) → Σ i,V i,Function.Injective x ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       Finset.univ.image x=profileRootSet σ ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (x 0).1=true ∧ ∀ j : Fin m,(x j.succ).1=false := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   let eK : Fin 1 ≃ (σ true).val := Fintype.equivOfCardEq (by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     rw [Fintype.card_fin,Fintype.card_coe,(σ true).property];rfl)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let eO : Fin m ≃ (σ false).val := Fintype.equivOfCardEq (by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     rw [Fintype.card_fin,Fintype.card_coe,(σ false).property];rfl)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let x : Fin (m+1) → Σ i,V i := Fin.cons (α:=fun _ =&gt; Σ i,V i)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ⟨true,(eK 0).val⟩ (fun j =&gt; ⟨false,(eO j).val⟩)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hxi : Function.Injective x := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     intro i j</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     refine Fin.cases ?_ (fun i =&gt; ?_) i</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     · refine Fin.cases ?_ (fun j =&gt; ?_) j</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       · intro _;rfl</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       · intro he</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         have hh := congrArg Sigma.fst he</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         exact Bool.noConfusion hh</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · refine Fin.cases ?_ (fun j =&gt; ?_) j</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       · intro he</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         have hh := congrArg Sigma.fst he</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         exact Bool.noConfusion hh</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       · intro he</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         have hv : (eO i).val=(eO j).val := (Sigma.mk.inj_iff.mp he).2 |&gt; eq_of_heq</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         exact congrArg Fin.succ (eO.injective (Subtype.ext hv))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   refine ⟨x,hxi,?_,rfl,fun _ =&gt; rfl⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   ext v</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   constructor</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   · intro hv</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     rcases Finset.mem_image.mp hv with ⟨i,_,rfl⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     refine Fin.cases ?_ (fun j =&gt; ?_) i</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     · exact (profileRootSet_mem σ true _).mpr (eK 0).property</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     · exact (profileRootSet_mem σ false _).mpr (eO j).property</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   · intro hv</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     rcases v with ⟨i,v⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     cases i</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     · let v&#x27; : (σ false).val := ⟨v,(profileRootSet_mem σ false v).mp hv⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       refine Finset.mem_image.mpr ⟨(eO.symm v&#x27;).succ,Finset.mem_univ _,?_⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       change (⟨false,(eO (eO.symm v&#x27;)).val⟩ : Σ i,V i)=⟨false,v⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       rw [Equiv.apply_symm_apply]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     · let v&#x27; : (σ true).val := ⟨v,(profileRootSet_mem σ true v).mp hv⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       have he : eK 0=v&#x27; := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         have hz : eK.symm v&#x27;=0 := Subsingleton.elim _ _</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         simpa only [hz] using eK.apply_symm_apply v&#x27;</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       refine Finset.mem_image.mpr ⟨0,Finset.mem_univ _,?_⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       change (⟨true,(eK 0).val⟩ : Σ i,V i)=⟨true,v⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       rw [he]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a> </span>
+<span id="L69"><a href="#L69" class="ln">  69</a> end Oberwolfach</span></pre></html>

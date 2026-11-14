@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FiniteGreedyColouring.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FiniteGreedyColouring.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Combinatorics.SimpleGraph.Basic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Data.Finset.Card</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Mathlib.Data.Fintype.Card</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Mathlib.Tactic</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Greedy colouring of a finite graph with a fresh palette. The bound is</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> stated using the actual finite neighbour sets. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 1200000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem finiteGreedyColouring</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {V : Type*} [Fintype V] (G : SimpleGraph V) {q : ℕ} (hq : 0&lt;q)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hdegree : ∀ v,(Finset.univ.filter (fun u=&gt;G.Adj v u)).card&lt;q) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∃ f : V → Fin q,∀ u v,G.Adj u v → f u≠f v := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   classical</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hpartial (S : Finset V) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ∃ f : V → Fin q,∀ u∈S,∀ v∈S,G.Adj u v → f u≠f v := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     induction S using Finset.induction_on with</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     | empty =&gt;</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       exact ⟨fun _=&gt;⟨0,hq⟩,by simp⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     | @insert x S hx ih =&gt;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       obtain ⟨f,hf⟩ := ih</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       let B := (S.filter (fun u=&gt;G.Adj x u)).image f</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       have hB : B.card&lt;q := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         calc</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>           _ ≤ (S.filter (fun u=&gt;G.Adj x u)).card := Finset.card_image_le</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>           _ ≤ (Finset.univ.filter (fun u=&gt;G.Adj x u)).card :=</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>             Finset.card_le_card (Finset.filter_subset_filter _ (Finset.subset_univ S))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>           _ &lt; _ := hdegree x</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       obtain ⟨c,hc⟩ : ∃ c : Fin q,c∉B := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         by_contra hn</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         push Not at hn</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         have he : B=Finset.univ := Finset.eq_univ_iff_forall.mpr hn</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         simpa [he] using hB</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       let g := Function.update f x c</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       refine ⟨g,?_⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       intro u hu v hv hadj</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       by_cases hux : u=x</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       · subst u</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         have hvx : v≠x := fun he=&gt;G.irrefl (he ▸ hadj)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         have hvS : v∈S := (Finset.mem_insert.mp hv).resolve_left hvx</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         have hfv : f v∈B := Finset.mem_image.mpr</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>           ⟨v,Finset.mem_filter.mpr ⟨hvS,hadj⟩,rfl⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         simp only [g,Function.update_self,Function.update_of_ne hvx]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         exact fun he=&gt;hc (he.symm ▸ hfv)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       · have huS : u∈S := (Finset.mem_insert.mp hu).resolve_left hux</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         by_cases hvx : v=x</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         · subst v</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>           have hfu : f u∈B := Finset.mem_image.mpr</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>             ⟨u,Finset.mem_filter.mpr ⟨huS,hadj.symm⟩,rfl⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>           simp only [g,Function.update_self,Function.update_of_ne hux]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>           exact fun he=&gt;hc (he ▸ hfu)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         · have hvS : v∈S := (Finset.mem_insert.mp hv).resolve_left hvx</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>           simp only [g,Function.update_of_ne hux,Function.update_of_ne hvx]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           exact hf u huS v hvS hadj</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   obtain ⟨f,hf⟩ := hpartial Finset.univ</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   exact ⟨f,fun u v=&gt;hf u (Finset.mem_univ _) v (Finset.mem_univ _)⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> end Oberwolfach</span></pre></html>

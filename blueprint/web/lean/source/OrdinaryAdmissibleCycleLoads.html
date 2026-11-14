@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryAdmissibleCycleLoads.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryAdmissibleCycleLoads.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryCycleConflictLoss</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.CycleVertexMatchingWeights</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The fixed fractional cycle weighting after exclusion of cycles whose</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> vertex set contains a conflict edge. The original weights are unchanged. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1600000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance 100000] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem finite_weight_discard_identity {I : Type*} [Fintype I]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (weight : I → ℝ) (base good : I → Prop) :</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (∑ i,if base i then weight i else 0)-</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (∑ i,if base i ∧ good i then weight i else 0)=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       ∑ i,if base i ∧ ¬good i then weight i else 0 := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   rw [← Finset.sum_sub_distrib]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   apply Finset.sum_congr rfl</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   intro i _</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   by_cases hb : base i &lt;;&gt; by_cases hg : good i &lt;;&gt; simp [hb,hg]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> variable {V : Type} [Fintype V] [DecidableEq V]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (P F : SimpleGraph V) (r : ℕ) (hr : 2≤r) (hn : 0&lt;Fintype.card V)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (weight : OrdinaryCycle P r → ℝ) (hweight : ∀ C,0≤weight C)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (B : ℝ) (hB : 0≤B) (hb : ∀ C,weight C≤B/(Fintype.card V:ℝ)^(r-2))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (L : ℝ) (hdeg : ∀ v,(F.degree v:ℝ)≤L)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (he : ∀ x y,(∑ C,if C.val.val.Adj x y then weight C else 0)=if P.Adj x y then 1 else 0)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> include hr hn hweight hB hb hdeg he</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem ordinary_admissible_cycle_edge_load (x y : V) (hxy : P.Adj x y) (hFxy : ¬F.Adj x y) :</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     |(∑ C,if C.val.val.Adj x y ∧ (∀ v∈C.val.val.support,∀ z∈C.val.val.support,¬F.Adj v z)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       then weight C else 0)-1|≤5*(r:ℝ)^4*B*L/Fintype.card V := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let good := fun C : OrdinaryCycle P r=&gt;∀ v∈C.val.val.support,∀ z∈C.val.val.support,¬F.Adj v z</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hnot (C : OrdinaryCycle P r) : ¬good C↔∃ v∈C.val.val.support,∃ z∈C.val.val.support,F.Adj v z := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     simp only [good,not_forall,not_imp,not_not,exists_prop]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hid := finite_weight_discard_identity weight (fun C=&gt;C.val.val.Adj x y) good</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   rw [he x y,if_pos hxy] at hid</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   simp only [hnot] at hid</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hlo : 0≤∑ C,if C.val.val.Adj x y ∧ (∃ v∈C.val.val.support,∃ z∈C.val.val.support,F.Adj v z)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       then weight C else 0 := Finset.sum_nonneg (fun C _=&gt;by split_ifs;exact hweight C;exact le_refl _)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hhi := ordinary_cycle_rim_conflict_loss P r hr hn weight hweight B hB hb F L hdeg x y hxy.ne hFxy</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hbound : |(∑ C,if C.val.val.Adj x y ∧ good C then weight C else 0)-1|≤</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       5*(r:ℝ)^4*B*L/Fintype.card V := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     rw [abs_sub_comm]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     erw [hid]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     rw [abs_of_nonneg hlo]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     convert hhi using 1 &lt;;&gt; congr!</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   convert hbound using 1 &lt;;&gt; congr!</span>
+<span id="L51"><a href="#L51" class="ln">  51</a> </span>
+<span id="L52"><a href="#L52" class="ln">  52</a> theorem ordinary_admissible_cycle_vertex_load (v : V) :</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     |(∑ C,if v∈C.val.val.support ∧ (∀ x∈C.val.val.support,∀ y∈C.val.val.support,¬F.Adj x y)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       then weight C else 0)-(P.degree v:ℝ)/2|≤3*(r:ℝ)^4*B*L := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   let good := fun C : OrdinaryCycle P r=&gt;∀ x∈C.val.val.support,∀ y∈C.val.val.support,¬F.Adj x y</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hnot (C : OrdinaryCycle P r) : ¬good C↔∃ x∈C.val.val.support,∃ y∈C.val.val.support,F.Adj x y := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     simp only [good,not_forall,not_imp,not_not,exists_prop]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hv := ordinary_cycle_vertex_weight_identity P r weight he v</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   simp only [ordinaryCycleVertices,Set.mem_toFinset] at hv</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hfull : (∑ C,if v∈C.val.val.support then weight C else 0)=(P.degree v:ℝ)/2 := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hv&#x27; : 2*(∑ C,if v∈C.val.val.support then weight C else 0)=(P.degree v:ℝ) := by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       convert hv using 1 &lt;;&gt; congr!</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     linarith only [hv&#x27;]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hid := finite_weight_discard_identity weight (fun C=&gt;v∈C.val.val.support) good</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   erw [hfull] at hid</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   simp only [hnot] at hid</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hlo : 0≤∑ C,if v∈C.val.val.support ∧ (∃ x∈C.val.val.support,∃ y∈C.val.val.support,F.Adj x y)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       then weight C else 0 := Finset.sum_nonneg (fun C _=&gt;by split_ifs;exact hweight C;exact le_refl _)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hhi := ordinary_cycle_vertex_conflict_loss P r hr hn weight hweight B hB hb F L hdeg v</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hbound : |(∑ C,if v∈C.val.val.support ∧ good C then weight C else 0)-(P.degree v:ℝ)/2|≤</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       3*(r:ℝ)^4*B*L := by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     rw [abs_sub_comm]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     erw [hid]</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     rw [abs_of_nonneg hlo]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     convert hhi using 1 &lt;;&gt; congr!</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   convert hbound using 1 &lt;;&gt; congr!</span>
+<span id="L77"><a href="#L77" class="ln">  77</a> </span>
+<span id="L78"><a href="#L78" class="ln">  78</a> end Oberwolfach</span></pre></html>

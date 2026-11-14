@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongOrdinaryMassErrorBudget.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongOrdinaryMassErrorBudget.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongPaddedLengthSum</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The original matching tolerance makes the ordinary-cycle mass error</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> smaller than θn. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 12000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem long_ordinary_mass_error_le_theta</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (K n:ℕ) (hK:3≤K) (θ lam eps:ℝ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hθ:0≤θ) (hθmax:θ≤1/100) (hlam:0≤lam) (hlamθ:lam≤θ) (heps:0≤eps)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hepsAssign:3*eps≤lam*(θ/(100*(K:ℝ)^2))):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ((max (3*eps) 0)*(n:ℝ))*(∑i:Fin K,((longPaddedSeedExponent i+2:ℕ):ℝ))≤θ*n:=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hK0:(0:ℝ)&lt;K:=by exact_mod_cast (show 0&lt;K by omega)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hn:(0:ℝ)≤n:=by positivity</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hmax:max (3*eps) 0=3*eps:=max_eq_left (by positivity)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   rw [hmax]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hlen:=long_padded_length_sum_bound K</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hmaxK:(max 3 K:ℕ)=K:=max_eq_right hK</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   rw [hmaxK] at hlen</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hlen&#x27;:(∑i:Fin K,((longPaddedSeedExponent i+2:ℕ):ℝ))≤(K:ℝ)^2:=by nlinarith</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hlen0:0≤(∑i:Fin K,((longPaddedSeedExponent i+2:ℕ):ℝ)):=by positivity</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hbound:=mul_le_mul_of_nonneg_right hepsAssign (sq_nonneg (K:ℝ))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hKne:(K:ℝ)≠0:=ne_of_gt hK0</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have heq:lam*(θ/(100*(K:ℝ)^2))*(K:ℝ)^2=lam*θ/100:=by field_simp</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   rw [heq] at hbound</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hlam1:lam≤1:=by linarith</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hθprod:lam*θ≤θ:=by nlinarith [mul_nonneg (sub_nonneg.mpr hlam1) hθ]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hscale:3*eps*(K:ℝ)^2≤θ:=by nlinarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hh:=mul_le_mul_of_nonneg_left hlen&#x27; (show 0≤(3*eps)*(n:ℝ) by positivity)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hh&#x27;:(3*eps*(K:ℝ)^2)*(n:ℝ)≤θ*n:=mul_le_mul_of_nonneg_right hscale hn</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   nlinarith</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TransformerUnusedEndpointSpokes.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TransformerUnusedEndpointSpokes.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TransformerActualData</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryPotentialLoads</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The hub assigned to a vertex attachment is different from the hub of</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> its own rim path. Spoke-path endpoints cannot occur on any rim path.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> These are the actual non-overlap checks needed at the two reused labels. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 5500000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a>  theorem actual_shifted_hub_ne_own (G:SimpleGraph V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (σ:∀ v,Equiv.Perm (G.neighborSet v)) (hσ:∀ v w,σ v w≠w) (h:G.edgeFinset↪U)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (d:Σ v,G.neighborSet v):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     transformerAssignedHub G σ h d≠h (rimIncidenceEquiv G d).1:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have h1:(shiftedIncidenceEquiv G σ d).1=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ⟨s(d.1,(σ d.1 d.2).val),SimpleGraph.mem_edgeFinset.mpr (σ d.1 d.2).property⟩:=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     Subtype.ext (shiftedIncidenceEquiv_edge G σ d)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have h2:(rimIncidenceEquiv G d).1=</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ⟨s(d.1,d.2.val),SimpleGraph.mem_edgeFinset.mpr d.2.property⟩:=</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     Subtype.ext (rimIncidenceEquiv_edge G d)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   simpa only [transformerAssignedHub,h1,h2] using shifted_hub_avoids_own_path G h σ hσ d.1 d.2</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a>  theorem actual_attachment_spokes_unused (G Q F:SimpleGraph V) (H₀ H:V→U→Prop)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (b:∀ v,G.neighborSet v≃({u:U // H₀ v u}×Fin 2))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (σ:∀ v,Equiv.Perm (G.neighborSet v)) (hσ:∀ v w,σ v w≠w) (h:G.edgeFinset↪U)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (p:(G.edgeFinset⊕{e:V×U // H₀ e.1 e.2})→(Σ a:V,Σ c:V,Q.Walk a c))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (R:Finset V) (havoid:∀ i,∀ v∈(p i).2.2.support,v∉R)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hdis:∀ i j,i≠j→Disjoint (p i).2.2.support.toFinset (p j).2.2.support.toFinset)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (r:ℕ) (W:G.edgeFinset→OrdinaryWheel Q F H r)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hhub:∀ e,ordinaryWheelHub (W e)=h e)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hsupport:∀ e,∀ v∈(ordinaryWheelRim (W e)).support,v∈R∨v∈(p (.inl e)).2.2.support):</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∀ e d,</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       Sum.inr (transformerRimEndpoint G Q H₀ p d,transformerAssignedHub G σ h d)∉ordinaryWheelResources (W e) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       Sum.inr (transformerSpokeEndpoint G Q H₀ b p d,transformerAssignedHub G σ h d)∉ordinaryWheelResources (W e):=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   intro e d</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have ha:=graphPathEndpoint_mem (p (.inl (rimIncidenceEquiv G d).1)) (rimIncidenceEquiv G d).2</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hz:=graphPathEndpoint_mem (p (.inr (spokeEndpointEquiv G H₀ b d).1)) (spokeEndpointEquiv G H₀ b d).2</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   change transformerRimEndpoint G Q H₀ p d∈_ at ha</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   change transformerSpokeEndpoint G Q H₀ b p d∈_ at hz</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   constructor</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   · intro hmem</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hs:=(ordinaryWheelResources_spoke (W e) _ _).mp hmem</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     rw [hhub] at hs</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have hp:transformerRimEndpoint G Q H₀ p d∈(p (.inl e)).2.2.support:=</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (hsupport e _ hs.2).resolve_left (havoid _ _ ha)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have he:e=(rimIncidenceEquiv G d).1:=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       by_contra he</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       exact Finset.disjoint_left.mp (hdis (.inl e) (.inl (rimIncidenceEquiv G d).1)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         (fun heq=&gt;he (Sum.inl.inj heq))) (List.mem_toFinset.mpr hp) (List.mem_toFinset.mpr ha)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact actual_shifted_hub_ne_own G σ hσ h d (he ▸ hs.1.symm)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   · intro hmem</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hs:=(ordinaryWheelResources_spoke (W e) _ _).mp hmem</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hp:transformerSpokeEndpoint G Q H₀ b p d∈(p (.inl e)).2.2.support:=</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (hsupport e _ hs.2).resolve_left (havoid _ _ hz)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact Finset.disjoint_left.mp (hdis (.inl e) (.inr (spokeEndpointEquiv G H₀ b d).1)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       Sum.inl_ne_inr) (List.mem_toFinset.mpr hp) (List.mem_toFinset.mpr hz)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> end Oberwolfach</span></pre></html>

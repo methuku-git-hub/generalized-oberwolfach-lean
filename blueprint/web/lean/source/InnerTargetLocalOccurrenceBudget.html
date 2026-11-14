@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>InnerTargetLocalOccurrenceBudget.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>InnerTargetLocalOccurrenceBudget.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.InnerTargetLoadBudget</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem inner_target_local_occurrence_budget</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (A H:ℕ) (θ δ η ζ ρ e z:ℝ)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (hθ:0≤θ) (hθδ:10*θ≤δ) (hη:η≤θ/4096) (hζ:ζ≤θ/4096) (hρ:ρ≤θ/4096)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hH:(H:ℝ)≤A) (hζη:0≤ζ) (he:e≤η*A) (hz:z≤ρ*A):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     2*θ*H+e+ζ*H+z≤δ*A/4:=by</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hcoef:=inner_target_occurrence_budget θ δ η ζ ρ hθ hθδ hη hζ hρ</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hA:(0:ℝ)≤A:=Nat.cast_nonneg A</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hθH:=mul_le_mul_of_nonneg_left hH (show 0≤2*θ by positivity)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hζH:=mul_le_mul_of_nonneg_left hH hζη</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hh:=mul_le_mul_of_nonneg_right hcoef hA</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   nlinarith only [hθH,hζH,he,hz,hh]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> end Oberwolfach</span></pre></html>

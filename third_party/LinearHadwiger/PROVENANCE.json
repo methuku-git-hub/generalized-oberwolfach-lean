@@ -1,0 +1,13 @@
+{
+  "url": "https://github.com/snorin239/LinearHadwiger",
+  "commit": "9ef0db5fbaba0c4bc15248b9ea83933c262559c1",
+  "original_toolchain": "leanprover/lean4:v4.32.1",
+  "files": {
+    "HadwigerLean.Hypergraph.AlmostPerfectMatching": "70155f4d173f8a83542f4599ec1903a6c83d9c51c178862f47d455724dff7116",
+    "HadwigerLean.Hypergraph.Indexed": "c35af1b57656a04c87b7c89b6512417e213dd75995f72f6170c229ea5c0faf90",
+    "HadwigerLean.Probability.FiniteBernoulli": "672d9c9d3f6c3eefffb07f65ade17dd854450dd4b60ee8dec59973754171e6f1",
+    "HadwigerLean.Quantitative.BackwardPotential": "2bcf290eacb665e3409f25e00d64f54956f8265225c52023a5776eaa730a1331",
+    "HadwigerLean.Quantitative.MatchingApplication": "fbf59864b636226451f1576e270c0c434c55249441cdfd5f82b0b58762cf3316",
+    "HadwigerLean.Quantitative.MatchingConstants": "0c5bd9b9a34585f3bc7a4f295322cc392b68d091bfa079d2fc8aa242dae59c5c"
+  }
+}

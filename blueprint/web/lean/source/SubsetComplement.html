@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SubsetComplement.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SubsetComplement.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FixedSubsets</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Exposing the smaller of a fixed-cardinality subset and its complement. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 1000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> def fixedSubsetComplEquiv {V : Type*} [Fintype V] {r : ℕ}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hr : r ≤ Fintype.card V) : FixedSubset V r ≃ FixedSubset V (Fintype.card V - r) where</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   toFun S := ⟨S.1ᶜ, by rw [Finset.card_compl, S.2]⟩</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   invFun T := ⟨T.1ᶜ, by simp only [Finset.card_compl, T.2]; omega⟩</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   left_inv S := by apply Subtype.ext; exact compl_compl _</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   right_inv T := by apply Subtype.ext; exact compl_compl _</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem fixedSubsetComplEquiv_map {V : Type*} [Fintype V] {r : ℕ}</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hr : r ≤ Fintype.card V) (e : Equiv.Perm V) (S : FixedSubset V r) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     fixedSubsetComplEquiv hr (fixedSubsetMap e S) =</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       fixedSubsetMap e (fixedSubsetComplEquiv hr S) := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   apply Subtype.ext</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   ext x</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   simp only [fixedSubsetComplEquiv, fixedSubsetMap, Equiv.coe_fn_mk,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     Finset.mem_compl, Finset.mem_map_equiv]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem fixedSubset_mgf_min</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     {r : ℕ} {V : Type*} [Fintype V]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     [Nonempty (FixedSubset V r)] (hr : r ≤ Fintype.card V)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (f : FixedSubset V r → ℝ) {b : ℝ} (hb : 0 ≤ b)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hexchange : ∀ S u v, |f S - f (fixedSubsetMap (Equiv.swap u v) S)| ≤ b)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (t : ℝ) :</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (FiniteLaw.uniform (FixedSubset V r)).expectation</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (fun S =&gt; Real.exp (t * (f S - (FiniteLaw.uniform (FixedSubset V r)).expectation f))) ≤</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       Real.exp (t ^ 2 * (min r (Fintype.card V - r) : ℕ) * b ^ 2 / 8) := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   by_cases hsmall : r ≤ Fintype.card V - r</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · simpa only [min_eq_left hsmall] using fixedSubset_mgf hr f hb hexchange t</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   · rw [min_eq_right (le_of_not_ge hsmall)]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let e := fixedSubsetComplEquiv (V := V) hr</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let : Nonempty (FixedSubset V (Fintype.card V - r)) :=</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       fixedSubset_nonempty (Nat.sub_le _ _)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hs (S : FixedSubset V (Fintype.card V - r)) (u v : V) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         e.symm (fixedSubsetMap (Equiv.swap u v) S) =</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>           fixedSubsetMap (Equiv.swap u v) (e.symm S) := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       apply e.injective</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       rw [e.apply_symm_apply, fixedSubsetComplEquiv_map, e.apply_symm_apply]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have hchange : ∀ S u v, |f (e.symm S) - f (e.symm (fixedSubsetMap (Equiv.swap u v) S))| ≤ b := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       intro S u v</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       rw [hs]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       exact hexchange _ _ _</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have h := fixedSubset_mgf (Nat.sub_le (Fintype.card V) r) (fun S =&gt; f (e.symm S)) hb hchange t</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have he (Y : FixedSubset V r → ℝ) :</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         (FiniteLaw.uniform (FixedSubset V (Fintype.card V - r))).expectation (fun S =&gt; Y (e.symm S)) =</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (FiniteLaw.uniform (FixedSubset V r)).expectation Y := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       rw [← finiteLaw_map_expectation, finiteLaw_uniform_map_equiv e.symm]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     rw [he f, he (fun S =&gt; Real.exp (t * (f S -</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (FiniteLaw.uniform (FixedSubset V r)).expectation f)))] at h</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact h</span>
+<span id="L60"><a href="#L60" class="ln">  60</a> </span>
+<span id="L61"><a href="#L61" class="ln">  61</a> theorem fixedSubset_absolute_tail</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     {r : ℕ} {V : Type*} [Fintype V]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     [Nonempty (FixedSubset V r)] (hr : r ≤ Fintype.card V)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (f : FixedSubset V r → ℝ) {b : ℝ} (hb : 0 ≤ b)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (hexchange : ∀ S u v, |f S - f (fixedSubsetMap (Equiv.swap u v) S)| ≤ b)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     {t : ℝ} (ht : 0 ≤ t) :</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (FiniteLaw.uniform (FixedSubset V r)).probability</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (fun S =&gt; t ≤ |f S - (FiniteLaw.uniform (FixedSubset V r)).expectation f|) ≤</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       2 * Real.exp (-2 * t ^ 2 / ((min r (Fintype.card V - r) : ℕ) * b ^ 2)) := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   apply finiteLaw_mgf_absolute_tail _ _ (by positivity) _ ht</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   intro u</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   simpa only [mul_assoc] using fixedSubset_mgf_min hr f hb hexchange u</span>
+<span id="L73"><a href="#L73" class="ln">  73</a> </span>
+<span id="L74"><a href="#L74" class="ln">  74</a> end Oberwolfach</span></pre></html>

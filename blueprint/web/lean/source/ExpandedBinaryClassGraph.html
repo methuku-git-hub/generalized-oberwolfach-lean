@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExpandedBinaryClassGraph.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExpandedBinaryClassGraph.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ExpandedBinaryClassLaw</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongPreparationPhysicalStates</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.ColourRestriction</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Binary colour zero is precisely the sampled class graph. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem expanded_binary_class_graph</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {V U Γ Color:Type} [Fintype V] [LinearOrder V] [Fintype U] [DecidableEq U] [Fintype Γ] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (P:SimpleGraph V) (σ:∀e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     edgeColourGraph P (fun e=&gt;(expandedBinaryClass (σ (Sum.inl e))).1) 0=</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       longPhysicalStateGraph P σ {0,1,2,3,4}:=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   ext x y</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   change P.Adj x y ∧ (expandedBinaryClass (σ (Sum.inl s(x,y)))).1=0 ↔</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     P.Adj x y ∧ (σ (Sum.inl s(x,y))).1∈({0,1,2,3,4}:Finset (Fin 6))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   rcases σ (Sum.inl s(x,y)) with ⟨a,b⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   fin_cases a &lt;;&gt; simp [expandedBinaryClass]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedBalancedWheelPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedBalancedWheelPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PositiveMarkedWheelWeights</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedWheelPacking</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Exact marked degree identities and a positive approximate weighting give</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> one packing with simultaneous auxiliary and physical leftover bounds. The</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> weight and host error tolerances are selected before the requested leftover</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> tolerance, and the separation parameter is supplied afterwards. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 2400000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_balanced_wheel_packing (α p₀ : ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hα : 0&lt;α) (hαmax : α≤1) (hp₀ : 0&lt;p₀) (hp₀max : p₀≤1/2) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ c₀ : ℕ,∀ k : ℕ,c₀≤k+2 → ∀ β L bminus bplus : ℝ,0&lt;β → 1≤L → 0&lt;bminus → 0&lt;bplus →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ ε η₀ δ₀ : ℝ,0&lt;ε ∧ 0&lt;η₀ ∧ 0&lt;δ₀ ∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ b : ℕ,∀ γ : ℝ,0&lt;γ → ∃ n₀ : ℕ,</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ (V E K U : Type)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       [Fintype V] [Fintype E] [Fintype K] [Fintype U] [DecidableEq V] [DecidableEq U],</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (tail head : E → V) (ktail khead : K → V) (π : Equiv.Perm V),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     Function.Injective (markedPhysicalEdge tail head ktail khead π) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀ (p D : ℝ),p₀≤p → p≤1/2 → n₀≤Fintype.card V →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (Fintype.card V:ℝ)/2≤D → D≤2*Fintype.card V →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ x,|occurrenceDegree tail x-p*D|≤ε*Fintype.card V) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀ x,|occurrenceDegree head x-p*D|≤ε*Fintype.card V) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀ x,|occurrenceDegree ktail x-p*D/(k+1:ℝ)|≤ε*Fintype.card V) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ x,|occurrenceDegree khead x-p*D/(k+1:ℝ)|≤ε*Fintype.card V) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ x y,x≠y → α*p^2*Fintype.card V≤</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ((Finset.univ.filter (fun z =&gt; (∃ e,tail e=x ∧ head e=z) ∧ (∃ e,tail e=z ∧ head e=y))).card:ℝ)) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (∀ S T : Finset V,(1-2*min (α/16) (p/128))*Fintype.card V&lt;(S.card:ℝ)+T.card →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (α*p/16)*Fintype.card V*min (S.card:ℝ) T.card≤</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       ((Finset.univ.filter (fun e =&gt; tail e∈S ∧ head e∈T)).card:ℝ)) →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∀ H₀ Hₖ : V → U → Prop,</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (∀ v u,¬(H₀ v u ∧ Hₖ v u)) →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∀ C&#x27; : MarkedCycleTuple tail head ktail khead (k+1) π b,</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       β*Fintype.card V≤(Fintype.card {u // MarkedHubCompatible H₀ Hₖ C&#x27;.val u}:ℝ)) →</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ v,occurrenceDegree (Sum.elim tail ktail) v=occurrenceDegree (Sum.elim head khead) v) →</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ v,occurrenceDegree khead v=∑ u,if Hₖ v u then (1:ℝ) else 0) →</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ v,occurrenceDegree (Sum.elim tail ktail) v=</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (∑ u,if H₀ v u then (1:ℝ) else 0)+(∑ u,if Hₖ v u then (1:ℝ) else 0)) →</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (∀ u,(∑ v,if H₀ v u then (1:ℝ) else 0)=(k+1:ℝ)*(∑ v,if Hₖ v u then (1:ℝ) else 0)) →</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     0&lt;Fintype.card U → Fintype.card U≤Fintype.card V →</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     ∀ (ps qs : Bool → U → ℝ) (δsp Dexc : ℝ),</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (∀ j,SparseIntersectionData (if j then Hₖ else H₀) (ps j) (qs j) L δsp Dexc) →</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     δsp+Dexc/(Fintype.card V:ℝ)+1/(Fintype.card U:ℝ)≤δ₀ →</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     ∀ i : Bool → Fin (k+2),(∀ j,markedPositionType (i j)=j) →</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (∀ u u&#x27; : U,u≠u&#x27; → β*(Fintype.card V:ℝ)^(k+2)≤</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (Fintype.card (CommonMarkedCycle tail head ktail khead (k+1) π b H₀ Hₖ u u&#x27;):ℝ)) →</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (∀ j,∀ Q : BipartiteFourCycle (if j then Hₖ else H₀),</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       β*(Fintype.card V:ℝ)^(k+1)≤</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (Fintype.card (MarkedReplacementPair tail head ktail khead (k+1) π b H₀ Hₖ (i j)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         Q.val.1.1 Q.val.1.2 Q.val.2.1 Q.val.2.2):ℝ)) →</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ∀ η : ℝ,0≤η → η≤η₀ →</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     ∀ ψ : MarkedWheel tail head ktail khead (k+1) π b H₀ Hₖ → ℝ,</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (∀ e,|markedWheelRimLoad ψ e-1|≤η) →</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (∀ j v u,|markedSpokeResidual ψ j v u|≤η) →</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (∀ W,bminus/(Fintype.card V:ℝ)^(k+1)≤ψ W ∧ ψ W≤bplus/(Fintype.card V:ℝ)^(k+1)) →</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     ∃ M : Finset (MarkedWheel tail head ktail khead (k+1) π b H₀ Hₖ),</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (∀ W∈M,∀ Z∈M,W≠Z → Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources Z)) ∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (∀ x : V⊕U,((markedIncidentEdges tail head ktail khead π H₀ Hₖ false x \</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         M.biUnion markedActiveResources).card : ℝ)≤γ*Fintype.card V) ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (∀ x : V⊕U,((markedPhysicalIncidentEdges tail head ktail khead π H₀ Hₖ x \</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         M.biUnion markedWheelPhysicalResources).card : ℝ)≤γ*Fintype.card V) := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   obtain ⟨c₀,hc₀⟩ := positive_marked_wheel_weights_uniform_parameters</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     α p₀ hα hαmax hp₀ hp₀max</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   refine ⟨max c₀ 4,?_⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   intro k hk β L bminus bplus hβ hL hbm hbp</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hkm : 3≤k+1 := by omega</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   obtain ⟨ε,η₀,δ₀,A,hε,hη₀,hδ₀,hA,hweights⟩ := hc₀ k ((le_max_left _ _).trans hk) β L bminus bplus hβ hL hbm hbp</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   refine ⟨ε,η₀,δ₀,hε,hη₀,hδ₀,?_⟩</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   intro b γ hγ</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   obtain ⟨NW,hW⟩ := hweights b</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   obtain ⟨NP,hP⟩ := marked_wheel_packing_bounded_hubs (k+1) hkm A γ hA hγ</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   refine ⟨max NW NP,?_⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   intro V E K U _ _ _ _ _ _ tail head ktail khead π hphys p D hp hpmax hn hDlo hDhi</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     hdo hdi hdko hdki htwo hcut H₀ Hₖ hdisj hhub hdir hK hout hcol hu huV</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     ps qs δsp Dexc hdata hsmall i hipos hcommon hpaths η hη hηsmall ψ hRerr hSerr hψ</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   obtain ⟨w,hwR,hwS,hwb⟩ := hW V E K U tail head ktail khead π hphys p D hp hpmax</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     ((le_max_left _ _).trans hn) hDlo hDhi hdo hdi hdko hdki htwo hcut H₀ Hₖ</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     hhub hdir hK hout hcol hu ps qs δsp Dexc hdata hsmall i hipos hcommon hpaths η hη hηsmall ψ hRerr hSerr hψ</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   exact hP V U E K ((le_max_right _ _).trans hn) huV tail head ktail khead π b H₀ Hₖ hphys hdisj w</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     (fun W=&gt;⟨(by positivity : 0≤(bminus/2)/(Fintype.card V:ℝ)^(k+1)).trans (hwb W).1,(hwb W).2⟩) hwR</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     (by</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       intro j v u</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       have hh := hwS j v u</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>       cases j &lt;;&gt; convert hh using 1 &lt;;&gt; simp only [ite_true,Bool.false_eq_true,ite_false] &lt;;&gt; congr!)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a> </span>
+<span id="L91"><a href="#L91" class="ln">  91</a> end Oberwolfach</span></pre></html>

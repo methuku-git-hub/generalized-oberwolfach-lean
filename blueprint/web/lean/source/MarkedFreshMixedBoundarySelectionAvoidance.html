@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedFreshMixedBoundarySelectionAvoidance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedFreshMixedBoundarySelectionAvoidance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFreshHubCommonEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedMixedBoundarySelectionAvoidance</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Mixed marked boundary choices avoid the actual graph used earlier.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> Its full degree is charged before invoking the fixed-weight common event.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> Actual mixed boundary choices from fixed marked-cycle weights and the</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> five endpoint degree/cut blocks. The single-factor premise of the selection</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> lemma is proved here, uniformly over every later physical forbidden graph. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option synthInstance.maxSize 512</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 14000000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_fresh_mixed_boundary_selection_avoiding (m:ℕ) (hm:3&lt;m+1) (β κ bLo B:ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hβ:0&lt;β) (hκ:0&lt;κ) (hbLo:0&lt;bLo) (hB:0≤B) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ η ζ:ℝ,0&lt;η ∧ 0&lt;ζ ∧ ∀ (p:ℝ) (hp:0&lt;p) (hp1:p≤1) (ρ:ℝ) (hρ:0&lt;ρ) (q:ℕ),∃ N:ℕ,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ (V U E K J I:Type) [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       [Fintype J] [DecidableEq J] [Fintype I] [DecidableEq I],</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       N≤Fintype.card V→Fintype.card J≤(Fintype.card V)^2→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (tail head:E→V) (ktail khead:K→V) (π:Equiv.Perm V) (b:ℕ)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (H₀ HK:V→U→Prop) (u:J→U),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ j v,¬(H₀ v (u j)∧HK v (u j)))→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       Function.Injective (markedPhysicalEdge tail head ktail khead π)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ j v z,H₀ v (u j)→HK z (u j)→v≠π z)→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ j,κ*Fintype.card V≤((Finset.univ.filter (fun v=&gt;H₀ v (u j)∨HK v (u j))).card:ℝ))→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ j,β*(Fintype.card V:ℝ)^(m+1)≤Fintype.card (HubMarkedCycle tail head ktail khead m π b H₀ HK (u j)))→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ j i,∀ v v&#x27;:V,v≠v&#x27;→(if i then HK v (u j) else H₀ v (u j))→(if i then HK v&#x27; (u j) else H₀ v&#x27; (u j))→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         β*(Fintype.card V:ℝ)^m≤Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m π b H₀ HK i v v&#x27; (u j) (u j)))→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ∀ wt:∀ j,HubMarkedCycle tail head ktail khead m π b H₀ HK (u j)→ℝ,</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ j C,bLo/(Fintype.card V:ℝ)^m≤wt j C ∧ wt j C≤B/(Fintype.card V:ℝ)^m)→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ j v,H₀ v (u j)∨HK v (u j)→|1-hypergraphWeightedDegree (hubMarkedCycleVertices (u j)) (wt j) v|≤η)→</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       1-1/(Fintype.card V:ℝ)^q≤</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (FiniteLaw.pi (fun _:Sym2 (V⊕U)=&gt;FiniteLaw.retentionCoin p hp.le hp1)).probability</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (fun σ=&gt;∀ Y:J→Finset V,(∀ j v,v∈Y j→H₀ v (u j)∨HK v (u j))→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>           (∀ j,((Y j).filter (fun v=&gt;H₀ v (u j))).card=m*((Y j).filter (fun v=&gt;HK v (u j))).card)→</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>           (∀ j,((changed (Y j) ((Finset.univ.filter (fun v=&gt;H₀ v (u j)∨HK v (u j))).filter</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>             (fun v=&gt;σ s(Sum.inl v,Sum.inr (u j))=true))).card:ℝ)≤ζ*(p*Fintype.card V))→</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         ∀ (A₀ A₁ X₀ X₁:I→Finset V) (Y₀ Y₁:I→Finset U),</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>           (∀ i,Disjoint (Y₀ i) (Y₁ i))→</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>           (∀ i,(A₀ i).card+(A₁ i).card=(Y₀ i).card+(Y₁ i).card)→</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>           (∀ i,(X₀ i).card+(X₁ i).card=(Y₀ i).card+(Y₁ i).card)→</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>           (∀ i,(A₁ i).card=(Y₁ i).card)→</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         ∀ degree tau lam loss:ℝ,0&lt;tau→0&lt;lam→</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>           ∀ (Z:SimpleGraph (V⊕U)) (δ:ℝ),(∀ z,(Z.degree z:ℝ)≤δ)→</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           2*tau+(2*(2*b+1):ℕ)≤degree→(2*(2*b+1):ℕ)&lt;lam*tau→</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           (∀ i,((X₁ i).card:ℝ)+2*tau≤(Y₀ i).card)→loss≤lam*tau→loss≤ζ*(p*Fintype.card V)→</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>           (∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈A₁ i) (fun y=&gt;y∈Y₁ i) (degree+loss) tau (2*lam))→</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>           (∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈A₀ i) (fun y=&gt;y∈Y₀ i) (degree+loss) tau (2*lam))→</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>           (∀ i,BipartiteBlockBounds HK (fun a=&gt;a∈X₁ i) (fun y=&gt;y∈Y₀ i) (degree+loss) tau (2*lam))→</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>           (∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈X₀ i) (fun y=&gt;y∈Y₀ i) (degree+loss) tau (2*lam))→</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>           (∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈X₀ i) (fun y=&gt;y∈Y₁ i) (degree+loss) tau (2*lam))→</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>           4*(ρ*Real.sqrt ρ*Fintype.card (V⊕U))+4*(Nat.ceil (4*(ρ*Real.sqrt ρ*Fintype.card (V⊕U))):ℝ)+δ≤loss→</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         let S:J⊕I→Finset (V⊕U):=Sum.elim</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>           (fun j=&gt;(Y j∪(Y j).image π).image Sum.inl)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           (fun i=&gt;ordinaryInnerVertices (A₀ i∪A₁ i∪(X₀ i∪X₁ i)) (Y₀ i∪Y₁ i));</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         (∀ i j,i≠j→((S i∩S j).card:ℝ)≤ρ^2*Fintype.card (V⊕U))→</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (∀ z,((Finset.univ.filter (fun i=&gt;z∈S i)).card:ℝ)≤ρ*Fintype.card (V⊕U))→</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         ∃ P:∀ j,MarkedHubFactorOn tail head ktail khead m π b H₀ HK (u j) (Y j),</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         ∃ Q:∀ i,MarkedEndpointPairing (A₀ i) (A₁ i) (X₀ i) (X₁ i) (Y₀ i) (Y₁ i) H₀ HK π b,</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         let G:J⊕I→SimpleGraph (V⊕U):=Sum.elim (fun j=&gt;(P j).graph) (fun i=&gt;(Q i).graph);</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>           (∀ i j,i≠j→Disjoint (G i) (G j)) ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>           (∀ i,Disjoint (G i) Z) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>           ∀ z,((⨆ i,G i).degree z:ℝ)≤4*(ρ*Fintype.card (V⊕U))) := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   obtain ⟨η,ζ,hη,hζ,hbase⟩:=marked_fresh_hub_common_event m hm β κ bLo B hβ hκ hbLo hB</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   refine ⟨η,ζ,hη,hζ,?_⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   intro p hp hp1 ρ hρ q</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   obtain ⟨Nf,hNf⟩:=hbase p hp hp1 q</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨Ns,hNs⟩:=select_mixed_marked_boundary_avoiding ρ hρ</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   refine ⟨max Nf Ns,?_⟩</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   intro V U E K J I _ _ _ _ _ _ _ _ hn hJ tail head ktail khead π b H₀ HK u</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     hd hphys hsep hsize hcycles hpaths wt hw herr</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hh:=hNf V U E K J (by omega) hJ tail head ktail khead π b H₀ HK u</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     hd hphys hsep hsize hcycles hpaths wt hw herr</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   apply hh.trans</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   apply finiteLaw_probability_mono</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   intro σ hσ Y hY hratio hchange A₀ A₁ X₀ X₁ Y₀ Y₁ hYY hbalA hbalX hmarked</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     degree tau lam loss htau hlam Z δ hZ hdegree hmargin hgap hcutloss hloss</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     B₁ B₂ B₃ B₄ B₅ hbudget S hinter hmem</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hn&#x27;:Ns≤Fintype.card (V⊕U):=by simp only [Fintype.card_sum];omega</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   apply hNs V U E K J I hn&#x27; tail head ktail khead m b π H₀ HK u Y</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     A₀ A₁ X₀ X₁ Y₀ Y₁ hsep hYY hbalA hbalX hmarked degree tau lam loss htau hlam Z δ hZ</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     hdegree hmargin hgap hcutloss B₁ B₂ B₃ B₄ B₅ hbudget _ hinter hmem</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   intro j F hF</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   obtain ⟨D,hD,hdis,_hdeg,_hedges⟩:=hσ j (Y j) (hY j) (hratio j) (hchange j) F</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     (fun v=&gt;(hF v).trans hloss)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   exact ⟨⟨D,hD.1,hD.2⟩,hdis⟩</span>
+<span id="L90"><a href="#L90" class="ln">  90</a> </span>
+<span id="L91"><a href="#L91" class="ln">  91</a> end Oberwolfach</span></pre></html>

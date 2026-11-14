@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TriangleTransformerUniformBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TriangleTransformerUniformBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TriangleUniformBudgetArithmetic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Uniformize the explicit triangle-transformer budgets: the spoke error</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> is chosen before the bounded root complexity and the order thresholds. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 15000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem triangle_active_hubs_le_spokes {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (H:V→U→Prop):Fintype.card {u:U // ∃v,H v u}≤Fintype.card {e:V×U // H e.1 e.2}:=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   let f:{u:U // ∃v,H v u}→{e:V×U // H e.1 e.2}:=fun u=&gt;</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ⟨(Classical.choose u.property,u.val),Classical.choose_spec u.property⟩</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   apply Fintype.card_le_of_injective f</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   intro u v h</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   apply Subtype.ext</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   exact congrArg (fun e:{e:V×U // H e.1 e.2}=&gt;e.val.2) h</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> theorem triangle_hub_spoke_count_le {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (H:V→U→Prop) (u:U):</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ((Finset.univ:Finset V).filter (fun v=&gt;H v u)).card≤Fintype.card {e:V×U // H e.1 e.2}:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   rw [←spoke_index_fiber_card H u]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   exact Finset.card_le_univ _</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem triangle_transformer_uniform_bounded_inputs</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (β:ℝ) (hβ:0&lt;β) (hβ1:β≤1):</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∃ ε₀:ℝ,0&lt;ε₀ ∧ ∀ q:ℕ,∃ s₀:ℕ,∀ s:ℕ,s₀≤s→3∣s→∃ N₀ M₀:ℕ,</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∀ (V U:Type) [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U],</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     N₀≤Fintype.card V→M₀≤Fintype.card U→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∀ (G Q:SimpleGraph V) (H₀ H:V→U→Prop) (φ:V→V) (ψ:U→U)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (R W:Finset V) (B:Finset U) (hRW:R⊆W)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hbalance:∀ v,G.degree v=2*((Finset.univ:Finset U).filter (H₀ v)).card)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hdiv:∀ u,3∣((Finset.univ:Finset V).filter (fun v=&gt;H₀ v u)).card)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hroot:∀ v∈G.support,v∈R∧φ v∈R)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hcross:∀ v∈G.support,∀ w∈G.support,φ v≠w)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hu:∀ u,(∃v,H₀ v u)→u≠ψ u)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hQ:G≤Q) (hφQ:∀ v w,G.Adj v w→Q.Adj (φ v) (φ w))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hφedge:Function.Injective (fun e:G.edgeFinset=&gt;s(φ e.val.out.1,φ e.val.out.2)))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hψedge:Function.Injective (fun e:{e:V×U // H₀ e.1 e.2}=&gt;(φ e.val.1,ψ e.val.2)))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hH:∀ v u,H₀ v u→H v u∧H (φ v) (ψ u))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hB:∀ e:{e:V×U // H₀ e.1 e.2},e.val.2∈B∧ψ e.val.2∈B)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hdeg:∀ v,(3/4+β)*(Fintype.card V:ℝ)≤(Q.degree v:ℝ))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (ε:ℝ) (hε:0≤ε) (hεsmall:ε≤ε₀)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hnearV:∀ u,(((Finset.univ:Finset V).filter (fun v=&gt;¬H v u)).card:ℝ)≤ε*(Fintype.card V:ℝ))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hnearU:∀ v,(((Finset.univ:Finset U).filter (fun u=&gt;¬H v u)).card:ℝ)≤ε*(Fintype.card U:ℝ))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hw:W.card≤q) (hr:R.card≤q) (hb:B.card≤q) (he:G.edgeFinset.card≤q)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (ht:Fintype.card {e:V×U // H₀ e.1 e.2}≤q) (hd:Fintype.card (Σ v,G.neighborSet v)≤q),</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     ∃ W&#x27; N:Finset V,∃ T:Finset (Sym2 V⊕(V×U)),∃ B&#x27;:Finset U,</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       W⊆W&#x27; ∧ W&#x27;.card≤W.card+2*(G.edgeFinset.card+Fintype.card {e:V×U // H₀ e.1 e.2})+</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         6*Fintype.card (Σ v,G.neighborSet v) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       Disjoint N W&#x27; ∧ N.card≤q*s ∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       IsResourceTransformer (ordinaryWheelResources (P:=Q) (F:=⊥) (Hbase:=H) (r:=3))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         (ordinaryHostResources G H₀) (transformerImageResources G H₀ φ ψ) T ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       T⊆ordinaryHostResources Q H ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       B&#x27;.card≤G.edgeFinset.card+2*Fintype.card {u:U // ∃v,H₀ v u} ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (∀ v z,Sum.inr (v,z)∈T→z∈B&#x27;) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (∀ v w,Sum.inl s(v,w)∈T→v∈W&#x27;∪N∧w∈W&#x27;∪N) ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (∀ v z,Sum.inr (v,z)∈T→v∈W&#x27;∪N) ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       (∀ v∈R,∀ w∈R,Sum.inl s(v,w)∉T) ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (∀ v∈R,∀ z∈B,Sum.inr (v,z)∉T) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (∀ v∈W,∀ w,Sum.inl s(v,w)∈T→v∈R) ∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (∀ v∈W,∀ z,Sum.inr (v,z)∈T→v∈R) ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (∀ v z,z∈B→Sum.inr (v,z)∈T→∃ u,(∃x,H₀ x u) ∧ (z=u∨z=ψ u)) :=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   refine ⟨β/64,by positivity,?_⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   intro q</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   obtain ⟨s₀,hs⟩:=triangle_dense_transformer_from_explicit_budgets q (2*q) β hβ hβ1</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   refine ⟨s₀,?_⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   intro s hs₀ hsdiv</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   obtain ⟨Nbase,hbase⟩:=hs s hs₀ hsdiv</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨M,hM⟩:=exists_nat_gt (64*(11*(q:ℝ)+1)/β)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   refine ⟨max Nbase M,4*q+1,?_⟩</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   intro V U _ _ _ _ hn hm G Q H₀ H φ ψ R W B hRW hbalance hdiv hroot hcross hu hQ hφQ hφedge hψedge hH hB hdeg ε hε hεsmall hnearV hnearU hw hr hb he ht hd</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hnbase:Nbase≤Fintype.card V:=(le_max_left _ _).trans hn</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hMn:(M:ℝ)≤Fintype.card V:=Nat.cast_le.mpr ((le_max_right _ _).trans hn)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have hnβ:64*(11*(q:ℝ)+1)≤β*(Fintype.card V:ℝ):=by</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     have hh:64*(11*(q:ℝ)+1)&lt;(M:ℝ)*β:=(div_lt_iff₀ hβ).mp hM</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     nlinarith</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   obtain ⟨hεβ,hEdge,hHub,hStage⟩:=triangle_budgets_from_uniform_root_bounds β ε q</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     (Fintype.card V) (Fintype.card U) W.card R.card G.edgeFinset.card</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (Fintype.card {e:V×U // H₀ e.1 e.2}) (Fintype.card (Σ v,G.neighborSet v)) B.card</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     hβ hβ1 hε hεsmall hnβ hm hw hr he ht hd hb</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   have hsize:∀ u,2*((Finset.univ:Finset V).filter (fun v=&gt;H₀ v u)).card≤2*q:=by</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     intro u</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     exact Nat.mul_le_mul_left 2 ((triangle_hub_spoke_count_le H₀ u).trans ht)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have hactive:Fintype.card {u:U // ∃v,H₀ v u}≤q:=(triangle_active_hubs_le_spokes H₀).trans ht</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   exact hbase V U hnbase G Q H₀ H φ ψ R W B hRW hbalance hdiv hsize hactive hroot hcross hu hQ hφQ</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     hφedge hψedge hH hB hdeg ε hε hεβ hnearV hnearU hEdge hHub hStage</span>
+<span id="L89"><a href="#L89" class="ln">  89</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,62 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>InnerRequiredRawOccurrenceLocal.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>InnerRequiredRawOccurrenceLocal.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.InnerRequiredRawOccurrence</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RetentionRestrictionLocalEvent</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.InnerRequiredRawCount</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.RawIntervalUnassignedColumnCount</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Bound the number of inner indices prescribing a fixed physical label by</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> unassigned, retention-changed and unused-ordinary occurrences. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 16000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem inner_required_targets_occurrence_from_local_raw_cover</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (π:Equiv.Perm V) (d:ℕ) (σ:RawIntervalFamilyOutcome V U Bool Bool)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (t:ℕ) (J:StartRetentionOutcome (rawStartHubSet π d σ false) t)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (inner:Finset U) (vertices:Finset V) (absorber occupied unused:U→Finset V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (happrox:∀w x,rawIntervalFamilyState π d σ (x,w)=some (Sum.inl true)→x∈occupied w)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hordinary:∀w x,rawIntervalFamilyState π d σ (x,w)=some (Sum.inr true)→x∈occupied w ∨ x∈unused w)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (ζ:ℝ) (hrows:RetainedRestrictionLocalGood π d σ false t vertices inner ζ J):</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀v∈vertices,(((Finset.univ:Finset U).filter (fun w=&gt;v∈innerRequiredTargets inner vertices</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (rawReservedSpokeList π d σ) (retainedFinalMarkedAt π d σ t J) absorber occupied w)).card:ℝ)≤</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       rawIntervalUnassignedColumnCount π d σ v inner+ζ*inner.card+</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       ((inner.filter (fun w=&gt;v∈unused w)).card:ℝ):=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   intro v hv</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let C:=inner.filter (fun w=&gt;v∈rawUnassignedAt π d σ w)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let T:=inner.filter (fun w=&gt;v∈rawRetentionChangedAt π d σ t J w)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let D:=inner.filter (fun w=&gt;v∈unused w)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hsub:(Finset.univ.filter (fun w=&gt;v∈innerRequiredTargets inner vertices</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (rawReservedSpokeList π d σ) (retainedFinalMarkedAt π d σ t J) absorber occupied w))⊆(C∪T)∪D:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     intro w hw</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hwZ: v∈innerRequiredTargets inner vertices (rawReservedSpokeList π d σ)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (retainedFinalMarkedAt π d σ t J) absorber occupied w:=(Finset.mem_filter.mp hw).2</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hi:w∈inner:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       by_contra h;have :=(inner_required_targets_properties inner vertices (rawReservedSpokeList π d σ)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (retainedFinalMarkedAt π d σ t J) absorber occupied).1 w h</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       rw [this] at hwZ</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       exact Finset.notMem_empty _ hwZ</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hcover:=inner_required_targets_raw_cover π d σ t J inner vertices absorber occupied unused happrox hordinary w hwZ</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     simp only [Finset.mem_union,Finset.mem_inter] at hcover</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     rcases hcover with (⟨ha,_⟩|⟨ht,_⟩)|⟨hu,_⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     · exact Finset.mem_union_left _ (Finset.mem_union_left _ (Finset.mem_filter.mpr ⟨hi,ha⟩))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     · exact Finset.mem_union_left _ (Finset.mem_union_right _ (Finset.mem_filter.mpr ⟨hi,ht⟩))</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     · exact Finset.mem_union_right _ (Finset.mem_filter.mpr ⟨hi,hu⟩)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hcard:=Finset.card_le_card hsub</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have h12:=Finset.card_union_le C T</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have h123:=Finset.card_union_le (C∪T) D</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hT:((T.card:ℝ))≤ζ*inner.card:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     simpa [T,rawRetentionChangedAt,RetainedRestrictionLocalGood] using (hrows.2 v hv)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hC:((C.card:ℝ))=rawIntervalUnassignedColumnCount π d σ v inner:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact raw_unassigned_restricted_column_card π d σ v inner</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hcardR:=show (((Finset.univ:Finset U).filter (fun w=&gt;v∈innerRequiredTargets inner vertices</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (rawReservedSpokeList π d σ) (retainedFinalMarkedAt π d σ t J) absorber occupied w)).card:ℝ)≤(((C∪T)∪D).card:ℝ) by exact_mod_cast hcard</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have h12R:=show (((C∪T).card:ℝ))≤(C.card:ℝ)+(T.card:ℝ) by exact_mod_cast h12</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have h123R:=show ((((C∪T)∪D).card:ℝ))≤((C∪T).card:ℝ)+(D.card:ℝ) by exact_mod_cast h123</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   dsimp only [D] at h123R</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   linarith</span>
+<span id="L59"><a href="#L59" class="ln">  59</a> end Oberwolfach</span></pre></html>

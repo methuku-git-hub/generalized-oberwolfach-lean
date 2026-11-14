@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSpokeResiduals.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSpokeResiduals.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedHostBalance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Exact rim loads force zero spoke-residual row sums; the hub degree</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> identity gives the marked-to-ordinary column ratio. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1600000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def markedSpokeResidual {V U E K : Type*} [Fintype V] [Fintype U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {tail head : E → V} {ktail khead : K → V} {m : ℕ} {π : Equiv.Perm V} {b : ℕ}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {H₀ Hₖ : V → U → Prop}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (ψ : MarkedWheel tail head ktail khead m π b H₀ Hₖ → ℝ) (j : Bool) (v : V) (u : U) : ℝ :=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   (if (if j then Hₖ v u else H₀ v u) then 1 else 0)-markedWheelSpokeLoad ψ j v u</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> theorem markedSpokeResidual_outside {V U E K : Type*} [Fintype V] [Fintype U]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     [DecidableEq V] [DecidableEq U]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     {tail head : E → V} {ktail khead : K → V} {m : ℕ} {π : Equiv.Perm V} {b : ℕ}</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     {H₀ Hₖ : V → U → Prop}</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (ψ : MarkedWheel tail head ktail khead m π b H₀ Hₖ → ℝ) (j : Bool) (v : V) (u : U)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hm : ¬(if j then Hₖ v u else H₀ v u)) : markedSpokeResidual ψ j v u=0 := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   rw [markedSpokeResidual,if_neg hm,markedWheelSpokeLoad_outside ψ j v u hm,sub_self]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem markedSpokeResidual_zero_rows {V U E K : Type*} [Fintype V] [Fintype U]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     [Fintype E] [Fintype K] [DecidableEq V] [DecidableEq U]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     {tail head : E → V} {ktail khead : K → V} {m : ℕ} {π : Equiv.Perm V} {b : ℕ}</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     {H₀ Hₖ : V → U → Prop}</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hinj : Function.Injective (fun e =&gt; (tail e,head e)))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hkinj : Function.Injective (fun e =&gt; (ktail e,khead e)))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hK : ∀ v,occurrenceDegree khead v=∑ u,if Hₖ v u then (1:ℝ) else 0)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hout : ∀ v,occurrenceDegree (Sum.elim tail ktail) v=</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∑ u,if H₀ v u then (1:ℝ) else 0)+(∑ u,if Hₖ v u then (1:ℝ) else 0))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (ψ : MarkedWheel tail head ktail khead m π b H₀ Hₖ → ℝ)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hR : ∀ e,markedWheelRimLoad ψ e=1) (j : Bool) (v : V) :</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (∑ u,markedSpokeResidual ψ j v u)=0 := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hmark := markedWheelRimLoad_marked_head hkinj ψ v</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hall := markedWheelRimLoad_outgoing hinj hkinj ψ v</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have he : markedWheelRimLoad ψ=(fun _ =&gt; (1:ℝ)) := funext hR</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   rw [he,occurrenceSumLinear_one,hK] at hmark</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   rw [he,occurrenceSumLinear_one,hout] at hall</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   cases j</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   · simp only [markedSpokeResidual,Bool.false_eq_true,ite_false,Finset.sum_sub_distrib]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     linarith</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   · simp only [markedSpokeResidual,ite_true,Finset.sum_sub_distrib]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     linarith</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> theorem markedSpokeResidual_column_ratio {V U E K : Type*} [Fintype V] [Fintype U]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     [DecidableEq V] [DecidableEq U]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     {tail head : E → V} {ktail khead : K → V} {m : ℕ} {π : Equiv.Perm V} {b : ℕ}</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     {H₀ Hₖ : V → U → Prop}</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hhub : ∀ u,(∑ v,if H₀ v u then (1:ℝ) else 0)=(m:ℝ)*(∑ v,if Hₖ v u then (1:ℝ) else 0))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (ψ : MarkedWheel tail head ktail khead m π b H₀ Hₖ → ℝ) (u : U) :</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (∑ v,markedSpokeResidual ψ false v u)=(m:ℝ)*(∑ v,markedSpokeResidual ψ true v u) := by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   simp only [markedSpokeResidual,Bool.false_eq_true,ite_false,ite_true,Finset.sum_sub_distrib]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   rw [hhub,markedWheelSpokeLoad_column_ratio]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   ring</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TransferPhysicalRetention.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TransferPhysicalRetention.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TransferPhysicalPatterns</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PatternSurvivalMean</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.ProductFailureBounds</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Concentration and a simultaneous lower survival event for the actual</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> transfer families, with unequal physical-edge retention probabilities allowed. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 1200000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (r : ℕ) (hr : 3 ≤ r) (P F : SimpleGraph V) (H : V → U → Prop) (v : V) (u u&#x27; : U)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> def transferSurvivalSum (σ : Sym2 V → Bool) : ℝ :=</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   ∑ T : OrdinaryTransferConfiguration hr P F H v u u&#x27;,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (1/(Fintype.card V:ℝ)^(r^2))*patternValue (transferRequiredEdges T) (fun _=&gt;true) σ</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem transferSurvivalSum_tail (hn : 0&lt;Fintype.card V)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (μ : Sym2 V → FiniteLaw Bool) (t : ℝ) (ht : 0&lt;t) :</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (FiniteLaw.pi μ).probability (fun σ=&gt;t≤</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       |transferSurvivalSum r hr P F H v u u&#x27; σ-</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         ∑ T : OrdinaryTransferConfiguration hr P F H v u u&#x27;,</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>           (1/(Fintype.card V:ℝ)^(r^2))*∏ e∈transferRequiredEdges T,(μ e).mass true|)≤</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       2*Real.exp (-2*t^2/((r:ℝ)^2*((1+2*r)*r)/Fintype.card V)) := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have htotal : (∑ _ : OrdinaryTransferConfiguration hr P F H v u u&#x27;,1/(Fintype.card V:ℝ)^(r^2))≤1 := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     simp only [Finset.sum_const,Finset.card_univ,nsmul_eq_mul,mul_one_div]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     exact (div_le_one (by positivity)).mpr (transfer_configuration_total (hr:=hr))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hh := independent_pattern_sum_tail μ transferRequiredEdges</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (fun _ : OrdinaryTransferConfiguration hr P F H v u u&#x27;=&gt;1/(Fintype.card V:ℝ)^(r^2))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (by intro T;positivity) (fun _ _=&gt;true)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ((r:ℝ)^2/Fintype.card V) (((1+2*r)*r:ℕ):ℝ) 1 (by positivity) (by positivity) (by norm_num)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (by intro T;exact_mod_cast transferRequiredEdges_card T) htotal</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (transfer_required_edge_incidence (hr:=hr) hn) t ht</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have he : ((r:ℝ)^2/Fintype.card V)*(((1+2*r)*r:ℕ):ℝ)*1=</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (r:ℝ)^2*((1+2*r)*r)/Fintype.card V := by push_cast;ring</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   simpa only [he,transferSurvivalSum] using hh</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> theorem transferSurvivalSum_lower_tail (hn : 0&lt;Fintype.card V)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (μ : Sym2 V → FiniteLaw Bool) (p c t : ℝ) (hp : 0≤p) (hp1 : p≤1) (ht : 0&lt;t)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (hprob : ∀ e∈P.edgeFinset,p≤(μ e).mass true)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hmany : c*(Fintype.card V:ℝ)^(r^2)≤Fintype.card (OrdinaryTransferConfiguration hr P F H v u u&#x27;)) :</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (FiniteLaw.pi μ).probability (fun σ=&gt;transferSurvivalSum r hr P F H v u u&#x27; σ≤p^((1+2*r)*r)*c-t)≤</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       2*Real.exp (-2*t^2/((r:ℝ)^2*((1+2*r)*r)/Fintype.card V)) := by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let w (_ : OrdinaryTransferConfiguration hr P F H v u u&#x27;) : ℝ := 1/(Fintype.card V:ℝ)^(r^2)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hmean := pattern_survival_mean_lower μ transferRequiredEdges w (by intro T;dsimp [w];positivity)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     p hp hp1 ((1+2*r)*r) transferRequiredEdges_card</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (fun T e he=&gt;hprob e (transferRequiredEdges_subset T he))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have htotal : c≤∑ T,w T := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     simp only [w,Finset.sum_const,Finset.card_univ,nsmul_eq_mul,mul_one_div]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact (le_div_iff₀ (by positivity)).mpr hmany</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hmean&#x27; := (mul_le_mul_of_nonneg_left htotal (pow_nonneg hp ((1+2*r)*r))).trans hmean</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   apply le_trans _ (transferSurvivalSum_tail r hr P F H v u u&#x27; hn μ t ht)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   apply finiteLaw_probability_mono</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   intro σ hσ</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have ha := neg_le_abs (transferSurvivalSum r hr P F H v u u&#x27; σ-</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     ∑ T,w T*∏ e∈transferRequiredEdges T,(μ e).mass true)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   change t≤|transferSurvivalSum r hr P F H v u u&#x27; σ-∑ T,w T*∏ e∈transferRequiredEdges T,(μ e).mass true|</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   linarith only [hσ,hmean&#x27;,ha]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a> </span>
+<span id="L64"><a href="#L64" class="ln">  64</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedBoundaryCoverage.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedBoundaryCoverage.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedBoundaryRemainder</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Exact incoming, outgoing and spoke incidence lists account for every</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> boundary edge, including both typed copies when their auxiliary label</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> coincides. The remaining finite host inherits divisibility. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 8000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U E T J I:Type} [Fintype V] [Fintype U] [Fintype E] [Fintype T]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     [DecidableEq V] [DecidableEq U] [DecidableEq E] [DecidableEq T]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {tail head:E→V} {ktail khead:T→V} {m b:ℕ} {π:Equiv.Perm V} {H₀ HK:V→U→Prop}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_boundary_coverage_from_incidence_lists</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (X:Finset V) (Z:Finset U) (root:J→V) (hub:I→U)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hroots:∀ v∉X,∃ j,root j=v) (hhubs:∀ u∉Z,∃ i,hub i=u)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (A₀ A₁ X₀ X₁:J→Finset V) (Y₀ Y₁:J→Finset U) (Y:I→Finset V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (incoming:∀ j,(A₀ j⊕A₁ j)→E⊕T) (outgoing:∀ j,(X₀ j⊕X₁ j)→E⊕T)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hin:∀ j a,Sum.elim head khead a=root j→∃ w,incoming j w=a)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hout:∀ j a,Sum.elim tail ktail a=root j→∃ w,outgoing j w=a)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hrow:∀ j u,H₀ (root j) u∨HK (root j) u→u∈Y₀ j∪Y₁ j)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hcol:∀ i v,H₀ v (hub i)∨HK v (hub i)→v∈Y i)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ HK))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hMi:∀ j a,Sum.inl (markedPhysicalEdge tail head ktail khead π (incoming j a))∈M.biUnion markedWheelPhysicalResources)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hMo:∀ j a,Sum.inl (markedPhysicalEdge tail head ktail khead π (outgoing j a))∈M.biUnion markedWheelPhysicalResources)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hMr:∀ j u,u∈Y₀ j∪Y₁ j→Sum.inr (root j,u)∈M.biUnion markedWheelPhysicalResources)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hMh:∀ i v,v∈Y i→Sum.inr (v,hub i)∈M.biUnion markedWheelPhysicalResources):</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ a:E⊕T,Sum.elim tail ktail a∉X∨Sum.elim head khead a∉X→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       Sum.inl (markedPhysicalEdge tail head ktail khead π a)∈M.biUnion markedWheelPhysicalResources)∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∀ v u,H₀ v u∨HK v u→v∉X∨u∉Z→Sum.inr (v,u)∈M.biUnion markedWheelPhysicalResources):=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   constructor</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   · intro a ha</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     rcases ha with ht|hh</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     · obtain ⟨j,hj⟩:=hroots _ ht</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       obtain ⟨w,rfl⟩:=hout j a hj.symm</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       exact hMo j w</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · obtain ⟨j,hj⟩:=hroots _ hh</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       obtain ⟨w,rfl⟩:=hin j a hj.symm</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       exact hMi j w</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   · intro v u hH hu</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     rcases hu with hv|hu</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     · obtain ⟨j,rfl⟩:=hroots v hv</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       exact hMr j u (hrow j u hH)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     · obtain ⟨i,rfl⟩:=hhubs u hu</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       exact hMh i v (hcol i v hH)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> theorem marked_full_host_boundary_remainder</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hH:∀ v u,¬(H₀ v u∧HK v u)) (X:Finset V) (Z:Finset U)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hAS:MarkedRemainderDivisible tail head ktail khead HK Finset.univ</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (Finset.univ.filter (fun s:V×U=&gt;H₀ s.1 s.2∨HK s.1 s.2)) m)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ HK))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hM:∀ W∈M,∀ W&#x27;∈M,W≠W&#x27;→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources W&#x27;))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (hArcs:∀ a:E⊕T,Sum.elim tail ktail a∉X∨Sum.elim head khead a∉X→</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       Sum.inl (markedPhysicalEdge tail head ktail khead π a)∈M.biUnion markedWheelPhysicalResources)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (hSpokes:∀ v u,H₀ v u∨HK v u→v∉X∨u∉Z→Sum.inr (v,u)∈M.biUnion markedWheelPhysicalResources):</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     let A&#x27;:=Finset.univ\M.biUnion markedWheelArcs</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     let S&#x27;:=(Finset.univ.filter (fun s:V×U=&gt;H₀ s.1 s.2∨HK s.1 s.2))\M.biUnion markedWheelSpokePairs</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     MarkedRemainderDivisible tail head ktail khead HK A&#x27; S&#x27; m∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (∀ a∈A&#x27;,Sum.elim tail ktail a∈X∧Sum.elim head khead a∈X)∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (∀ s∈S&#x27;,s.1∈X∧s.2∈Z)∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (A&#x27;.image (fun a=&gt;Sum.inl (markedPhysicalEdge tail head ktail khead π a))∪S&#x27;.image Sum.inr)=</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         (Finset.univ.image (fun a:E⊕T=&gt;Sum.inl (markedPhysicalEdge tail head ktail khead π a))∪</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>           (Finset.univ.filter (fun s:V×U=&gt;H₀ s.1 s.2∨HK s.1 s.2)).image Sum.inr)\</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>           M.biUnion markedWheelPhysicalResources:=by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   apply marked_boundary_remainder hp hH X Z _ _ hAS M hM (Finset.subset_univ _)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   · intro s hs</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     obtain ⟨W,hW,hs⟩:=Finset.mem_biUnion.mp hs</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     exact Finset.mem_filter.mpr ⟨Finset.mem_univ _,markedWheelPhysicalResources_spoke_present W _ _</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       ((markedWheel_spoke_resource W s).mp hs)⟩</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   · intro a _ ha;exact hArcs a ha</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   · intro s hs hn;exact hSpokes s.1 s.2 (Finset.mem_filter.mp hs).2 hn</span>
+<span id="L75"><a href="#L75" class="ln">  75</a> </span>
+<span id="L76"><a href="#L76" class="ln">  76</a> end Oberwolfach</span></pre></html>

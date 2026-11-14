@@ -1,0 +1,49 @@
+module
+
+public import Oberwolfach.OrdinaryOutsideCleanupRootFreeWithMarginsExplicit
+public import Oberwolfach.OrdinaryFreeHubExtensions
+public import Oberwolfach.OrdinaryPackingCleanupData
+public import Oberwolfach.OrdinaryWheelGeneralHostInclusion
+
+@[expose] public section
+/-! Package deep-avoiding cleanup for any certified physical remainder. -/
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 12000000
+noncomputable section
+namespace Oberwolfach
+attribute [local instance] Classical.propDecidable
+
+theorem ordinary_cleanup_root_free_counts_to_data_explicit (r:ℕ) (hr:3≤r) (bV bU ν:ℝ)
+    (hbV:0<bV) (hbU:0<bU) (hν:0<ν):
+    ∃τ:ℝ,τ=ordinarySparseCleanupScale r bV (bU/2) ν/2 ∧ 0<τ ∧ ∀L:ℝ,0≤L→∃N:ℕ,
+    ∀(V U:Type) [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U],N≤Fintype.card (V⊕U)→
+    ∀(Q₀ Q F:SimpleGraph V) (H₀ H:V→U→Prop) (X T:Finset V) (Z W:Finset U)
+      (C:SimpleGraph (V⊕U)) (σ:Sym2 (V⊕U)→Bool),
+    T⊆X→W⊆Z→(W.card:ℝ)≤(bU/2)*Fintype.card (V⊕U)→
+    ordinaryPhysicalGraph Q H≤ordinaryPhysicalGraph Q₀ H₀\C→Disjoint Q F→
+    (∀v,(F.degree v:ℝ)≤L)→
+    (∀u a c,bV*Fintype.card (V⊕U)≤((((X\T).filter (fun w=>H w u))∩Q.neighborFinset a∩Q.neighborFinset c).card:ℝ))→
+    (∀x∉X,∀y∉X,Q.Adj x y→bU*Fintype.card (V⊕U)≤((Z.filter (fun u=>H x u∧H y u)).card:ℝ))→
+    (∀w,((((ordinaryPhysicalGraph Q₀ H₀\spanningRestriction (ordinaryPhysicalGraph Q₀ H₀)
+      (ordinaryInnerVertices X Z))\retainedGraph (ordinaryBoundaryGraph Q₀ H₀ X Z) σ)\C).degree w:ℝ)≤τ*Fintype.card (V⊕U))→
+    ∃K:OrdinaryOutsideCleanupData Q F H X Z C r (ν*Fintype.card (V⊕U)),
+      Disjoint (ordinaryPhysicalGraph (wheelFamilyRim K.wheels) (wheelFamilySpokes K.wheels)) (ordinaryDeepRootStar T W):=by
+  obtain ⟨τ,hτeq,hτ,hcleanup⟩:=ordinary_outside_cleanup_root_free_with_margins_explicit r hr bV (bU/2) ν hbV (by positivity) hν
+  refine ⟨τ,hτeq,hτ,?_⟩
+  intro L hL
+  obtain ⟨N,hN⟩:=hcleanup L hL
+  refine ⟨N,?_⟩
+  intro V U _ _ _ _ hn Q₀ Q F H₀ H X T Z W C σ hTX hWZ hW hpost hqf hF hcount hubs hleft
+  have hfreeHub:∀x∉X,∀y∉X,Q.Adj x y→(bU/2)*Fintype.card (V⊕U)≤
+      (((Z\W).filter (fun u=>H x u∧H y u)).card:ℝ):=by
+    intro x hx y hy hxy
+    have hsurvive:=ordinary_free_hub_extension_count H Z W x y
+    have horig:=hubs x hx y hy hxy
+    linarith only [hsurvive,horig,hW]
+  obtain ⟨Nr,Ns,M,hdis,hdec,hNoR,hNoS,hdegree,hdisC,hstar⟩:=hN V U hn Q₀ Q F H₀ H X T Z W C σ
+    hTX hWZ hpost hqf hF hcount hfreeHub hleft
+  let data:OrdinaryOutsideCleanupData Q F H X Z C r (ν*Fintype.card (V⊕U)) :=
+    ⟨Nr,Ns,M,hdis,hdec,hNoR,hNoS,hdegree,hdisC⟩
+  exact ⟨data,hstar⟩
+end Oberwolfach

@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongHostEventConclusionFirstInnerColumnRimRow.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongHostEventConclusionFirstInnerColumnRimRow.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SuppliedVortexOutcomeFirstInnerColumnRimRow</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SuppliedVortexOutcomeFirstInnerColumn</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.LongHostFixedSpacingEventSpecializationWithStarts</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The exact regular-host event conclusion, named so the shared choices</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> can be composed with its checked specialization. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 30000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] referenceWitnessFinDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def HostVortexFixedSpacingEventConclusionWithFirstInnerColumnAndRimRow</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (r k₀ Qpow:ℕ) (hr:2≤r) (hQpow:0&lt;Qpow) (hlen:r+4+1=(k₀+2)*2)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (αRef sstar ω γRich tstar kstar:ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hαRef:0&lt;αRef) (hsstar:0&lt;sstar) (hsstar1:sstar≤1/100) (hω:0&lt;ω)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hmargin:successorCycleRatio k₀+αRef/2≤1/2+αRef)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hγRich:0&lt;γRich) (hγRich1:γRich≤1/2) (hγcap:γRich≤αRef)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (htstar:0&lt;tstar) (htstar1:tstar≤1) (horder:tstar≤sstar) (hkstar:0&lt;kstar)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (K:ℕ) (hK3:3≤K) (hm:7≤(r+4))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (θ ρ₀:ℝ) (hθpos:0&lt;θ) (hθ:θ≤1/100) (hρ₀:0&lt;ρ₀) (hωBound:4*ω≤ρ₀)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (ζret:ℝ) (hζret:0&lt;ζret)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (ε₀ lam:ℝ) (hε₀:ε₀&lt;1) (hlam:0&lt;lam) (hlamθ:lam≤θ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (eps:ℝ) (d:ℕ) (hd:2≤d)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hcut:(1/((((r+4):ℕ):ℝ)+1))/(d:ℝ)≤θ)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (BM:ℝ) (hBM:0&lt;BM) (BO:Fin K→ℝ) (hBO:∀i,0&lt;BO i)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (αHost A:ℝ) (hαHost:0&lt;αHost) (hαmargin:2*αRef≤αHost)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (htstarBound:tstar≤(1/100)/(((r+4):ℕ):ℝ))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hkBound:∀ρ:ℝ,ρ₀≤ρ→kstar≤ρ*(1/100)/2 ∧ kstar≤ρ*((1/100)/(((r+4):ℕ):ℝ))/2)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> :Prop :=</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∃ β βCommon εAbs εRob ζRob δAbs:ℝ,0&lt;β∧0&lt;βCommon∧0&lt;εAbs∧0&lt;εRob∧0&lt;ζRob∧0&lt;δAbs ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀ (εRef δRef εQ χ χCommon Qreal pstarRef ζ εBal ζBal χBal εNbr ζNbr χNbr εLoad ζLoad χLoad ζLocal χLocal ζConfig χConfig τLevel:ℝ)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hεRef:0&lt;εRef) (hδRef:0&lt;δRef) (hεQ:0&lt;εQ) (hεQ1:εQ&lt;1/4) (hεQAbs:εQ≤εAbs) (hχ:0&lt;χ)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hχCommon:0&lt;χCommon) (hpstarRef:0&lt;pstarRef) (hζ:0&lt;ζ) (hεBal:0&lt;εBal) (hζBal:0&lt;ζBal) (hχBal:0&lt;χBal)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hεNbr:0&lt;εNbr) (hζNbr:0&lt;ζNbr) (hχNbr:0&lt;χNbr) (hεLoad:0&lt;εLoad)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hζLoad:0&lt;ζLoad) (hχLoad:0&lt;χLoad) (hζLocal:0&lt;ζLocal) (hχLocal:0&lt;χLocal) (hζConfig:0&lt;ζConfig) (hχConfig:0&lt;χConfig) (hτLevel:0&lt;τLevel)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hQreal:0&lt;Qreal) (hNbr:ℕ) (hpstarBound:4*(((r+4):ℕ):ℝ)*pstarRef≤ρ₀*(1/100))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hgap:χ+χCommon+χBal+2*χNbr+χLoad+χLocal+χConfig&lt;ε₀),</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     ∃βmax:ℝ,0&lt;βmax ∧ ∀βQ:ℝ,0&lt;βQ→βQ≤1/4→βQ≤αRef/4→βQ≤βmax→βQ≤εBal/4→βQ≤εRef/4→</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     ∃MLevel:ℕ,1≤MLevel ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∃mLevel:ℕ,1≤mLevel ∧ ∃η:ℝ,0&lt;η ∧ ∃t₀ τ₀ Δ ξ:ℝ,0&lt;t₀ ∧ 0&lt;τ₀ ∧ τ₀≤1/16 ∧ 0&lt;Δ ∧ 0&lt;ξ ∧ 4*ξ≤eps/2 ∧ ∃N:ℕ,</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∃vsize:ℕ,1≤vsize ∧ mLevel≤vsize ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     ∀size:ℕ,∃a₀ b₀ e₀ aRob bRob eRob:ℕ,∀f₀:ℕ,∃NTotal:ℕ,∃hNTotal:1≤NTotal,</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     ∀Allowed:Set ℕ,Allowed.Nonempty→(∀s∈Allowed,3≤s)→</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     ∀n:ℕ,∀hn:NTotal≤n,∀(U:Type) [Fintype U] [DecidableEq U],</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     ∀(F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hAllowed:∀u,AllowedCycleLengths (F u) Allowed)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hclass:∀u,factorPreparationClass (F u) K=none)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (P:SimpleGraph (Fin n)) (Dnat:ℕ) (hreg:P.IsRegularOfDegree Dnat)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hmin:(allowedThreshold Allowed+αHost)*n≤(Dnat:ℝ))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hρlo:ρ₀ ≤ initialIndexDensity U Dnat) (hρhi:initialIndexDensity U Dnat≤1),</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     ∃hD:0&lt;(Dnat:ℝ),</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     ∃hsize:initialIndexDensity U Dnat*(Dnat:ℝ)=2*Fintype.card U,</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ∃Q:Vortex U P Dnat βQ εQ vsize,∃π:Equiv.Perm (Fin n),</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     ∃hpres:(∀i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i),</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x) ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     ∃w:∀i:Fin K,OrdinaryCycle P (longPaddedSeedExponent i+2)→ℝ,</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     ∃weight:(Fin ((r+4)+1)→Fin n)→ℝ,</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     SuppliedVortexFixedSpacingOutcomeWithFirstInnerColumnAndRimRow r k₀ K d hr hK3 hm hd</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       αRef sstar γRich tstar kstar θ ρ₀ (initialIndexDensity U Dnat) Dnat eps lam ζret</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       hθpos hθ hρ₀ hρlo hρhi hD hcut</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       β βCommon εAbs εRob ζRob εRef δRef ζ εBal ζBal εNbr ζNbr εLoad ζLoad ζLocal ζConfig τLevel</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       BM BO t₀ ξ Δ (τ₀/2) size a₀ b₀ e₀ aRob bRob eRob f₀ (Q.length-1) hNbr n (by omega)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       U F hF Allowed hAllowed hsize hclass P π weight w Dnat vsize βQ εQ Q hpres</span>
+<span id="L67"><a href="#L67" class="ln">  67</a> end Oberwolfach</span></pre></html>

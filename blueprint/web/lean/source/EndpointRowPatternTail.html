@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EndpointRowPatternTail.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EndpointRowPatternTail.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointRowResources</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Concentration for the actual five-resource endpoint row patterns.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The coefficients are fixed before sampling, and the tested root is absent</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> from every pattern. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 5000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem endpointRowCandidates_weight_bounds (E:SimpleGraph V) (A:Finset V) (B:Finset U) (x v:V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (w:EndpointRowCandidates E A B v→ℝ) (M:ℝ) (hM:0≤M) (hw:∀ p,0≤w p∧w p≤M):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∑ p,w p)≤M*(B.card*A.card) ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ e:Sym2 V⊕(V×U),(∑ p,if e∈endpointRowResources x v p.val.2 p.val.1 then w p else 0)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ≤M*(2*B.card+A.card):=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   constructor</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · calc</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       _≤∑ _p:EndpointRowCandidates E A B v,M:=Finset.sum_le_sum (fun p _=&gt;(hw p).2)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       _=M*Fintype.card (EndpointRowCandidates E A B v):=by simp [mul_comm]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       _≤_:=mul_le_mul_of_nonneg_left (by exact_mod_cast endpointRowCandidates_card E A B v) hM</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · intro e</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     rw [←Finset.sum_filter]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     calc</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       _≤∑ p∈Finset.univ.filter (fun p:EndpointRowCandidates E A B v=&gt;e∈endpointRowResources x v p.val.2 p.val.1),M:=</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         Finset.sum_le_sum (fun p _=&gt;(hw p).2)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       _=M*(Finset.univ.filter (fun p:EndpointRowCandidates E A B v=&gt;e∈endpointRowResources x v p.val.2 p.val.1)).card:=by simp [mul_comm]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       _≤_:=mul_le_mul_of_nonneg_left (by exact_mod_cast endpointRowCandidates_incidence E A B x v e) hM</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> theorem raw_endpoint_row_pattern_tail (P E F:SimpleGraph V) (A:Finset V) (B:Finset U) (x v:V)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hA:0&lt;A.card) (hB:0&lt;B.card) (hxv:x≠v)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hE:∀ w,E.Adj v w→P.Adj x w∧P.Adj v w∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       ∀ a∈({x,v,w}:Finset V),∀ b∈({x,v,w}:Finset V),¬F.Adj a b)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (π:Equiv.Perm V) (d:ℕ) (hd:2≤d) (hF:permutationConflictGraph π (3*d)≤F)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hnoshort:∀ z l,0&lt;l→l&lt;2*d+1→(π^l) z≠z)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (pR pH:ℝ) (hpR:0≤pR) (hpR1:pR≤1)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (j:Color) (hj:∀ u∈B,s u j=pH)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (w:EndpointRowCandidates E A B v→ℝ) (M:ℝ) (hM:0&lt;M) (hw:∀ p,0≤w p∧w p≤M)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (t:ℝ) (ht:0&lt;t):</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (FiniteLaw.pi (rawWheelLaw (fun _=&gt;pR) (fun _=&gt;hpR) (fun _=&gt;hpR1) d hd q hq hQ s hs hS)).probability</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (fun σ=&gt;t≤|rawOrdinaryPatternSum P π d (fun p:EndpointRowCandidates E A B v=&gt;endpointRowResources x v p.val.2 p.val.1) w j σ-</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         pR^2*pH^3*(∑ p,w p)|)≤</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       2*Real.exp (-2*t^2/((4*(d:ℝ)+3)^2*((M*(2*B.card+A.card))*5*(M*(B.card*A.card))))):=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let R:=fun p:EndpointRowCandidates E A B v=&gt;endpointRowResources x v p.val.2 p.val.1</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hsep (p:EndpointRowCandidates E A B v):= (hE p.val.2 p.property.2.2).2.2</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have htotal:=endpointRowCandidates_weight_bounds E A B x v w M hM.le hw</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have ha:(0:ℝ)&lt;A.card:=Nat.cast_pos.mpr hA</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hb:(0:ℝ)&lt;B.card:=Nat.cast_pos.mpr hB</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hh:=rawOrdinaryPatternSum_tail P π (fun _=&gt;pR) (fun _=&gt;hpR) (fun _=&gt;hpR1)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     d hd q hq hQ s hs hS hnoshort R w (fun p=&gt;(hw p).1)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (fun p a ha b hb hne=&gt;endpointRowResources_disjoint π d F hF x v p.val.2 p.val.1 (hsep p) a b ha hb hne) j</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (M*(2*B.card+A.card)) 5 (M*(B.card*A.card)) (by positivity) (by norm_num) (by positivity)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (fun p=&gt;by exact_mod_cast endpointRowResources_card x v p.val.2 p.val.1) htotal.1 htotal.2 t ht</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have he:(∑ p,w p*∏ e∈R p,rawWheelMarginal P (fun _=&gt;pR) s j e)=pR^2*pH^3*(∑ p,w p):=by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     rw [Finset.mul_sum]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     apply Finset.sum_congr rfl</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     intro p _</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have ht:=endpointRowResources_target P s j pR pH x v p.val.2 p.val.1 hxv</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (hE p.val.2 p.property.2.2).1.ne (hE p.val.2 p.property.2.2).2.1.ne</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (hE p.val.2 p.property.2.2).1 (hE p.val.2 p.property.2.2).2.1 (hj p.val.1 p.property.1)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     change _* (∏ e∈endpointRowResources x v p.val.2 p.val.1,_) =_</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     rw [ht];ring</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   simpa only [he] using hh</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

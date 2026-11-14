@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AmbientHubCycleProfiles.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AmbientHubCycleProfiles.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.HubCycleProfiles</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SupportedResourceFactors</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Hub classes are embedded in the ambient vertex set. The successor</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> permutation is never required to preserve the union of these classes. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 4500000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {A U E K : Type*} [Fintype A] [DecidableEq A]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {V : Bool → Type*} [∀ i,Fintype (V i)] [∀ i,DecidableEq (V i)]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {tail head : E → A} {ktail khead : K → A} {m : ℕ}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {π : Equiv.Perm A} {b : ℕ} {H₀ Hₖ : A → U → Prop}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem embedded_class_image_iff (e : (Σ i,V i) ↪ A) (i : Bool) (z : Σ i,V i) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∃ v : V i,e ⟨i,v⟩=e z) ↔ z.1=i := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   constructor</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   · rintro ⟨v,hv⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     exact (congrArg Sigma.fst (e.injective hv)).symm</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · rcases z with ⟨j,v⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     intro he</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     change j=i at he</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     subst j</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     exact ⟨v,rfl⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem hubMarkedCycle_supported (e : (Σ i,V i) ↪ A) (w : U)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hK : ∀ v,Hₖ v w ↔ ∃ z : V true,e ⟨true,z⟩=v)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hO : ∀ v,H₀ v w ↔ ∃ z : V false,e ⟨false,z⟩=v)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (C : HubMarkedCycle tail head ktail khead m π b H₀ Hₖ w) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∀ v∈hubMarkedCycleVertices w C,∃ z,e z=v := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   intro v hv</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   obtain ⟨i,_,rfl⟩ := Finset.mem_image.mp hv</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   refine Fin.cases ?_ (fun i =&gt; ?_) i</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · obtain ⟨z,hz⟩ := (hK _).mp C.property.2.1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact ⟨⟨true,z⟩,hz⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · obtain ⟨z,hz⟩ := (hO _).mp (C.property.2.2 i)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact ⟨⟨false,z⟩,hz⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem ambient_hubMarkedCycle_profile (e : (Σ i,V i) ↪ A) (w : U)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hK : ∀ v,Hₖ v w ↔ ∃ z : V true,e ⟨true,z⟩=v)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hO : ∀ v,H₀ v w ↔ ∃ z : V false,e ⟨false,z⟩=v)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (C : HubMarkedCycle tail head ktail khead m π b H₀ Hₖ w) (i : Bool) :</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (Finset.univ.filter (fun v : V i =&gt; e ⟨i,v⟩∈hubMarkedCycleVertices w C)).card=twoClassProfile m i := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hs := hubMarkedCycle_supported e w hK hO C</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hf (j : Fin (m+1)) : ∃ z,e z=C.val j := hs _ (Finset.mem_image.mpr ⟨j,Finset.mem_univ _,rfl⟩)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let f (j : Fin (m+1)) : Σ i,V i := Classical.choose (hf j)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have he (j) : e (f j)=C.val j := Classical.choose_spec (hf j)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hfi : Function.Injective f := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     intro j k hjk</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     apply permutationSeparated_injective π b C.val C.property.1.1</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     rw [← he j,← he k,hjk]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hfK : (f 0).1=true := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     apply (embedded_class_image_iff e true (f 0)).mp</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     rw [he 0]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     exact (hK _).mp C.property.2.1</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hfO (j : Fin m) : (f j.succ).1=false := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     apply (embedded_class_image_iff e false (f j.succ)).mp</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     rw [he j.succ]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact (hO _).mp (C.property.2.2 j)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hmem (v : Σ i,V i) : e v∈hubMarkedCycleVertices w C ↔ v∈Finset.univ.image f := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     constructor</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     · intro hv</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       obtain ⟨j,_,hj⟩ := Finset.mem_image.mp hv</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       exact Finset.mem_image.mpr ⟨j,Finset.mem_univ _,e.injective ((he j).trans hj)⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     · rintro hv</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       obtain ⟨j,_,rfl⟩ := Finset.mem_image.mp hv</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       exact Finset.mem_image.mpr ⟨j,Finset.mem_univ _,(he j).symm⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hh := twoClass_tuple_profile f hfi hfK hfO i</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   simpa only [hmem] using hh</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> </span>
+<span id="L73"><a href="#L73" class="ln">  73</a> theorem ambient_hubMarkedCycle_multiplicity (w : U) (Y : Finset A) :</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     Fintype.card {C : HubMarkedCycle tail head ktail khead m π b H₀ Hₖ w // hubMarkedCycleVertices w C=Y}≤</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       (m+1)^(m+1) := by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   apply tuple_resource_multiplicity (m+1) _ (fun C =&gt; C.val) (fun _ _ he =&gt; Subtype.ext he)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     (fun _ =&gt; rfl) _ Y</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   intro C</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   change (Finset.univ.image C.val).card=m+1</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   rw [Finset.card_image_of_injective _</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (permutationSeparated_injective π b C.val C.property.1.1),Finset.card_univ,Fintype.card_fin]</span>
+<span id="L82"><a href="#L82" class="ln">  82</a> </span>
+<span id="L83"><a href="#L83" class="ln">  83</a> end Oberwolfach</span></pre></html>

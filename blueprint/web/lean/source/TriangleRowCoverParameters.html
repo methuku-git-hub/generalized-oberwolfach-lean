@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TriangleRowCoverParameters.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TriangleRowCoverParameters.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointFactorUnderDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Choose the number of triangle row roots before the ambient order.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The degree-three accumulated deletion fits both fixed-domain count errors</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> and the fixed potential-load error. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1800000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem triangle_row_cover_parameters (ε η κ C : ℝ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hε:0&lt;ε) (hη:0&lt;η) (hκ:0&lt;κ) (hC:0&lt;C) :</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ θ:ℝ,0&lt;θ ∧ ∀ a b n:ℝ,0&lt;a → κ*a≤b → 0≤n → n≤θ*a →</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       4*(3*n)/a+3*(3*n)/b≤ε/2 ∧ 5*C*(3*n)/a≤η/2 := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   let D:ℝ:=12+9/κ</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hD:0&lt;D:=by dsimp [D];positivity</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   let θ:=min (ε/(2*D)) (η/(30*C))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hθ:0&lt;θ:=lt_min (by positivity) (by positivity)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   refine ⟨θ,hθ,?_⟩</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   intro a b n ha hba hn hnθ</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hb:0&lt;b:=(mul_pos hκ ha).trans_le hba</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hratio:n/a≤θ:=(div_le_iff₀ ha).mpr hnθ</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hnb:n/b≤(n/a)/κ:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     rw [div_div]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     apply div_le_div_of_nonneg_left hn (mul_pos ha hκ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     simpa only [mul_comm] using hba</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   constructor</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   · have h₁:D*(n/a)≤D*θ:=mul_le_mul_of_nonneg_left hratio hD.le</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have h₂:D*θ≤ε/2:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       have hh:=mul_le_mul_of_nonneg_left (min_le_left (ε/(2*D)) (η/(30*C))) hD.le</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       have he:D*(ε/(2*D))=ε/2:=by field_simp &lt;;&gt; ring</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       simpa only [θ,he] using hh</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     calc</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       _ = 12*(n/a)+9*(n/b):=by ring</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       _ ≤ 12*(n/a)+9*((n/a)/κ):=add_le_add (le_refl _) (mul_le_mul_of_nonneg_left hnb (by norm_num : (0:ℝ)≤9))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       _ = D*(n/a):=by dsimp [D];ring</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       _ ≤ ε/2:=h₁.trans h₂</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · have h₁:15*C*(n/a)≤15*C*θ:=mul_le_mul_of_nonneg_left hratio (by positivity)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have h₂:15*C*θ≤η/2:=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       have hh:=mul_le_mul_of_nonneg_left (min_le_right (ε/(2*D)) (η/(30*C))) (show 0≤15*C by positivity)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       have he:15*C*(η/(30*C))=η/2:=by field_simp &lt;;&gt; ring</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       simpa only [θ,he] using hh</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have he:5*C*(3*n)/a=15*C*(n/a):=by ring</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     rw [he]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact h₁.trans h₂</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> </span>
+<span id="L47"><a href="#L47" class="ln">  47</a> end Oberwolfach</span></pre></html>

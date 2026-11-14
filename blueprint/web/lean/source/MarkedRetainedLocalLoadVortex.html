@@ -1,0 +1,106 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedRetainedLocalLoadVortex.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedRetainedLocalLoadVortex.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedLocalLoadSpokeChanges</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RetainedMarkedRestrictionChanges</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.RawMarkedRetentionEvent</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.PermutationInvariantImage</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! External spoke-root potential loads on all fixed vortex levels of</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> the actual globally retained experiment. Each level keeps its supplied</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> parent weighting and normalization throughout both exposures. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 3000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_retained_local_load_vortex_event</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (m d : ℕ) (hm : 3≤m) (hd : 2≤d) (B pstar ε K η χ C Q pret ζ : ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hB : 0&lt;B) (hpstar : 0&lt;pstar) (hε : 0&lt;ε) (hK : 1≤K)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hη : 0&lt;η) (hη1 : η&lt;1) (hχ : 0&lt;χ) (hpret : 0&lt;pret) (hζ : 0&lt;ζ) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ M₀ N : ℕ,1≤M₀ ∧ 1≤N ∧ ∀ (V U Γ Color : Type) (W Z : ℕ→Type)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [LinearOrder V] [Nonempty V] [DecidableEq U]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       [∀ i,Fintype (W i)] [∀ i,Fintype (Z i)] [∀ i,LinearOrder (W i)] [∀ i,DecidableEq (Z i)],</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     N≤Fintype.card V → Fintype.card U≤Fintype.card V →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀ (P : SimpleGraph V) (π : Equiv.Perm V),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀ (f : ∀ i,W i↪oV) (g : ∀ i,Z i↪U) (ρ : ∀ i,Equiv.Perm (W i)),</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ i x,f i (ρ i x)=π (f i x)) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∀ L : ℕ,(L+1:ℝ)≤(Fintype.card V:ℝ)^C →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ i≤L,M₀≤Fintype.card (W i)) → (∀ i≤L,M₀≤Fintype.card (Z i)) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ i&lt;L,(Fintype.card (W (i+1)):ℝ)≤η*Fintype.card (W i)) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i≤L,(Fintype.card (Z i):ℝ)≤K*Fintype.card (W i)) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∀ (D : ℕ→ℝ) (τ A : ℝ),</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ i≤L,(Fintype.card (W i):ℝ)/2≤D i) → (∀ i≤L,D i≤2*Fintype.card (W i)) →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∀ weight : ∀ i,(Fin (m+1)→W i)→ℝ,</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ i≤L,SuccessorSequenceWeightConditions (P.comap (f i)) (ρ i) (3*d) (D i) τ A B (weight i)) →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∀ (p k s₀ : ℝ) (hp : 0&lt;p) (hk : 0&lt;k) (hphys : 2*p+2*k≤1),</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       pstar≤p → pstar≤k → pstar≤s₀ → p≤1 → k≤1 → s₀≤1 →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     ∀ (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a)) (a : Γ) (j : Color),</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (∀ u,q u a=s₀/m) → (∀ u,s u j=s₀) → pret*Fintype.card V≤(s₀/m)*Fintype.card U →</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     1-χ-(Fintype.card V:ℝ)^(-Q)≤</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (rawMarkedRetentionLaw π d hd a p k hp.le hk.le hphys q hq hQ s hs hS).probability</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         (fun z=&gt;∀ i≤L,MarkedLocalSpokeLoadsWithSpokes (P.comap (f i)) (ρ i) d m (D i) p k s₀ (weight i)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>           (τ+ε+5*((m:ℝ)+1)^4*(2*B/pstar^(2*m+1))*K*ζ)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>           (rawMarkedRestrictPair (f i) (g i) z.1)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>             (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f i x) (g i u))) := by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   obtain ⟨mret,N,hmret,hN1,hret⟩ := raw_marked_retention_common_event d hd C Q pret ζ hpret hζ</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   obtain ⟨Ml,hMl1,hloads⟩ := marked_local_spoke_loads_vortex_event m d hm hd B pstar ε K η χ</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     hB hpstar hε hη hη1 hχ</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   refine ⟨max mret Ml,N,hmret.trans (le_max_left _ _),hN1,?_⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   intro V U Γ Color W Z _ _ _ _ _ _ _ _ _ _ _ hn hu P π hπ f g ρ hcomm L hL hW hZ hstep hZW D τ A hDlo hDhi weight hw p k s₀ hp hk hphys hpp hpk hps hp1 hk1 hs1 q hq hQ s hs hS a j ha hj hmass</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   let S : Fin (L+1)→Finset V := fun i=&gt;Finset.univ.image (f i.val)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   let T : Fin (L+1)→Finset U := fun i=&gt;Finset.univ.image (g i.val)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hSc (i : Fin (L+1)) : (S i).card=Fintype.card (W i.val) := by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     dsimp [S]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     rw [Finset.card_image_of_injective _ (f i.val).injective,Finset.card_univ]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hTc (i : Fin (L+1)) : (T i).card=Fintype.card (Z i.val) := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     dsimp [T]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     rw [Finset.card_image_of_injective _ (g i.val).injective,Finset.card_univ]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   let E := fun σ : RawMarkedOutcome V U Γ Color=&gt;∀ i≤L,</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     RawMarkedLocalSpokeLoads (P.comap (f i)) (ρ i) d m (D i) p k s₀ (weight i) a j (τ+ε)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (rawMarkedRestrictPair (f i) (g i) σ)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hE : 1-χ≤(FiniteLaw.pi (rawMarkedWheelLaw p k hp.le hk.le hphys d hd q hq hQ s hs hS)).probability E :=</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     hloads V U Γ Color W Z P π hπ f g ρ hcomm L</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (fun i hi=&gt;(le_max_right mret Ml).trans (hW i hi)) hstep hZW D τ A hDlo hDhi weight hw</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       p k s₀ hp hk hphys hpp hpk hps hp1 hk1 hs1 q hq hQ s hs hS a j ha hj</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hb := hret V U Γ Color (Fin (L+1)) hn hu</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (by simpa only [Fintype.card_fin,Nat.cast_add,Nat.cast_one] using hL)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     π hπ p k hp.le hk.le hphys q hq hQ s hs hS a (s₀/m) ha hmass S T</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (fun i=&gt;permutation_invariant_image (f i.val) π (ρ i.val) (hcomm i.val) Finset.univ (by simp))</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (fun i=&gt;by rw [hSc];exact (le_max_left mret Ml).trans (hW i.val (by omega)))</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (fun i=&gt;by rw [hTc];exact (le_max_left mret Ml).trans (hZ i.val (by omega))) E χ hE</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   apply hb.trans</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   apply finiteLaw_probability_mono</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   intro z hz i hi</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   have hKi : 0≤K := le_trans (by norm_num) hK</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   have hc := retainedMarked_restricted_col_changes (f i) (g i) π (ρ i) (hcomm i) d z.1 a</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j Finset.univ (K*ζ*Fintype.card (W i)) (by</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       intro u</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       have hh := (hz.2.2 (⟨i,by omega⟩ : Fin (L+1))).1 u</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       rw [hSc] at hh</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       exact hh.trans (by nlinarith only [mul_le_mul_of_nonneg_right hK (show 0≤ζ*Fintype.card (W i) by positivity)]))</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have hr := retainedMarked_restricted_row_changes (f i) (g i) π (ρ i) (hcomm i) d z.1 a</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j Finset.univ (K*ζ*Fintype.card (W i)) (by</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       intro x</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>       have hh := (hz.2.2 (⟨i,by omega⟩ : Fin (L+1))).2 x</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>       rw [hTc] at hh</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>       exact hh.trans (by nlinarith only [mul_le_mul_of_nonneg_left (hZW i hi) hζ.le]))</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   have hni : 0&lt;Fintype.card (W i) := lt_of_lt_of_le (by omega) (hW i hi)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   have hh := markedLocalSpokeLoads_spoke_changes (P.comap (f i)) (ρ i) d m hm hni (D i) τ A B</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     (hDlo i hi) (hDhi i hi) p k s₀ pstar hpstar hpp hpk hps hp1 hk1 hs1 hB.le</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     (weight i) (hw i hi) a j (τ+ε) (K*ζ*Fintype.card (W i)) (by positivity)</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     (rawMarkedRestrictPair (f i) (g i) z.1) _ (hz.1 i hi) hr hc</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   have hn0 : (Fintype.card (W i):ℝ)≠0 := by exact_mod_cast (Nat.ne_of_gt hni)</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have he : τ+ε+5*((m:ℝ)+1)^4*(2*B/pstar^(2*m+1))*(K*ζ*Fintype.card (W i))/Fintype.card (W i)=</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>       τ+ε+5*((m:ℝ)+1)^4*(2*B/pstar^(2*m+1))*K*ζ := by field_simp [hn0] &lt;;&gt; ring</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   rw [he] at hh</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   exact hh</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a> </span>
+<span id="L103"><a href="#L103" class="ln"> 103</a> end Oberwolfach</span></pre></html>

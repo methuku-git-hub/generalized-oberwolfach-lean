@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ClassCorrectionOrderedMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ClassCorrectionOrderedMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ClassCorrectionFromCommonEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ExpandedClassDiscrepancyMargins</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.ClassRoutingFitsDeletion</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Choose the class error tolerances before the order, and obtain a protected</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> balanced class orientation whose correction fits the original deletion budget. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> local instance orderedMarginsFin (n:ℕ):DecidableEq (Fin n):=fun a b=&gt;Classical.propDecidable (a=b)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> local instance (priority := 2000) orderedMarginsSix : DecidableEq (Fin 6) := instDecidableEqFin 6</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem class_correction_ordered_margins (α p δ:ℝ) (hα:0&lt;α) (hp:0&lt;p) (hδ:0&lt;δ):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃c:ℝ,0&lt;c ∧ ∃N:ℕ,1≤N ∧ ∀n:ℕ,N≤n→</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∀ {U Γ Color:Type} [Fintype U] [DecidableEq U] [Fintype Γ] [Fintype Color]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (P S Protected:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d m:ℕ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (σ:∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Γ Color e)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (mass:Fin 6→ℝ) (ρ D ε ξ err f:ℝ),</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     0≤ρ→ρ≤1→0≤ε→ε≤c/2→0≤ξ→ξ≤min (c/4) (δ/16)→0≤f→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     f≤(α*p^2/16)*n→S.IsRegularOfDegree (2*m)→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∑a∈({0,1,2,3,4}:Finset (Fin 6)),mass a)=ρ→ρ*D=2*m→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀v,|(P.degree v:ℝ)-D|≤ε*n)→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀a v,|((∑w,sampledColourOrientation P (fun e=&gt;σ (Sum.inl e)) a v w:ℕ):ℝ)-</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       mass a/2*P.degree v|≤(n:ℝ)^(3/5:ℝ))→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀v,((changed ((longPhysicalStateGraph P σ {0,1,2,3,4}).neighborFinset v) (S.neighborFinset v)).card:ℝ)≤ξ*n)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀x y,Protected.Adj x y→(S.Adj x y↔(longPhysicalStateGraph P σ {0,1,2,3,4}).Adj x y))→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀v,(Protected.degree v:ℝ)≤f)→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀v,(1/2+α)*(n:ℝ)≤P.degree v)→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀x y,x≠y→((P.neighborFinset x∩P.neighborFinset y).card:ℝ)*p^2-err≤</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       ((Finset.univ.filter (fun z=&gt;</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         0&lt;markedPhysicalRim P π (3*d) (fun e=&gt;markedExpandedPhysicalCollapse (σ (Sum.inl e))) false x z ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         0&lt;markedPhysicalRim P π (3*d) (fun e=&gt;markedExpandedPhysicalCollapse (σ (Sum.inl e))) false z y)).card:ℝ))→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     err+2*(ξ*n)≤α*p^2*n→</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∃M:Fin n→Fin n→ℕ,</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀x y,M x y+M y x=if S.Adj x y then 1 else 0) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀v,(∑w,M v w)=m ∧ (∑w,M w v)=m) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (∀v,((orientationDisagreementGraph (longPhysicalStateGraph P σ {0,1,2,3,4})</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (fun e=&gt;(σ (Sum.inl e)).2) M).degree v:ℝ)≤δ*n) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (∀x y,(orientationDisagreementGraph (longPhysicalStateGraph P σ {0,1,2,3,4})</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         (fun e=&gt;(σ (Sum.inl e)).2) M).Adj x y→¬Protected.Adj x y):=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hβ:0&lt;α*p^2:=by positivity</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   obtain ⟨q,c,hq,hc,N₁,hN₁pos,hN₁⟩:=class_routing_fits_deletion (α*p^2) δ hβ hδ</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   obtain ⟨N₂,hN₂⟩:=eventually_expanded_class_discrepancy c hc</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   refine ⟨c,hc,max N₁ N₂,le_trans hN₁pos (le_max_left _ _),?_⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro n hn U Γ Color _ _ _ _ P S Protected π d m σ mass ρ D ε ξ err f hρ hρhi hε hεhi hξ hξhi hf hfhi hreg hmass hsize hdegree hcol hedit hprotected hforbid hmin htest hsupply</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hnN₁:N₁≤n:=(le_max_left _ _).trans hn</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hnN₂:N₂≤n:=(le_max_right _ _).trans hn</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hnpos:0&lt;n:=by omega</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hn0:0≤(n:ℝ):=Nat.cast_nonneg n</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hξc:ξ≤c/4:=(hξhi.trans (min_le_left _ _))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hξδ:ξ≤δ/16:=(hξhi.trans (min_le_right _ _))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   let a:=5*(n:ℝ)^(3/5:ℝ)+ρ/2*(ε*n)+ξ*n</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have ha:0≤a:=by dsimp [a];positivity</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hac:a≤c*n:=hN₂ n hnN₂ ρ ε ξ hρ hρhi hε hεhi hξc</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hξn:ξ*n≤(δ/16)*n:=mul_le_mul_of_nonneg_right hξδ hn0</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   obtain ⟨L,hL,hrout,hcorr⟩:=hN₁ n hnN₁ a f (ξ*n) (α*p^2/16) ha hac hfhi (le_refl _) hξn</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hmin&#x27;:∀v,(1/2+α)*(Fintype.card (Fin n):ℝ)≤P.degree v:=by simpa using hmin</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hsupply&#x27;:err+2*(ξ*n)≤α*p^2*Fintype.card (Fin n):=by simpa using hsupply</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hrout&#x27;:(Fintype.card (Fin n):ℝ)*</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (5*(n:ℝ)^(3/5:ℝ)+ρ/2*(ε*n)+ξ*n)/L+</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       2*(5*(n:ℝ)^(3/5:ℝ)+ρ/2*(ε*n)+ξ*n)+4*L+2*f&lt;α*p^2*Fintype.card (Fin n):=by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     simpa [a] using hrout</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨M,hphys,hdegrees,hbound,havoid⟩:=class_correction_from_common_event P S Protected π d m L σ mass ρ D</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     ((n:ℝ)^(3/5:ℝ)) (ξ*n) (ε*n) α p err f hreg (by simpa using hnpos) hL hρ</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (by positivity) (by positivity) (by positivity) hα hp hf hmass hsize hdegree hcol hedit hprotected hforbid hmin&#x27; htest hsupply&#x27; hrout&#x27;</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   refine ⟨M,hphys,hdegrees,?_,havoid⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   intro v</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   exact (hbound v).trans (by simpa [a] using hcorr)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> end Oberwolfach</span></pre></html>

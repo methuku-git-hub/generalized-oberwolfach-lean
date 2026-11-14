@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MappedFactorGraph.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MappedFactorGraph.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LocalFactorGraphChoice</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SupportedBernoulliFactor</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Embed a rim factor into the physical vertex space, preserving its</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> original cycle identifiers, maximum degree, and avoidance of physical edges. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 3500000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V W:Type} [Fintype V] [DecidableEq V] [Fintype W] [DecidableEq W]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem graph_map_degree_bound (G:SimpleGraph V) (e:V↪W) (d:ℕ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hd:∀ v,G.degree v≤d) (w:W):(G.map e).degree w≤d:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   by_cases hw:w∈Set.range e</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   · obtain ⟨v,rfl⟩:=hw</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     have hh:=SimpleGraph.degree_map_apply G e v</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have he:(G.map e).degree (e v)=G.degree v:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       simpa only [←SimpleGraph.ncard_neighborSet] using hh</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     rw [he];exact hd v</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · have hi:(G.map e).IsIsolated w:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       intro z hz</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       rw [SimpleGraph.map_adj] at hz</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       obtain ⟨x,y,hxy,hx,hy⟩:=hz</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       exact hw ⟨x,hx⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     rw [hi.degree_eq_zero];exact Nat.zero_le _</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem graph_map_restriction (G Q:SimpleGraph V) (P:SimpleGraph W) (e:V↪W) (Y:Finset V)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hG:G≤spanningRestriction Q Y) (hQ:Q.map e≤P):</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     G.map e≤spanningRestriction P (Y.image e):=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   intro x y hxy</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   rw [SimpleGraph.map_adj] at hxy</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   obtain ⟨v,w,hvw,rfl,rfl⟩:=hxy</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   obtain ⟨hq,hv,hw⟩:=(spanningRestriction_adj Q Y v w).mp (hG hvw)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   exact (spanningRestriction_adj _ _ _ _).mpr</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ⟨hQ (by rw [SimpleGraph.map_adj];exact ⟨v,w,hq,rfl,rfl⟩),Finset.mem_image.mpr ⟨v,hv,rfl⟩,</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       Finset.mem_image.mpr ⟨w,hw,rfl⟩⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem graph_map_disjoint_of_comap (G:SimpleGraph V) (K:SimpleGraph W) (e:V↪W)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hG:Disjoint G (K.comap e)):</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     Disjoint (G.map e) K:=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   apply disjoint_iff_inf_le.mpr</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   intro x y hxy</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hh:=hxy.1</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   rw [SimpleGraph.map_adj] at hh</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨v,w,hvw,hv,hw⟩:=hh</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   subst x;subst y</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hb:(⊥:SimpleGraph V).Adj v w:=(disjoint_iff_inf_le.mp hG) ⟨hvw,hxy.2⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   exact hb.elim</span>
+<span id="L51"><a href="#L51" class="ln">  51</a> </span>
+<span id="L52"><a href="#L52" class="ln">  52</a> theorem mapped_local_factor_choice (Q F:SimpleGraph V) (P K:SimpleGraph W) (e:V↪W)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (T Y:Finset V) (r:ℕ) (hQ:Q.map e≤P)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (D:Finset (LocalOrdinaryCycle Q F T r))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hfactor:(∀ C∈D,∀ E∈D,C≠E→Disjoint (localOrdinaryVertices C) (localOrdinaryVertices E)) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       D.biUnion localOrdinaryVertices=Y)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (havoid:Disjoint (localOrdinaryFactorGraph D) (K.comap e)):</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (localOrdinaryFactorGraph D).map e≤spanningRestriction P (Y.image e) ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (∀ w,((localOrdinaryFactorGraph D).map e).degree w≤2) ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       Disjoint ((localOrdinaryFactorGraph D).map e) K:=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   exact ⟨graph_map_restriction _ Q P e Y (localOrdinaryFactorGraph_restriction D Y hfactor.2) hQ,</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     graph_map_degree_bound _ e 2 (localOrdinaryFactorGraph_degree D hfactor.1),</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     graph_map_disjoint_of_comap _ K e havoid⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

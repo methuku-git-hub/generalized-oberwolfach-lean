@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualSourceOrientationUniqueOutgoing.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualSourceOrientationUniqueOutgoing.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ActualSourceOrientationProperties</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The actual source-piece orientation also has at most one outgoing arc. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem actual_source_orientation_has_unique_outgoing</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     {X:Type} [Fintype X] [DecidableEq X]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (pieces:List (PrescribedSourcePiece X)) (D:X→X→Prop)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hpair:pieces.Pairwise (fun p q=&gt;Disjoint p.vertices.toFinset q.vertices.toFinset))</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hvalid:∀p∈pieces,p.OriginalValid D)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hArcs:∀x y,D x y↔(x,y)∈sourcePieceArcsUnion pieces):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∀x y z,D x y→D x z→y=z:=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   classical</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   intro x y z hy hz</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   obtain ⟨p,hp,hyp⟩:=Finset.mem_biUnion.mp ((hArcs x y).1 hy)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   obtain ⟨q,hq,hzq⟩:=Finset.mem_biUnion.mp ((hArcs x z).1 hz)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hp&#x27;:p∈pieces:=List.mem_toFinset.mp hp</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hq&#x27;:q∈pieces:=List.mem_toFinset.mp hq</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   rcases prescribed_pairwise_rel_or_eq (fun p q:PrescribedSourcePiece X=&gt;Disjoint p.vertices.toFinset q.vertices.toFinset)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (fun _ _ h=&gt;h.symm) pieces hpair p hp&#x27; q hq&#x27; with heq | hdis</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · subst q</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     exact prescribed_piece_unique_successor p D ⊥ (prescribed_original_piece_valid p D (hvalid p hp&#x27;)) x y z hyp hzq</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   · have hxp:x∈p.vertices.toFinset:=List.mem_toFinset.mpr (prescribed_source_piece_arc_endpoints p (x,y) hyp).1</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hxq:x∈q.vertices.toFinset:=List.mem_toFinset.mpr (prescribed_source_piece_arc_endpoints q (x,z) hzq).1</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     exact False.elim (Finset.disjoint_left.mp hdis hxp hxq)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> end Oberwolfach</span></pre></html>

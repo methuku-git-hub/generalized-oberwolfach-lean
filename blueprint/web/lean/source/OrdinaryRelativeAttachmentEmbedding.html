@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryRelativeAttachmentEmbedding.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryRelativeAttachmentEmbedding.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryRelativeAttachmentRoot</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryAttachmentEmbeddingMaps</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.SeparatedLabelledGadgets</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The full attachment embedding in a relative host, preserving the old</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> subgraph and every prescribed root. Its private rows and hubs are chosen</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> by the proved local constructions, with separation retained globally. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 9000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V₀ U₀ V U I : Type} [Fintype V] [Fintype U] [Fintype I]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [DecidableEq V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem ordinary_relative_attachment_embedding (Q F : SimpleGraph V) (H : V → U → Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (A W R : Finset V) (B : Finset U) (φ : V₀ ↪ V) (ψ : U₀ ↪ U)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (G₀ : SimpleGraph V₀) (H₀ : V₀ → U₀ → Prop) (ρ : I → V₀)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hφ : ∀ a,φ a∈R) (hψ : ∀ b,ψ b∈B)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hG₀ : ∀ a b,G₀.Adj a b → Q.Adj (φ a) (φ b)) (hH₀ : ∀ a b,H₀ a b → H (φ a) (ψ b))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (r : ℕ) (hr : 3≤r) (d c cH : ℝ) (hd : 0≤d)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hF : ∀ v,(F.degree v:ℝ)≤d)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hcount : ∀ v w,c≤((A∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hhub : ∀ T:Finset V,T.card≤r → (∀ v∈T,∀ w∈T,¬F.Adj v w) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       cH≤((common Finset.univ T (fun v =&gt; Finset.univ.filter (H v))).card:ℝ))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hbudget : W.card+((R.card:ℝ)+Fintype.card I*r+r+6)*(d+1)&lt;c)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hB : (B.card:ℝ)+Fintype.card I&lt;cH) :</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∃ (f : V₀⊕(I×Fin r) ↪ V) (g : U₀⊕I ↪ U),</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ a,f (.inl a)=φ a) ∧ (∀ b,g (.inl b)=ψ b) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ i w,f (.inr (i,w))∈A ∧ f (.inr (i,w))∉W ∧ f (.inr (i,w))∉R ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         ∀ z∈R,¬F.Adj (f (.inr (i,w))) z) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ i,g (.inr i)∉B) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ i j w w&#x27;,¬F.Adj (f (.inr (i,w))) (f (.inr (j,w&#x27;)))) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ a b,(ordinaryAttachmentRim G₀ (SimpleGraph.cycleGraph r) ⟨0,by omega⟩ ρ).Adj a b → Q.Adj (f a) (f b)) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       ∀ a b,ordinaryAttachmentSpokes H₀ ⟨0,by omega⟩ ρ a b → H (f a) (g b) := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let z : Fin r := ⟨0,by omega⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   let C := SimpleGraph.cycleGraph r</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   let P : I → (Fin r ↪ V) → U → Prop := fun i f a =&gt;</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ j k,j≠z → k≠z → C.Adj j k → Q.Adj (f j) (f k)) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ j,C.Adj z j → Q.Adj (φ (ρ i)) (f j)) ∧ H (φ (ρ i)) a ∧ (∀ j,j≠z → H (f j) a) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ j k,¬F.Adj (f j) (f k)) ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∀ j,f j∈A ∧ f j∉W ∧ f j∉R ∧ ∀ v∈R,¬F.Adj (f j) v</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   obtain ⟨f,a,hf,hsep⟩ := separated_labelled_gadgets_finite r F R B P (by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     intro i S T hRS hBT hS hT</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hSc : (S.card:ℝ)≤R.card+Fintype.card I*r := by exact_mod_cast hS</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hTc : (T.card:ℝ)≤B.card+Fintype.card I := by exact_mod_cast hT</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     obtain ⟨f,a,hC,hcross,hrootH,hH,ha,hind,havoid⟩ := ordinary_relative_attachment_root Q F H A W S T</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (φ (ρ i)) (hRS (hφ (ρ i))) r hr d c cH hd hF hcount</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (by nlinarith only [hbudget,hSc,hd]) hhub (hTc.trans_lt hB)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     refine ⟨f,a,⟨hC,hcross,hrootH,hH,hind,?_⟩,(fun j =&gt; (havoid j).2.2.1),ha,?_⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     · intro j</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       exact ⟨(havoid j).1,(havoid j).2.1,(fun h =&gt; (havoid j).2.2.1 (hRS h)),</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         fun v hv =&gt; (havoid j).2.2.2 v (hRS hv)⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     · intro j v hv</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       exact (havoid j).2.2.2 v hv)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hfroot : ∀ i w b,f i w≠φ b := by intro i w b he;exact (hf i).2.1 w (he ▸ hφ b)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have haroot : ∀ i b,a i≠ψ b := by intro i b he;exact (hf i).2.2 (he ▸ hψ b)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hainj : Function.Injective a := by intro i j he;by_contra hne;exact (hsep i j hne).1 he</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hfsep : ∀ i j,i≠j → ∀ w w&#x27;,f i w≠f j w&#x27; := fun i j hij w w&#x27; =&gt; ((hsep i j hij).2 w w&#x27;).1</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   let f&#x27; := expansionRowEmbedding φ f hfroot hfsep</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   let g&#x27; := expansionHubEmbedding ψ a haroot hainj</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   refine ⟨f&#x27;,g&#x27;,(fun _ =&gt; rfl),(fun _ =&gt; rfl),(fun i =&gt; (hf i).1.2.2.2.2.2),(fun i =&gt; (hf i).2.2),?_,</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     attachmentRowEmbedding_hom φ f hfroot hfsep G₀ C z ρ Q hG₀ (fun i =&gt; (hf i).1.1) (fun i =&gt; (hf i).1.2.1),</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     attachmentEmbedding_spokes φ f hfroot hfsep ψ a haroot hainj H₀ z ρ H hH₀</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (fun i =&gt; (hf i).1.2.2.2.1) (fun i =&gt; (hf i).1.2.2.1)⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   intro i j w w&#x27;</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   by_cases hij : i=j</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   · subst j;exact (hf i).1.2.2.2.2.1 w w&#x27;</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · exact ((hsep i j hij).2 w w&#x27;).2</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

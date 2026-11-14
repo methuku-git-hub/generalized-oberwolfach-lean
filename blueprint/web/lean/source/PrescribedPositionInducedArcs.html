@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedPositionInducedArcs.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedPositionInducedArcs.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedPositionOriginalSelection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedPositionInducedEdges</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Adding the selected source positions to the original independent set</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> induces exactly the selected oriented arcs. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {X:Type} [Fintype X] [DecidableEq X]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem prescribed_selected_induced_arcs (Q:SimpleGraph X) (D:X→X→Prop) (A:Finset X)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hDQ:∀x y,D x y→Q.Adj x y) (horiented:∀x y,D x y→¬D y x)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hA:∀x∈A,∀y∈A,¬Q.Adj x y)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (es:List (X×X)) (vs:List X)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hE:∀e∈es,D e.1 e.2 ∧ e.1∉prescribedClosedNeighbourhoods Q A ∧ e.2∉prescribedClosedNeighbourhoods Q A)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hpair:es.Pairwise (prescribedPairsApart Q))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hvs:∀v∈vs,v∉prescribedClosedNeighbourhoods Q A)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hcross:∀ e∈es,∀v∈vs,v∉prescribedPairClosed Q e)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hsingle:vs.Pairwise (prescribedSinglesApart Q)):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ x y,D x y→x∈A∪(es.flatMap prescribedPairVertices++vs).toFinset→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       y∈A∪(es.flatMap prescribedPairVertices++vs).toFinset→(x,y)∈es := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   intro x y hxy hx hy</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hx&#x27;:x∈A ∨ x∈es.flatMap prescribedPairVertices++vs:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     rcases Finset.mem_union.mp hx with hx|hx</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     · exact Or.inl hx</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     · exact Or.inr (List.mem_toFinset.mp hx)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hy&#x27;:y∈A ∨ y∈es.flatMap prescribedPairVertices++vs:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     rcases Finset.mem_union.mp hy with hy|hy</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     · exact Or.inl hy</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     · exact Or.inr (List.mem_toFinset.mp hy)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hout:∀v∈es.flatMap prescribedPairVertices++vs,v∉prescribedClosedNeighbourhoods Q A:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     intro v hv</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     rcases List.mem_append.mp hv with hv|hv</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     · obtain ⟨e,he,hv⟩:=List.mem_flatMap.mp hv</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       simp only [prescribedPairVertices,List.mem_cons,List.not_mem_nil,or_false] at hv</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       rcases hv with hv|hv</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       · subst v;exact (hE e he).2.1</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       · subst v;exact (hE e he).2.2</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · exact hvs v hv</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   rcases hx&#x27; with hx|hx &lt;;&gt; rcases hy&#x27; with hy|hy</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   · exact (hA x hx y hy (hDQ x y hxy)).elim</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   · exact ((prescribed_outside_closed_neighbourhood Q A y (hout y hy)).2 x hx (hDQ x y hxy)).elim</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   · exact ((prescribed_outside_closed_neighbourhood Q A x (hout x hx)).2 y hy (hDQ x y hxy).symm).elim</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   · obtain ⟨e,he,hpos⟩:=prescribed_selected_induced_edge Q es vs hpair hsingle hcross x y hx hy (hDQ x y hxy)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     rcases hpos with ⟨rfl,rfl⟩|⟨rfl,rfl⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     · exact he</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     · exact (horiented e.1 e.2 (hE e he).1 hxy).elim</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongHostAdaptiveReferenceParameters.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongHostAdaptiveReferenceParameters.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedAdaptiveAuxiliaryConstants</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongAssignedHostMatchingWeights</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Choose the reference and level-density constants from the regular-host</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> margin, with exactly the dependencies needed by the adaptive event. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem long_host_adaptive_reference_parameters</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (m k₀:ℕ) (hm:1≤m) (αHost ρ₀:ℝ) (hα:0&lt;αHost) (hρ₀:0&lt;ρ₀)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hmargin:successorCycleRatio k₀+αHost/4≤1/2+αHost/2):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃αRef γRich ω pstarRef kstar tstar:ℝ,</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       αRef=αHost/2 ∧ 0&lt;αRef ∧ 0&lt;γRich ∧ γRich≤1/2 ∧ γRich≤αRef ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       successorCycleRatio k₀+αRef/2≤1/2+αRef ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       0&lt;ω ∧ 0&lt;pstarRef ∧ 0&lt;kstar ∧ 0&lt;tstar ∧ tstar≤1/100 ∧ tstar≤1 ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       4*ω≤ρ₀ ∧ 4*(m:ℝ)*pstarRef≤ρ₀*(1/100) ∧ tstar≤(1/100)/(m:ℝ) ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (∀ρ:ℝ,ρ₀≤ρ→kstar≤ρ*(1/100)/2 ∧ kstar≤ρ*((1/100)/(m:ℝ))/2) := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   obtain ⟨ω,pstarRef,kstar,tstar,hω,hp,hk,ht,ht100,ht1,hωBound,hpBound,htm,hkBound⟩:=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     marked_adaptive_auxiliary_constants m hm ρ₀ hρ₀</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let αRef:=αHost/2</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   let γRich:=min (1/2:ℝ) αRef</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hαRef:0&lt;αRef:=by dsimp [αRef];positivity</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hγ:0&lt;γRich:=lt_min (by norm_num) hαRef</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hγ1:γRich≤1/2:=min_le_left _ _</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hγcap:γRich≤αRef:=min_le_right _ _</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hmargin&#x27;:successorCycleRatio k₀+αRef/2≤1/2+αRef:=by dsimp [αRef];linarith</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   exact ⟨αRef,γRich,ω,pstarRef,kstar,tstar,rfl,hαRef,hγ,hγ1,hγcap,hmargin&#x27;,</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     hω,hp,hk,ht,ht100,ht1,hωBound,hpBound,htm,hkBound⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> end Oberwolfach</span></pre></html>

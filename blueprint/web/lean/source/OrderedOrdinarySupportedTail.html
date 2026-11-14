@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrderedOrdinarySupportedTail.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrderedOrdinarySupportedTail.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrderedOrdinaryLoadBound</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrderedOrdinaryPairBound</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrderedOrdinaryLocality</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.ResourcePatternConcentration</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Concentration from the ordinary-wheel size, load, and pair bounds. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 2500000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U:Type} [Fintype V] [Fintype U] [LinearOrder V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   {m b:ℕ} {π:Equiv.Perm V}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a>  theorem orderedOrdinary_supported_tail (hm:2≤m) (hn:0&lt;Fintype.card V) (hu:Fintype.card U≤Fintype.card V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (w:OrderedOrdinaryWheel (U:=U) π b (m+1)→ℝ) (B:ℝ) (hB:0&lt;B)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hw:∀ W,0≤w W ∧ w W≤B/(Fintype.card V:ℝ)^m)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     {J:Type} [Fintype J] [DecidableEq J] {Base:J→Type} [∀ e,Fintype (Base e)]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (μ:∀ e,FiniteLaw (Base e)) (S:((V×V)⊕(V×U))→Finset J)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (state:(∀ e,Base e)→((V×V)⊕(V×U))→Bool)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hs:∀ a σ τ,(∀ e∈S a,σ e=τ e)→state σ a=state τ a)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (L:ℝ) (hL:0&lt;L) (hread:∀ a,((S a).card:ℝ)≤L)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (haffect:∀ e,((Finset.univ.filter (fun a=&gt;e∈S a)).card:ℝ)≤L)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (root:(V×V)⊕(V×U)) (t:ℝ) (ht:0&lt;t):</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (FiniteLaw.pi μ).probability (fun σ=&gt;t≤</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       |resourcePatternLoad orderedOrdinaryResources w (fun _ _=&gt;true) root (state σ)-</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (FiniteLaw.pi μ).expectation (fun τ=&gt;resourcePatternLoad orderedOrdinaryResources w (fun _ _=&gt;true) root (state τ))|)≤</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       2*Real.exp (-2*t^2/(L^2*(((m:ℝ)+1)^3*B/Fintype.card V)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B))):=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hn0:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hh:=resourcePatternLoad_supported_tail μ orderedOrdinaryResources w (fun W=&gt;(hw W).1)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (fun _ _=&gt;true) S state hs L hL hread haffect root</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (2*((m:ℝ)+1)) (((m:ℝ)+1)^2*B) (((m:ℝ)+1)^3*B/Fintype.card V) (by positivity) (by positivity) (by positivity)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       intro W _</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       have hc:=Finset.card_le_card (Finset.sdiff_subset : orderedOrdinaryResources W\{root}⊆orderedOrdinaryResources W)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       exact_mod_cast hc.trans (orderedOrdinaryResources_card W))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (orderedOrdinary_root_load_bound hm hn hu w B hB.le hw root)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (orderedOrdinary_omitted_pair_bound hm hn hu w B hB.le hw root) t ht</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   exact hh</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ResidualRunContainingSegment.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ResidualRunContainingSegment.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResidualSelectedRunCard</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Every selected segment lies in a maximal consecutive selected run. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem selected_segment_in_maximal_run (d:ℕ) (T:Finset ℕ)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (hT:T⊆Finset.range d) (j:ℕ) (hj:j∈T):</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     ∃ a b,(a,b)∈selectedSegmentRuns d T ∧ a≤j ∧ j≤b := by</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   let good := (Finset.range (j+1)).filter (fun a=&gt;∀ k,a≤k→k≤j→k∈T)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hgood:good.Nonempty := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     refine ⟨j,Finset.mem_filter.mpr ⟨Finset.mem_range.mpr (by omega),?_⟩⟩</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     intro k h1 h2</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     have : k=j := by omega</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     simpa [this] using hj</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   let a:=good.min&#x27; hgood</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have ha:=Finset.min&#x27;_mem good hgood</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have had:a≤j := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     have hh: a&lt;j+1 := Finset.mem_range.mp (Finset.mem_filter.mp ha).1</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     omega</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hagood:∀k,a≤k→k≤j→k∈T := (Finset.mem_filter.mp ha).2</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have haT:a∈T := hagood a le_rfl had</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hstart:a∈selectedRunStarts T := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     apply (selected_run_start_mem T a).mpr</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     refine ⟨haT,?_⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     by_cases ha0:a=0</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     · exact Or.inl ha0</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     · right</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       intro hapred</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       have hpGood:a-1∈good := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         apply Finset.mem_filter.mpr</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         refine ⟨Finset.mem_range.mpr (by omega),?_⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         intro k hk hjk</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         by_cases heq:k=a-1</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         · simpa [heq] using hapred</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         · exact hagood k (by omega) hjk</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       have hm:=Finset.min&#x27;_le good (a-1) hpGood</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       omega</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   obtain ⟨b,hb,_⟩:=selected_run_exists_unique_from_start d T hT a hstart</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hjb:j≤b := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     by_contra h</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hnext: b+1≤j := by omega</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hnextT:=hagood (b+1) (by have hh:=hb.1;omega) hnext</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact hb.2.2.2 hnextT</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   exact ⟨a,b,(selected_run_mem d T hT a b).mpr hb,had,hjb⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> end Oberwolfach</span></pre></html>

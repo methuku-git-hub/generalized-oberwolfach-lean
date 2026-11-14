@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedAdaptiveFailureBudget.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedAdaptiveFailureBudget.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Uniform failure budgets for the full adaptive event, including agreement. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option maxHeartbeats 3000000</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> open Filter</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped Topology</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem eventually_marked_adaptive_agreement_failure_below</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (χ χCommon χBal χNbr χLoad χLocal χConfig Qexp ε₀:ℝ) (Qpow:ℕ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hQexp:0&lt;Qexp) (hQpow:0&lt;Qpow)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hgap:χ+χCommon+χBal+2*χNbr+χLoad+χLocal+χConfig&lt;ε₀):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃N:ℕ,∀n:ℕ,N≤n→</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       χ+χCommon+χBal+2*χNbr+χLoad+χLocal+χConfig+</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>         7*(n:ℝ)^(-Qexp)+5/(n:ℝ)^Qpow&lt;ε₀ :=by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have h1:Tendsto (fun n:ℕ=&gt;(n:ℝ)^(-Qexp)) atTop (𝓝 0):=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (tendsto_rpow_neg_atTop hQexp).comp tendsto_natCast_atTop_atTop</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hq:0&lt;(Qpow:ℝ):=by exact_mod_cast hQpow</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have h2&#x27;:Tendsto (fun n:ℕ=&gt;(n:ℝ)^(-(Qpow:ℝ))) atTop (𝓝 0):=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (tendsto_rpow_neg_atTop hq).comp tendsto_natCast_atTop_atTop</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have h2:Tendsto (fun n:ℕ=&gt;1/(n:ℝ)^Qpow) atTop (𝓝 0):=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     convert h2&#x27; using 1</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     funext n</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     rw [Real.rpow_neg (Nat.cast_nonneg n),Real.rpow_natCast]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     simp</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have ht:Tendsto (fun n:ℕ=&gt;7*((n:ℝ)^(-Qexp))+5/(n:ℝ)^Qpow) atTop (𝓝 0):=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     simpa only [mul_zero,zero_add,div_eq_mul_inv,one_mul] using (h1.const_mul 7).add (h2.const_mul 5)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hg:0&lt;ε₀-(χ+χCommon+χBal+2*χNbr+χLoad+χLocal+χConfig):=by linarith</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have he:∀ᶠn:ℕ in atTop,7*((n:ℝ)^(-Qexp))+5/(n:ℝ)^Qpow&lt;ε₀-(χ+χCommon+χBal+2*χNbr+χLoad+χLocal+χConfig):=</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ht.eventually (eventually_lt_nhds hg)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨N,hN⟩:=eventually_atTop.mp he</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   refine ⟨N,?_⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   intro n hn</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hh:=hN n hn</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   linarith</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> </span>
+<span id="L38"><a href="#L38" class="ln">  38</a> theorem marked_adaptive_agreement_failure_budgets_exist</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (Qexp ε₀:ℝ) (Qpow:ℕ) (hQexp:0&lt;Qexp) (hQpow:0&lt;Qpow) (hε₀:0&lt;ε₀):</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     ∃χ χCommon χBal χNbr χLoad χLocal χConfig:ℝ,</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       0&lt;χ ∧ 0&lt;χCommon ∧ 0&lt;χBal ∧ 0&lt;χNbr ∧ 0&lt;χLoad ∧ 0&lt;χLocal ∧ 0&lt;χConfig ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       ∃N:ℕ,∀n:ℕ,N≤n→</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         χ+χCommon+χBal+2*χNbr+χLoad+χLocal+χConfig+</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>           7*(n:ℝ)^(-Qexp)+5/(n:ℝ)^Qpow&lt;ε₀ :=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let e:=ε₀/16</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have he:0&lt;e:=by dsimp [e];positivity</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hgap:e+e+e+2*e+e+e+e&lt;ε₀:=by dsimp [e];linarith</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨N,hN⟩:=eventually_marked_adaptive_agreement_failure_below e e e e e e e Qexp ε₀ Qpow hQexp hQpow hgap</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   exact ⟨e,e,e,e,e,e,e,he,he,he,he,he,he,he,N,hN⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> end Oberwolfach</span></pre></html>

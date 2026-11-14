@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawIntervalRestrictedLabels.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawIntervalRestrictedLabels.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawIntervalHubRestriction</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Simultaneous index counts on an arbitrary fixed hub domain. The</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> vertex labels may lie outside a later inner vertex domain. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1800000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U Γ Color : Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def rawIntervalSelectedLabelCountOn (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (σ : RawIntervalFamilyOutcome V U Γ Color) (j : V→Γ⊕Color) (T : Finset V) (B : Finset U) : ℝ :=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   ∑ u∈B,if ∀ v∈T,rawIntervalFamilyState π d σ (v,u)=some (j v) then 1 else 0</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem rawIntervalSelectedLabelCount_restrict_hubs (π : Equiv.Perm V) (d : ℕ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (σ : RawIntervalFamilyOutcome V U Γ Color) (j : V→Γ⊕Color) (T : Finset V) (B : Finset U) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     rawIntervalSelectedLabelCount π d (rawIntervalRestrictHubs (fun u : B=&gt;u.val) σ) j T=</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       rawIntervalSelectedLabelCountOn π d σ j T B := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   unfold rawIntervalSelectedLabelCount rawIntervalSelectedLabelCountOn</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   simp only [rawIntervalRestrictHubs_state]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   exact Finset.sum_coe_sort B (fun u : U=&gt;if ∀ v∈T,rawIntervalFamilyState π d σ (v,u)=some (j v) then (1:ℝ) else 0)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem rawIntervalSelectedLabelCountOn_common_event</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (π : Equiv.Perm V) (d : ℕ) (hd : 2≤d)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (q : U→Γ→ℝ) (hq : ∀ u g,0≤q u g) (hQ : ∀ u,∑ g,q u g≤1/8)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hnoshort : ∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (B : Finset U) (hB : B.Nonempty)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     {I : Type} [Fintype I] (j : I→V→Γ⊕Color) (T : I→Finset V)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hsep : ∀ i,∀ x∈T i,∀ y∈T i,x≠y → ¬PermutationClose π (3*d) x y)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hT : ∀ i,(T i).Nonempty) (k : ℕ) (hk : 0&lt;k) (hsize : ∀ i,(T i).card≤k)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (t : ℝ) (ht : 0&lt;t) :</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     1-(Fintype.card I:ℝ)*(2*Real.exp (-2*t^2/((4*(d:ℝ)+3)^2*((k:ℝ)*B.card))))≤</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (FiniteLaw.pi (rawIntervalFamilyLaw (V:=V) d hd q hq hQ s hs hS)).probability</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (fun σ=&gt;∀ i,|rawIntervalSelectedLabelCountOn π d σ (j i) (T i) B-</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         ∑ u∈B,∏ v∈T i,Sum.elim (q u) (s u) (j i v)|&lt;t) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let E := fun τ : RawIntervalFamilyOutcome V B Γ Color=&gt;∀ i,</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     |rawIntervalSelectedLabelCount π d τ (j i) (T i)-</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       ∑ u : B,∏ v∈T i,Sum.elim (q u.val) (s u.val) (j i v)|&lt;t</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hh := rawIntervalSelectedLabelCount_common_event π d hd</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (fun u : B=&gt;q u.val) (fun u=&gt;hq u.val) (fun u=&gt;hQ u.val)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (fun u : B=&gt;s u.val) (fun u=&gt;hs u.val) (fun u=&gt;hS u.val) hnoshort</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (by simpa only [Fintype.card_coe] using hB.card_pos) j T hsep hT k hk hsize t ht</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   rw [← rawInterval_hub_restriction_probability (fun u : B=&gt;u.val) Subtype.val_injective</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     d hd q hq hQ s hs hS E] at hh</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hsum (i : I) : (∑ u : B,∏ v∈T i,Sum.elim (q u.val) (s u.val) (j i v))=</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       ∑ u∈B,∏ v∈T i,Sum.elim (q u) (s u) (j i v) := Finset.sum_coe_sort B (fun u : U=&gt;∏ v∈T i,Sum.elim (q u) (s u) (j i v))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   simpa only [E,Fintype.card_coe,rawIntervalSelectedLabelCount_restrict_hubs,hsum] using hh</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> </span>
+<span id="L55"><a href="#L55" class="ln">  55</a> end Oberwolfach</span></pre></html>

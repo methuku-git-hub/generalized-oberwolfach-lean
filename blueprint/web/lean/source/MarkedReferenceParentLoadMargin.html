@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceParentLoadMargin.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceParentLoadMargin.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceParentLoadFromZeroDeletionSplit</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Numerical choices for the parent-level adaptive load error. This does</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> not assert the sampling event or the parent weight hypotheses. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem marked_reference_parent_load_margin_choice (r:ℕ) (κ ρstar sstar Bload Kload:ℝ)</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (hκ:0&lt;κ) (hρ:0&lt;ρstar) (hs:0&lt;sstar) (hB:0&lt;Bload) (hK:0&lt;Kload):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     ∃ τ εLoad ζLoad:ℝ,0&lt;τ ∧ 0&lt;εLoad ∧ 0&lt;ζLoad ∧</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>       τ+εLoad+11*(((r+4):ℝ)+1)^4*(2*Bload/(ρstar*sstar/(2*((r+4:ℕ):ℝ)))^(2*(r+4)+1))*Kload*ζLoad≤κ/4 := by</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   let C:ℝ:=11*(((r+4):ℝ)+1)^4*(2*Bload/(ρstar*sstar/(2*((r+4:ℕ):ℝ)))^(2*(r+4)+1))*Kload</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hC:0&lt;C:=by dsimp [C];positivity</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   refine ⟨κ/16,κ/16,κ/(16*(C+1)),by positivity,by positivity,by positivity,?_⟩</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hden:0&lt;16*(C+1):=by positivity</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hfrac:C*(κ/(16*(C+1)))≤κ/16:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     apply (le_div_iff₀ (by norm_num: (0:ℝ)&lt;16)).2</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     have hratio:C/(C+1)≤1:=(div_le_one (by positivity)).2 (by linarith)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     have hh:=mul_le_mul_of_nonneg_left hratio hκ.le</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have hid:(C*(κ/(16*(C+1))))*16=κ*(C/(C+1)):=by field_simp &lt;;&gt; ring</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     rw [hid]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     linarith</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   change κ/16+κ/16+C*(κ/(16*(C+1)))≤κ/4</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   linarith</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,111 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedFixedVortexActiveJointEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedFixedVortexActiveJointEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedActiveDifferenceJointEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedFixedVortexEventInputs</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.VortexSamplingDomainSizes</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The active-domain event specialized to the actual pre-exposure paired</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> vortex. All domain choices and embeddings precede the random outcome. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 25000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem marked_fixed_vortex_active_neighbourhood_with_existing_event</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (h d:ℕ) (hd:2≤d) (β ε ρ₀ tol χ C Qexp pstar ζ:ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hb:0≤β) (hb1:β≤1/4) (he:0&lt;ε) (he1:ε&lt;1/4) (hr:0&lt;ρ₀)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (htol:0&lt;tol) (hχ:0&lt;χ) (hpstar:0&lt;pstar) (hζ:0&lt;ζ):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ m₀:ℕ,1≤m₀ ∧ ∀ (V U Γ Color:Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       [LinearOrder V] [Nonempty V] [DecidableEq U],</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ (G:SimpleGraph V) (D m:ℕ),G.IsRegularOfDegree D→0&lt;Fintype.card V→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (Fintype.card V:ℝ)/2≤D→ρ₀ ≤ initialIndexDensity U D→initialIndexDensity U D ≤ 1→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       m₀≤m→m≤Fintype.card V→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (vtx:Vortex U G D β ε m) (π:Equiv.Perm V)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (hpres:∀ i x,π x∈vtx.extendedVertices i↔x∈vtx.extendedVertices i),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ L:ℕ,L&lt;vtx.length→(L+1:ℝ)≤(Fintype.card V:ℝ)^C→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let W:=markedVortexVertexType vtx</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let Z:=markedVortexHubType vtx</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let f:=markedVortexVertexEmbedding vtx</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let g:=markedVortexHubEmbedding vtx</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let ρi:=markedVortexPermutation vtx π hpres</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let I:=markedVortexInnerVertices vtx</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let T:=markedVortexDeeperVertices vtx</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let J:=markedVortexInnerHubs vtx</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let Wrem:=markedVortexDeeperHubs vtx;</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∀ (p k : ℝ) (hp : 0≤p) (hk : 0≤k) (hphys : 2*p+2*k≤1)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a)) (a : Γ) (j : Color)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (t₀ : ℝ),(∀ u,q u a=t₀) → pstar*Fintype.card V≤t₀*Fintype.card U →</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     ∀ (E:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a→Prop) (err:ℝ),</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     1-err≤(rawMarkedRetentionLaw π d hd a p k hp hk hphys q hq hQ s hs hS).probability E →</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     1-err-2*χ-2*(Fintype.card V:ℝ)^(-Qexp)≤</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (rawMarkedRetentionLaw π d hd a p k hp hk hphys q hq hQ s hs hS).probability</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         (fun z=&gt;E z ∧ ∀ i≤L,</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>           let ω := rawMarkedRestrictPair (f i) (g i) z.1</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>           let H := fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>             (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f i x) (g i u);</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           ∀ deltaR deltaV deltaU : ℝ,0≤deltaR→0≤deltaV→0≤deltaU→</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>           ∀ (DR : SimpleGraph (W i)) (DS : SimpleGraph (W i⊕Z i)),</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>             (∀ x,((DR.neighborFinset x∩(I i\T i)).card:ℝ)≤deltaR)→</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>             (∀ x,((((J i\Wrem i)).filter (fun u=&gt;DS.Adj (Sum.inl x) (Sum.inr u))).card:ℝ)≤deltaV)→</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>             (∀ u,((((I i\T i)).filter (fun x=&gt;DS.Adj (Sum.inl x) (Sum.inr u))).card:ℝ)≤deltaU)→</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>           MarkedRowsWithSpokes (G.comap (f i)) (ρi i) d h ((I i\T i)) p k</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>             (fun u=&gt;q (g i u)) (fun u=&gt;s (g i u)) a j</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>             ((tol+h*ζ)*((I i\T i)).card+h*(deltaR+deltaU))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>             (rawMarkedDeleteRims ω DR.edgeFinset) (markedDeletePhysicalSpokes H DS) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           MarkedIndicesWithSpokes (ρi i) d h ((J i\Wrem i))</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>             (fun u=&gt;q (g i u)) (fun u=&gt;s (g i u)) a j</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>             ((tol+h*ζ)*((J i\Wrem i)).card+h*deltaV)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>             (rawMarkedDeleteRims ω DR.edgeFinset) (markedDeletePhysicalSpokes H DS)) := by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   let K:=1+1/(ε/2)+1/((ε/2)*(ρ₀/8))</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hK:1≤K:=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     dsimp [K]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have h1:0≤(1/(ε/2):ℝ):=by positivity</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have h2:0≤(1/((ε/2)*(ρ₀/8)):ℝ):=by positivity</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     linarith</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hratio:ε&lt;1-ε:=by linarith</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   obtain ⟨M,N,hM,hN,hbase⟩:=marked_active_vortex_neighbourhood_with_existing_event h d hd tol K ε ε χ C Qexp pstar ζ</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     htol hK he he.le (by linarith) hratio hχ hpstar hζ</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨M₀,hM₀,hsize⟩:=marked_fixed_vortex_event_size_inputs β ε ρ₀ hb hb1 he he1 hr M</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   refine ⟨max M₀ N,le_trans hM₀ (le_max_left _ _),?_⟩</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   intro V U Γ Color _ _ _ _ _ _ _ G D m hreg hn hD hrlo hrhi hm hmn vtx π hpres hπ L hL hLpoly W Z f g ρi I T J Wrem</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hm₀:M₀≤m:=(le_max_left _ _).trans hm</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hnN:N≤Fintype.card V:=(le_max_right _ _).trans (hm.trans hmn)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have hDpos:(0:ℝ)&lt;D:=by</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     have hn&#x27;:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     linarith</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   have hu2:(2:ℝ)*Fintype.card U≤D:=by</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     have hh:=(div_le_iff₀ hDpos).mp hrhi</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     simpa [initialIndexDensity] using hh</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hdV:D≤Fintype.card V:=regular_degree_le_card hreg hn</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   have hu:Fintype.card U≤Fintype.card V:=by</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     have hdV&#x27;:(D:ℝ)≤Fintype.card V:=by exact_mod_cast hdV</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     have hU0:(0:ℝ)≤Fintype.card U:=Nat.cast_nonneg _</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     exact_mod_cast (show (Fintype.card U:ℝ)≤Fintype.card V by linarith)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hgeometry (i:ℕ) (hi:i≤L):=marked_vortex_fixed_active_geometry vtx he.le i</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hsizes (i:ℕ) (hi:i≤L):=hsize V U G D m hreg hn hD hrlo hrhi hm₀ vtx i (by omega)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   have hsubI:∀ i≤L,T i⊆I i:=fun i hi=&gt;(hgeometry i hi).1</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   have hsubJ:∀ i≤L,Wrem i⊆J i:=fun i hi=&gt;(hgeometry i hi).2.1</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   have hsmallI:∀ i≤L,((T i).card:ℝ)≤ε*(I i).card:=fun i hi=&gt;(hgeometry i hi).2.2.1</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   have hsmallJ:∀ i≤L,((Wrem i).card:ℝ)≤ε*(J i).card:=fun i hi=&gt;(hgeometry i hi).2.2.2.1</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   have hminI:∀ i≤L,(M:ℝ)≤(1-ε)*((I i).card:ℝ):=fun i hi=&gt;(hsizes i hi).2.1</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   have hminJ:∀ i≤L,(M:ℝ)≤(1-ε)*((J i).card:ℝ):=fun i hi=&gt;(hsizes i hi).2.2.1</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   have hstepI:∀ i&lt;L,((I (i+1)).card:ℝ)≤ε*(I i).card:=fun i hi=&gt;(hgeometry i (by omega)).2.2.2.2.1</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   have hstepJ:∀ i&lt;L,((J (i+1)).card:ℝ)≤ε*(J i).card:=fun i hi=&gt;(hgeometry i (by omega)).2.2.2.2.2</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   have hWI:∀ i≤L,(Fintype.card (W i):ℝ)≤K*(I i).card:=fun i hi=&gt;(hsizes i hi).2.2.2.1</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have hZI:∀ i≤L,(Fintype.card (Z i):ℝ)≤K*(I i).card:=fun i hi=&gt;(hsizes i hi).2.2.2.2.1</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hWJ:∀ i≤L,(Fintype.card (W i):ℝ)≤K*(J i).card:=fun i hi=&gt;(hsizes i hi).2.2.2.2.2</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   have hcomm:∀ i x,f i (ρi i x)=π (f i x):=fun i=&gt;(marked_vortex_permutation_compatibility vtx π hpres i).1</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   have hI:∀ i≤L,∀ x,ρi i x∈I i↔x∈I i:=fun i _=&gt;(marked_vortex_permutation_compatibility vtx π hpres i).2.1</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   have hT:∀ i≤L,∀ x,ρi i x∈T i↔x∈T i:=fun i _=&gt;(marked_vortex_permutation_compatibility vtx π hpres i).2.2</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   intro p k hp hk hphys q hq hQ s hs hS a j t₀ ha hmass E err hE</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   have hh:=hbase V U Γ Color W Z hnN hu G π hπ f g ρi hcomm I T J Wrem L hLpoly</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     hsubI hsubJ hsmallI hsmallJ hminI hminJ hstepI hstepJ hWI hZI hWJ hI hT</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     p k hp hk hphys q hq hQ s hs hS a j t₀ ha hmass E err hE</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>   convert hh using 1 &lt;;&gt; congr!</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a> end Oberwolfach</span></pre></html>

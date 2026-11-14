@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SelectedRoutingFromClassEdits.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SelectedRoutingFromClassEdits.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SelectedClassLostEdges</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SelectedCommonEventRoutingPaths</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The actual two-path tests and regularisation edit bound imply the routing</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> path supply; no independent lost-edge hypothesis is needed. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem selected_routing_paths_from_class_edits</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {V U Γ Color:Type} [Fintype V] [LinearOrder V] [Fintype U] [DecidableEq U] [Fintype Γ] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (P S:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (σ:∀e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e) (p err b β:ℝ) (hb:0≤b)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hedit:∀v,((changed ((longPhysicalStateGraph P σ {0,1,2,3,4}).neighborFinset v) (S.neighborFinset v)).card:ℝ)≤b)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (htest:∀x y,x≠y→((P.neighborFinset x∩P.neighborFinset y).card:ℝ)*p^2-err≤</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ((Finset.univ.filter (fun z=&gt;</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>         0&lt;markedPhysicalRim P π (3*d) (fun e=&gt;markedExpandedPhysicalCollapse (σ (Sum.inl e))) false x z ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>         0&lt;markedPhysicalRim P π (3*d) (fun e=&gt;markedExpandedPhysicalCollapse (σ (Sum.inl e))) false z y)).card:ℝ))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hmargin:∀x y,x≠y→β*Fintype.card V+2*b≤</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ((P.neighborFinset x∩P.neighborFinset y).card:ℝ)*p^2-err):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀x y,x≠y→β*Fintype.card V≤</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ((Finset.univ.filter (fun z=&gt;0&lt;sampledOrientation S (fun e=&gt;(σ (Sum.inl e)).2) x z ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         0&lt;sampledOrientation S (fun e=&gt;(σ (Sum.inl e)).2) z y ∧ S.Adj x z ∧ S.Adj z y)).card:ℝ):=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   apply selected_common_event_routing_paths P S π d (fun e=&gt;σ (Sum.inl e)) p err b β hb ?_ htest hmargin</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   intro v</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hh:=selected_class_lost_edges_le_edits P S π d σ v</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hh&#x27;:((Finset.univ.filter (fun w=&gt;</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (rawSelectedPhysicalRelation P π d (fun e=&gt;σ (Sum.inl e)) v w ∨</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>        rawSelectedPhysicalRelation P π d (fun e=&gt;σ (Sum.inl e)) w v) ∧ ¬S.Adj v w)).card:ℝ)≤</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ((changed ((longPhysicalStateGraph P σ {0,1,2,3,4}).neighborFinset v) (S.neighborFinset v)).card:ℝ):=by exact_mod_cast hh</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   exact hh&#x27;.trans (hedit v)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> end Oberwolfach</span></pre></html>

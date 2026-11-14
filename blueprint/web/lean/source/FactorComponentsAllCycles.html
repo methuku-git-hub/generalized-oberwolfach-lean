@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FactorComponentsAllCycles.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FactorComponentsAllCycles.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FactorComponentEnumeration</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Enumerate all components of an actual two-factor at once. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> variable {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem two_factor_all_components_enumerated (F:SimpleGraph V)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hF:F.IsRegularOfDegree 2):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ (root:F.ConnectedComponent→V) (tail:F.ConnectedComponent→List V),</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       (∀ c,(root c::tail c).Nodup ∧ 3≤(root c::tail c).length) ∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       (∀ c x,x∈root c::tail c ↔ x∈c.supp) ∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       (∀ c c&#x27; x,x∈root c::tail c→x∈root c&#x27;::tail c&#x27;→c=c&#x27;) ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (∀ x,∃ c,x∈root c::tail c) ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (∀ x y,F.Adj x y ↔ ∃ c,x∈root c::tail c ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>         s(x,y)∈prescribedOrderedPathEdges ((root c::tail c)++[root c])) := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   choose root tail hnd hlen hvertices hedges using</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     fun c : F.ConnectedComponent =&gt; two_factor_component_enumeration F hF c</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   refine ⟨root,tail,?_,hvertices,?_,?_,?_⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   · intro c</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     exact ⟨hnd c,hlen c⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · intro c c&#x27; x hx hx&#x27;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     have ha:= (hvertices c x).1 hx</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have hb:= (hvertices c&#x27; x).1 hx&#x27;</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     rw [SimpleGraph.ConnectedComponent.mem_supp_iff] at ha hb</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     exact ha.symm.trans hb</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   · intro x</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     refine ⟨F.connectedComponentMk x, (hvertices _ _).2 ?_⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     rfl</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · intro x y</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     constructor</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     · intro h</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       let c:=F.connectedComponentMk x</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       have hx:x∈root c::tail c := (hvertices c x).2 rfl</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       exact ⟨c,hx,(hedges c x hx y).1 h⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     · rintro ⟨c,hx,he⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       exact (hedges c x hx y).2 he</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> end Oberwolfach</span></pre></html>

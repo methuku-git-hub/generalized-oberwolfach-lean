@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedInnerPackingNumerics.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedInnerPackingNumerics.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPrescribedInnerEdgePacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Explicit sufficient inequalities for prescribed inner-edge packing.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The separation-radius term is controlled by the order threshold, while</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> the protected-set proportion and the free-use tolerance are fixed first. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 14000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem marked_inner_packing_numeric_budgets</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (L q k dr ds nr ns a j sep B:ℝ) (hL:0≤L) (hq:0&lt;q) (hB:0&lt;B)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hklo:q≤k) (hkhi:k≤2*q) (hdr:dr≤q) (hds:ds≤q)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hnr:nr≤q^2) (hns:ns≤q^2) (ha:a≤B/10) (hj:j≤B/10)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hsep:sep≤B/10) (hqB:100*(L+20)*q≤B):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (a+nr*(L+5)/k+sep+8*(k+dr)&lt;B)∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (j+nr/k+(L+5)*(k+dr)&lt;B)∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (a+ns*(L+5)/k+ds*(L+5)+sep+8*(k+ds)+8*(k+dr)+2*(k*(L+5))&lt;B):=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hk:0&lt;k:=hq.trans_le hklo</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hLf:0≤L+5:=by linarith</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hrdiv:nr/k≤q:=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     apply (div_le_iff₀ hk).mpr</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     nlinarith only [hnr,mul_le_mul_of_nonneg_left hklo hq.le]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hsdiv:ns/k≤q:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     apply (div_le_iff₀ hk).mpr</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     nlinarith only [hns,mul_le_mul_of_nonneg_left hklo hq.le]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hrdiv&#x27;:nr*(L+5)/k≤q*(L+5):=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     convert mul_le_mul_of_nonneg_right hrdiv hLf using 1 &lt;;&gt; ring</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hsdiv&#x27;:ns*(L+5)/k≤q*(L+5):=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     convert mul_le_mul_of_nonneg_right hsdiv hLf using 1 &lt;;&gt; ring</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hdsm:ds*(L+5)≤q*(L+5):=mul_le_mul_of_nonneg_right hds hLf</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hkm:k*(L+5)≤2*q*(L+5):=mul_le_mul_of_nonneg_right hkhi hLf</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hkrm:(L+5)*(k+dr)≤3*q*(L+5):=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hh:=mul_le_mul_of_nonneg_left (add_le_add hkhi hdr) hLf</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     nlinarith only [hh]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hlq:0≤L*q:=mul_nonneg hL hq.le</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   constructor</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · nlinarith only [ha,hrdiv&#x27;,hsep,hkhi,hdr,hqB,hB,hq,hlq]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   constructor</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   · nlinarith only [hj,hrdiv,hkrm,hqB,hB,hq,hlq]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   · nlinarith only [ha,hsdiv&#x27;,hdsm,hsep,hkhi,hds,hdr,hkm,hqB,hB,hq,hlq]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> </span>
+<span id="L43"><a href="#L43" class="ln">  43</a> theorem marked_inner_packing_thresholds (l:ℕ) (β:ℝ) (hβ:0&lt;β):</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∃ η₀:ℝ,0&lt;η₀∧∀ η:ℝ,0&lt;η→η≤η₀→∀ b:ℕ,∃ n₀:ℕ,∀ n:ℕ,n₀≤n→</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (0&lt;n)∧(1≤η*n)∧(η≤1)∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (100*((l:ℝ)+20)*(η*n)≤β*n)∧(((l:ℝ)+6)*(2*b+1)≤β*n/10)∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (η*n≤(Nat.ceil (η*n):ℝ))∧((Nat.ceil (η*n):ℝ)≤2*(η*n)):=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let η₀:=min 1 (β/(100*((l:ℝ)+20)))</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hη₀:0&lt;η₀:=lt_min (by norm_num) (div_pos hβ (by positivity))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨η₀,hη₀,?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   intro η hη hsmall b</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   obtain ⟨n₀,hn₀⟩:=exists_nat_gt (max (1/η) (10*(((l:ℝ)+6)*(2*b+1))/β))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   refine ⟨n₀,?_⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   intro n hn</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hnreal:(n₀:ℝ)≤n:=by exact_mod_cast hn</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have ha:1/η&lt;(n:ℝ):=(le_max_left _ _).trans_lt (hn₀.trans_le hnreal)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hb:10*(((l:ℝ)+6)*(2*b+1))/β&lt;(n:ℝ):=(le_max_right _ _).trans_lt (hn₀.trans_le hnreal)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hηn:1&lt;η*n:=by have hh:1&lt;(n:ℝ)*η:=(div_lt_iff₀ hη).mp ha;nlinarith only [hh]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hnn:(0:ℝ)&lt;n:=lt_trans (by positivity : (0:ℝ)&lt;1/η) ha</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hs:η≤β/(100*((l:ℝ)+20)):=hsmall.trans (min_le_right _ _)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hs&#x27;:100*((l:ℝ)+20)*η≤β:=by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hh:η*(100*((l:ℝ)+20))≤β:=(le_div_iff₀ (by positivity)).mp hs</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     nlinarith only [hh]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hceil:η*n≤(Nat.ceil (η*n):ℝ):=Nat.le_ceil _</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hceil&#x27;:(Nat.ceil (η*n):ℝ)&lt;η*n+1:=Nat.ceil_lt_add_one (by positivity)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   refine ⟨by exact_mod_cast hnn,hηn.le,hsmall.trans (min_le_left _ _),?_,?_,hceil,?_⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   · nlinarith only [mul_le_mul_of_nonneg_right hs&#x27; hnn.le]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   · have hh:10*(((l:ℝ)+6)*(2*b+1))&lt;(n:ℝ)*β:=(div_lt_iff₀ hβ).mp hb</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     nlinarith only [hh]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · linarith only [hceil&#x27;,hηn]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

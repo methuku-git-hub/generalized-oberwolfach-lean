@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>DependentGoodEvents.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>DependentGoodEvents.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TwoStageEvents</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! An additive common-event bound for a first finite law followed by a</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> law depending on its outcome. The conditional bound is needed only on E. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem finiteLaw_twoStage_good {Ω : Type*} [Fintype Ω]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {Γ : Ω→Type*} [∀ ω,Fintype (Γ ω)]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (μ : FiniteLaw Ω) (ν : ∀ ω,FiniteLaw (Γ ω)) (E : Ω→Prop) (S : ∀ ω,Γ ω→Prop)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (a b : ℝ) (ha : 0≤a) (hb : 0≤b)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hE : 1-a≤μ.probability E) (hS : ∀ ω,E ω → 1-b≤(ν ω).probability (S ω)) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     1-a-b≤(μ.sigma ν).probability (fun z=&gt;E z.1 ∧ S z.1 z.2) := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   by_cases hb1 : b≤1</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   · have hh := finiteLaw_twoStage_survival μ ν E S b hS</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     have hlo := mul_le_mul_of_nonneg_left hE (show 0≤1-b by linarith)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have hab := mul_nonneg ha hb</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     nlinarith only [hh,hlo,hab]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   · exact (by linarith : 1-a-b≤0).trans (finiteLaw_probability_nonneg _ _)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> end Oberwolfach</span></pre></html>

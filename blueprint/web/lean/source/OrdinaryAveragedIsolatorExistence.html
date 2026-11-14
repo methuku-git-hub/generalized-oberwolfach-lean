@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryAveragedIsolatorExistence.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryAveragedIsolatorExistence.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AveragedRimIsolator</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The actual rim isolator supplied by the admissible induced-subgraph</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> families, with its coefficient bound and its effect on each spoke. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1600000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem ordinary_averaged_isolator_exists (r : ℕ) (hr : 3≤r) (α : ℝ) (hα : 0&lt;α) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ N : ℕ,∀ (V U : Type) [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U],</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ∀ (P Q F : SimpleGraph V) (H : V → U → Prop) (k : ℕ),N≤k →</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ∀ θ : ℝ,cycleThreshold r≤θ → ∀ γ : ℝ,0&lt;γ → 0&lt;Fintype.card V →</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       ∀ x y,P.Adj x y →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       γ*(Fintype.card V:ℝ)^(k-1)≤</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>         (Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y):ℝ) →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ∃ I : OrdinaryWheel Q F H r → ℝ,</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         (∀ a b,ordinaryRimLoad I a b=if (SimpleGraph.edge x y).Adj a b then 1 else 0) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>         (∀ D,|I D|≤1/(γ*(Fintype.card V:ℝ)^</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>           (((ordinaryWheelRim D).support.toFinset∪{x,y}).card-1))) ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         (∀ z h,|ordinarySpokeLoad I z h|≤</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>           (if z=x ∨ z=y then (1:ℝ) else 0)/(2*γ*Fintype.card V)) := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   obtain ⟨N,hN⟩ := ordinary_isolator_configuration_weights r hr α hα</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   refine ⟨max N (r+2),?_⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   intro V U _ _ _ _ P Q F H k hk θ hθ γ hγ hn x y hxy hcount</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hkN : N≤k := (le_max_left _ _).trans hk</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hkr : r+2≤k := (le_max_right _ _).trans hk</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hh := hN V U P Q F H k hkN θ hθ x y hxy</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   choose ψ hb hs he hv using hh</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hn&#x27; : (0:ℝ)&lt;Fintype.card V := Nat.cast_pos.mpr hn</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hpos : 0&lt;Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y) := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hp : (0:ℝ)&lt;γ*(Fintype.card V:ℝ)^(k-1) := by positivity</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     exact_mod_cast hp.trans_le hcount</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   refine ⟨finiteSignedAverage ψ,(averaged_rim_isolator_loads ψ hpos he hv).1,?_,?_⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · exact averaged_rim_isolator_coefficient_bound hr hkr ψ hb hs γ hγ hn hcount</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   · exact averaged_rim_isolator_spoke_bound (by omega) hxy.ne ψ he hv γ hγ hn hcount</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

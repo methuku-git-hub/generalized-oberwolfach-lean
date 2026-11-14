@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RemainingColourExpectation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RemainingColourExpectation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SurvivalColourCovariance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RemainingColourDegrees</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The mean of the actual remaining colour degree. Correlation between</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> root survival and colour availability is bounded in the original law. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 2300000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem finiteLaw_complement_covariance {Ω : Type*} [Fintype Ω]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (μ : FiniteLaw Ω) (E A : Ω → Prop) :</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     |μ.probability (fun x=&gt;¬E x ∧ A x)-(1-μ.probability E)*μ.probability A|=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       |μ.probability (fun x=&gt;E x ∧ A x)-μ.probability E*μ.probability A| := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hh := finiteLaw_probability_split μ A E</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have h₁ : μ.probability (fun x=&gt;A x ∧ E x)=μ.probability (fun x=&gt;E x ∧ A x) :=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     finiteLaw_probability_congr _ _ _ (fun _=&gt;and_comm)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have h₂ : μ.probability (fun x=&gt;A x ∧ ¬E x)=μ.probability (fun x=&gt;¬E x ∧ A x) :=</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     finiteLaw_probability_congr _ _ _ (fun _=&gt;and_comm)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   rw [h₁,h₂] at hh</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have he : μ.probability (fun x=&gt;¬E x ∧ A x)-(1-μ.probability E)*μ.probability A=</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       -(μ.probability (fun x=&gt;E x ∧ A x)-μ.probability E*μ.probability A) := by linarith</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   rw [he,abs_neg]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem remainingColourVertices_expectation</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     {V C J : Type*} [Fintype V] [Fintype C]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (G : SimpleGraph V) (L : V → Finset C) (hL : ∀ u,(L u).Nonempty)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     {l K : ℕ} (hl : 1&lt;l) (hcard : ∀ u,(L u).card=l)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hbound : ∀ u c,(colourNeighbourSet G L u c).card≤K)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (U : Finset V) (Q : V → Finset J) (T : J → Finset V) (c : C) :</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let μ := FiniteLaw.pi (fun u=&gt;(FiniteLaw.uniformOn (L u) (hL u)).withCoin</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (equalizationCoin G L l K u) (equalizationCoin_bounds G L (by omega) K u))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let ρ := (1-1/(l : ℝ))^K</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     |μ.expectation (fun σ=&gt;((remainingColourVertices G U Q T c σ).card : ℝ))-</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∑ v∈U,(1-ρ)*μ.probability (fun σ=&gt;∀ j∈Q v,∀ w∈T j,coinRetainedColour G σ w≠some c)|≤</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (U.card : ℝ)*(1/(l : ℝ)+ρ*(2/(l : ℝ)+2*(K : ℝ)/((l : ℝ)*((l : ℝ)-1)))) := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   classical</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   dsimp only</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let μ := FiniteLaw.pi (fun u=&gt;(FiniteLaw.uniformOn (L u) (hL u)).withCoin</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (equalizationCoin G L l K u) (equalizationCoin_bounds G L (by omega : 0&lt;l) K u))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let ρ := (1-1/(l : ℝ))^K</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let A := fun v σ=&gt;∀ j∈Q v,∀ w∈T j,coinRetainedColour G σ w≠some c</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let B := fun v (τ : V → Option Bool)=&gt;∀ j∈Q v,∀ w∈T j,¬maskRetains G τ w</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let ε := 1/(l : ℝ)+ρ*(2/(l : ℝ)+2*(K : ℝ)/((l : ℝ)*((l : ℝ)-1)))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hmask (v : V) (σ : V → C×Bool) : A v σ ↔ B v (fun u=&gt;colourMask c (σ u)) := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     simp only [A,B,ne_eq,coinRetainedColour_iff_mask]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hAprob (v : V) : μ.probability (A v)=μ.probability (fun σ=&gt;B v (fun u=&gt;colourMask c (σ u))) :=</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     finiteLaw_probability_congr _ _ _ (hmask v)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hEprob (v : V) : μ.probability (fun σ=&gt;coinColourSurvives G σ v ∧ A v σ)=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       μ.probability (fun σ=&gt;coinColourSurvives G σ v ∧ B v (fun u=&gt;colourMask c (σ u))) :=</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     finiteLaw_probability_congr _ _ _ (fun σ=&gt;and_congr_right&#x27; (hmask v σ))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hsurv (v : V) : μ.probability (fun σ=&gt;coinColourSurvives G σ v)=ρ :=</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     equalizedColour_survival_probability G L hL (by omega) hcard (fun u b _=&gt;hbound u b) v</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hpoint (v : V) :</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       |μ.probability (fun σ=&gt;¬coinColourSurvives G σ v ∧ A v σ)-(1-ρ)*μ.probability (A v)|≤ε := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hh := equalized_survival_colour_covariance G L hL hl hcard hbound v c (B v)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have he := finiteLaw_complement_covariance μ (fun σ=&gt;coinColourSurvives G σ v) (A v)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     rw [hsurv v,hEprob v,hAprob v] at he</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     rw [← hAprob v] at he</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     rw [he]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     simpa only [hAprob v] using hh</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hmean : μ.expectation (fun σ=&gt;((remainingColourVertices G U Q T c σ).card : ℝ))=</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       ∑ v∈U,μ.probability (fun σ=&gt;¬coinColourSurvives G σ v ∧ A v σ) := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     have hh := finiteLaw_expectation_count μ U (fun v σ=&gt;¬coinColourSurvives G σ v ∧ A v σ)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     convert hh using 1</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     apply congrArg μ.expectation</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     funext σ</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     apply congrArg (fun n : ℕ =&gt; (n : ℝ))</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     apply congrArg Finset.card</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     ext v</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     simp only [remainingColourVertices,Finset.mem_filter,A]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   change |μ.expectation _-(∑ v∈U,(1-ρ)*μ.probability (A v))|≤(U.card : ℝ)*ε</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   rw [hmean,← Finset.sum_sub_distrib]</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   calc</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     _ ≤ ∑ v∈U,|μ.probability (fun σ=&gt;¬coinColourSurvives G σ v ∧ A v σ)-(1-ρ)*μ.probability (A v)| :=</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       Finset.abs_sum_le_sum_abs _ _</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     _ ≤ ∑ _v∈U,ε := Finset.sum_le_sum (fun v _=&gt;hpoint v)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     _ = _ := by simp</span>
+<span id="L82"><a href="#L82" class="ln">  82</a> </span>
+<span id="L83"><a href="#L83" class="ln">  83</a> end Oberwolfach</span></pre></html>

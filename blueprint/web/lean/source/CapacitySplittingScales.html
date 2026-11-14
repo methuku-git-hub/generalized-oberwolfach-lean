@@ -1,0 +1,55 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CapacitySplittingScales.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CapacitySplittingScales.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Tactic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Numerical substitutions for the signed corrections in the marked-capacity</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> position splitting. No separation parameter enters these choices. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_position_signed_scale (ε ρ δ d A n mean : ℝ)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (hρ : 0&lt;ρ) (hδ : 0&lt;δ) (hd : 0&lt;d) (hA : 24/(δ*d)≤A) (hn : 0&lt;n)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hε : ε≤δ*d/16) (hmean : d*n/2≤mean) :</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (A*ρ)*(2*ε*n)+3*(ρ*n) ≤ δ*(A*ρ)*mean := by</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hAp : 0&lt;A := (div_pos (by norm_num) (mul_pos hδ hd)).trans_le hA</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hAmul : 24≤A*(δ*d) := (div_le_iff₀ (mul_pos hδ hd)).mp hA</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have heps := mul_le_mul_of_nonneg_left hε hAp.le</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hbase : A*(2*ε)+3≤δ*A*d/2 := by nlinarith</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   calc</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     _ = (A*(2*ε)+3)*(ρ*n) := by ring</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     _ ≤ (δ*A*d/2)*(ρ*n) := mul_le_mul_of_nonneg_right hbase (mul_pos hρ hn).le</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     _ = (δ*(A*ρ))*(d*n/2) := by ring</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     _ ≤ _ := mul_le_mul_of_nonneg_left hmean (mul_pos hδ (mul_pos hAp hρ)).le</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem normalized_correction_mass_bound (edges n B h : ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (he : edges≤n^2) (hB : 0&lt;B) (hh : 0&lt;h) (hscale : 2/h≤B) :</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     edges/B ≤ h*n*n/2 := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hBh : 2≤B*h := (div_le_iff₀ hh).mp hscale</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hm := mul_le_mul_of_nonneg_right hBh (sq_nonneg n)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   apply (div_le_iff₀ hB).mpr</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   nlinarith</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem exists_capacity_splitting_parameters (k : ℕ) (δ d q A B : ℝ)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hδ : 0&lt;δ) (hd : 0&lt;d) (hq : 0&lt;q) (hA : 0&lt;A) (hB : 0&lt;B) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∃ ε κ : ℝ,0&lt;ε ∧ 0&lt;κ ∧ ε≤δ*d/16 ∧ κ≤1/2 ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       2*(ε+κ)≤q/10 ∧ κ/(k+1:ℝ)+k*(B*A*(ε+κ))≤1/(2*(k+1:ℝ)) := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let C : ℝ := 1/(k+1:ℝ)+2*k*B*A</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hC : 0&lt;C := by unfold C;positivity</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let η := min (δ*d/16) (min (1/2) (min (q/40) (1/(2*(k+1:ℝ)*C))))/2</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hη : 0&lt;η := by unfold η;positivity</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hle : η≤min (δ*d/16) (min (1/2) (min (q/40) (1/(2*(k+1:ℝ)*C)))) := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     dsimp only [η]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hp : 0&lt;min (δ*d/16) (min (1/2) (min (q/40) (1/(2*(k+1:ℝ)*C)))) := by positivity</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     linarith</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have he := hle.trans (min_le_left _ _)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hk := hle.trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hq&#x27; := hle.trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _)))</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hc := hle.trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _)))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   refine ⟨η,η,hη,hη,he,hk,by linarith,?_⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hm := mul_le_mul_of_nonneg_right hc hC.le</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hid : (1/(2*(k+1:ℝ)*C))*C=1/(2*(k+1:ℝ)) := by field_simp</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   rw [hid] at hm</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   convert hm using 1 &lt;;&gt; dsimp [C] &lt;;&gt; ring</span>
+<span id="L51"><a href="#L51" class="ln">  51</a> </span>
+<span id="L52"><a href="#L52" class="ln">  52</a> end Oberwolfach</span></pre></html>

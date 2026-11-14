@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPreparationReferenceLength.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPreparationReferenceLength.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPreparationLengthChoice</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SuccessorCyclicMargin</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Every sufficiently large permitted marked length satisfies the reference</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> successor-density margin, uniformly after the length cutoff is fixed. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem marked_preparation_reference_length (α:ℝ) (hα:0&lt;α) (L₀:ℕ):</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     ∃ L:ℕ,7≤L ∧ L₀≤L ∧ ∀ m:ℕ,L≤m→Even (m+1)→</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>       ∃ r k₀:ℕ,2≤r ∧ r+4=m ∧ r+4+1=(k₀+2)*2 ∧</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>         successorCycleRatio k₀+α/4≤1/2+α/2:=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   obtain ⟨M,hM,hLM,heven,hmargin⟩:=marked_preparation_length_choice (α/2) (by positivity) (max 7 L₀)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   refine ⟨M,(le_max_left 7 L₀).trans hLM,(le_max_right 7 L₀).trans hLM,?_⟩</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   intro m hm hmEven</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hM7:7≤M:=(le_max_left 7 L₀).trans hLM</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hm7:7≤m:=hM7.trans hm</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   obtain ⟨t,ht⟩:=hmEven</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let k₀:=t-2</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let r:=m-4</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hlen:r+4+1=(k₀+2)*2:=by dsimp [r,k₀];omega</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hreq:r+4=m:=by dsimp [r];omega</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hr:2≤r:=by dsimp [r];omega</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hmR:(0:ℝ)&lt;m:=by exact_mod_cast (show 0&lt;m by omega)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hMR:(0:ℝ)&lt;M:=by exact_mod_cast (show 0&lt;M by omega)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hMM:(M:ℝ)≤m:=by exact_mod_cast hm</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hratioM:((M+1:ℕ):ℝ)/(2*((M+1:ℕ):ℝ)-2)=1/2+1/(2*(M:ℝ)):=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     push_cast;field_simp [ne_of_gt hMR];ring</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hratio:successorCycleRatio k₀=1/2+1/(2*(m:ℝ)):=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     unfold successorCycleRatio</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hnat:m+1=(k₀+2)*2:=by omega</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hcast0:((m+1:ℕ):ℝ)=(((k₀+2)*2:ℕ):ℝ):=by exact_mod_cast hnat</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     push_cast at hcast0</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hcast:(k₀:ℝ)+2=((m:ℝ)+1)/2:=by linarith</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     rw [hcast]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     field_simp [ne_of_gt hmR];ring</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hmono:(1:ℝ)/(2*m)≤1/(2*(M:ℝ)):=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     apply one_div_le_one_div_of_le (by positivity)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     nlinarith</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   rw [hratioM] at hmargin</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   refine ⟨r,k₀,hr,hreq,hlen,?_⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   rw [hratio]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   linarith</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> end Oberwolfach</span></pre></html>

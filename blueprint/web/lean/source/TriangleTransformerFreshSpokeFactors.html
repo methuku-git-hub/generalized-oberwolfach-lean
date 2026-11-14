@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TriangleTransformerFreshSpokeFactors.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TriangleTransformerFreshSpokeFactors.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TriangleSimultaneousFreshFactors</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryTransformerSpokeSets</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Actual old spoke-path sets and disjoint new triangle-factor domains</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> for the bounded family of transformer hubs. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 12000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem triangular_transformer_fresh_spoke_factors</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (K₀ L:ℕ) (β:ℝ) (hβ:0&lt;β) (hβ1:β≤1):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ s₀:ℕ,∀ s:ℕ,s₀≤s → 3∣s → ∃ N:ℕ,</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∀ (V U J:Type) [Fintype V] [Fintype U] [Fintype J] [DecidableEq V] [DecidableEq U] [DecidableEq J],</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     N≤Fintype.card V → Fintype.card J≤K₀ → ∀ (ι:J↪U),</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∀ (G Q F:SimpleGraph V) (H K:V→U→Prop) (ψ:U→U),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ (p:{e:V×U // H e.1 e.2}→(Σ a:V,Σ b:V,Q.Walk a b)),</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∀ i,(p i).2.2.IsPath∧(p i).2.2.length=1) →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ i j,i≠j→Disjoint (p i).2.2.support.toFinset (p j).2.2.support.toFinset) →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (∀ i j,∀ v∈(p i).2.2.support,∀ w∈(p j).2.2.support,¬F.Adj v w) →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ i,∀ v∈(p i).2.2.support,K v i.val.2∧K v (ψ i.val.2)) →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ u,3∣((Finset.univ:Finset V).filter (fun v=&gt;H v u)).card) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀ u,2*((Finset.univ:Finset V).filter (fun v=&gt;H v u)).card≤L) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀ v,(3/4+β)*(Fintype.card V:ℝ)≤(G.degree v:ℝ)) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀ (A:J→Finset V),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀ i,(((Finset.univ:Finset V)\A i).card:ℝ)≤(β/4)*(Fintype.card V:ℝ)) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ i v,v∈A i→K v (ι i)∧K v (ψ (ι i))) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let Z:U→Finset V:=fun u=&gt;(Finset.univ.filter (fun i:{e:V×U // H e.1 e.2}=&gt;i.val.2=u)).biUnion</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (fun i=&gt;(p i).2.2.support.toFinset)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ i j,Disjoint (A i) (Z (ι j))) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∃ S:J→Finset V,</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i,(S i).card=s ∧ S i⊆A i ∧ Disjoint (S i) (Z (ι i)) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (∀ v∈S i∪Z (ι i),K v (ι i)∧K v (ψ (ι i))) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         TriangleTransformerFactorPair G (S i) (Z (ι i))) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ i j,i≠j→Disjoint (S i∪Z (ι i)) (S j∪Z (ι j))) := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨s₀,hs⟩:=triangle_transformer_simultaneous_fresh_factors K₀ L β hβ hβ1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   refine ⟨s₀,?_⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   intro s hs₀ hdivs</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨N,hN⟩:=hs s hs₀ hdivs</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨N,?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   intro V U J _ _ _ _ _ _ hn hJ ι G Q F H K ψ p hpath hdis hF hH hdiv hsize hdeg A hmiss hcommon Z hAvoid</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hsets:=ordinary_transformer_spoke_sets Q F H K ψ 3 (by omega) p</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (by intro i;simpa using hpath i) hdis hF hH hdiv</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   dsimp only at hsets</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hZ (i:J):(Z (ι i)).card≤L ∧ 3∣(Z (ι i)).card:=by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     refine ⟨?_,hsets.2.1 (ι i)⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     rw [hsets.1 (ι i)]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     simpa using hsize (ι i)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   obtain ⟨S,hS,hpair⟩:=hN V J hn hJ G A (fun i=&gt;Z (ι i)) hdeg hZ hmiss</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨S,?_,?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · intro i</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     refine ⟨(hS i).1,(hS i).2.1,(hS i).2.2.1,?_,(hS i).2.2.2⟩</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     intro v hv</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     rcases Finset.mem_union.mp hv with hv|hv</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     · exact hcommon i v ((hS i).2.1 hv)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     · exact hsets.2.2.2.1 (ι i) v hv</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   · intro i j hij</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     intro v hvi hvj</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     rcases Finset.mem_union.mp hvi with hSi|hZi &lt;;&gt; rcases Finset.mem_union.mp hvj with hSj|hZj</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     · exact Finset.disjoint_left.mp (hpair i j hij) hSi hSj</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     · exact Finset.disjoint_left.mp (hAvoid i j) ((hS i).2.1 hSi) hZj</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     · exact Finset.disjoint_left.mp (hAvoid j i) ((hS j).2.1 hSj) hZi</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     · exact Finset.disjoint_left.mp (hsets.2.2.1 (ι i) (ι j) (fun h=&gt;hij (ι.injective h))) hZi hZj</span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

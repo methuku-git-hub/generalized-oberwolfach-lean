@@ -1,0 +1,137 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryPotentialDegreeStability.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryPotentialDegreeStability.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryPotentialChanges</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RelationIncidentWeights</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Actual degree-controlled stability of all ordinary potential wheel loads.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The root can be absent, and coefficients remain fixed during the change. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1600000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U : Type*} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (P F : SimpleGraph V) (Hbase : V → U → Prop) (r : ℕ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hr : 2≤r) (hn : 0&lt;Fintype.card V) (hu : Fintype.card U≤Fintype.card V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (w : OrdinaryWheel P F Hbase r → ℝ) (B : ℝ) (hB : 0≤B)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hw : ∀ W,0≤w W ∧ w W≤B/(Fintype.card V:ℝ)^(r-1))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (Q Q&#x27; : SimpleGraph V) (H H&#x27; : V → U → Prop) (d : ℝ) (hd : 0≤d)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hQ : ∀ x,(∑ y,bipAdj (fun x y=&gt;¬(Q.Adj x y↔Q&#x27;.Adj x y)) x y)≤d)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hHout : ∀ x,(∑ u,bipAdj (fun x u=&gt;¬(H x u↔H&#x27; x u)) x u)≤d)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hHin : ∀ u,(∑ x,bipAdj (fun x u=&gt;¬(H x u↔H&#x27; x u)) x u)≤d)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> include hr hn hu hB hw hd hQ hHout hHin</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> </span>
+<span id="L25"><a href="#L25" class="ln">  25</a> theorem ordinaryPotentialLoad_rim_degree_stability (x y : V) (hxy : x≠y) :</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     |ordinaryPotentialLoad w (Sum.inl s(x,y)) Q&#x27; H&#x27;-ordinaryPotentialLoad w (Sum.inl s(x,y)) Q H|≤</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       8*(r:ℝ)^4*B*d/Fintype.card V := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let Dq := fun x y=&gt;¬(Q.Adj x y↔Q&#x27;.Adj x y)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let Dh := fun x u=&gt;¬(H x u↔H&#x27; x u)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let n : ℝ := Fintype.card V</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let K : ℝ := (r:ℝ)^4*B</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let M := K/n</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   let N := K/n^2</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hn0 : 0&lt;n := Nat.cast_pos.mpr hn</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hM : 0≤M := by dsimp [M,K];positivity</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hN : 0≤N := by dsimp [N,K];positivity</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hQi (y : V) : (∑ x,bipAdj Dq x y)≤d := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have he : (∑ x,bipAdj Dq x y)=∑ x,bipAdj Dq y x := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       apply Finset.sum_congr rfl</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       intro x _</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       simp only [bipAdj,Dq,Q.adj_comm,Q&#x27;.adj_comm]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       all_goals split_ifs &lt;;&gt; rfl</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     rw [he];exact hQ y</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hR := relation_root_incident_cost Dq d hQ hQi {x,y} {x,y} M N hM hN</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hS := relation_root_incident_cost Dh d hHout hHin {x,y} ∅ M N hM hN</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hc : ({x,y}:Finset V).card=2 := by simp [hxy]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   simp only [hc,Nat.cast_ofNat,Finset.card_empty,Nat.cast_zero,Finset.notMem_empty,or_false,add_zero] at hR hS</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hstart := ordinaryPotentialLoad_stability_ordered w (fun W=&gt;(hw W).1) (Sum.inl s(x,y)) Q Q&#x27; H H&#x27;</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   apply hstart.trans</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   calc</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     _ ≤ (∑ z,∑ t,if Dq z t then (if z∈({x,y}:Finset V) ∨ t∈({x,y}:Finset V) then M else N) else 0)+</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         (∑ z,∑ u,if Dh z u then (if z∈({x,y}:Finset V) then M else N) else 0) := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       apply add_le_add</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       · apply Finset.sum_le_sum</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         intro z _</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         apply Finset.sum_le_sum</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         intro t _</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         by_cases h : Dq z t</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         · dsimp only [Dq,Dh] at h ⊢</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>           simp only [h,ite_true,ite_false]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>           exact ordinaryOmittedPairLoad_rim_cost P F Hbase r hr hn hu w B hB hw x y z t hxy</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         · dsimp only [Dq,Dh] at h ⊢</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>           simp only [h,ite_true,ite_false,le_refl]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       · apply Finset.sum_le_sum</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         intro z _</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         apply Finset.sum_le_sum</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         intro u _</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         by_cases h : Dh z u</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         · dsimp only [Dq,Dh] at h ⊢</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>           simp only [h,ite_true,ite_false]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>           exact ordinaryOmittedPairLoad_rim_spoke_cost P F Hbase r hr hn hu w B hB hw x y z u hxy</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         · dsimp only [Dq,Dh] at h ⊢</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>           simp only [h,ite_true,ite_false,le_refl]</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     _ ≤ d*((2+2)*M+n*N)+d*(2*M+n*N) := by</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       convert (add_le_add hR hS) using 1</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       all_goals congr 1 &lt;;&gt; (apply Finset.sum_congr rfl; intro a _; apply Finset.sum_congr rfl; intro b _; split_ifs &lt;;&gt; rfl)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     _ = _ := by dsimp only [M,N,K,n];field_simp;ring</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> </span>
+<span id="L79"><a href="#L79" class="ln">  79</a> theorem ordinaryPotentialLoad_spoke_degree_stability (v : V) (u : U) :</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     |ordinaryPotentialLoad w (Sum.inr (v,u)) Q&#x27; H&#x27;-ordinaryPotentialLoad w (Sum.inr (v,u)) Q H|≤</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       4*(r:ℝ)^4*B*d/Fintype.card V := by</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   let Dq := fun x y=&gt;¬(Q.Adj x y↔Q&#x27;.Adj x y)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   let Dh := fun x u=&gt;¬(H x u↔H&#x27; x u)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   let n : ℝ := Fintype.card V</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   let K : ℝ := (r:ℝ)^4*B</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   let M := K/n</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   let N := K/n^2</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hn0 : 0&lt;n := Nat.cast_pos.mpr hn</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   have hM : 0≤M := by dsimp [M,K];positivity</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   have hN : 0≤N := by dsimp [N,K];positivity</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   have hQi (y : V) : (∑ x,bipAdj Dq x y)≤d := by</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     have he : (∑ x,bipAdj Dq x y)=∑ x,bipAdj Dq y x := by</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       apply Finset.sum_congr rfl</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>       intro x _</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>       simp only [bipAdj,Dq,Q.adj_comm,Q&#x27;.adj_comm]</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       all_goals split_ifs &lt;;&gt; rfl</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     rw [he];exact hQ y</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have hR := relation_root_incident_cost Dq d hQ hQi {v} {v} M N hM hN</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hS := relation_root_incident_cost Dh d hHout hHin ∅ {u} M 0 hM (by norm_num)</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   simp only [Finset.card_singleton,Nat.cast_one,Finset.mem_singleton] at hR</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   simp only [Finset.card_empty,Nat.cast_zero,Finset.card_singleton,Nat.cast_one,</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     Finset.notMem_empty,Finset.mem_singleton,false_or,zero_add,mul_zero,add_zero,one_mul] at hS</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   have hstart := ordinaryPotentialLoad_stability_ordered w (fun W=&gt;(hw W).1) (Sum.inr (v,u)) Q Q&#x27; H H&#x27;</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   apply hstart.trans</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   calc</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     _ ≤ (∑ x,∑ y,if Dq x y then (if x=v ∨ y=v then M else N) else 0)+</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>         (∑ x,∑ t,if Dh x t then (if t=u then M else 0) else 0) := by</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>       apply add_le_add</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>       · apply Finset.sum_le_sum</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>         intro x _</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>         apply Finset.sum_le_sum</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>         intro y _</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>         by_cases h : Dq x y</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>         · dsimp only [Dq,Dh] at h ⊢</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>           simp only [h,ite_true,ite_false]</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>           exact ordinaryOmittedPairLoad_spoke_rim_cost P F Hbase r hr hn hu w B hB hw v x y u</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>         · dsimp only [Dq,Dh] at h ⊢</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>           simp only [h,ite_true,ite_false,le_refl]</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>       · apply Finset.sum_le_sum</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>         intro x _</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>         apply Finset.sum_le_sum</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>         intro t _</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>         by_cases h : Dh x t</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>         · dsimp only [Dq,Dh] at h ⊢</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>           simp only [h,ite_true,ite_false]</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>           exact ordinaryOmittedPairLoad_spokes_cost P F Hbase r hr hn hu w B hB hw v x u t</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>         · dsimp only [Dq,Dh] at h ⊢</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>           simp only [h,ite_true,ite_false,le_refl]</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     _ ≤ d*((1+1)*M+n*N)+d*M := by</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>       convert (add_le_add hR hS) using 1</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>       all_goals congr 1 &lt;;&gt; (apply Finset.sum_congr rfl; intro a _; apply Finset.sum_congr rfl; intro b _; split_ifs &lt;;&gt; rfl)</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     _ = _ := by dsimp only [M,N,K,n];field_simp;ring</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a> </span>
+<span id="L134"><a href="#L134" class="ln"> 134</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,50 @@
+module
+
+public import Oberwolfach.ExpandedOrderedOrdinaryFiniteFamily
+public import Oberwolfach.MixedClassActualRetention
+
+@[expose] public section
+/-! Fixed ordinary candidate weights have simultaneous approximate-layer
+potential estimates under the marked class's actual conditional retention. -/
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 12000000
+set_option synthInstance.maxSize 32768
+open scoped BigOperators
+noncomputable section
+namespace Oberwolfach
+attribute [local instance] Classical.propDecidable
+
+theorem mixed_ordinary_approximate_family_highProbability
+    (I:Type) [Fintype I] (d:ℕ) (hd:2≤d) (m:I→ℕ) (hm:∀ i,2≤m i)
+    (B t:I→ℝ) (hB:∀ i,0<B i) (ht:∀ i,0<t i) (ζ:ℝ) (hζ:0<ζ):
+    ∃ N:ℕ,∀ (V U:Type) [Fintype V] [Fintype U] [LinearOrder V] [Nonempty V] [DecidableEq U],
+    N≤Fintype.card V→Fintype.card U≤Fintype.card V→
+    ∀ (P:SimpleGraph V) (π:Equiv.Perm V)
+    (p k p₂ k₂ u:ℝ) (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u)
+    (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)
+    (q:U→Bool→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)
+    (s:U→Bool→ℝ) (hs:∀ u j,0≤s u j) (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))
+    (hnoshort:∀ x l,0<l→l<2*d+1→(π^l) x≠x)
+    (w:∀ i,OrderedOrdinaryWheel (U:=U) π (3*d) (m i+1)→ℝ)
+    (hw:∀ i W,0≤w i W ∧ w i W≤B i/(Fintype.card V:ℝ)^(m i))
+    (g:I→Bool) (j:I→Bool)
+    (a:Bool),
+    let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS);
+    1-ζ≤(μ.sigma (mixedClassActualRetention true π d a)).probability (fun z=>∀ i root,
+      |resourcePatternLoad orderedOrdinaryResources (w i) (fun _ _=>true) root
+        (orderedOrdinaryResourceState P π d (g i) (j i) (fun e=>rawExpandedApproximateCollapse e (z.1 e)))-
+        ∑ W,(if root∈orderedOrdinaryResources W then w i W else 0)*
+          ∏ a∈orderedOrdinaryResources W\{root},rawMarkedWheelMarginal P π d p₂ k₂ q s (g i) (j i) (orderedOrdinaryResourceEmbedding a)|<t i):=by
+  obtain ⟨N,hN⟩:=raw_expanded_ordinary_finite_family_highProbability I d hd m hm B t hB ht ζ hζ
+  refine ⟨N,?_⟩
+  intro V U _ _ _ _ _ hn huV P π p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum q hq hQ s hs hS hnoshort w hw g j a μ
+  let F:=fun σ:RawMarkedOutcome V U Bool Bool=>
+    StartRetentionOutcome (rawStartHubSet π d (fun e=>σ (Sum.inr e)) a)
+      (startRetentionMinimum (rawStartHubSet π d (fun e=>σ (Sum.inr e)) a))
+  let ν:=fun σ:RawMarkedOutcome V U Bool Bool=>
+    startRetentionLaw (rawStartHubSet π d (fun e=>σ (Sum.inr e)) a)
+      (startRetentionMinimum (rawStartHubSet π d (fun e=>σ (Sum.inr e)) a)) (startRetentionMinimum_le _)
+  have hh:=hN V U Bool Bool hn huV P π p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum q hq hQ s hs hS hnoshort w hw g j F ν
+  exact hh
+end Oberwolfach

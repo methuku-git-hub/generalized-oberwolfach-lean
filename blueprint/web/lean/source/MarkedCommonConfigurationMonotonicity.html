@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedCommonConfigurationMonotonicity.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedCommonConfigurationMonotonicity.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedCommonConfigurationsAfterPhysicalDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Typed host inclusion preserves the actual common-cycle and root-omitted</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> path families without changing their vertex tuples. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 16000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V U E K E&#x27; K&#x27;:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable (tail head:E→V) (ktail khead:K→V) (tail&#x27; head&#x27;:E&#x27;→V) (ktail&#x27; khead&#x27;:K&#x27;→V)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   (π:Equiv.Perm V) (b:ℕ) (H H&#x27;:Bool→V→U→Prop)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable (hE:∀ e,∃ e&#x27;,tail&#x27; e&#x27;=tail e∧head&#x27; e&#x27;=head e)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   (hK:∀ e,∃ e&#x27;,ktail&#x27; e&#x27;=ktail e∧khead&#x27; e&#x27;=khead e)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   (hH:∀ a v u,H a v u→H&#x27; a v u)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> include hE hK in</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem marked_cycle_tuple_under_typed_host_inclusion (m:ℕ) (C:Fin (m+1)→V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hC:IsMarkedCycleTuple tail head ktail khead m π b C):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     IsMarkedCycleTuple tail&#x27; head&#x27; ktail&#x27; khead&#x27; m π b C:=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   refine ⟨hC.1,?_,?_⟩</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · intro i</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     obtain ⟨e,ht,hh⟩:=hC.2.1 i</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     obtain ⟨e&#x27;,ht&#x27;,hh&#x27;⟩:=hE e</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     exact ⟨e&#x27;,ht&#x27;.trans ht,hh&#x27;.trans hh⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · obtain ⟨e,ht,hh⟩:=hC.2.2</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     obtain ⟨e&#x27;,ht&#x27;,hh&#x27;⟩:=hK e</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     exact ⟨e&#x27;,ht&#x27;.trans ht,hh&#x27;.trans hh⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> include hE hK in</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> theorem marked_root_first_cycle_under_typed_host_inclusion</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (m:ℕ) (i:Fin (m+1)) (C:Fin (m+1)→V)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hC:IsRootFirstMarkedCycle tail head ktail khead m π b i C):</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     IsRootFirstMarkedCycle tail&#x27; head&#x27; ktail&#x27; khead&#x27; m π b i C:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   refine ⟨hC.1,?_⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   intro j</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   by_cases hj:j=i</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · rw [if_pos hj] at ⊢</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hold:=hC.2 j</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rw [if_pos hj] at hold</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     obtain ⟨e,ht,hh⟩:=hold</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     obtain ⟨e&#x27;,ht&#x27;,hh&#x27;⟩:=hK e</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     exact ⟨e&#x27;,ht&#x27;.trans ht,hh&#x27;.trans hh⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   · rw [if_neg hj] at ⊢</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have hold:=hC.2 j</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     rw [if_neg hj] at hold</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     obtain ⟨e,ht,hh⟩:=hold</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     obtain ⟨e&#x27;,ht&#x27;,hh&#x27;⟩:=hE e</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     exact ⟨e&#x27;,ht&#x27;.trans ht,hh&#x27;.trans hh⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> def marked_common_cycle_host_inclusion (m:ℕ) (u u&#x27;:U):</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     CommonMarkedCycle tail head ktail khead m π b (H false) (H true) u u&#x27; ↪</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       CommonMarkedCycle tail&#x27; head&#x27; ktail&#x27; khead&#x27; m π b (H&#x27; false) (H&#x27; true) u u&#x27; where</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   toFun C:=⟨⟨C.val.val,marked_cycle_tuple_under_typed_host_inclusion tail head ktail khead tail&#x27; head&#x27; ktail&#x27; khead&#x27; π b hE hK m C.val.val C.val.property⟩,</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     ⟨⟨hH true _ _ C.property.1.1,fun i=&gt;hH false _ _ (C.property.1.2 i)⟩,</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       ⟨hH true _ _ C.property.2.1,fun i=&gt;hH false _ _ (C.property.2.2 i)⟩⟩⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   inj&#x27; C D h:=by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     apply Subtype.ext</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     apply Subtype.ext</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     exact congrArg (fun z=&gt;z.val.val) h</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> def marked_common_path_host_inclusion (m:ℕ) (j:Bool) (v v&#x27;:V) (u u&#x27;:U):</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     RootFirstCommonMarkedPath tail head ktail khead m π b (H false) (H true) j v v&#x27; u u&#x27; ↪</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       RootFirstCommonMarkedPath tail&#x27; head&#x27; ktail&#x27; khead&#x27; m π b (H&#x27; false) (H&#x27; true) j v v&#x27; u u&#x27; where</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   toFun C:=⟨C.val,⟨</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     marked_root_first_cycle_under_typed_host_inclusion tail head ktail khead tail&#x27; head&#x27; ktail&#x27; khead&#x27; π b hE hK m _ _ C.property.1,</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     marked_root_first_cycle_under_typed_host_inclusion tail head ktail khead tail&#x27; head&#x27; ktail&#x27; khead&#x27; π b hE hK m _ _ C.property.2.1,</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     fun i=&gt;by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       have hh:=C.property.2.2 i</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       cases htype:rootFirstSpokeType m j i.succ &lt;;&gt; simp only [htype,ite_false,ite_true] at hh ⊢</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       · exact ⟨hH false _ _ hh.1,hH false _ _ hh.2⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       · exact ⟨hH true _ _ hh.1,hH true _ _ hh.2⟩⟩⟩</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   inj&#x27; C D h:=by</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     apply Subtype.ext</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     exact congrArg (fun z:RootFirstCommonMarkedPath tail&#x27; head&#x27; ktail&#x27; khead&#x27; m π b (H&#x27; false) (H&#x27; true) j v v&#x27; u u&#x27;=&gt;z.val) h</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> end Oberwolfach</span></pre></html>

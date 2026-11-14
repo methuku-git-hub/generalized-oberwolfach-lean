@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawSelectedPhysicalNeighbourTests.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawSelectedPhysicalNeighbourTests.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawUnassignedPhysicalNeighbourTests</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawUnassignedAdaptiveHighProbability</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.RawUnassignedExtendingList</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedExpandedApproximateProjection</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The at-most-quadratic family of in-, out-, and mixed neighbourhood tests</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> is allowed to depend on the independent sampled physical-edge coordinates. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 14000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def rawSelectedPhysicalRelation {V:Type} [Fintype V] [LinearOrder V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (ω:Sym2 V→Fin 6×Bool) (x y:V):Prop:=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   markedPhysicalRim P π (3*d) (fun e=&gt;markedExpandedPhysicalCollapse (ω e)) false x y=1</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> def rawSelectedNeighbourTestSet {V:Type} [Fintype V] [LinearOrder V]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (ω:Sym2 V→Fin 6×Bool):RawNeighbourTestIndex V→Finset V</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   | none=&gt;Finset.univ</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   | some (.inl x)=&gt;directedOutNeighbours (rawSelectedPhysicalRelation P π d ω) x</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   | some (.inr (.inl y))=&gt;directedInNeighbours (rawSelectedPhysicalRelation P π d ω) y</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   | some (.inr (.inr (x,y)))=&gt;directedOutNeighbours (rawSelectedPhysicalRelation P π d ω) x ∩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       directedInNeighbours (rawSelectedPhysicalRelation P π d ω) y</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem raw_unassigned_selected_neighbour_tests_high_probability</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (d:ℕ) (hd:2≤d) (δ:ℝ) (hδ:0&lt;δ):</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∃N:ℕ,∀(V:Type) [Fintype V] [LinearOrder V],N≤Fintype.card V→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∀(U Γ Color:Type) [Fintype U] [DecidableEq U] [Fintype Γ] [Fintype Color],</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     Fintype.card U≤Fintype.card V→</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∀(P:SimpleGraph V) (π:Equiv.Perm V) (p k p₂ k₂ u:ℝ)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u) (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (q:U→Γ→ℝ) (hq:∀w g,0≤q w g) (hQ:∀w,∑g,q w g≤1/8)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (s:U→Color→ℝ) (hs:∀w j,0≤s w j) (hS:∀w,∑j,s w j≤ intervalUncoveredProbability d (∑g,q w g))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (F:RawMarkedOutcome V U Γ Color→Type) [∀a,Fintype (F a)] (ν:∀a,FiniteLaw (F a)),</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let law:=rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let μ:=FiniteLaw.pi law</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let f:=fun (ω:∀e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e) e=&gt;rawExpandedMarkedCollapse e (ω e)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     1-δ≤(μ.sigma (fun ω=&gt;ν (f ω))).probability (fun z=&gt;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       ∀w i,|rawIntervalUnassignedHubCountOn π d (fun e=&gt;z.1 (Sum.inr e)) w</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>           (rawSelectedNeighbourTestSet P π d (fun e=&gt;z.1 (Sum.inl e)) i)-</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         (rawSelectedNeighbourTestSet P π d (fun e=&gt;z.1 (Sum.inl e)) i).card*(1-(∑g,q w g)-(∑j,s w j))|&lt;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>           (Fintype.card V:ℝ)^(3/4:ℝ)):=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨N,hN⟩:=raw_unassigned_physical_adaptive_high_probability d hd δ hδ</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   refine ⟨max N 1,?_⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   intro V _ _ hn U Γ Color _ _ _ _ hU P π p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum q hq hQ s hs hS hnoshort F _ ν law μ f</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hn0:0&lt;Fintype.card V:=by omega</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   exact hN V (by omega) U Γ Color (RawNeighbourTestIndex V) hU (raw_neighbour_test_index_card_bound hn0)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     π p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum q hq hQ s hs hS hnoshort (rawSelectedNeighbourTestSet P π d) F ν</span>
+<span id="L53"><a href="#L53" class="ln">  53</a> end Oberwolfach</span></pre></html>

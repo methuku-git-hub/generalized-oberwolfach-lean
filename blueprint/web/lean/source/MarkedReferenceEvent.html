@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceStatistics</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ExponentialMarkedReferenceCuts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.GoodPlacementEvents</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Complete reference degree, intersection and cut estimates on one raw</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> marked sample, with an exponential bound uniform over the host and arrays. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 1800000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_reference_event</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (ε δ γ kstar tstar κ : ℝ) (hε : 0&lt;ε) (hδ : 0&lt;δ) (hγ : 0&lt;γ) (hγ1 : γ≤1/2)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hkstar : 0&lt;kstar) (htstar : 0&lt;tstar) (htstar1 : tstar≤1) (hκ : 0&lt;κ) (d : ℕ) (hd : 2≤d) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ N : ℕ,1≤N ∧ ∀ (V U Γ Color : Type)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [LinearOrder V] [DecidableEq U],</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       N≤Fintype.card V → κ*Fintype.card V≤(Fintype.card U:ℝ) → Fintype.card U≤Fintype.card V →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ (P : SimpleGraph V) (π : Equiv.Perm V),</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (p k : ℝ) (hp : 0≤p) (hk : 0≤k) (hsum : 2*p+2*k≤1),kstar≤p → kstar≤k →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∀ D δP : ℝ,0≤δP → δP≤ε/4 →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ x,|(P.degree x:ℝ)-D|≤δP*Fintype.card V) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ x,(1/2+γ)*Fintype.card V≤(P.degree x:ℝ)) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀ (q : U→Γ→ℝ) (hq : ∀ u g,0≤q u g) (hQ : ∀ u,∑ g,q u g≤1/8)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (g : Γ) (j : Color) (s₀ t₀ : ℝ),(∀ u,q u g=t₀) → (∀ u,s u j=s₀) → tstar≤s₀ → tstar≤t₀ →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     1-72*(Fintype.card V:ℝ)^3*Real.exp</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (-min (markedReferenceExponent ε δ γ kstar tstar κ d) (markedCutExponent γ kstar tstar κ d)*Fintype.card V)≤</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (FiniteLaw.pi (rawMarkedWheelLaw p k hp hk hsum d hd q hq hQ s hs hS)).probability</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (fun σ=&gt;MarkedReferenceStatistics P π d g j D ε δ γ p k s₀ t₀ σ ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         MarkedReferenceCutFamilies P π d g j γ p k tstar σ) := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨NS,hNS⟩ := marked_reference_statistics ε δ γ kstar tstar κ hε hδ hγ hkstar htstar hκ d hd</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   obtain ⟨NC,hNC1,hNC⟩ := marked_reference_cut_event γ kstar tstar κ hγ hγ1 hkstar htstar htstar1 hκ d hd</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   refine ⟨max NS NC,hNC1.trans (le_max_right _ _),?_⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   intro V U Γ Color _ _ _ _ _ _ hnN hmlo hmhi P π hnoshort p k hp hk hsum hpmin hkmin D δP hδP hδε hPreg hP q hq hQ s hs hS g j s₀ t₀ hg hj hslo htlo</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let n : ℝ := Fintype.card V</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let cS := markedReferenceExponent ε δ γ kstar tstar κ d</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let cC := markedCutExponent γ kstar tstar κ d</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let c := min cS cC</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hn1 : 1≤n := by dsimp [n];exact_mod_cast (show 1≤Fintype.card V by omega)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hn0 : 0≤n := Nat.cast_nonneg _</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let μ : FiniteLaw (RawMarkedOutcome V U Γ Color) := FiniteLaw.pi (rawMarkedWheelLaw p k hp hk hsum d hd q hq hQ s hs hS)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hstats : 1-36*n^3*Real.exp (-cS*n)≤</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       μ.probability (MarkedReferenceStatistics P π d g j D ε δ γ p k s₀ t₀) :=</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     hNS V U Γ Color (by omega) hmlo hmhi P π hnoshort p k hp hk hsum hpmin D δP hδP hδε hPreg hP</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       q hq hQ s hs hS g j s₀ t₀ hg hj hslo htlo</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hcuts : 1-36*n*Real.exp (-cC*n)≤</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       μ.probability (MarkedReferenceCutFamilies P π d g j γ p k tstar) :=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     hNC V U Γ Color (by omega) hmlo hmhi P hP π hnoshort p k hp hk hsum hpmin hkmin</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       q hq hQ s hs hS g j s₀ t₀ hg hj hslo htlo</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hjoint := finiteLaw_good_intersection μ</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (MarkedReferenceStatistics P π d g j D ε δ γ p k s₀ t₀)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (MarkedReferenceCutFamilies P π d g j γ p k tstar) (36*n*Real.exp (-cC*n)) hcuts</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hbase := (sub_le_sub_right hstats (36*n*Real.exp (-cC*n))).trans hjoint</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have heS : Real.exp (-cS*n)≤Real.exp (-c*n) := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     apply Real.exp_le_exp.mpr</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hh := mul_le_mul_of_nonneg_right (min_le_left cS cC) hn0</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     change c*n≤cS*n at hh</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     linarith only [hh]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have heC : Real.exp (-cC*n)≤Real.exp (-c*n) := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     apply Real.exp_le_exp.mpr</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hh := mul_le_mul_of_nonneg_right (min_le_right cS cC) hn0</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     change c*n≤cC*n at hh</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     linarith only [hh]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hpow : n≤n^3 := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     have h12 : n≤n^2 := by nlinarith only [hn1]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have h23 : n^2≤n^3 := by nlinarith only [mul_nonneg (sq_nonneg n) (sub_nonneg.mpr hn1)]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     exact h12.trans h23</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hbS := mul_le_mul_of_nonneg_left heS (show 0≤36*n^3 by positivity)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hbC : 36*n*Real.exp (-cC*n)≤36*n^3*Real.exp (-c*n) :=</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     mul_le_mul (by linarith only [hpow]) heC (by positivity) (by positivity)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   apply le_trans _ hbase</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   change 1-72*n^3*Real.exp (-c*n)≤_</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   linarith only [hbS,hbC]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SeparatedOrderedCycleWeightSums.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SeparatedOrderedCycleWeightSums.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SeparatedOrderedCycleSums</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrderedCyclePositionSums</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Transfer fixed physical-cycle weights to ordered separated tuples with</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> the exact edge and vertex multiplicities. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 10000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V:Type} [Fintype V] [DecidableEq V] {P:SimpleGraph V} {π:Equiv.Perm V} {b n:ℕ}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem separated_tuple_position_edge_sum (hn:1≤n) (w:SeparatedHostCycle P π b (n+2)→ℝ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (i:Fin (n+2)) (x y:V):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (∑ C:SeparatedHostCycleTuple P π b (n+2),if C.val i=x ∧ C.val (cycleNext i)=y then w (separatedTupleCycle hn C) else 0)=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       ∑ H:SeparatedHostCycle P π b (n+2),if H.val.Adj x y then w H else 0:=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   rw [separated_tuple_sum_by_cycle hn]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   apply Finset.sum_congr rfl</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   intro H _</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   calc</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     _ = ∑ f:OrderedCycleRepresentations H.val (n+2),if f.val i=x ∧ f.val (cycleNext i)=y then w H else 0:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       apply Finset.sum_congr rfl</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       intro f _</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       have hc:=separated_tuple_cycle_of_representation hn H f</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       change (if f.val i=x ∧ f.val (cycleNext i)=y then w (separatedTupleCycle hn (separatedSigmaToTuple hn ⟨H,f⟩)) else 0)=_</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       rw [hc]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     _ = _:=orderedCycle_position_edge_sum H.val n hn H.property.1 i x y (w H)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem separated_tuple_position_vertex_sum (hn:1≤n) (w:SeparatedHostCycle P π b (n+2)→ℝ)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (i:Fin (n+2)) (x:V):</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∑ C:SeparatedHostCycleTuple P π b (n+2),if C.val i=x then w (separatedTupleCycle hn C) else 0)=</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       ∑ H:SeparatedHostCycle P π b (n+2),(H.val.degree x:ℝ)*w H:=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   rw [separated_tuple_sum_by_cycle hn]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   apply Finset.sum_congr rfl</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   intro H _</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   calc</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     _ = ∑ f:OrderedCycleRepresentations H.val (n+2),if f.val i=x then w H else 0:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       apply Finset.sum_congr rfl</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       intro f _</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       have hc:=separated_tuple_cycle_of_representation hn H f</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       change (if f.val i=x then w (separatedTupleCycle hn (separatedSigmaToTuple hn ⟨H,f⟩)) else 0)=_</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       rw [hc]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     _ = _:=orderedCycle_position_vertex_sum H.val n hn H.property.1 i x (w H)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SparseIntersectionDeletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SparseIntersectionDeletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BipartiteDeletionEstimates</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Sparse intersection data persist under degree-controlled deletion, with</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> exactly the same supplied density profiles and exceptional sets. The two</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> original ambient cardinalities remain the normalising scales. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1400000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {A B : Type*} [Fintype A] [Fintype B]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem SparseIntersectionData.deletion {H : A → B → Prop} {p q : B → ℝ} {L δ D : ℝ}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (h : SparseIntersectionData H p q L δ D) (H&#x27; : A → B → Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hsub : ∀ x u,H&#x27; x u → H x u) (d ρ : ℝ) (hd : 0≤d) (hρ : 0≤ρ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hrow : ∀ x,(∑ u,bipAdj (fun x u=&gt;H x u ∧ ¬H&#x27; x u) x u)≤d)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hcol : ∀ u,(∑ x,bipAdj (fun x u=&gt;H x u ∧ ¬H&#x27; x u) x u)≤d)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hcolScale : 3*d≤ρ*Fintype.card A) (hrowScale : 2*L^2*d≤ρ*Fintype.card B) :</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     SparseIntersectionData H&#x27; p q L (δ+ρ) D := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   refine ⟨h.one_le_L,add_nonneg h.delta_nonneg hρ,h.D_nonneg,h.density,h.inverse_bounds,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     h.inverse_identity,?_,?_,?_,?_⟩</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   · intro u</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hloss := bipColumnDegree_deletion H H&#x27; hsub u d (hcol u)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have hbase := h.degree_error u</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     have ht := abs_sub_le (bipColumnDegree H&#x27; u) (bipColumnDegree H u) ((Fintype.card A:ℝ)*p u)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     nlinarith</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · intro u v huv</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hloss := bipPairIntersection_deletion H H&#x27; hsub v u d hcol</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hbase := h.pair_error u v huv</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have ht := abs_sub_le (bipPairIntersection H&#x27; v u) (bipPairIntersection H v u) ((Fintype.card A:ℝ)*p v*p u)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     nlinarith</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · intro u v t huv hut hvt</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hloss := bipTripleIntersection_deletion H H&#x27; hsub u v t d hcol</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hbase := h.triple_error u v t huv hut hvt</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have ht := abs_sub_le (bipTripleIntersection H&#x27; u v t) (bipTripleIntersection H u v t)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       ((Fintype.card A:ℝ)*p u*p v*p t)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     nlinarith</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   · intro x</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     obtain ⟨E,hE,hbound⟩ := h.exceptions x</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     refine ⟨E,hE,?_⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     intro y hy</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have hloss := bipWeightedCodegree_deletion H H&#x27; hsub q L d h.inverse_bounds hrow x y</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hbase := hbound y hy</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have ht := abs_sub_le (bipWeightedCodegree H&#x27; q x y) (bipWeightedCodegree H q x y) (Fintype.card B:ℝ)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     nlinarith</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> </span>
+<span id="L50"><a href="#L50" class="ln">  50</a> end Oberwolfach</span></pre></html>

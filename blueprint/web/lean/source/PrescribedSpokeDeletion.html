@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedSpokeDeletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedSpokeDeletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedRimDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A prescribed spoke can be completed after a bounded realised rim</span>
+<span id="L4"><a href="#L4" class="ln">   4</a>  deletion; every other rim vertex avoids the explicitly forbidden set. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 6000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem ordinary_spoke_wheel_after_deletion (Q D F:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (A W:Finset V) (x:V) (u:U) (hHx:H x u) (hHA:∀ a∈A,H a u)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (r:ℕ) (hr:3≤r) (L d b:ℝ) (hL:0≤L)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hF:∀ a,(F.degree a:ℝ)≤L) (hD:∀ a,(D.degree a:ℝ)≤d)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hcount:∀ a c,b≤((A∩Q.neighborFinset a∩Q.neighborFinset c).card:ℝ))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hbudget:W.card+((r:ℝ)+2)*(L+1)+2*d&lt;b) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ C:OrdinaryWheel Q F H r,ordinaryWheelHub C=u ∧ x∈(ordinaryWheelRim C).support ∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       Disjoint (ordinaryWheelRim C) D ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (∀ a∈(ordinaryWheelRim C).support,a=x ∨ a∈A∧a∉W) :=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hc (a c:V):b-2*d≤((A∩(Q\D).neighborFinset a∩(Q\D).neighborFinset c).card:ℝ):=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     have h:((A∩Q.neighborFinset a∩Q.neighborFinset c).card:ℝ)≤</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (A∩(Q\D).neighborFinset a∩(Q\D).neighborFinset c).card+D.degree a+D.degree c:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       exact_mod_cast two_common_neighbours_after_deletion Q D A a c</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     linarith only [h,hD a,hD c,hcount a c]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨C,hCu,hCx,hCs⟩:=ordinary_spoke_wheel_from_common_counts (Q\D) F H A W x u</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     hHx hHA r hr L (b-2*d) hL hF (by intro a c; convert hc a c using 1 &lt;;&gt; congr!) (by linarith only [hbudget])</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨ordinaryWheelInclude sdiff_le C,hCu,hCx,?_,hCs⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   apply disjoint_iff_inf_le.mpr</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro a c hac</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   exact ((C.val.1.property hac.1).2 hac.2).elim</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> end Oberwolfach</span></pre></html>

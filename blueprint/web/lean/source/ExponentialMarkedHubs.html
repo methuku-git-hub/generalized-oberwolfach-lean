@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExponentialMarkedHubs.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExponentialMarkedHubs.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawMarkedHubCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ExponentialConfigurationMargins</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Uniform compatible-hub lower bounds, before actual feasible arrays</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> are supplied. Every separated tuple is controlled on one raw-law event;</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> its physical rim edges may be absent. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 1000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem rawMarkedHubs_exponential_probability</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (m : ℕ) (sstar tstar ω : ℝ) (hsstar : 0&lt;sstar) (htstar : 0&lt;tstar) (hω : 0&lt;ω) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ d : ℕ,∀ hd : 2≤d,</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ (V U Γ Color : Type)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [DecidableEq V] [DecidableEq U],</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       0&lt;Fintype.card V → ω*Fintype.card V≤(Fintype.card U:ℝ) → Fintype.card U≤Fintype.card V →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ (π : Equiv.Perm V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (q : U→Γ→ℝ) (hq : ∀ u g,0≤q u g) (hQ : ∀ u,∑ g,q u g≤1/8)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (g : Γ) (j : Color),(∀ u,tstar≤q u g) → (∀ u,sstar≤s u j) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ x k,0&lt;k → k&lt;2*d+1 → (π^k) x≠x) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     1-2*(Fintype.card V:ℝ)^(m+1)*Real.exp</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (-(2*(ω*tstar*sstar^m/2)^2/((4*(d:ℝ)+3)^2*((m:ℝ)+1)))*Fintype.card V)≤</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (FiniteLaw.pi (rawIntervalFamilyLaw (V:=V) d hd q hq hQ s hs hS)).probability</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         (fun σ=&gt;∀ C : Fin (m+1)→V,PermutationSeparated π (3*d) C →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>           (ω*tstar*sstar^m/2)*Fintype.card V≤((potentialMarkedHubs (rawMarkedSpokes π d σ g j) C).card:ℝ)) := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let β : ℝ := ω*tstar*sstar^m/2</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hβ : 0&lt;β := by dsimp [β];positivity</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   intro d hd</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro V U Γ Color _ _ _ _ _ _ hnN hmlo hmhi π q hq hQ s hs hS g j hg hj hnoshort</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let n := Fintype.card V</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hn : 0&lt;n := by dsimp [n];omega</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hn0 : (0:ℝ)&lt;n := by exact_mod_cast hn</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hm0 : (0:ℝ)&lt;Fintype.card U := (mul_pos hω hn0).trans_le hmlo</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hm : 0&lt;Fintype.card U := by exact_mod_cast hm0</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hh := rawMarkedHubs_common_event π d hd q hq hQ s hs hS hnoshort hm m g j (β*n) (by positivity)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hM : (Fintype.card U:ℝ)≤n := by exact_mod_cast hmhi</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have ht := linear_deviation_failure_exponential 1 ((4*(d:ℝ)+3)^2*((m:ℝ)+1))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     β (by positivity) hβ (m+1) n hn ((n:ℝ)^(m+1))</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     ((4*(d:ℝ)+3)^2*(((m:ℝ)+1)*Fintype.card U))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (by positivity) (by simp) (by positivity) (by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       have hmul := mul_le_mul_of_nonneg_left hM</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         (show 0≤(4*(d:ℝ)+3)^2*((m:ℝ)+1) by positivity)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       nlinarith only [hmul])</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   norm_num only [mul_one] at ht</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hprob := (sub_le_sub_left ht 1).trans hh</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   apply hprob.trans</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   apply finiteLaw_probability_mono</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   intro σ hσ C hC</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hcount := (abs_lt.mp (hσ C hC)).1</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hmean : (Fintype.card U:ℝ)*(tstar*sstar^m)≤∑ u : U,q u g*(s u j)^m := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     rw [← nsmul_eq_mul,← Finset.card_univ,← Finset.sum_const]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     apply Finset.sum_le_sum</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     intro u _</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     exact mul_le_mul (hg u) (by gcongr;exact hj u) (by positivity) (hq u g)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hmean&#x27; := mul_le_mul_of_nonneg_right hmlo (show 0≤tstar*sstar^m by positivity)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   dsimp only [β] at hcount ⊢</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   nlinarith only [hcount,hmean,hmean&#x27;]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

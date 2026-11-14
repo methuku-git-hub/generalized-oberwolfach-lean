@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BipartiteRegularization.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BipartiteRegularization.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RetainedBipartiteMatrix</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Regularization with controlled edge-deletion probabilities, including</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> the constant and order quantifiers of the manuscript lemma. The sample D</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> specifies deleted edges; R is the actual retained adjacency matrix. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem bipartite_matrix_random_regularization (β : ℝ) (hβ : 0 &lt; β) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ C η₀ : ℝ, 0 &lt; C ∧ 0 &lt; η₀ ∧ ∀ η : ℝ, 0 &lt; η → η &lt; η₀ →</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ∃ m₀ : ℕ, ∀ (V : Type) [Fintype V] [DecidableEq V], m₀ ≤ Fintype.card V →</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ∀ (M : V → V → ℕ), (∀ x y, M x y ≤ 1) → ∀ d : ℝ,</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (∀ x, (1 / 2 + β) * Fintype.card V ≤ ((∑ y, M x y : ℕ) : ℝ)) →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (∀ y, (1 / 2 + β) * Fintype.card V ≤ ((∑ x, M x y : ℕ) : ℝ)) →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∀ x, d - η * Fintype.card V ≤ ((∑ y, M x y : ℕ) : ℝ) ∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         ((∑ y, M x y : ℕ) : ℝ) ≤ d + η * Fintype.card V) →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (∀ y, d - η * Fintype.card V ≤ ((∑ x, M x y : ℕ) : ℝ) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>         ((∑ x, M x y : ℕ) : ℝ) ≤ d + η * Fintype.card V) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       let k := ⌊d - Real.sqrt η * Fintype.card V⌋₊</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       ∃ ν : FiniteLaw (BipartiteEdges M → Bool),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (∀ D, 0 &lt; ν.mass D →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>           (∀ x, (∑ y, retainedBipartiteMatrix M D x y) = k) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>           (∀ y, (∑ x, retainedBipartiteMatrix M D x y) = k)) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (∀ D x y, retainedBipartiteMatrix M D x y ≤ M x y) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (∀ e : BipartiteEdges M,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>           ν.probability (fun D =&gt; retainedBipartiteMatrix M D e.1 e.2.1 = 0) ≤</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>             C * Real.sqrt η) := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨C, η₀, hC, hη₀, hall⟩ := matrix_regularization_deletion_law β hβ</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   refine ⟨C, η₀, hC, hη₀, ?_⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   intro η hη hsmall</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   obtain ⟨m₀, hm₀⟩ := hall η hη hsmall</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   refine ⟨m₀, ?_⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   intro V _ _ hm M hM d hl hr hnl hnr</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   obtain ⟨hkl, hkr, ν, hdegrees, hprob⟩ := hm₀ V hm M hM d hl hr hnl hnr</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   refine ⟨ν, ?_, retainedBipartiteMatrix_le M, ?_⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   · intro D hD</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     obtain ⟨hdleft, hdright⟩ := hdegrees D hD</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     constructor</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     · intro x</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       rw [retainedBipartiteMatrix_row]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       exact selected_complement_degree (fun e : BipartiteEdges M =&gt; e.1 = x)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         D _ _ (hkl x) (bipartiteEdges_row_degree M x) (by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>           convert hdleft x using 1</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           apply Finset.sum_congr rfl</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           intro e _</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>           split_ifs &lt;;&gt; rfl)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     · intro y</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       rw [retainedBipartiteMatrix_column]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       exact selected_complement_degree (fun e : BipartiteEdges M =&gt; e.2.1 = y)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         D _ _ (hkr y) (bipartiteEdges_column_degree M y) (by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>           convert hdright y using 1</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>           apply Finset.sum_congr rfl</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>           intro e _</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           split_ifs &lt;;&gt; rfl)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   · intro e</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     convert hprob e using 1</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     congr 1</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     ext D</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     exact retainedBipartiteMatrix_edge M hM D e</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

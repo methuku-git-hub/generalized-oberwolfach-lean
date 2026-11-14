@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TriangleSharedEndpointGeometry.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TriangleSharedEndpointGeometry.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TransformerActualData</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.TransformerUnusedEndpointSpokes</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! A triangular rim path consists of one vertex p_e. Two incidences</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> share that vertex precisely when they are the two ends of e. The shifted</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> hub distinguishes those incidences: simplicity and the absence of fixed</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> points rule out a second edge with the same two ends. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 5000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem triangle_root_shared_endpoint_injective (G:SimpleGraph V) (φ:V→V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (p:G.edgeFinset↪V) (hφ:∀ v w,G.Adj v w→φ v≠φ w):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     Function.Injective (fun d:Σ v,G.neighborSet v=&gt;(φ d.1,p (rimIncidenceEquiv G d).1)):=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have he (d:Σ v,G.neighborSet v):(rimIncidenceEquiv G d).1=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ⟨s(d.1,d.2.val),SimpleGraph.mem_edgeFinset.mpr d.2.property⟩:=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     Subtype.ext (rimIncidenceEquiv_edge G d)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   simpa only [he,Equiv.refl_apply] using</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     shifted_hub_root_injective G p (fun _=&gt;Equiv.refl _) φ hφ</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> </span>
+<span id="L25"><a href="#L25" class="ln">  25</a> theorem triangle_edge_shifted_edge_injective (G:SimpleGraph V)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (σ:∀ v,Equiv.Perm (G.neighborSet v)) (hσ:∀ v w,σ v w≠w):</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     Function.Injective (fun d:Σ v,G.neighborSet v=&gt;</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       ((rimIncidenceEquiv G d).1,(shiftedIncidenceEquiv G σ d).1)):=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   rintro ⟨v,w⟩ ⟨v&#x27;,w&#x27;⟩ he</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have h1:=congrArg Subtype.val (Prod.mk.inj he).1</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have h2:=congrArg Subtype.val (Prod.mk.inj he).2</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   rw [rimIncidenceEquiv_edge,rimIncidenceEquiv_edge] at h1</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   rw [shiftedIncidenceEquiv_edge,shiftedIncidenceEquiv_edge] at h2</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   change s(v,w.val)=s(v&#x27;,w&#x27;.val) at h1</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   change s(v,(σ v w).val)=s(v&#x27;,(σ v&#x27; w&#x27;).val) at h2</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   rcases Sym2.eq_iff.mp h1 with ⟨hvv,hww⟩|⟨hvw,hwh⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · subst v&#x27;</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hw:w=w&#x27;:=Subtype.ext hww</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     subst w&#x27;;rfl</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   · rcases Sym2.eq_iff.mp h2 with ⟨hvv,_⟩|⟨_,hsv⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     · exact (w.property.ne (hvv.trans hwh.symm)).elim</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     · have hfixed:σ v w=w:=Subtype.ext (hsv.trans hwh.symm)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       exact (hσ v w hfixed).elim</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> </span>
+<span id="L45"><a href="#L45" class="ln">  45</a> theorem triangle_shared_endpoint_hub_injective (G:SimpleGraph V)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (σ:∀ v,Equiv.Perm (G.neighborSet v)) (hσ:∀ v w,σ v w≠w)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (p:G.edgeFinset↪V) (h:G.edgeFinset↪U):</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     Function.Injective (fun d:Σ v,G.neighborSet v=&gt;</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (p (rimIncidenceEquiv G d).1,transformerAssignedHub G σ h d)):=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro d e he</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   apply triangle_edge_shifted_edge_injective G σ hσ</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   exact Prod.ext (p.injective (Prod.mk.inj he).1) (h.injective (Prod.mk.inj he).2)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a> </span>
+<span id="L54"><a href="#L54" class="ln">  54</a> end Oberwolfach</span></pre></html>

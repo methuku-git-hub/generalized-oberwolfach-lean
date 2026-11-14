@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedRowRequiredResources.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedRowRequiredResources.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedRowCoverPackings</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The exact resources prescribed at a row: the supplied incoming and</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> outgoing physical rim edges, and the two types of root spokes. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {V U E T A X : Type} [DecidableEq V] [DecidableEq U] [Fintype A] [Fintype X]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {tail head : E→V} {ktail khead : T→V} {π : Equiv.Perm V}</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> def markedRowRequiredResources (incoming : A→E⊕T) (outgoing : X→E⊕T)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (v : V) (Y : Finset U) : Finset (Finset V⊕(V×U)) :=</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   (Finset.univ.image (fun a=&gt;Sum.inl (markedPhysicalEdge tail head ktail khead π (incoming a)))∪</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>    Finset.univ.image (fun x=&gt;Sum.inl (markedPhysicalEdge tail head ktail khead π (outgoing x))))∪</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     Y.image (fun u=&gt;Sum.inr (v,u))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem marked_row_required_covered {I : Type} (incoming : A→E⊕T) (outgoing : X→E⊕T)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (v : V) (Y : Finset U) (C : I→Finset (Finset V⊕(V×U)))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hA : ∀ a,∃ i,Sum.inl (markedPhysicalEdge tail head ktail khead π (incoming a))∈C i)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hX : ∀ x,∃ i,Sum.inl (markedPhysicalEdge tail head ktail khead π (outgoing x))∈C i)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hY : ∀ u∈Y,∃ i,Sum.inr (v,u)∈C i) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ e∈markedRowRequiredResources (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (π:=π) incoming outgoing v Y,∃ i,e∈C i := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   intro e he</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   rcases Finset.mem_union.mp he with he|he</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   · rcases Finset.mem_union.mp he with he|he</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     · obtain ⟨a,_,rfl⟩ := Finset.mem_image.mp he</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       exact hA a</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     · obtain ⟨x,_,rfl⟩ := Finset.mem_image.mp he</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       exact hX x</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   · obtain ⟨u,hu,rfl⟩ := Finset.mem_image.mp he</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     exact hY u hu</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> end Oberwolfach</span></pre></html>

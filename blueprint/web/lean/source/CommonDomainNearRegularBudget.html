@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CommonDomainNearRegularBudget.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CommonDomainNearRegularBudget.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RestrictedRegularRootedFactors</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Two nearly complete neighbourhoods and a bounded forbidden set leave</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> an induced domain with the relative size needed for degree transfer. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem common_domain_near_regular_budget {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (A₁ A₂ C:Finset V) (η:ℝ) (hη:0≤η) (hη1:η≤1)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (h₁:((Finset.univ\A₁).card:ℝ)≤η*Fintype.card V/16)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (h₂:((Finset.univ\A₂).card:ℝ)≤η*Fintype.card V/16)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hC:(C.card:ℝ)≤η*Fintype.card V/16):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     let B:=(A₁∩A₂)\C;</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ((Fintype.card V-B.card:ℕ):ℝ)≤η*B.card:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   intro B</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hs:Finset.univ\B⊆((Finset.univ\A₁)∪(Finset.univ\A₂))∪C:=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     intro v hv</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have hvnot: v∉B:=(Finset.mem_sdiff.mp hv).2</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     by_cases hC&#x27;:v∈C</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     · exact Finset.mem_union_right _ hC&#x27;</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     · apply Finset.mem_union_left</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       by_cases hA₁:v∈A₁</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       · apply Finset.mem_union_right</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         apply Finset.mem_sdiff.mpr</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         refine ⟨Finset.mem_univ _,?_⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         intro hA₂</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         exact hvnot (Finset.mem_sdiff.mpr ⟨Finset.mem_inter.mpr ⟨hA₁,hA₂⟩,hC&#x27;⟩)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       · exact Finset.mem_union_left _ (Finset.mem_sdiff.mpr ⟨Finset.mem_univ _,hA₁⟩)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hc:((Finset.univ\B).card:ℝ)≤(Finset.univ\A₁).card+(Finset.univ\A₂).card+C.card:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hh:=(Finset.card_le_card hs).trans (Finset.card_union_le _ _)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hhh:=Finset.card_union_le (Finset.univ\A₁) (Finset.univ\A₂)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     exact_mod_cast (show (Finset.univ\B).card≤(Finset.univ\A₁).card+(Finset.univ\A₂).card+C.card by omega)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hB:B.card≤Fintype.card V:=Finset.card_le_univ B</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hdiff:((Finset.univ\B).card:ℝ)=(Fintype.card V:ℝ)-B.card:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     simp only [Finset.card_sdiff,Finset.inter_univ,Finset.card_univ,Nat.cast_sub hB]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hq:((Fintype.card V-B.card:ℕ):ℝ)=(Fintype.card V:ℝ)-B.card:=by rw [Nat.cast_sub hB]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hn:(0:ℝ)≤Fintype.card V:=by positivity</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hB0:(0:ℝ)≤B.card:=by positivity</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hmiss:(Fintype.card V:ℝ)-B.card≤3*η*Fintype.card V/16:=by linarith only [hdiff,hc,h₁,h₂,hC]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hηmiss:=mul_le_mul_of_nonneg_left hmiss hη</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hηsq:η^2≤η:=by nlinarith [mul_nonneg hη (sub_nonneg.mpr hη1)]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hηsqn:=mul_le_mul_of_nonneg_right hηsq hn</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   rw [hq]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   nlinarith only [hmiss,hηmiss,hηsqn,hη,hn]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> </span>
+<span id="L47"><a href="#L47" class="ln">  47</a> end Oberwolfach</span></pre></html>

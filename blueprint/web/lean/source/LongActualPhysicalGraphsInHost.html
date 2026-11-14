@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongActualPhysicalGraphsInHost.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongActualPhysicalGraphsInHost.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongApproximateSampleGraphEmbedding</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongPreparationPhysicalContainment</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.RawSelectedPhysicalNeighbourTests</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Both physical layers used by the residual completion lie in the host. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V U Γ Color:Type} [Fintype V] [LinearOrder V] [Fintype U] [DecidableEq U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   [Fintype Γ] [Fintype Color]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem long_approximate_physical_graph_le_host</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (σ:∀e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     longApproximatePhysicalGraph P π d σ≤P:=by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   intro x y h</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   let raw:RawMarkedOutcome V U Γ Color:=fun e=&gt;rawExpandedApproximateCollapse e (σ e)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   change x≠y ∧ ({x,y}:Finset V)∈</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (Finset.univ.image (markedPhysicalEdge</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;raw (Sum.inl e)) false=&gt;e.val.1)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;raw (Sum.inl e)) false=&gt;e.val.2)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;raw (Sum.inl e)) true=&gt;e.val.1)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;raw (Sum.inl e)) true=&gt;e.val.2) π)) at h</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   obtain ⟨a,_,ha⟩:=Finset.mem_image.mp h.2</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hpair {a b c e:V} (hh:({a,b}:Finset V)={c,e}):a=c ∧ b=e ∨ a=e ∧ b=c:=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     apply Set.pair_eq_pair_iff.mp</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     simpa only [Finset.coe_pair] using congrArg (fun S:Finset V=&gt;(S:Set V)) hh</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   cases a with</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   | inl e=&gt;</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hadj:P.Adj e.val.1 e.val.2:=((markedPhysicalRim_eq_one_iff P π (3*d) _ false _ _).mp e.property).2.1</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     rcases hpair (by simpa [markedPhysicalEdge] using ha) with ⟨rfl,rfl⟩|⟨rfl,rfl⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     · exact hadj</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     · exact hadj.symm</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   | inr e=&gt;</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hadj:P.Adj e.val.1 (π e.val.2):=((markedPhysicalRim_eq_one_iff P π (3*d) _ true _ _).mp e.property).2.1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     rcases hpair (by simpa [markedPhysicalEdge] using ha) with ⟨rfl,rfl⟩|⟨rfl,rfl⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     · exact hadj</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · exact hadj.symm</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem long_required_physical_graph_le_host</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (P P₀ Sel:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (I:Finset V) (D M:V→V→Prop)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hP₀:P₀≤P):longRequiredPhysicalGraph P P₀ Sel π d I D M≤P:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   intro x y h</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   rcases (show (spanningRestriction (P₀\Sel) I).Adj x y ∨ (longCloseRequiredGraph P π d D M).Adj x y from h) with hh|hh</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   · exact hP₀ ((spanningRestriction_adj _ _ _ _).mp hh).1.1</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   · exact hh.1</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> theorem raw_selected_physical_relation_in_host</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (ω:Sym2 V→Fin 6×Bool) (x y:V):</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     rawSelectedPhysicalRelation P π d ω x y→P.Adj x y:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   intro h</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   exact ((markedPhysicalRim_eq_one_iff P π (3*d) _ false _ _).mp h).2.1</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> end Oberwolfach</span></pre></html>

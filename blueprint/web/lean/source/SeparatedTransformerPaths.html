@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SeparatedTransformerPaths.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SeparatedTransformerPaths.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteConflictSeparatedChoices</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.TransformerRimPaths</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Simultaneous construction of the rim paths in a bounded ordinary</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> transformer. The forbidden set is enlarged by the actual earlier path</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> supports, whose total size is bounded before each application. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 5500000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V I:Type} [Fintype V] [Fintype I] [DecidableEq V] [DecidableEq I]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a>  theorem separated_transformer_paths (Q F:SimpleGraph V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (A:I→Finset V) (W Ω:Finset V) (Z:I→Finset V) (hAΩ:∀ i,A i⊆Ω)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (x y x&#x27; y&#x27;:I→V) (hroots:∀ i,x i∈Z i∧y i∈Z i∧x&#x27; i∈Z i∧y&#x27; i∈Z i)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hΩ:∀ i,x i∈Ω∧y i∈Ω∧x&#x27; i∈Ω∧y&#x27; i∈Ω)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hZ:∀ i,∀ v∈Z i,∀ w∈Z i,¬F.Adj v w)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (r:I→ℕ) (d:ℕ) (hr:∀ i,4≤r i) (hd:∀ i,r i-2≤d) (L b:ℝ) (hL:0≤L) (hF:∀ v,(F.degree v:ℝ)≤L)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hcount:∀ i,∀ v∈Ω,∀ w∈Ω,b≤((A i∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hthree:∀ i,r i=4→∀ a∈A i,b≤(((A i∩Q.neighborFinset a)∩Q.neighborFinset (y i)∩Q.neighborFinset (y&#x27; i)).card:ℝ))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hbudget:∀ i,W.card+Fintype.card I*d*(L+1)+(((Z i).card:ℝ)+r i+2)*(L+1)&lt;b):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃ p:I→(Σ a:V,Σ c:V,Q.Walk a c),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ i,(p i).2.2.IsPath ∧ (p i).2.2.length=r i-3 ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         Q.Adj (x i) (p i).1 ∧ Q.Adj (x&#x27; i) (p i).1 ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         Q.Adj (y i) (p i).2.1 ∧ Q.Adj (y&#x27; i) (p i).2.1 ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (∀ v∈(p i).2.2.support,v∈A i∧v∉W∧v∉Z i) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (∀ v∈(p i).2.2.support,∀ w∈(p i).2.2.support,¬F.Adj v w) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         (∀ v∈(p i).2.2.support,∀ w∈Z i,¬F.Adj v w)) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       ∀ i j,i≠j→Disjoint (p i).2.2.support.toFinset (p j).2.2.support.toFinset ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         (∀ v∈(p i).2.2.support,∀ w∈(p j).2.2.support,¬F.Adj v w):=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   let S:(Σ a:V,Σ c:V,Q.Walk a c)→Finset V:=fun p=&gt;p.2.2.support.toFinset</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let Good:=fun (i:I) (p:Σ a:V,Σ c:V,Q.Walk a c)=&gt;</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     p.2.2.IsPath ∧ p.2.2.length=r i-3 ∧ Q.Adj (x i) p.1 ∧ Q.Adj (x&#x27; i) p.1 ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       Q.Adj (y i) p.2.1 ∧ Q.Adj (y&#x27; i) p.2.1 ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ v∈p.2.2.support,v∈A i∧v∉Z i) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (∀ v∈p.2.2.support,∀ w∈p.2.2.support,¬F.Adj v w) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀ v∈p.2.2.support,∀ w∈Z i,¬F.Adj v w)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hchoose:∀ i,∀ B:Finset V,(B.card:ℝ)≤W.card+Fintype.card I*d*(L+1)→</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       ∃ p,Good i p ∧ (S p).card≤d ∧ Disjoint (S p) B:=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     intro i B hB</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     obtain ⟨a,c,p,hp,hlen,hxa,hx&#x27;a,hyc,hy&#x27;c,hclass,hind,hroot⟩:=</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       transformer_rim_common_path Q F (A i) B Ω (Z i) (hAΩ i) (x i) (y i) (x&#x27; i) (y&#x27; i)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         (hroots i) (hΩ i) (hZ i) (r i) (hr i) L b hL hF (hcount i) (hthree i)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         (by linarith only [hB,hbudget i])</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     refine ⟨⟨a,c,p⟩,⟨hp,hlen,hxa,hx&#x27;a,hyc,hy&#x27;c,?_,hind,hroot⟩,?_,?_⟩</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     · intro v hv;exact ⟨(hclass v hv).1,(hclass v hv).2.2⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     · have hh:=List.toFinset_card_le p.support</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       rw [p.length_support,hlen] at hh</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       dsimp only [S]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       have hh&#x27; := hd i</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       have hh&#x27;&#x27; := hr i</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       omega</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     · apply Finset.disjoint_left.mpr</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       intro v hv hBv</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       exact (hclass v (List.mem_toFinset.mp hv)).2.1 hBv</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   obtain ⟨p,hp,hdis⟩:=finite_conflict_separated_choices S Good W d F L hL hF hchoose</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   refine ⟨p,?_,?_⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   rotate_left</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   · intro i j hij</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     exact ⟨(hdis i j hij).1,fun v hv w hw=&gt;(hdis i j hij).2 v (List.mem_toFinset.mpr hv) w (List.mem_toFinset.mpr hw)⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   intro i</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨hi,hcard,hW⟩:=hp i</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   rcases hi with ⟨hpath,hlen,hxa,hx&#x27;a,hyc,hy&#x27;c,hclass,hind,hroot⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   refine ⟨hpath,hlen,hxa,hx&#x27;a,hyc,hy&#x27;c,?_,hind,hroot⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   intro v hv</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   exact ⟨(hclass v hv).1,fun hw=&gt;Finset.disjoint_left.mp hW (List.mem_toFinset.mpr hv) hw,(hclass v hv).2⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a> </span>
+<span id="L70"><a href="#L70" class="ln">  70</a> end Oberwolfach</span></pre></html>

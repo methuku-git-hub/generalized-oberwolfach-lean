@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EdgeFinsetInstances.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EdgeFinsetInstances.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResidualActualData</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> set_option autoImplicit false</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> noncomputable section</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> namespace Oberwolfach</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem edge_finset_card_independent {V:Type} (G:SimpleGraph V) (A B:Fintype G.edgeSet):</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (@SimpleGraph.edgeFinset V G A).card=(@SimpleGraph.edgeFinset V G B).card := by</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>   congr 1</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>   apply Finset.coe_injective</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   exact (@SimpleGraph.coe_edgeFinset V G A).trans (@SimpleGraph.coe_edgeFinset V G B).symm</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> end Oberwolfach</span></pre></html>

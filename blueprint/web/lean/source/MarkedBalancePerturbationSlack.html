@@ -1,0 +1,34 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedBalancePerturbationSlack.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedBalancePerturbationSlack.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Tactic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! One realised change allowance leaves room for both the local balance</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> and the original ambient error scale at every external root. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_balance_perturbation_slack</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (m:ℕ) (etaBal x iota:ℝ) (hη:0&lt;etaBal) (hx:0&lt;x) (hi : 0 &lt; iota):</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     ∃ ζcap:ℝ,0&lt;ζcap ∧ ∀ ζ:ℝ,0≤ζ→ζ≤ζcap→</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∀ n I err:ℝ,0≤n→iota*n≤I→</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       err≤(etaBal/2)*I → err≤(x/4)*n →</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       err+(m+4:ℕ)*ζ*n≤etaBal*I ∧ err+(m+4:ℕ)*ζ*n≤(x/2)*n := by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   let a:ℝ:=(m+4:ℕ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have ha:0&lt;a:=by dsimp [a];positivity</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   let ζcap:=min (etaBal*iota/(2*(a+1))) (x/(4*(a+1)))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hcap:0&lt;ζcap:=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     dsimp [ζcap]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     exact lt_min (div_pos (mul_pos hη hi) (by linarith)) (div_pos hx (by linarith))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   refine ⟨ζcap,hcap,?_⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   intro ζ hζ hζcap n I err hn hI heI hen</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have h1:ζ≤etaBal*iota/(2*(a+1)):=hζcap.trans (min_le_left _ _)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have h2:ζ≤x/(4*(a+1)):=hζcap.trans (min_le_right _ _)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have h1&#x27;:ζ*(2*(a+1))≤etaBal*iota:=(le_div_iff₀ (by positivity)).mp h1</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have h2&#x27;:ζ*(4*(a+1))≤x:=(le_div_iff₀ (by positivity)).mp h2</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hmul1:=mul_le_mul_of_nonneg_right h1&#x27; hn</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hmul2:=mul_le_mul_of_nonneg_right h2&#x27; hn</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hmulI:=mul_le_mul_of_nonneg_left hI (show 0≤etaBal/2 by positivity)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   constructor &lt;;&gt; dsimp only [a] at * &lt;;&gt; push_cast at * &lt;;&gt;</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     nlinarith [mul_nonneg hζ hn,mul_nonneg ha.le (mul_nonneg hζ hn)]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> end Oberwolfach</span></pre></html>

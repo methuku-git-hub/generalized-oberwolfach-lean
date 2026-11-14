@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ColorClassLottery.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ColorClassLottery.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ColorClassSelection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The independent colour-class selection step in the weighted matching</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> argument, with its exact probability law and one event for every fixed test. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency true</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 800000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {E I C V J : Type*} [Fintype E] [Fintype I] [Fintype C] [Nonempty C]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [DecidableEq E] [DecidableEq I] [DecidableEq C] [DecidableEq V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem colorClassLottery_expectation (part : E → I) (color : E → C) (w : E → ℝ) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (FiniteLaw.pi (fun _ : I=&gt;FiniteLaw.uniform C)).expectation</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (fun σ=&gt;∑ i,colorClassWeight part color w i (σ i))=(∑ e,w e)/Fintype.card C := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let : MeasurableSpace C := ⊤</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let : MeasurableSingletonClass C := ⟨fun _=&gt;trivial⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   calc</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     _ = ∑ i,(FiniteLaw.pi (fun _ : I=&gt;FiniteLaw.uniform C)).expectation</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         (fun σ=&gt;colorClassWeight part color w i (σ i)) := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       unfold FiniteLaw.expectation</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       simp_rw [Finset.mul_sum]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       rw [Finset.sum_comm]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     _ = ∑ i,(FiniteLaw.uniform C).expectation (colorClassWeight part color w i) := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       apply Finset.sum_congr rfl</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       intro i _</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       exact finiteLaw_coordinate_expectation _ i _</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     _ = ∑ i,(∑ c,colorClassWeight part color w i c)/Fintype.card C := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       simp_rw [finiteLaw_uniform_expectation]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     _ = _ := by rw [← Finset.sum_div,colorClassWeight_total]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> theorem colorClassLottery_matching</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (R : E → Finset V) (part : E → I) (color : E → C)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hparts : ∀ e f,part e≠part f → Disjoint (R e) (R f))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hcolor : ∀ e f,e≠f → part e=part f → color e=color f → Disjoint (R e) (R f))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (T : Finset J) (w : J → E → ℝ) (B : J → I → ℝ) (t : J → ℝ)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hw : ∀ j∈T,∀ e,0≤w j e)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hB : ∀ j∈T,∀ i c,colorClassWeight part color (w j) i c≤B j i)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (ht : ∀ j∈T,0≤t j)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hsmall : (∑ j∈T,2*Real.exp (-2*(t j)^2/(∑ i,(B j i)^2)))&lt;1) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∃ M : Finset E,</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (∀ e∈M,∀ f∈M,e≠f → Disjoint (R e) (R f)) ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (∀ j∈T,|(∑ e∈M,w j e)-(∑ e,w j e)/Fintype.card C|&lt;t j) := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let μ := FiniteLaw.pi (fun _ : I=&gt;FiniteLaw.uniform C)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let X (j : J) (σ : I → C) := ∑ i,colorClassWeight part color (w j) i (σ i)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hnonneg (j : J) (hj : j∈T) (i : I) : 0≤B j i :=</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (colorClassWeight_nonneg part color (w j) (hw j hj) i (Classical.choice (inferInstance : Nonempty C))).trans</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (hB j hj i _)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have htail (j : J) (hj : j∈T) : μ.probability (fun σ=&gt;t j≤|X j σ-μ.expectation (X j)|)≤</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       2*Real.exp (-2*(t j)^2/(∑ i,(B j i)^2)) := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact finiteLaw_boundedDifferences (fun _ : I=&gt;FiniteLaw.uniform C) (X j) (B j)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (hnonneg j hj)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (colorClassWeight_coordinate_change part color (w j) (hw j hj) (B j) (hB j hj)) (ht j hj)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   obtain ⟨σ,_hσ,hgood⟩ := finiteLaw_common_event_exists μ T</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (fun j σ=&gt;t j≤|X j σ-μ.expectation (X j)|)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (fun j=&gt;2*Real.exp (-2*(t j)^2/(∑ i,(B j i)^2))) htail hsmall</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   refine ⟨colorClassSelection part color σ,colorClassSelection_matching R part color hparts hcolor σ,?_⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   intro j hj</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hh := lt_of_not_ge (hgood j hj)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   change |(∑ i,colorClassWeight part color (w j) i (σ i))-</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (FiniteLaw.pi (fun _ : I=&gt;FiniteLaw.uniform C)).expectation</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (fun σ=&gt;∑ i,colorClassWeight part color (w j) i (σ i))|&lt;t j at hh</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   rw [colorClassLottery_expectation] at hh</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   rwa [colorClassSelection_weight]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a> </span>
+<span id="L69"><a href="#L69" class="ln">  69</a> end Oberwolfach</span></pre></html>

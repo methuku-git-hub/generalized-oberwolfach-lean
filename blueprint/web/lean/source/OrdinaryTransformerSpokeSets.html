@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryTransformerSpokeSets.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryTransformerSpokeSets.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryOneRootPathWheels</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.TransformerEndpointAssignments</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The sets used by the hub-switch factors are the actual disjoint</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> spoke-path vertex sets. Their cardinalities, divisibility and common-hub</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> adjacencies are derived from the original spoke incidence relation. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 6000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> open scoped BigOperators</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a>  theorem spoke_index_fiber_card (H:V→U→Prop) (u:U):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ((Finset.univ:Finset {e:V×U // H e.1 e.2}).filter (fun e=&gt;e.val.2=u)).card=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       ((Finset.univ:Finset V).filter (fun v=&gt;H v u)).card:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   apply Finset.card_bij (fun e _=&gt;e.val.1)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   · intro e he</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     have he&#x27;:e.val.2=u:=(Finset.mem_filter.mp he).2</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     exact Finset.mem_filter.mpr ⟨Finset.mem_univ _,he&#x27; ▸ e.property⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · intro e he f hf hval</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     apply Subtype.ext</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     exact Prod.ext hval ((Finset.mem_filter.mp he).2.trans (Finset.mem_filter.mp hf).2.symm)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · intro v hv</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     refine ⟨⟨(v,u),(Finset.mem_filter.mp hv).2⟩,by simp,rfl⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a>  theorem ordinary_transformer_spoke_sets (Q F:SimpleGraph V) (H K:V→U→Prop)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (φ:U→U) (r:ℕ) (hr:3≤r)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (p:{e:V×U // H e.1 e.2}→(Σ a:V,Σ b:V,Q.Walk a b))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hpath:∀ i,(p i).2.2.IsPath∧(p i).2.2.length=r-2)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hdis:∀ i j,i≠j→Disjoint (p i).2.2.support.toFinset (p j).2.2.support.toFinset)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hF:∀ i j,∀ v∈(p i).2.2.support,∀ w∈(p j).2.2.support,¬F.Adj v w)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hH:∀ i,∀ v∈(p i).2.2.support,K v i.val.2∧K v (φ i.val.2))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hdiv:∀ u,r∣((Finset.univ:Finset V).filter (fun v=&gt;H v u)).card):</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let Z:U→Finset V:=fun u=&gt;(Finset.univ.filter (fun i:{e:V×U // H e.1 e.2}=&gt;i.val.2=u)).biUnion</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (fun i=&gt;(p i).2.2.support.toFinset)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (∀ u,(Z u).card=(r-1)*((Finset.univ:Finset V).filter (fun v=&gt;H v u)).card) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ u,r∣(Z u).card) ∧ (∀ u u&#x27;,u≠u&#x27;→Disjoint (Z u) (Z u&#x27;)) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (∀ u,∀ v∈Z u,K v u∧K v (φ u)) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ u,∀ v∈Z u,∀ w∈Z u,¬F.Adj v w):=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   dsimp only</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let J:={e:V×U // H e.1 e.2}</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let I:U→Finset J:=fun u=&gt;Finset.univ.filter (fun i=&gt;i.val.2=u)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let Z:U→Finset V:=fun u=&gt;(I u).biUnion (fun i=&gt;(p i).2.2.support.toFinset)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hsize (i:J):(p i).2.2.support.toFinset.card=r-1:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     rw [List.toFinset_card_of_nodup (hpath i).1.support_nodup,(p i).2.2.length_support,(hpath i).2]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     omega</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hZcard (u:U):(Z u).card=(r-1)*((Finset.univ:Finset V).filter (fun v=&gt;H v u)).card:=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     change ((I u).biUnion (fun i=&gt;(p i).2.2.support.toFinset)).card=_</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     rw [Finset.card_biUnion (by intro i _ j _ hij;exact hdis i j hij)]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     simp only [hsize,Finset.sum_const,nsmul_eq_mul]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     rw [show (I u).card=((Finset.univ:Finset V).filter (fun v=&gt;H v u)).card from spoke_index_fiber_card H u,Nat.mul_comm]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     norm_cast</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   refine ⟨hZcard,?_,?_,?_,?_⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   · intro u</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     rw [hZcard]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact dvd_mul_of_dvd_right (hdiv u) (r-1)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   · intro u u&#x27; huu&#x27;</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     intro v hv hv&#x27;</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     obtain ⟨i,hi,hvi⟩:=Finset.mem_biUnion.mp hv</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     obtain ⟨j,hj,hvj⟩:=Finset.mem_biUnion.mp hv&#x27;</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have hij:i≠j:=by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       intro he</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       have hi&#x27;:i.val.2=u:=(Finset.mem_filter.mp hi).2</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       have hj&#x27;:j.val.2=u&#x27;:=(Finset.mem_filter.mp hj).2</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       exact huu&#x27; (hi&#x27;.symm.trans ((congrArg (fun e:J=&gt;e.val.2) he).trans hj&#x27;))</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     exact Finset.disjoint_left.mp (hdis i j hij) hvi hvj</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   · intro u v hv</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     obtain ⟨i,hi,hv⟩:=Finset.mem_biUnion.mp hv</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have hi&#x27;:i.val.2=u:=(Finset.mem_filter.mp hi).2</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     simpa only [hi&#x27;] using hH i v (List.mem_toFinset.mp hv)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · intro u v hv w hw</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     obtain ⟨i,_,hv⟩:=Finset.mem_biUnion.mp hv</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     obtain ⟨j,_,hw⟩:=Finset.mem_biUnion.mp hw</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     exact hF i j v (List.mem_toFinset.mp hv) w (List.mem_toFinset.mp hw)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a>  theorem balanced_spoke_root_separation (G F:SimpleGraph V) (H:V→U→Prop) (φ:V→V)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (hbalance:∀ v,G.degree v=2*((Finset.univ:Finset U).filter (H v)).card)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     (hsep:∀ v w,G.Adj v w→¬F.Adj v (φ v)):</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     ∀ v u,H v u→¬F.Adj v (φ v):=by</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   intro v u hvu</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   have hpos:0&lt;((Finset.univ:Finset U).filter (H v)).card:=</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     Finset.card_pos.mpr ⟨u,Finset.mem_filter.mpr ⟨Finset.mem_univ _,hvu⟩⟩</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hdeg:0&lt;G.degree v:=by rw [hbalance];omega</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hn:(G.neighborFinset v).Nonempty:=Finset.card_pos.mp (by simpa only [SimpleGraph.card_neighborFinset_eq_degree] using hdeg)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   obtain ⟨w,hw⟩:=hn</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   exact hsep v w ((G.mem_neighborFinset v w).mp hw)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a> </span>
+<span id="L92"><a href="#L92" class="ln">  92</a> end Oberwolfach</span></pre></html>

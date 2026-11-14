@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RootedDenseSetScales.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RootedDenseSetScales.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.DivisibilityRepairScales</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Choose the bounded set size from the degree margin before the conflict</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> degree bound, and only then choose the ambient order. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 600000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem rooted_conflict_loss_le (n s k : ℕ) (hn : 0&lt;n) (hns : 2*s≤n)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (L : ℝ) (hL : 0≤L) :</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     let q : ℝ := (k:ℝ)/(n-s:ℕ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     L*(2*(s:ℝ)*q+n*q^2)≤L*(4*s*k+4*(k:ℝ)^2)/n := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   intro q</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hs : s≤n := by omega</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hden : (0:ℝ)&lt;(n-s:ℕ) := by exact_mod_cast (show 0&lt;n-s by omega)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hnr : (0:ℝ)&lt;n := Nat.cast_pos.mpr hn</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hbase : (n:ℝ)≤2*(n-s:ℕ) := by exact_mod_cast (show n≤2*(n-s) by omega)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hq : q≤2*k/(n:ℝ) := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     apply (div_le_div_iff₀ hden hnr).mpr</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     nlinarith only [mul_le_mul_of_nonneg_left hbase (Nat.cast_nonneg (α:=ℝ) k)]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hq0 : 0≤q := by dsimp [q];positivity</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hsq : q^2≤(2*k/(n:ℝ))^2 := (sq_le_sq₀ hq0 (by positivity)).mpr hq</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hlin := mul_le_mul_of_nonneg_left hq (show (0:ℝ)≤2*s by positivity)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hquad := mul_le_mul_of_nonneg_left hsq hnr.le</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   calc</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     _ ≤ L*(2*(s:ℝ)*(2*k/n)+(n:ℝ)*(2*k/n)^2) :=</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       mul_le_mul_of_nonneg_left (add_le_add hlin hquad) hL</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     _ = _ := by field_simp;ring</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> </span>
+<span id="L33"><a href="#L33" class="ln">  33</a> theorem rooted_dense_set_scales (s : ℕ) (α : ℝ) (hα : 0&lt;α) :</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∃ K : ℕ,∀ k : ℕ,K≤k → 2≤k ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (s:ℝ)+1≤α*(s+k:ℝ)/4 ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       2*(s+k:ℝ)*Real.exp (-α^2*(s+k:ℝ)/8)≤1/4 ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       ∀ L : ℝ,0≤L → ∃ N : ℕ,∀ n : ℕ,N≤n → 0&lt;n ∧ 2*(s+k)≤n ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         L*(2*(s:ℝ)*((k:ℝ)/(n-s:ℕ))+n*((k:ℝ)/(n-s:ℕ))^2)≤1/4 := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨K₁,h₁⟩ := eventually_stretchedExp_le_inv_pow 8 1</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (c:=α^2/8) (p:=1) (by positivity) (by norm_num) 0</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   obtain ⟨K₂,h₂⟩ := eventually_constant_le_linear ((s:ℝ)+1) (α/4) (by positivity)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   refine ⟨max (max K₁ K₂) 2,?_⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   intro k hk</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have ha := h₂ k (by omega)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hb := h₁ (s+k) (by omega)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   simp only [Real.rpow_one,pow_zero,div_one,Nat.cast_add] at hb</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hroot : (s:ℝ)+1≤α*(s+k:ℝ)/4 := by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have hh := mul_nonneg hα.le (Nat.cast_nonneg (α:=ℝ) s)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     nlinarith only [ha,hh]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨by omega,hroot,?_,?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · have he : -(α^2/8)*(s+k:ℝ) = -α^2*(s+k:ℝ)/8 := by ring</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     rw [he] at hb</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     linarith only [hb]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   · intro L hL</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     obtain ⟨N₁,hN₁⟩ := eventually_constant_le_linear (4*L*(4*s*k+4*(k:ℝ)^2)) 1 (by norm_num)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     refine ⟨max N₁ (2*(s+k)+1),?_⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     intro n hn</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hnp : 0&lt;n := by omega</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hnr : (0:ℝ)&lt;n := Nat.cast_pos.mpr hnp</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hb := hN₁ n (by omega)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     simp only [one_mul] at hb</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     refine ⟨hnp,by omega,(rooted_conflict_loss_le n s k hnp (by omega) L hL).trans ?_⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     apply (div_le_iff₀ hnr).mpr</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     linarith only [hb]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a> </span>
+<span id="L66"><a href="#L66" class="ln">  66</a> end Oberwolfach</span></pre></html>

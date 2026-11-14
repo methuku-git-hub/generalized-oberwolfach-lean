@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LocalScaleSurvivalMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LocalScaleSurvivalMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ExponentialConfigurationMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Conversion of normalized physical-survival tails to a fixed inner</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> order. The leading candidate coefficient is independent of the ambient</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> size ratio; only the exponential failure constant uses that ratio. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem localScale_exponential_tail (a n : ℕ) (ha : 0&lt;a) (han : a≤n)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (K β D : ℝ) (hK : 0&lt;K) (hβ : 0&lt;β) (hD : 0&lt;D) (hnK : (n:ℝ)≤K*a) (k : ℕ) :</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     2*Real.exp (-2*(β*((a:ℝ)/n)^k)^2/(D/n))≤</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       2*Real.exp (-(2*(β/K^k)^2/D)*a) := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have haR : (0:ℝ)&lt;a := by exact_mod_cast ha</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hnR : (0:ℝ)&lt;n := by exact_mod_cast ha.trans_le han</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hanR : (a:ℝ)≤n := by exact_mod_cast han</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hratio : 1/K≤(a:ℝ)/n := (div_le_div_iff₀ hK hnR).mpr (by simpa only [one_mul,mul_one,mul_comm] using hnK)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have ht : β/K^k≤β*((a:ℝ)/n)^k := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     have hh := mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (by positivity) hratio k) hβ.le</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     simpa only [div_pow,one_pow,mul_one_div] using hh</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hcmp : 2*(β/K^k)^2*(a:ℝ)/D≤2*(β*((a:ℝ)/n)^k)^2*n/D := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     gcongr</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   apply mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr ?_) (by norm_num)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have he : -2*(β*((a:ℝ)/n)^k)^2/(D/n)=-(2*(β*((a:ℝ)/n)^k)^2*n/D) := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     field_simp</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   rw [he]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   exact (neg_le_neg hcmp).trans (le_of_eq (by ring))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> end Oberwolfach</span></pre></html>

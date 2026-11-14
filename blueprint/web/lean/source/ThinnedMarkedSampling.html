@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ThinnedMarkedSampling.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ThinnedMarkedSampling.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ThinnedMarkedGeometry</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Root-omitted expectations and concentration for two common hub columns</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> with independent ordinary-class thinning. These use the exact original</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> marked coordinates rather than a new model with independent spoke entries. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 2600000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U Γ Color : Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   (P : SimpleGraph V) (π : Equiv.Perm V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   (p k : ℝ) (hp : 0≤p) (hk : 0≤k) (hphys : 2*p+2*k≤1) (d : ℕ) (hd : 2≤d)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   (θ : ℝ) (hθ : 0≤θ) (hθ1 : θ≤1) (g : Γ) (j : Color) (u u&#x27; : U)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> local notation &quot;μthin&quot; =&gt; thinnedMarkedLaw (rawMarkedWheelLaw p k hp hk hphys d hd q hq hQ s hs hS) θ hθ hθ1</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> local notation &quot;Qthin&quot; =&gt; (fun σ : ThinnedMarkedOutcome V U Γ Color=&gt;rawMarkedPairRims P π d (fun e=&gt;σ (Sum.inl e)))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> local notation &quot;Hthin&quot; =&gt; thinnedMarkedSpokes π d g j u u&#x27;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> local notation &quot;φthin&quot; =&gt; rawMarkedWheelMarginal P π d p k</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   (fun (_ : Unit) a=&gt;q u a*q u&#x27; a) (fun (_ : Unit) j=&gt;s u j*s u&#x27; j*θ) g j</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem thinnedMarkedResource_probability</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hnoshort : ∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) (hu : u≠u&#x27;)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (a : ((V×V)⊕(V×V))⊕(Bool×V×Unit)) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (FiniteLaw.pi μthin).probability (fun σ=&gt;typedMarkedResourceState (Qthin σ) (Hthin σ) a=true)=φthin a := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   cases a with</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   | inl e=&gt;</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hproj := thinnedMarked_raw_projection (rawMarkedWheelLaw p k hp hk hphys d hd q hq hQ s hs hS)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       θ hθ hθ1 (fun σ=&gt;typedMarkedResourceState (rawMarkedPairRims P π d σ)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         (rawMarkedPairSpokes π d σ g j) (Sum.inl e)=true)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     change (FiniteLaw.pi μthin).probability (fun σ=&gt;decide (Qthin σ e)=true)=_ at hproj ⊢</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     rw [hproj]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hh := rawMarkedResource_probability P π p k hp hk hphys d hd q hq hQ s hs hS hnoshort g j (Sum.inl e)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     cases e &lt;;&gt; simpa only [rawMarkedWheelMarginal] using hh</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   | inr a=&gt;</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     rcases a with ⟨b,v,z⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     cases z</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     simpa only [typedMarkedResourceState,Sum.elim_inr,decide_eq_true_eq,rawMarkedWheelMarginal] using</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       thinnedMarked_spoke_probability P π p k hp hk hphys d hd q hq hQ s hs hS hnoshort θ hθ hθ1 g j u u&#x27; hu b v</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> </span>
+<span id="L46"><a href="#L46" class="ln">  46</a> theorem thinnedMarkedPotentialLoad_expectation</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hnoshort : ∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) (hu : u≠u&#x27;)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (m : ℕ) (hm : 2≤m) (H₀ Hₖ : V→Unit→Prop)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (w : MarkedWheel (Prod.fst : V×V→V) Prod.snd Prod.fst Prod.snd m π (3*d) H₀ Hₖ→ℝ)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (root : ((V×V)⊕(V×V))⊕(Bool×V×Unit)) :</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (FiniteLaw.pi μthin).expectation (fun σ=&gt;typedMarkedPotentialLoad w (Qthin σ) (Hthin σ) root)=</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       ∑ W,(if root∈typedMarkedOccurrenceResources W then w W else 0)*</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         ∏ a∈typedMarkedOccurrenceResources W\{root},φthin a := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   letI : DecidableEq (V×V) := Classical.decEq _</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hsup := thinnedMarkedResourceState_supported P π d g j u u&#x27;</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hh := resourcePatternLoad_supported_expectation μthin typedMarkedOccurrenceResources w</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (fun _ _=&gt;true) (thinnedMarkedResourceCoordinates π d u u&#x27;)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (fun σ=&gt;typedMarkedResourceState (Qthin σ) (Hthin σ)) hsup root (by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       intro W _ a ha b hb hab</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       exact thinnedMarkedCoordinates_candidate_disjoint (by omega) hm W a b</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (Finset.mem_sdiff.mp ha).1 (Finset.mem_sdiff.mp hb).1 hab u u&#x27;)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   simp_rw [typedMarkedPotentialLoad_eq_pattern]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   refine Eq.trans hh ?_</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   apply Finset.sum_congr rfl</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   intro W _</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   apply congrArg₂ (fun x y : ℝ=&gt;x*y)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   · split_ifs &lt;;&gt; rfl</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   · exact Finset.prod_congr (by ext a;simp)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (fun a _=&gt;thinnedMarkedResource_probability P π p k hp hk hphys d hd q hq hQ s hs hS θ hθ hθ1 g j u u&#x27; hnoshort hu a)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> </span>
+<span id="L71"><a href="#L71" class="ln">  71</a> theorem thinnedMarkedPotentialLoad_mean_event</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (m : ℕ) (hm : 3≤m) (H₀ Hₖ : V→Unit→Prop) (hn : 0&lt;Fintype.card V)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (w : MarkedWheel (Prod.fst : V×V→V) Prod.snd Prod.fst Prod.snd m π (3*d) H₀ Hₖ→ℝ)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (B : ℝ) (hB : 0&lt;B) (hw : ∀ W,0≤w W ∧ w W≤B/(Fintype.card V:ℝ)^m)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (ε : ℝ) (hε : 0&lt;ε) :</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     1-(Fintype.card (((V×V)⊕(V×V))⊕(Bool×V×Unit)):ℝ)*</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       (2*Real.exp (-2*ε^2/((16*(d:ℝ)+14)^2*(((m:ℝ)+1)^4*B/Fintype.card V)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B))))≤</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (FiniteLaw.pi μthin).probability (fun σ=&gt;∀ root,</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       |typedMarkedPotentialLoad w (Qthin σ) (Hthin σ) root-</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>         (FiniteLaw.pi μthin).expectation (fun τ=&gt;typedMarkedPotentialLoad w (Qthin τ) (Hthin τ) root)|&lt;ε) := by</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   letI : DecidableEq (V×V) := Classical.decEq _</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   apply typedMarkedPotentialLoad_supported_common_event hm hn (by simpa only [Fintype.card_unique] using Nat.succ_le_of_lt hn)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     w B hB.le hw μthin Qthin Hthin (thinnedMarkedResourceCoordinates π d u u&#x27;)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     (thinnedMarkedResourceState_supported P π d g j u u&#x27;) (16*(d:ℝ)+14) (by positivity) hB</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   · intro a</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     exact_mod_cast thinnedMarkedResourceCoordinates_card π d u u&#x27; a</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   · intro e</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     have hh := thinnedMarkedResourceCoordinates_reverse_card π d u u&#x27; e</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     have hh&#x27; : ((Finset.univ.filter (fun a=&gt;e∈thinnedMarkedResourceCoordinates π d u u&#x27; a)).card:ℝ)≤16*(d:ℝ)+14 := by</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>       exact_mod_cast hh</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     convert hh&#x27; using 1 &lt;;&gt; congr!</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   · exact hε</span>
+<span id="L93"><a href="#L93" class="ln">  93</a> </span>
+<span id="L94"><a href="#L94" class="ln">  94</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,96 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ThinnedCommonWitnessEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ThinnedCommonWitnessEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CommonThinnedSpokeChanges</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteCoordinateEvents</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Eliminate the auxiliary coins once for the fixed family of hub pairs.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The coefficient function is shared by every pair. Each witness selector</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> is then held fixed during later changes of the host. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 2800000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option quotPrecheck false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U Γ Color : Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> def CommonPotentialSpokeLoads (P : SimpleGraph V) (π : Equiv.Perm V) (d m : ℕ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (D p k sbar : ℝ) (weight : (Fin (m+1)→V)→ℝ) (η : ℝ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (σ : RawMarkedOutcome V U Γ Color) (H : Bool→V→U→Prop) (κ : V→Bool) (u u&#x27; : U) : Prop :=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let Parent := MarkedWheel (Prod.fst : V×V→V) Prod.snd Prod.fst Prod.snd m π (3*d)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (fun (_ : V) (_ : Unit)=&gt;True) (fun _ _=&gt;True)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let seed := fun W : Parent=&gt;weight W.1.val/(D*p^m*k*sbar^m)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   ∀ b v,|typedMarkedPotentialLoad seed (rawMarkedPairRims P π d σ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (commonThinnedSpokes H κ u u&#x27;) (Sum.inr (b,v,()))-1|≤η</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem thinnedMarked_exists_coins_probability</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (μ : ∀ e : RawWheelCoordinate V U,FiniteLaw (RawMarkedCoordinateState Γ Color e))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (θ : ℝ) (hθ : 0≤θ) (hθ1 : θ≤1) (E : RawMarkedOutcome V U Γ Color→(V→Bool)→Prop) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (FiniteLaw.pi (thinnedMarkedLaw μ θ hθ hθ1)).probability</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (fun σ=&gt;E (fun e=&gt;σ (Sum.inl e)) (fun x=&gt;σ (Sum.inr x)))≤</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (FiniteLaw.pi μ).probability (fun σ=&gt;∃ κ,E σ κ) := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   rw [← thinnedMarked_raw_projection μ θ hθ hθ1 (fun σ=&gt;∃ κ,E σ κ)]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   apply finiteLaw_probability_mono</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro σ hσ</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   exact ⟨fun x=&gt;σ (Sum.inr x),hσ⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> </span>
+<span id="L38"><a href="#L38" class="ln">  38</a> theorem rawMarked_common_weight_witness_event</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (P : SimpleGraph V) (π : Equiv.Perm V)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (p k : ℝ) (hp : 0&lt;p) (hk : 0&lt;k) (hphys : 2*p+2*k≤1) (d : ℕ) (hd : 2≤d)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (hnoshort : ∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (m : ℕ) (hm : 3≤m) (g : Γ) (j : Color) (s₀ D τ A B : ℝ) (hs₀ : 0&lt;s₀) (hB : 0&lt;B)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hq₀ : ∀ u,q u g=s₀/m) (hs₀&#x27; : ∀ u,s u j=s₀)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (weight : (Fin (m+1)→V)→ℝ)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hw : SuccessorSequenceWeightConditions P π (3*d) D τ A B weight)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hn : 0&lt;Fintype.card V) (hDlo : (Fintype.card V:ℝ)/2≤D) (hDhi : D≤2*Fintype.card V)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (pstar : ℝ) (hpstar : 0&lt;pstar) (hpmin : pstar≤p) (hkmin : pstar≤k) (hsmin : pstar≤s₀*s₀/m)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hp1 : p≤1) (hk1 : k≤1) (hs1 : s₀*s₀/m≤1) (ε : ℝ) (hε : 0&lt;ε) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     let Bplus := 2*B/pstar^(2*m+1)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     let err := (Fintype.card (((V×V)⊕(V×V))⊕(Bool×V×Unit)):ℝ)*</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (2*Real.exp (-2*ε^2/((16*(d:ℝ)+14)^2*(((m:ℝ)+1)^4*Bplus/Fintype.card V)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*Bplus))))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     1-(Fintype.card (U×U):ℝ)*err≤</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (FiniteLaw.pi (rawMarkedWheelLaw p k hp.le hk.le hphys d hd q hq hQ s hs hS)).probability</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (fun σ=&gt;∀ u u&#x27;,u≠u&#x27; → ∃ κ,CommonPotentialSpokeLoads P π d m D p k (s₀*s₀/m) weight</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         (τ+ε) σ (rawMarkedPairSpokes π d σ g j) κ u u&#x27;) := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   intro Bplus err</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   let μ := rawMarkedWheelLaw (V:=V) p k hp.le hk.le hphys d hd q hq hQ s hs hS</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   let Good := fun a : U×U=&gt;fun σ : RawMarkedOutcome V U Γ Color=&gt;</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     a.1≠a.2 → ∃ κ,CommonPotentialSpokeLoads P π d m D p k (s₀*s₀/m) weight</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (τ+ε) σ (rawMarkedPairSpokes π d σ g j) κ a.1 a.2</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have herr : 0≤err := by dsimp [err];positivity</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hpair (a : U×U) : 1-err≤(FiniteLaw.pi μ).probability (Good a) := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     by_cases ha : a.1=a.2</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     · simp only [Good,ha,ne_eq,not_true_eq_false,false_implies,finiteLaw_probability_true]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       have ht := finiteLaw_probability_true (FiniteLaw.pi μ)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       linarith only [herr,ht]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     obtain ⟨hθ,hθ1,hsbar,hqbar,hsbar&#x27;⟩ := commonThinning_parameters m (by omega) s₀ hs₀</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have hh := thinnedMarkedSeed_spoke_event P π p k hp hk hphys d hd q hq hQ s hs hS hnoshort</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       (1/(m:ℝ)) hθ hθ1 g j a.1 a.2 ha m hm (s₀*s₀/m) ((s₀/m)*(s₀/m)) D τ A B hB</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       (by rw [hq₀,hq₀]) (by rw [hs₀&#x27;,hs₀&#x27;];exact hsbar&#x27;) hqbar weight hw hn hDlo hDhi</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       pstar hpstar hpmin hkmin hsmin hp1 hk1 hs1 ε hε</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     have hpj := thinnedMarked_exists_coins_probability μ (1/(m:ℝ)) hθ hθ1</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       (fun σ κ=&gt;CommonPotentialSpokeLoads P π d m D p k (s₀*s₀/m) weight</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>         (τ+ε) σ (rawMarkedPairSpokes π d σ g j) κ a.1 a.2)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hevent : 1-err≤(FiniteLaw.pi μ).probability (fun σ=&gt;∃ κ,</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>         CommonPotentialSpokeLoads P π d m D p k (s₀*s₀/m) weight</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>           (τ+ε) σ (rawMarkedPairSpokes π d σ g j) κ a.1 a.2) := hh.trans hpj</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     apply hevent.trans</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     apply finiteLaw_probability_mono</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     intro σ hσ _</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     exact hσ</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   have hh := finiteLaw_common_event_lower (FiniteLaw.pi μ) Finset.univ</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     (fun a σ=&gt;¬Good a σ) (fun _=&gt;err) (by</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       intro a ha</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       have hc := finiteLaw_probability_compl (FiniteLaw.pi μ) (Good a)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>       linarith only [hpair a,hc])</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   simpa only [Finset.sum_const,Finset.card_univ,nsmul_eq_mul,Finset.mem_univ,true_implies,</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     not_not,Good,Prod.forall] using hh</span>
+<span id="L92"><a href="#L92" class="ln">  92</a> </span>
+<span id="L93"><a href="#L93" class="ln">  93</a> end Oberwolfach</span></pre></html>

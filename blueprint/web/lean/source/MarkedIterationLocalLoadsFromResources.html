@@ -1,0 +1,118 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedIterationLocalLoadsFromResources.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedIterationLocalLoadsFromResources.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFiniteDeletionGraphBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedDomainSpokeLoadsAfterDeletion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedActiveDeletionDegrees</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Fixed local weights retain their potential-spoke estimates after the</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> actual protected-star deletion. The coefficient is charged at the original</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> local order, and the potential root need not survive the deletion. The hub</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> embedding is unrestricted: every deleted spoke with its row in X already</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> belongs to the protected star, even when its hub lies outside Y. -/</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option autoImplicit false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 9000000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> open scoped BigOperators</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> noncomputable section</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> namespace Oberwolfach</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> variable {V U E K W Z Γ Color : Type} [Fintype V] [Fintype U] [Fintype E] [Fintype K]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     [Fintype W] [Fintype Z] [Fintype Γ] [Fintype Color] [LinearOrder V] [LinearOrder W]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     [DecidableEq U] [DecidableEq Z] [DecidableEq E] [DecidableEq K]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem finite_spoke_graph_comap_star</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (S : Finset (V×U)) (X : Finset V) (Y : Finset U) (f : W→V) (g : Z→U)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hf : ∀ x,f x∈X) :</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (markedFiniteSpokeGraph S).comap (Sum.map f g)=</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (markedFiniteSpokeGraph (S.filter (fun s=&gt;s.1∈X ∨ s.2∈Y))).comap (Sum.map f g) := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   ext a b</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   cases a with</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   | inl x=&gt;</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     cases b with</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     | inl y=&gt;simp only [SimpleGraph.comap_adj,Sum.map_inl,(markedFiniteSpokeGraph_same_part S).1,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (markedFiniteSpokeGraph_same_part (S.filter (fun s=&gt;s.1∈X ∨ s.2∈Y))).1]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     | inr u=&gt;simp only [SimpleGraph.comap_adj,Sum.map_inl,Sum.map_inr,markedFiniteSpokeGraph_adj,Finset.mem_filter,hf,or_true,true_or,and_true]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   | inr u=&gt;</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     cases b with</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     | inl x=&gt;simp only [SimpleGraph.comap_adj,Sum.map_inl,Sum.map_inr,SimpleGraph.adj_comm,markedFiniteSpokeGraph_adj,Finset.mem_filter,hf,or_true,true_or,and_true]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     | inr v=&gt;simp only [SimpleGraph.comap_adj,Sum.map_inr,(markedFiniteSpokeGraph_same_part S).2,</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (markedFiniteSpokeGraph_same_part (S.filter (fun s=&gt;s.1∈X ∨ s.2∈Y))).2]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a> </span>
+<span id="L39"><a href="#L39" class="ln">  39</a> theorem marked_iteration_restricted_deletion_degrees</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (tail head : E→V) (ktail khead : K→V) (π : Equiv.Perm V) (H : Bool→V→U→Prop)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (A : Finset (E⊕K)) (S : Finset (V×U)) (Bres : Finset (Finset V⊕(V×U)))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (X : Finset V) (Y : Finset U) (hX : ∀ v,π v∈X↔v∈X) (δ : ℝ)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hA : ∀ a∈A,Sum.inl (markedPhysicalEdge tail head ktail khead π a)∈Bres)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (hS : ∀ s∈S,H false s.1 s.2 ∨ H true s.1 s.2) (hSB : ∀ s∈S,Sum.inr s∈Bres)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hStar : ∀ physical z,(((markedIncidentEdges tail head ktail khead π (H false) (H true) physical z).filter</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (fun e=&gt;markedActivePhysical tail head ktail khead π (H false) (H true) e∈Bres.filter (markedStarResource X Y))).card : ℝ)≤δ)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (f : W↪oV) (g : Z↪U) (hf : ∀ x,f x∈X)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>  :</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     let DR := physicalEdgeGraph (A.image (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let DS := markedFiniteSpokeGraph S;</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (∀ x : W,((DR.comap f).degree x:ℝ)≤δ) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (∀ z : W⊕Z,((DS.comap (Sum.map f g)).degree z:ℝ)≤δ) := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   intro DR DS</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   obtain ⟨_,hr,hc,ha⟩ := marked_finite_star_counts_from_incidence tail head ktail khead π (H false) (H true)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     A S Bres X Y hX δ hA hS hSB hStar</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   let AS := A.filter (fun a=&gt;Sum.elim tail ktail a∈X ∨ Sum.elim head khead a∈X)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   let SS := S.filter (fun s=&gt;s.1∈X ∨ s.2∈Y)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hrim (x : W) : ((DR.neighborFinset (f x)∩Finset.univ.image f).card:ℝ)≤δ := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hsub : Finset.univ.image f⊆X := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       intro v hv;obtain ⟨w,_,rfl⟩:=Finset.mem_image.mp hv;exact hf w</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hle := Finset.card_le_card (Finset.inter_subset_inter (Finset.Subset.refl (DR.neighborFinset (f x))) hsub)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     apply (Nat.cast_le.mpr hle).trans</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     apply (Nat.cast_le.mpr (finite_physical_arc_graph_into_set tail head ktail khead π A X hX (f x))).trans</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     exact (Nat.cast_le.mpr (finite_physical_arc_graph_degree tail head ktail khead π AS (f x))).trans (ha (f x))</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hsp (z : W⊕Z) : (((DS.comap (Sum.map f g)).degree z):ℝ)≤δ := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have he : (DS.comap (Sum.map f g)).degree z=((markedFiniteSpokeGraph SS).comap (Sum.map f g)).degree z := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       simp only [←SimpleGraph.ncard_neighborSet]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       rw [finite_spoke_graph_comap_star S X Y f g hf]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     rw [he]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     have hd := Nat.cast_le (α:=ℝ).mpr (graph_comap_injective_degree_le (markedFiniteSpokeGraph SS) (f.toEmbedding.sumMap g) z)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     apply hd.trans</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     cases z with</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     | inl x=&gt;exact (Nat.cast_le.mpr ((finite_spoke_graph_degree_counts SS).1 (f x))).trans (hr (f x))</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     | inr u=&gt;exact (Nat.cast_le.mpr ((finite_spoke_graph_degree_counts SS).2 (g u))).trans (hc (g u))</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   refine ⟨?_,hsp⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   intro x</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   exact (congrArg (fun n:ℕ=&gt;(n:ℝ)) (graph_comap_degree_into_image DR f.toEmbedding x)).trans_le (hrim x)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> </span>
+<span id="L79"><a href="#L79" class="ln">  79</a> theorem marked_iteration_local_loads_from_resource_bounds</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     (tail head : E→V) (ktail khead : K→V) (π : Equiv.Perm V) (H : Bool→V→U→Prop)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (A : Finset (E⊕K)) (S : Finset (V×U)) (Bres : Finset (Finset V⊕(V×U)))</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     (X : Finset V) (Y : Finset U) (hX : ∀ v,π v∈X↔v∈X) (δ : ℝ) (hδ : 0≤δ)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     (hA : ∀ a∈A,Sum.inl (markedPhysicalEdge tail head ktail khead π a)∈Bres)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     (hS : ∀ s∈S,H false s.1 s.2 ∨ H true s.1 s.2) (hSB : ∀ s∈S,Sum.inr s∈Bres)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     (hStar : ∀ physical z,(((markedIncidentEdges tail head ktail khead π (H false) (H true) physical z).filter</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       (fun e=&gt;markedActivePhysical tail head ktail khead π (H false) (H true) e∈Bres.filter (markedStarResource X Y))).card : ℝ)≤δ)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (f : W↪oV) (g : Z↪U) (hf : ∀ x,f x∈X)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     (P : SimpleGraph V) (ρ : Equiv.Perm W) (d m : ℕ) (hm : 3≤m) (hn : 0&lt;Fintype.card W)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     (D τ aLo B : ℝ) (hDlo : (Fintype.card W:ℝ)/2≤D) (hDhi : D≤2*Fintype.card W)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     (p k s₀ pstar : ℝ) (hpstar : 0&lt;pstar) (hp : pstar≤p) (hk : pstar≤k) (hs : pstar≤s₀)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     (hp1 : p≤1) (hk1 : k≤1) (hs1 : s₀≤1) (hB : 0≤B)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     (weight : (Fin (m+1)→W)→ℝ)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     (hw : SuccessorSequenceWeightConditions (P.comap f) ρ (3*d) D τ aLo B weight)</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     (eps : ℝ) (ω : RawMarkedOutcome V U Γ Color)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     (hload : MarkedLocalSpokeLoadsWithSpokes (P.comap f) ρ d m D p k s₀ weight eps</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       (rawMarkedRestrictPair f g ω) (fun b x z=&gt;H b (f x) (g z))) :</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     let DR := physicalEdgeGraph (A.image (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     let DS := markedFiniteSpokeGraph S;</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     MarkedLocalSpokeLoadsWithSpokes (P.comap f) ρ d m D p k s₀ weight</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>       (eps+15*((m:ℝ)+1)^4*(2*B/pstar^(2*m+1))*δ/Fintype.card W)</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       (rawMarkedRestrictPair f g (rawMarkedDeleteRims ω DR.edgeFinset))</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       (fun b x z=&gt;markedDeletePhysicalSpokes H DS b (f x) (g z)) := by</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   intro DR DS</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   obtain ⟨hR,hS&#x27;⟩ := marked_iteration_restricted_deletion_degrees tail head ktail khead π H</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     A S Bres X Y hX δ hA hS hSB hStar f g hf</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>   have hrim (x : W) : ((DR.neighborFinset (f x)∩Finset.univ.image f).card:ℝ)≤δ := by</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     exact (congrArg (fun n:ℕ=&gt;(n:ℝ)) (graph_comap_degree_into_image DR f.toEmbedding x).symm).trans_le (hR x)</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>   have hspoke (z : W⊕Z) : ((DS.neighborFinset (Sum.map f g z)∩Finset.univ.image (Sum.map f g)).card:ℝ)≤δ := by</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     have he := graph_comap_degree_into_image DS (f.toEmbedding.sumMap g) z</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     exact (congrArg (fun n:ℕ=&gt;(n:ℝ)) he.symm).trans_le (hS&#x27; z)</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>   have hh := marked_domain_spoke_loads_after_global_physical_deletion f g P ρ d m hm hn D τ aLo B</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     hDlo hDhi p k s₀ pstar hpstar hp hk hs hp1 hk1 hs1 hB weight hw eps δ δ hδ hδ ω H hload DR DS hrim hspoke</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>   convert hh using 1 &lt;;&gt; ring</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a> </span>
+<span id="L115"><a href="#L115" class="ln"> 115</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongReservedListFirstVortexMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongReservedListFirstVortexMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongSelectedListFirstVortexMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> set_option autoImplicit false</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> noncomputable section</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> namespace Oberwolfach</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> theorem long_reserved_list_first_vortex_margins</span>
+<span id="L7"><a href="#L7" class="ln">   7</a>     (γ pstar:ℝ) (hγ:0&lt;γ) (hp:0&lt;pstar):</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     ∃β:ℝ,0&lt;β ∧ β≤1 ∧ ∃dMin:ℕ,∀(ε δ lamMax ζMax:ℝ),0&lt;ε→0&lt;δ→0&lt;lamMax→0&lt;ζMax→</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     ∃lam ζ:ℝ,0&lt;lam ∧ lam≤1/100 ∧ lam≤lamMax ∧ lam≤δ*ε/32 ∧ 0&lt;ζ ∧ ζ≤ζMax ∧ ζ≤lam/3 ∧</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     ∀d:ℕ,dMin≤d→2≤d→∃N:ℕ,∀n≥N,</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>       (n:ℝ)^(3/4:ℝ)+2*(2*((3*d:ℕ):ℝ)+1)≤γ*pstar^2*n ∧</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       β*n+(n:ℝ)^(3/4:ℝ)≤γ*pstar^2*n*(1/100:ℝ) ∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       (lam+2*ζ)*n+(n:ℝ)/(8*(d:ℝ))+2*(n:ℝ)^(3/4:ℝ)/d≤β*n:=by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   exact long_selected_list_first_vortex_margins (1/100) γ pstar (by norm_num) hγ hp</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> end Oberwolfach</span></pre></html>

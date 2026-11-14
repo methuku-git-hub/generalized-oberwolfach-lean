@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryPatternSpokeLocalBridge.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryPatternSpokeLocalBridge.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryPatternSpokeSumVal</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinarySpokeIndicatorLocalMixed</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The omitted-spoke pattern load equals the local cycle potential. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency true</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 10000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance 100000] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U] {r:ℕ}</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem ordinary_pattern_spoke_eq_local_bridge (P Q F:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (weight:OrdinaryCycle P r→ℝ) (D:ℝ) (v:V) (u:U):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     resourcePatternLoad ordinaryWheelResources (ordinaryCycleWheelWeight P F r weight D)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (fun _ _=&gt;true) (Sum.inr (v,u)) (ordinaryResourceState Q H)=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ordinaryLocalPotential P Q F (Finset.univ.filter (fun z=&gt;H z u)) (fun C=&gt;weight C/D) v := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   calc</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     _ = ∑ W:OrdinaryWheel P F (fun _ :V=&gt;fun _ :U=&gt;True) r,</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       if W.val.2=u ∧ v∈(W.val.1.val.val).support ∧ W.val.1.val.val≤Q ∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         (∀ z∈(W.val.1.val.val).support,z≠v→H z u) then weight W.val.1/D else 0 :=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>           ordinary_pattern_spoke_sum_val P Q F H weight D v u</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     _ = _ := ordinary_spoke_indicator_sum_eq_local_mixed P Q F H weight D v u</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> end Oberwolfach</span></pre></html>

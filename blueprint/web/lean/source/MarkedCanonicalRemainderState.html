@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedCanonicalRemainderState.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedCanonicalRemainderState.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedCanonicalDeletedBalanceValues</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedFiniteResourcePreimages</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Identifying the resource set of a remaining host also identifies its</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> typed arc and spoke complements. Its exact divisibility then holds in</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> the canonical deleted sample, with no added balance hypothesis. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 8192</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 10000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U Γ Color : Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [LinearOrder V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_canonical_remainder_divisibility</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (P : SimpleGraph V) (π : Equiv.Perm V) (d m : ℕ) (σ : RawMarkedOutcome V U Γ Color)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (H : Bool→V→U→Prop) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let E := MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let K := MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) true</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let S := Finset.univ.filter (fun s:V×U=&gt;H false s.1 s.2∨H true s.1 s.2);</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (FA AR : Finset (E⊕K)) (FS SR : Finset (V×U)),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     MarkedRemainderDivisible (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (fun e:K=&gt;e.val.1) (fun e=&gt;e.val.2) (H true) AR SR m→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     markedFiniteResources (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (fun e:K=&gt;e.val.1) (fun e=&gt;e.val.2) π AR SR=</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       markedFiniteResources (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (fun e:K=&gt;e.val.1) (fun e=&gt;e.val.2) π Finset.univ S\</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       markedFiniteResources (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (fun e:K=&gt;e.val.1) (fun e=&gt;e.val.2) π FA FS→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let σ&#x27; := rawMarkedDeleteRims σ (markedSampleArcSetGraph P π d σ FA).edgeFinset</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let H&#x27; := markedDeletePhysicalSpokes H (markedFiniteSpokeGraph FS)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let E&#x27; := MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let K&#x27; := MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true;</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     AR=Finset.univ\FA ∧ SR=S\FS ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     MarkedRemainderDivisible (fun e:E&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (fun e:K&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2) (H&#x27; true) Finset.univ</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (Finset.univ.filter (fun s:V×U=&gt;H&#x27; false s.1 s.2∨H&#x27; true s.1 s.2)) m := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   intro E K S FA AR FS SR hdiv hRes σ&#x27; H&#x27; E&#x27; K&#x27;</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hp := markedSampleArc_physical_injective P π (3*d) (fun e=&gt;σ (Sum.inl e))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   rw [←markedFiniteResources_sdiff _ _ _ _ π hp Finset.univ FA S FS] at hRes</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   obtain ⟨hA,hS⟩ := marked_finite_resources_determine_sets _ _ _ _ π hp AR (Finset.univ\FA) SR (S\FS) hRes</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   refine ⟨hA,hS,?_⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   apply (markedFiniteBalance_eq_zero_iff _ _ _ _ _ _ _ _).mp</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro z i</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   rw [(marked_canonical_deleted_balance_values P π d m σ H FA FS Finset.univ Finset.univ z i).1]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   rw [←hA,←hS]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   exact (markedFiniteBalance_eq_zero_iff _ _ _ _ _ _ _ _).mpr hdiv z i</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> end Oberwolfach</span></pre></html>

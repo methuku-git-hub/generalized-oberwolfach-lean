@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>InnerRequiredRawCountLocal.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>InnerRequiredRawCountLocal.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RetentionRestrictionLocalEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.InnerRequiredRawCount</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.InnerRequiredRawStateCover</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.RawIntervalUnassignedHubRestricted</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.RetentionRestrictionCommonEvent</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Convert the raw-state cover to the size estimate needed by the</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> prescribed-position capacity calculation. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 12000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem inner_required_targets_count_from_local_raw_cover</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (π:Equiv.Perm V) (d:ℕ) (σ:RawIntervalFamilyOutcome V U Bool Bool)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (t:ℕ) (J:StartRetentionOutcome (rawStartHubSet π d σ false) t)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (inner:Finset U) (vertices:Finset V) (absorber occupied unused:U→Finset V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (happrox:∀w x,rawIntervalFamilyState π d σ (x,w)=some (Sum.inl true)→x∈occupied w)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hordinary:∀w x,rawIntervalFamilyState π d σ (x,w)=some (Sum.inr true)→x∈occupied w ∨ x∈unused w)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (ζ:ℝ) (hrows:RetainedRestrictionLocalGood π d σ false t vertices inner ζ J):</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀w∈inner,((innerRequiredTargets inner vertices (rawReservedSpokeList π d σ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (retainedFinalMarkedAt π d σ t J) absorber occupied w).card:ℝ)≤</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       rawIntervalUnassignedHubCountOn π d σ w vertices+ζ*vertices.card+((unused w∩vertices).card:ℝ):=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   intro w hw</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hcover:=inner_required_targets_raw_cover π d σ t J inner vertices absorber occupied unused happrox hordinary w</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hcard:=Finset.card_le_card hcover</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have h12:=Finset.card_union_le (rawUnassignedAt π d σ w∩vertices) (rawRetentionChangedAt π d σ t J w∩vertices)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have h123:=Finset.card_union_le ((rawUnassignedAt π d σ w∩vertices)∪(rawRetentionChangedAt π d σ t J w∩vertices)) (unused w∩vertices)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hc:((rawRetentionChangedAt π d σ t J w∩vertices).card:ℝ)≤ζ*vertices.card:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have heq:rawRetentionChangedAt π d σ t J w∩vertices = vertices.filter (fun x=&gt;retainedRawFamilyState π d σ false t J (x,w)≠rawIntervalFamilyState π d σ (x,w)):=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ext x</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       simp only [rawRetentionChangedAt,Finset.mem_inter,Finset.mem_filter,Finset.mem_univ,true_and,and_comm]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     rw [heq]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     apply le_trans ?_ (hrows.1 w hw)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     exact_mod_cast (Finset.card_le_card (by intro x hx; simpa only [Finset.mem_filter] using hx))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have h12R:=show (((rawUnassignedAt π d σ w∩vertices)∪(rawRetentionChangedAt π d σ t J w∩vertices)).card:ℝ)≤</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ((rawUnassignedAt π d σ w∩vertices).card:ℝ)+((rawRetentionChangedAt π d σ t J w∩vertices).card:ℝ) by exact_mod_cast h12</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have h123R:=show ((((rawUnassignedAt π d σ w∩vertices)∪(rawRetentionChangedAt π d σ t J w∩vertices))∪(unused w∩vertices)).card:ℝ)≤</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (((rawUnassignedAt π d σ w∩vertices)∪(rawRetentionChangedAt π d σ t J w∩vertices)).card:ℝ)+((unused w∩vertices).card:ℝ) by exact_mod_cast h123</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hcardR:=show ((innerRequiredTargets inner vertices (rawReservedSpokeList π d σ)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (retainedFinalMarkedAt π d σ t J) absorber occupied w).card:ℝ)≤</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       ((((rawUnassignedAt π d σ w∩vertices)∪(rawRetentionChangedAt π d σ t J w∩vertices))∪(unused w∩vertices)).card:ℝ) by exact_mod_cast hcard</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   rw [raw_unassigned_restricted_count_card] at h12R</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   linarith</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PositiveFractionalResourceMatching.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PositiveFractionalResourceMatching.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PositiveResourceRestriction</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The resource matching can be chosen from positive-weight candidates;</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> zero-weight candidates never need to be added to the packing. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 10000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem fractional_resource_matching_positive (r B:ℕ) (hr:2≤r) (hB:1≤B)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (K a γ:ℝ) (hK:0&lt;K) (ha:0&lt;a) (hγ:0&lt;γ):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃η₀:ℝ,0&lt;η₀ ∧ ∃n₀:ℕ,∀n:ℕ,n₀≤n →</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∀(V E A I:Type) [Fintype V] [Fintype E] [Fintype A] [Fintype I] [DecidableEq V],</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∀(R:E→Finset V) (w:E→ℝ) (g:A→E→ℝ) (S:I→Finset V),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     Fintype.card V≤n^B → Fintype.card A≤n^B → Fintype.card I≤n^B →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∀e,0&lt;w e→2≤(R e).card ∧ (R e).card≤r) → (∀e,0≤w e) →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀v,1-η₀≤hypergraphWeightedDegree R w v ∧ hypergraphWeightedDegree R w v≤1+η₀) →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (∀u v,u≠v → (∑e,if u∈R e ∧ v∈R e then w e else 0)≤K/n) →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀i,a*n≤(S i).card) → (∀i e,0≤g i e ∧ g i e≤1) →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀i,a*n≤∑e,g i e*w e) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃M:Finset E,(∀e∈M,0&lt;w e) ∧ (∀e∈M,∀f∈M,e≠f→Disjoint (R e) (R f)) ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀i,((S i\M.biUnion R).card:ℝ)≤γ*(S i).card) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀i,(1-γ)*(∑e,g i e*w e)≤∑e∈M,g i e) ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀i,(∑e∈M,g i e)≤(1+γ)*(∑e,g i e*w e)) := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨η,hη,n₀,hmatch⟩:=fractional_resource_matching r B hr hB K a γ hK ha hγ</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   refine ⟨η,hη,n₀,?_⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   intro n hn V E A I _ _ _ _ _ R w g S hV hA hI hsize hw hdeg hpair hS hg hmass</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let R&#x27; : PositiveResource w→Finset V := fun e=&gt;R e.val</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let w&#x27; : PositiveResource w→ℝ := fun e=&gt;w e.val</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let g&#x27; : A→PositiveResource w→ℝ := fun i e=&gt;g i e.val</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hdeg&#x27;:∀v,1-η≤hypergraphWeightedDegree R&#x27; w&#x27; v ∧ hypergraphWeightedDegree R&#x27; w&#x27; v≤1+η := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     intro v</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     rw [show hypergraphWeightedDegree R&#x27; w&#x27; v=hypergraphWeightedDegree R w v from positive_resource_degree R w hw v]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     exact hdeg v</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hpair&#x27;:∀u v,u≠v → (∑e:PositiveResource w,if u∈R&#x27; e ∧ v∈R&#x27; e then w&#x27; e else 0)≤K/n := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     intro u v huv</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     rw [show (∑e:PositiveResource w,if u∈R&#x27; e ∧ v∈R&#x27; e then w&#x27; e else 0)=</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       ∑e,if u∈R e ∧ v∈R e then w e else 0 from positive_resource_codegree R w hw u v]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     exact hpair u v huv</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hmass&#x27;:∀i,a*n≤∑e:PositiveResource w,g&#x27; i e*w&#x27; e:=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     intro i</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     rw [show (∑e:PositiveResource w,g&#x27; i e*w&#x27; e)=∑e,g i e*w e from positive_resource_weighted_sum w hw (g i)]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact hmass i</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   obtain ⟨M,hdis,hcover,hlower,hupper⟩:=hmatch n hn V (PositiveResource w) A I R&#x27; w&#x27; g&#x27; S</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     hV hA hI (fun e=&gt;hsize e.val e.property) (fun e=&gt;(e.property).le) hdeg&#x27; hpair&#x27; hS (fun i e=&gt;hg i e.val) hmass&#x27;</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let N:Finset E:=M.image Subtype.val</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hsum:∀i,(∑e∈N,g i e)=∑e∈M,g&#x27; i e:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     intro i</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     dsimp [N,g&#x27;]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     rw [Finset.sum_image]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     intro a _ b _ hab</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact Subtype.ext hab</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hunion:N.biUnion R=M.biUnion R&#x27;:=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ext v</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     simp [N,R&#x27;,Finset.mem_biUnion]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   refine ⟨N,?_,?_,?_,?_,?_⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   · intro e he</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     obtain ⟨x,_,rfl⟩:=Finset.mem_image.mp he</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact x.property</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   · intro e he f hf hne</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     obtain ⟨x,hx,rfl⟩:=Finset.mem_image.mp he</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     obtain ⟨y,hy,rfl⟩:=Finset.mem_image.mp hf</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     exact hdis x hx y hy (fun h=&gt;hne (congrArg Subtype.val h))</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   · intro i;rw [hunion];exact hcover i</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   · intro i</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     rw [hsum,←positive_resource_weighted_sum w hw (g i)]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     exact hlower i</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · intro i</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     rw [hsum,←positive_resource_weighted_sum w hw (g i)]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     exact hupper i</span>
+<span id="L73"><a href="#L73" class="ln">  73</a> end Oberwolfach</span></pre></html>

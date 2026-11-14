@@ -1,0 +1,78 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PairSampleScale.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PairSampleScale.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SubsetInclusion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Data.Nat.Choose.Cast</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The exact two-vertex inclusion probability and the coefficient scale</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> obtained by dividing an r-vertex inclusion estimate by it. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def pairSampleProbability (n m : ℕ) : ℝ := (m.choose 2:ℝ)/(n.choose 2:ℝ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem pairSampleProbability_pos {n m : ℕ} (hm : 2≤m) (hmn : m≤n) :</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     0&lt;pairSampleProbability n m := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   apply div_pos</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   · exact_mod_cast Nat.choose_pos hm</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   · exact_mod_cast Nat.choose_pos (hm.trans hmn)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem pairSampleProbability_formula {n m : ℕ} (hm : 2≤m) (hmn : m≤n) :</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     pairSampleProbability n m=(m:ℝ)*(m-1)/((n:ℝ)*(n-1)) := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   unfold pairSampleProbability</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   rw [Nat.cast_choose_two,Nat.cast_choose_two]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   field_simp</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem pairSampleProbability_lower {n m : ℕ} (hm : 2≤m) (hmn : m≤n) :</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ((m:ℝ)/n)^2/2≤pairSampleProbability n m := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   rw [pairSampleProbability_formula hm hmn]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hn : (0:ℝ)&lt;n := Nat.cast_pos.mpr (by omega)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hn1 : (0:ℝ)&lt;(n:ℝ)-1 := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hh : (2:ℝ)≤n := by exact_mod_cast hm.trans hmn</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     linarith</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hm2 : (2:ℝ)≤m := by exact_mod_cast hm</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hd : 0&lt;(n:ℝ)*(n-1) := mul_pos hn hn1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   apply (le_div_iff₀ hd).mpr</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   field_simp</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   nlinarith [sq_nonneg (m:ℝ),mul_nonneg (show 0≤(m:ℝ)*(m-2) by positivity) hn.le]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem fixedSubset_pair_probability {V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     {m : ℕ} [Nonempty (FixedSubset V m)] (hm : m≤Fintype.card V)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (u v : V) (huv : u≠v) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (FiniteLaw.uniform (FixedSubset V m)).probability (fun S =&gt; u∈S.val ∧ v∈S.val)=</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       pairSampleProbability (Fintype.card V) m := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hh := fixedSubset_joint_inclusion hm ({u,v}:Finset V)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   simpa [huv,pairSampleProbability,Finset.insert_subset_iff,Finset.singleton_subset_iff] using hh</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> theorem cycle_sample_coefficient_scale {n m r : ℕ} (hm : 2≤m) (hmn : m≤n)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hr : 2≤r) (κ : ℝ) (hκ : 0≤κ) (hκ1 : κ≤1) :</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     ((m:ℝ)/n)^r/(pairSampleProbability n m/(1+κ))≤</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (4*(m:ℝ)^(r-2))/(n:ℝ)^(r-2) := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hn : (0:ℝ)&lt;n := Nat.cast_pos.mpr (by omega)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hm&#x27; : (0:ℝ)&lt;m := Nat.cast_pos.mpr (by omega)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hx : 0&lt;(m:ℝ)/n := div_pos hm&#x27; hn</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hκ&#x27; : 0&lt;1+κ := by linarith</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hs : 0&lt;((m:ℝ)/n)^2/2 := by positivity</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hpow : ((m:ℝ)/n)^r=((m:ℝ)/n)^(r-2)*((m:ℝ)/n)^2 := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     rw [← pow_add,Nat.sub_add_cancel hr]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   calc</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     _ = (1+κ)*(((m:ℝ)/n)^r/pairSampleProbability n m) := by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       simp only [div_div_eq_mul_div]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       ring</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     _ ≤ (1+κ)*(((m:ℝ)/n)^r/(((m:ℝ)/n)^2/2)) := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       apply mul_le_mul_of_nonneg_left _ hκ&#x27;.le</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       exact div_le_div_of_nonneg_left (by positivity) hs (pairSampleProbability_lower hm hmn)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     _ = 2*(1+κ)*((m:ℝ)/n)^(r-2) := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       rw [hpow]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       field_simp</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     _ ≤ 4*((m:ℝ)/n)^(r-2) := by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       have hp : 0≤((m:ℝ)/n)^(r-2) := by positivity</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       nlinarith [mul_le_mul_of_nonneg_right hκ1 hp]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     _ = _ := by rw [div_pow];ring</span>
+<span id="L74"><a href="#L74" class="ln">  74</a> </span>
+<span id="L75"><a href="#L75" class="ln">  75</a> end Oberwolfach</span></pre></html>

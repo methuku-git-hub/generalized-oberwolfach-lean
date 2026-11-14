@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedExpandedTwoPathInvCard.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedExpandedTwoPathInvCard.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedExpandedTwoPathEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Inverse-order failure probability for the same fixed-domain event. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 20000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem raw_expanded_marked_class_two_paths_highProbability_invCard :</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∃ N:ℕ,∀ (V:Type) [Fintype V] [LinearOrder V],N≤Fintype.card V→</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∀ (U Γ Color:Type) [Fintype U] [Fintype Γ] [Fintype Color] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (G E:SimpleGraph V) (hEG:E≤G)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (p k p₂ k₂ u:ℝ) (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (d:ℕ) (hd:2≤d) (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (s:U→Color→ℝ) (hs:∀ u j,0≤s u j) (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (F:RawMarkedOutcome V U Γ Color→Type) [∀ a,Fintype (F a)] (ν:∀ a,FiniteLaw (F a)),</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let ρ:=2*p+2*k+2*p₂+2*k₂+u</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let f:=fun (ω:∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e) e=&gt;rawExpandedMarkedCollapse e (ω e)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     1-1/(Fintype.card V:ℝ)≤(μ.sigma (fun ω=&gt;ν (f ω))).probability (fun z=&gt;∀ x y,x≠y→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       |(eligibleTwoPathCount E (sampledColourOrientation G (fun e=&gt;markedExpandedClass (z.1 (Sum.inl e))) 0) x y:ℝ)-</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         ((E.neighborFinset x∩E.neighborFinset y).card:ℝ)*(ρ/2)^2|&lt;(Fintype.card V:ℝ)^(3/5:ℝ)) := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   obtain ⟨N,hN⟩:=eventually_stretchedExp_le_inv_pow (2:ℝ) 2</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (c:=1) (p:=1/5) (by norm_num) (by norm_num) 1</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   refine ⟨max N 1000,?_⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   intro V _ _ hn U Γ Color _ _ _ _ G E hEG p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS F _ ν</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hn1000:1000≤Fintype.card V:=le_trans (le_max_right _ _) hn</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hnpos:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast (show 0&lt;Fintype.card V by omega)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hb:=hN (Fintype.card V) (le_trans (le_max_left _ _) hn)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   simp only [pow_one, one_mul, neg_one_mul] at hb</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hh:=raw_expanded_marked_class_two_paths G E hEG p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS F ν</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (t:=(Fintype.card V:ℝ)^(3/5:ℝ)) (by positivity)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have he: -((Fintype.card V:ℝ)^(3/5:ℝ))^2/(Fintype.card V:ℝ)=-(Fintype.card V:ℝ)^(1/5:ℝ):=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have he&#x27;:=threeFifths_tail_exponent hnpos</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hr: -2*((Fintype.card V:ℝ)^(3/5:ℝ))^2/(Fintype.card V:ℝ)=</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       2*(-((Fintype.card V:ℝ)^(3/5:ℝ))^2/(Fintype.card V:ℝ)):=by ring</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rw [hr] at he&#x27;</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     linarith only [he&#x27;]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   rw [he] at hh</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hsmall:(1:ℝ)/(Fintype.card V:ℝ)≤1/1000:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     apply (div_le_iff₀ hnpos).2</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have : (1000:ℝ)≤Fintype.card V:=by exact_mod_cast hn1000</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     linarith</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hnum:1-1/(Fintype.card V:ℝ)≤1-2*(Fintype.card V:ℝ)^2*Real.exp (-(Fintype.card V:ℝ)^(1/5:ℝ)):=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     convert sub_le_sub_left hb 1 using 1 &lt;;&gt; norm_num</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   exact hnum.trans hh</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> end Oberwolfach</span></pre></html>

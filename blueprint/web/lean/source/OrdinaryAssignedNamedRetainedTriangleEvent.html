@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryAssignedNamedRetainedTriangleEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryAssignedNamedRetainedTriangleEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryAssignedNamedTriangleEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryRetainedClassBudget</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Name the original one-class probability assertion, keeping the same</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> product law, fixed weight and factor-dependent interval probabilities. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option synthInstance.maxSize 32768</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> local instance (priority := high) namedRetainedTriangleFiniteEquality (n:ℕ) : DecidableEq (Fin n) := Classical.decEq (Fin n)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def ordinaryAssignedNamedRetainedTriangleEvent {n:ℕ} [Nonempty (Fin n)] {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (d K:ℕ) (hd:2≤d) (i₀:Fin K)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (θhost α ρ₀ s₀ βP ηP ηH βH c B:ℝ) (hρ₀:0&lt;ρ₀) (hs₀:0&lt;s₀)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (kH:ℕ) (R Conflict:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (sOrd θfreq caux ρ χ:ℝ) (a:Bool) (weight:OrdinaryCycle R 3→ℝ):Prop :=</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let q:=ordinaryAssignedMarkedProbability F hF K θfreq caux</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let sco:=ordinaryAssignedSpokeProbability F hF K i₀ sOrd θfreq caux</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let pR:=ρ*sOrd</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   let pstar:ℝ:=ρ₀*s₀/2;</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   ∃ (hRlo:ρ₀*s₀/2≤pR) (hRhi:pR≤1)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hq:∀w j,0≤q w j) (hQ:∀w,∑j,q w j≤1/8)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hs:∀w j,0≤sco w j) (hS&#x27;:∀w,∑j,sco w j≤ intervalUncoveredProbability d (∑j,q w j)),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let μ:=FiniteLaw.pi (rawWheelLaw (V:=Fin n) (fun _=&gt;pR)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (fun _=&gt;(lt_of_lt_of_le (div_pos (mul_pos hρ₀ hs₀) (by norm_num)) hRlo).le)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (fun _=&gt;hRhi) d hd q hq hQ sco hs hS&#x27;);</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   letI : ∀ ω:RawWheelOutcome (Fin n) U Bool Bool,Fintype (mixedClassRetentionSpace false π d a ω):=</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     fun ω=&gt;mixedClassRetentionFintype false π d a ω</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   letI : Fintype (Σ ω:RawWheelOutcome (Fin n) U Bool Bool,mixedClassRetentionSpace false π d a ω):=</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     @Sigma.instFintype _ _ (fun ω=&gt;mixedClassRetentionFintype false π d a ω) inferInstance;</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   1-(100*χ+200/(n:ℝ))≤</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (μ.sigma (mixedClassActualRetention false π d a)).probability (fun z=&gt;</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       ordinaryCombinedTriangleEvent d kH R Conflict π θhost α pstar βP ηP ηH βH c B pR sOrd weight false z.1)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FactorSequentialEvenRemoval.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FactorSequentialEvenRemoval.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.GraphDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.Definitions</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Sequentially remove finitely many prescribed factors, conditional only on</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> the indicated single-copy existence result. The residual degree and physical</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> edge partition are tracked exactly. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem factor_sequential_even_removal {n:ℕ} (T D:ℕ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (G:SimpleGraph (Fin n)) (hG:G.IsRegularOfDegree D) (hEven:Even D)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (F:List (SimpleGraph (Fin n))) (hmargin:T+2*F.length≤D)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hcopy:∀ P:SimpleGraph (Fin n),∀ d:ℕ, P.IsRegularOfDegree d→Even d→T≤d→</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ∀ A∈F,∃ H:SimpleGraph (Fin n),H≤P ∧ H.IsRegularOfDegree 2 ∧ Nonempty (H ≃g A)):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃ R:SimpleGraph (Fin n),∃ pieces:List (SimpleGraph (Fin n)),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       R.IsRegularOfDegree (D-2*F.length) ∧ R≤G ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       List.Forall₂ (fun H A=&gt;Nonempty (H ≃g A) ∧ H.IsRegularOfDegree 2) pieces F ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∀ H∈pieces,H≤G ∧ ∀ u v,H.Adj u v→¬R.Adj u v) ∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       pieces.Pairwise (fun H J=&gt;∀ u v,H.Adj u v→¬J.Adj u v) ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (∀ u v,G.Adj u v ↔ R.Adj u v ∨ ∃ H∈pieces,H.Adj u v):=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   induction F generalizing G D with</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   | nil =&gt;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     refine ⟨G,[],?_,le_rfl,?_,?_,?_,?_⟩</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     · simpa using hG</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     · exact List.Forall₂.nil</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     · simp</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     · simp</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     · intro u v</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       simp</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   | cons A F ih =&gt;</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hlen:T+2*(F.length+1)≤D:=by simpa using hmargin</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hT:T≤D:=by omega</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     obtain ⟨H,hHP,hH,hIso⟩:=hcopy G D hG hEven hT A (by simp)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let P:SimpleGraph (Fin n):=G\H</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     letI : DecidableRel P.Adj := Classical.decRel _</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hrem:P.IsRegularOfDegree (D-2):=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       intro v</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       change (G\H).degree v=D-2</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       have hh:=graph_degree_sdiff G H hHP v</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       rw [hG v,hH v] at hh</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       convert hh using 1</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       unfold SimpleGraph.degree</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       congr 1</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       ext y</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       simp only [SimpleGraph.mem_neighborFinset]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hsd:G\H≤G:=sdiff_le</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have hmargin&#x27;:T+2*F.length≤D-2:=by omega</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have heven:Even (D-2):=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       obtain ⟨k,hk⟩:=hEven</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       refine ⟨k-1,?_⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       omega</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hcopy&#x27;:∀ P:SimpleGraph (Fin n),∀ d:ℕ,P.IsRegularOfDegree d→Even d→T≤d→</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         ∀ A∈F,∃ J:SimpleGraph (Fin n),J≤P ∧ J.IsRegularOfDegree 2 ∧ Nonempty (J ≃g A):=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       intro P d hp he hd A hA</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       exact hcopy P d hp he hd A (by simp [hA])</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     obtain ⟨R,pieces,hR,hRG,hrel,hpiece,hpair,hexact⟩:=ih (D-2) P hrem heven hmargin&#x27; hcopy&#x27;</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     refine ⟨R,H::pieces,?_,hRG.trans (sdiff_le),List.Forall₂.cons ⟨hIso,hH⟩ hrel,?_,?_,?_⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     · convert hR using 1 &lt;;&gt; simp only [List.length_cons] &lt;;&gt; omega</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     · intro J hJ</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       rcases List.mem_cons.mp hJ with rfl | hJ</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       · refine ⟨hHP,?_⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         intro u v huv hrv</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         exact ((hRG hrv).2 huv)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       · obtain ⟨hJP,hJR⟩:=hpiece J hJ</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         exact ⟨hJP.trans sdiff_le,hJR⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     · apply List.Pairwise.cons</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       · intro J hJ u v huv hjv</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         have hJP: J≤G\H:=(hpiece J hJ).1</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         exact ((hJP hjv).2 huv)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       · exact hpair</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     · intro u v</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       constructor</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       · intro huv</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>         by_cases h: H.Adj u v</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>         · exact Or.inr ⟨H,by simp,h⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>         · have hrest:(G\H).Adj u v:=⟨huv,h⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>           rcases (hexact u v).1 hrest with hR | ⟨J,hJ,hj⟩</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>           · exact Or.inl hR</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>           · exact Or.inr ⟨J,by simp [hJ],hj⟩</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       · rintro (hR | ⟨J,hJ,hj⟩)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>         · exact hsd (hRG hR)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>         · rcases List.mem_cons.mp hJ with rfl | hJ</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>           · exact hHP hj</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>           · exact hsd ((hpiece J hJ).1 hj)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a> end Oberwolfach</span></pre></html>

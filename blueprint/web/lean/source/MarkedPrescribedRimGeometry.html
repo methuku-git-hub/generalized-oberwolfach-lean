@@ -1,0 +1,88 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPrescribedRimGeometry.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPrescribedRimGeometry.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPrescribedRimExtension</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The actual prescribed physical edge and auxiliary endpoint isolation</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> for a two-root marked wheel. Global physical injectivity is used exactly</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> when recovering an old typed arc from a common physical edge. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 20000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U E K I:Type} [Fintype V] [Fintype U] [Fintype I] [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b n m:ℕ}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_two_root_rows (p:Fin (n+1)→V) (v w:V) (ρ:Equiv.Perm (Fin (n+3)))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (C:MarkedWheel tail head ktail khead (n+2) π b H₀ HK)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hC:∀ a,C.1.val a=Fin.cons (α:=fun _=&gt;V) v (Fin.cons w p) (ρ a)):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     markedWheelRows C=insert v (insert w (Finset.univ.image p)):=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   ext x</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   simp only [markedWheelRows,Finset.mem_image,Finset.mem_univ,true_and,Finset.mem_insert]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   constructor</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · rintro ⟨a,ha⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     rw [hC] at ha</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     generalize ρ a=i at ha</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     revert ha</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     refine Fin.cases ?_ (fun i=&gt;?_) i</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     · intro ha;exact Or.inl ha.symm</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     · refine Fin.cases ?_ (fun i=&gt;?_) i</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       · intro ha;exact Or.inr (Or.inl ha.symm)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       · intro ha;exact Or.inr (Or.inr ⟨i,ha⟩)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · rintro (rfl|rfl|⟨i,hi⟩)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     · exact ⟨ρ.symm 0,by rw [hC,Equiv.apply_symm_apply];rfl⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     · exact ⟨ρ.symm (0:Fin (n+2)).succ,by rw [hC,Equiv.apply_symm_apply];rfl⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     · exact ⟨ρ.symm i.succ.succ,by rw [hC,Equiv.apply_symm_apply];exact hi⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> </span>
+<span id="L36"><a href="#L36" class="ln">  36</a> theorem marked_two_root_contains_arc (hn:2≤n) (p:Fin (n+1)→V) (v w:V) (j:Bool)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (C:MarkedWheel tail head ktail khead (n+2) π b H₀ HK)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hC:∀ a,C.1.val a=Fin.cons (α:=fun _=&gt;V) v (Fin.cons w p)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (canonicalMarkedRotation (if j then 0 else 3) a)):</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     Sum.inl (if j then ({v,π w}:Finset V) else {v,w})∈markedWheelPhysicalResources C:=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let k:Fin (n+3):=if j then 0 else 3</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have he:=marked_wheel_raw_rim_position C (Fin.cons v (Fin.cons w p)) k hC 0</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hr0:finRotate (n+3) (0:Fin (n+3))=(0:Fin (n+2)).succ:=finRotate_castSucc_eq_succ (n+2) 0</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have h03:(0:Fin (n+3))≠3:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     intro h;have hh:=congrArg Fin.val h</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     change 0=3%(n+3) at hh</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     rw [Nat.mod_eq_of_lt (by omega)] at hh;omega</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have he&#x27;:markedWheelPositionResource C (Sum.inl ((canonicalMarkedRotation k).symm 0))=</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       Sum.inl (if j then ({v,π w}:Finset V) else {v,w}):=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     rw [he]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     cases j &lt;;&gt; simp only [markedRawRimResource,k,Bool.false_eq_true,ite_false,ite_true,</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       h03,hr0,Fin.cons_zero,Fin.cons_succ]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   rw [←he&#x27;,←markedWheelPositionResource_image]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   exact Finset.mem_image.mpr ⟨_,Finset.mem_univ _,rfl⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> </span>
+<span id="L56"><a href="#L56" class="ln">  56</a> theorem marked_arc_witness (j:Bool) (v w:V) (hroot:markedArcPresent tail head ktail khead j v w):</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     ∃ e:E⊕K,Sum.elim tail ktail e=v∧Sum.elim head khead e=w∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       markedPhysicalEdge tail head ktail khead π e=(if j then {v,π w} else {v,w}):=by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   cases j</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   · obtain ⟨e,ht,hh⟩:=hroot</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact ⟨Sum.inl e,ht,hh,by simp only [markedPhysicalEdge,Sum.elim_inl,ht,hh,Bool.false_eq_true,ite_false]⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   · obtain ⟨e,ht,hh⟩:=hroot</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     exact ⟨Sum.inr e,ht,hh,by simp only [markedPhysicalEdge,Sum.elim_inr,ht,hh,ite_true]⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> theorem marked_prescribed_arc_avoids_family</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (C:I→MarkedWheel tail head ktail khead m π b H₀ HK) (R:Finset V) (old:I→Finset V)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (hold:∀ i a,(C i).1.val a∈R→(C i).1.val (finRotate (m+1) a)∈R→</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       markedPhysicalEdge tail head ktail khead π (markedCycleTypedEdge tail head ktail khead m π b (C i).1 a)=old i)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (j:Bool) (v w:V) (hv:v∈R) (hw:w∈R)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (hroot:markedArcPresent tail head ktail khead j v w)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (hne:∀ i,old i≠(if j then {v,π w} else {v,w})):</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     ¬(markedFamilyRim C).Adj v (if j then π w else w):=by</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   intro hadj</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   obtain ⟨i,_,he⟩:=SimpleGraph.iSup_adj.mp hadj</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   obtain ⟨a,_,ha⟩:=Finset.mem_image.mp he</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   obtain ⟨e,ht,hh,hphys⟩:=marked_arc_witness (π:=π) j v w hroot</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hpair:({v,if j then π w else w}:Finset V)=(if j then {v,π w} else {v,w}):=by cases j &lt;;&gt; rfl</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   have heq:=hp (ha.trans (hpair.trans hphys.symm))</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   have hc:=markedCycleTypedEdge_endpoints tail head ktail khead m π b (C i).1 a</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have htv:(C i).1.val a=v:=hc.1.symm.trans ((congrArg (Sum.elim tail ktail) heq).trans ht)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hhw:(C i).1.val (finRotate (m+1) a)=w:=hc.2.symm.trans ((congrArg (Sum.elim head khead) heq).trans hh)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   exact hne i ((hold i a (htv ▸ hv) (hhw ▸ hw)).symm.trans (ha.trans hpair))</span>
+<span id="L84"><a href="#L84" class="ln">  84</a> </span>
+<span id="L85"><a href="#L85" class="ln">  85</a> end Oberwolfach</span></pre></html>

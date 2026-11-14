@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedEmbeddedHubFactors.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedEmbeddedHubFactors.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedEmbeddedHubCycles</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PhysicalEdgeGraphEmbedding</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedHubFactorOn</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! An inner hub factor embeds as an actual ambient factor. Its physical</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> rim graph is exactly the graph image, so avoidance transfers by comap. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 12000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {W V U E K:Type} [Fintype W] [Fintype V] [DecidableEq W] [DecidableEq V]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem twistedTupleHead_embedding (f:W↪V) (ρ:Equiv.Perm W) (π:Equiv.Perm V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (h:∀ x,f (ρ x)=π (f x)) {m:ℕ} (z:Fin (m+1)→W) (i:Fin (m+1)):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     twistedTupleHead π (f∘z) i=f (twistedTupleHead ρ z i):=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   refine Fin.lastCases ?_ (fun i=&gt;?_) i &lt;;&gt;</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     simp only [twistedTupleHead,Fin.snoc_last,Fin.snoc_castSucc,Function.comp_apply,h]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem hubCycleEmbedding_physical_edges (f:W↪V) (ρ:Equiv.Perm W) (π:Equiv.Perm V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (h:∀ x,f (ρ x)=π (f x)) (tail head:E→W) (ktail khead:K→W)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (m b:ℕ) (H₀ HK:W→U→Prop) (u:U)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (C:HubMarkedCycle tail head ktail khead m ρ b H₀ HK u):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     hubCyclePhysicalEdges u (hubCycleEmbeddingEquiv f ρ π h tail head ktail khead m b H₀ HK u C)=</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (hubCyclePhysicalEdges u C).image (fun e=&gt;e.image f):=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   simp only [hubCyclePhysicalEdges,markedCyclePhysicalEdges,Finset.image_image,Function.comp_apply,</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     markedCycle_physical_pair,hubCycleAsMarked]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   apply Finset.image_congr</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro i _</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   simp only [Function.comp_apply,markedCycle_physical_pair]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   change {f (C.val i),twistedTupleHead π (f∘C.val) i}=({C.val i,twistedTupleHead ρ C.val i}:Finset W).image f</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   rw [twistedTupleHead_embedding f ρ π h]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   simp only [Finset.image_insert,Finset.image_singleton]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> </span>
+<span id="L36"><a href="#L36" class="ln">  36</a> def hubFactorEmbedding (f:W↪V) (ρ:Equiv.Perm W) (π:Equiv.Perm V)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (h:∀ x,f (ρ x)=π (f x)) (tail head:E→W) (ktail khead:K→W)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (m b:ℕ) (H₀ HK:W→U→Prop) (u:U) (Y:Finset W)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (P:MarkedHubFactorOn tail head ktail khead m ρ b H₀ HK u Y):</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     MarkedHubFactorOn (f∘tail) (f∘head) (f∘ktail) (f∘khead) m π b</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (spokeRelationImage f H₀) (spokeRelationImage f HK) u (Y.image f) where</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   cycles:=P.cycles.image (hubCycleEmbeddingEquiv f ρ π h tail head ktail khead m b H₀ HK u)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   disjoint:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     intro C hC D hD hCD</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     obtain ⟨c,hc,hec⟩:=Finset.mem_image.mp hC</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     obtain ⟨d,hd,hed⟩:=Finset.mem_image.mp hD</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     subst C;subst D</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     rw [hubCycleEmbedding_vertices,hubCycleEmbedding_vertices]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     intro v hv hv&#x27;</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     obtain ⟨x,hx,hfx⟩:=Finset.mem_image.mp hv</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     obtain ⟨y,hy,hfy⟩:=Finset.mem_image.mp hv&#x27;</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hxy:x=y:=f.injective (hfx.trans hfy.symm)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact Finset.disjoint_left.mp (P.disjoint c hc d hd (fun he=&gt;hCD (congrArg _ he))) hx (hxy.symm ▸ hy)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   covers:=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     rw [Finset.image_biUnion]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     simp_rw [hubCycleEmbedding_vertices]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     rw [←Finset.biUnion_image,P.covers]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a> </span>
+<span id="L60"><a href="#L60" class="ln">  60</a> theorem hubFactorEmbedding_rim (f:W↪V) (ρ:Equiv.Perm W) (π:Equiv.Perm V)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (h:∀ x,f (ρ x)=π (f x)) (tail head:E→W) (ktail khead:K→W)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (m b:ℕ) (H₀ HK:W→U→Prop) (u:U) (Y:Finset W)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (P:MarkedHubFactorOn tail head ktail khead m ρ b H₀ HK u Y):</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (hubFactorEmbedding f ρ π h tail head ktail khead m b H₀ HK u Y P).rim=P.rim.map f:=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   change physicalEdgeGraph ((P.cycles.image _).biUnion (hubCyclePhysicalEdges u))=P.rim.map f</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   rw [Finset.image_biUnion]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   simp_rw [hubCycleEmbedding_physical_edges]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   rw [←Finset.biUnion_image,physicalEdgeGraph_image_map]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   rfl</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> </span>
+<span id="L71"><a href="#L71" class="ln">  71</a> theorem hubFactorEmbedding_avoids (f:W↪V) (ρ:Equiv.Perm W) (π:Equiv.Perm V)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (h:∀ x,f (ρ x)=π (f x)) (tail head:E→W) (ktail khead:K→W)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (m b:ℕ) (H₀ HK:W→U→Prop) (u:U) (Y:Finset W)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (P:MarkedHubFactorOn tail head ktail khead m ρ b H₀ HK u Y) (F:SimpleGraph V)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (hF:Disjoint P.rim (F.comap f)):</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     Disjoint (hubFactorEmbedding f ρ π h tail head ktail khead m b H₀ HK u Y P).rim F:=by</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   rw [hubFactorEmbedding_rim]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   exact graph_map_disjoint_of_comap P.rim F f hF</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

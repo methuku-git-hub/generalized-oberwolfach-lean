@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryActiveRootOrder.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryActiveRootOrder.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryPairSupportReduction</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryBoundaryGraph</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The finite old vertex types have size bounded by the physical support,</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> not by the ambient host order. Isolated ambient labels are not included. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 5000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def ordinaryActiveVertexEmbedding (G : SimpleGraph V) (H : V → U → Prop) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (OrdinaryActiveRow G⊕OrdinaryActiveHub H) ↪ {x : V⊕U // x∈(ordinaryPhysicalGraph G H).support} where</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   toFun := fun x=&gt;match x with</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     | .inl v=&gt;⟨.inl v.val,by obtain ⟨w,hw⟩:=v.property;exact ⟨.inl w,hw⟩⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     | .inr u=&gt;⟨.inr u.val,by obtain ⟨v,hv⟩:=u.property;exact ⟨.inl v,hv⟩⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   inj&#x27; := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     intro x y he</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     have he&#x27; := congrArg Subtype.val he</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     cases x with</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     | inl x=&gt;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       cases y with</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       | inl y=&gt;exact congrArg Sum.inl (Subtype.ext (Sum.inl.inj he&#x27;))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       | inr y=&gt;exact (Sum.inl_ne_inr he&#x27;).elim</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     | inr x=&gt;</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       cases y with</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       | inl y=&gt;exact (Sum.inr_ne_inl he&#x27;).elim</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       | inr y=&gt;exact congrArg Sum.inr (Subtype.ext (Sum.inr.inj he&#x27;))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem ordinary_active_root_order (G : SimpleGraph V) (H : V → U → Prop) :</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     Fintype.card (OrdinaryActiveRow G)+Fintype.card (OrdinaryActiveHub H)≤</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (ordinaryPhysicalGraph G H).support.toFinset.card := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hh := Fintype.card_le_of_injective _ (ordinaryActiveVertexEmbedding G H).injective</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   simpa only [Fintype.card_sum,Set.toFinset_card] using hh</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> </span>
+<span id="L38"><a href="#L38" class="ln">  38</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ReservedFactorFamilyEdgeDisjointPoly.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ReservedFactorFamilyEdgeDisjointPoly.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ReservedFactorFamilyWalkEmbeddingFull</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.BufferedEmbeddingWalkEdgeCoverage</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PartialFactorWalkEdgeDisjointnessPoly</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Cross-hub-disjoint target walk edges give edge-disjoint reserved partial</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> factor maps while retaining the original source buffers and block witnesses. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem reserved_factor_family_to_edge_disjoint_walk_maps_poly</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {X W U:Type*} [Fintype X] [DecidableEq X] [DecidableEq W]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (F:U→SimpleGraph X) (hF:∀u,(F u).IsRegularOfDegree 2) (H:SimpleGraph W)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (I J:U→Type*) [∀u,Fintype (I u)] [∀u,Fintype (J u)]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (components:∀u,I u↪(F u).ConnectedComponent)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (e:∀u (i:I u),SimpleGraph.cycleGraph (Fintype.card (components u i)) ≃g (components u i).toSimpleGraph)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (c d:ℕ) (t:∀u,J u→ℕ) (ht:∀u j,t u j≤d)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hcapacity:∀u,Fintype.card (J u)≤∑i:I u,Fintype.card (components u i)/(c*d+5))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (start finish:∀u,J u→W) (q:∀u (j:J u),H.Walk (start u j) (finish u j))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hq:∀u j,(q u j).IsPath) (hlen:∀u j,(q u j).length=c*t u j)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hqdis:∀u (j l:J u),j≠l→Disjoint (q u j).support.toFinset (q u l).support.toFinset)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hqedge:∀u v,u≠v→∀j:J u,∀l:J v,Disjoint (walkPhysicalEdges (q u j)) (walkPhysicalEdges (q v l))):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃index:∀u,J u↪LongReservedBlockIndex (F u) (components u) c d,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃ext:∀u (j:J u),Fin (c*t u j+5)↪X,</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃inner:∀u (j:J u),Fin (c*t u j+1)↪X,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∃φ:∀u,{x // x∈Finset.univ.biUnion (fun j:J u=&gt;Finset.univ.image (inner u j))}↪W,</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀u j,ext u j=longReservedSigmaBlock (F u) (components u) c d (e u) (index u j) (t u j) (ht u j)) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀u j (k:Fin (c*t u j+1)),inner u j k=ext u j ⟨k.val+2,by omega⟩) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀u j k,ext u j k∈(components u (index u j).1).supp) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀u (j l:J u),j≠l→Disjoint (Finset.univ.image (ext u j)) (Finset.univ.image (ext u l))) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀u (j:J u),∃p:(F u).Walk (ext u j ⟨0,by omega⟩) (ext u j ⟨c*t u j+4,by omega⟩),</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         p.length=c*t u j+4 ∧ p.support=List.ofFn (ext u j)) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀u (j:J u) (k:Fin (c*t u j+1)),</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         φ u ⟨inner u j k,Finset.mem_biUnion.mpr ⟨j,Finset.mem_univ _,Finset.mem_image.mpr ⟨k,Finset.mem_univ _,rfl⟩⟩⟩=</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>           simpleWalkLengthEmbedding H (q u j) (hq u j) (c*t u j) (hlen u j) k) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀u x y,(F u).Adj x.val y.val→H.Adj (φ u x) (φ u y)) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀u v,u≠v→Disjoint</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         (partialFactorPhysicalEdgesPoly {x // x∈Finset.univ.biUnion (fun j:J u=&gt;Finset.univ.image (inner u j))}</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>           ((F u).induce (↑(Finset.univ.biUnion (fun j:J u=&gt;Finset.univ.image (inner u j))):Set X)) (φ u))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (partialFactorPhysicalEdgesPoly {x // x∈Finset.univ.biUnion (fun j:J v=&gt;Finset.univ.image (inner v j))}</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>           ((F v).induce (↑(Finset.univ.biUnion (fun j:J v=&gt;Finset.univ.image (inner v j))):Set X)) (φ v))) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   classical</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   obtain ⟨index,ext,inner,φ,hext,hinner,hcomponents,hdis,hwalk,hmatch,hgraph⟩:=</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     reserved_factor_family_to_disjoint_walks_with_buffers F hF H I J components e c d t ht hcapacity start finish q hq hlen hqdis</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let D (u:U):={x // x∈Finset.univ.biUnion (fun j:J u=&gt;Finset.univ.image (inner u j))}</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let F&#x27; (u:U):SimpleGraph (D u):=(F u).induce (↑(Finset.univ.biUnion (fun j:J u=&gt;Finset.univ.image (inner u j))):Set X)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hcover:∀u (x y:D u),(F&#x27; u).Adj x y→</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       ({φ u x,φ u y}:Finset W)∈Finset.univ.biUnion (fun j:J u=&gt;walkPhysicalEdges (q u j)):=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     intro u x y hxy</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     exact regular_two_buffered_embedding_walk_edge_coverage (F u) (hF u) H (fun j:J u=&gt;c*t u j)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (ext u) (inner u) (hinner u) (hwalk u) (hdis u) (Finset.univ:Finset (J u))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (start u) (finish u) (q u) (hq u) (hlen u) (φ u) (fun j hj k=&gt;hmatch u j k) x y hxy</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hedge:=partial_factor_edges_disjoint_of_walk_coverage_poly D F&#x27; (fun u=&gt;φ u) J H start finish q hqedge hcover</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   exact ⟨index,ext,inner,φ,hext,hinner,hcomponents,hdis,hwalk,hmatch,hgraph,hedge⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> end Oberwolfach</span></pre></html>

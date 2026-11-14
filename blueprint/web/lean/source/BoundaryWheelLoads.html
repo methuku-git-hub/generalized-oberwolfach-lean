@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BoundaryWheelLoads.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BoundaryWheelLoads.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.WheelLoadBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Free-vertex counts for wheels with different prescribed row roots.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The counts exclude each wheel&#x27;s own three prescribed row vertices. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 3500000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U I:Type} [Fintype V] [Fintype U] [Fintype I] [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   {Q F:SimpleGraph V} {H:V→U→Prop} {r:ℕ}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def boundaryWheelFreeLoad (C:I→OrdinaryWheel Q F H r) (x v w:I→V) (a:V):ℕ:=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   (Finset.univ.filter (fun i=&gt;a∈rootWheelInternal (C i) (x i) (v i) (w i))).card</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem boundaryWheelFreeLoad_total (C:I→OrdinaryWheel Q F H r) (x v w:I→V):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∑ a,boundaryWheelFreeLoad C x v w a≤Fintype.card I*r:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have he:∑ a,boundaryWheelFreeLoad C x v w a=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       ∑ i,(rootWheelInternal (C i) (x i) (v i) (w i)).card:=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     simp only [boundaryWheelFreeLoad,Finset.card_filter]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     rw [Finset.sum_comm]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     apply Finset.sum_congr rfl</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     intro i hi</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     simp</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   rw [he]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   calc</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     _≤∑ _i:I,r:=Finset.sum_le_sum (fun i _=&gt;rootWheelInternal_card (C i) (x i) (v i) (w i))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     _=_:=by simp</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem boundaryWheelFreeLoad_saturated (C:I→OrdinaryWheel Q F H r) (x v w:I→V) (K:ℕ):</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     K*(Finset.univ.filter (fun a=&gt;K≤boundaryWheelFreeLoad C x v w a)).card≤Fintype.card I*r:=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   calc</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     _=∑ a∈Finset.univ.filter (fun a=&gt;K≤boundaryWheelFreeLoad C x v w a),K:=by simp [Nat.mul_comm]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     _≤∑ a∈Finset.univ.filter (fun a=&gt;K≤boundaryWheelFreeLoad C x v w a),boundaryWheelFreeLoad C x v w a:=</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       Finset.sum_le_sum (fun a ha=&gt;(Finset.mem_filter.mp ha).2)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     _≤∑ a,boundaryWheelFreeLoad C x v w a:=Finset.sum_le_univ_sum_of_nonneg (fun _=&gt;Nat.zero_le _)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     _≤_:=boundaryWheelFreeLoad_total C x v w</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem boundaryWheel_load_bound (C:I→OrdinaryWheel Q F H r) (x v w:I→V) (K D:ℕ)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hcap:∀ a,boundaryWheelFreeLoad C x v w a≤K)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hroot:∀ a,(Finset.univ.filter (fun i=&gt;a∈({x i,v i,w i}:Finset V))).card≤D):</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∀ a,wheelRimLoad C a≤K+D:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro a</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hs:Finset.univ.filter (fun i=&gt;a∈(ordinaryWheelRim (C i)).support)⊆</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (Finset.univ.filter (fun i=&gt;a∈rootWheelInternal (C i) (x i) (v i) (w i)))∪</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (Finset.univ.filter (fun i=&gt;a∈({x i,v i,w i}:Finset V))):=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     intro i hi</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have ha:=(Finset.mem_filter.mp hi).2</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     by_cases hr:a∈({x i,v i,w i}:Finset V)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     · exact Finset.mem_union_right _ (Finset.mem_filter.mpr ⟨Finset.mem_univ _,hr⟩)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     · exact Finset.mem_union_left _ (Finset.mem_filter.mpr</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         ⟨Finset.mem_univ _,Finset.mem_sdiff.mpr ⟨Set.mem_toFinset.mpr ha,hr⟩⟩)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   exact ((Finset.card_le_card hs).trans (Finset.card_union_le _ _)).trans</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (Nat.add_le_add (hcap a) (hroot a))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a> </span>
+<span id="L58"><a href="#L58" class="ln">  58</a> theorem boundaryWheelFreeLoad_snoc {k:ℕ} (C:Fin k→OrdinaryWheel Q F H r)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (D:OrdinaryWheel Q F H r) (x v w:Fin k→V) (a b c z:V):</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     boundaryWheelFreeLoad (Fin.snoc C D) (Fin.snoc x a) (Fin.snoc v b) (Fin.snoc w c) z=</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       boundaryWheelFreeLoad C x v w z+(if z∈rootWheelInternal D a b c then 1 else 0):=by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   simp only [boundaryWheelFreeLoad,Finset.card_filter,Fin.sum_univ_castSucc,Fin.snoc_castSucc,Fin.snoc_last]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a> </span>
+<span id="L64"><a href="#L64" class="ln">  64</a> end Oberwolfach</span></pre></html>

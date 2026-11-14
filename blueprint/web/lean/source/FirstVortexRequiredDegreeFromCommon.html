@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FirstVortexRequiredDegreeFromCommon.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FirstVortexRequiredDegreeFromCommon.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FirstVortexRequiredDegreeLocalBound</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongRequiredPreciseFromCommonIncidence</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 20000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem first_vortex_required_degree_from_precise_common_bounds</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (ε δ θ lam:ℝ) (d:ℕ) (hε:0&lt;ε) (hδ:0&lt;δ)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hθ:θ≤δ/32) (hlam:lam≤δ*ε/32):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃N:ℕ,∀n≥N,∀{U:Type} [Fintype U] {P P₀ Sel:SimpleGraph (Fin n)}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       {D m:ℕ} {β:ℝ} (Q:Vortex U P D β ε m) (π:Equiv.Perm (Fin n))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (Rel Match:Fin n→Fin n→Prop),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       1≤(Q.extendedVertices 1).card→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (∀v,((longRequiredPhysicalGraph P P₀ Sel π d (Q.extendedVertices 1) Rel Match).degree v:ℝ)≤</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>         2*θ*(Q.extendedVertices 1).card+(n:ℝ)^(3/4:ℝ)+lam*n+(6*d+2:ℕ))→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ∀v,((longRequiredPhysicalGraph P P₀ Sel π d (Q.extendedVertices 1) Rel Match).degree v:ℝ)≤</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         δ*(Q.extendedVertices 1).card/4:=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   obtain ⟨N,hN⟩:=first_vortex_required_degree_local_bound ε δ θ lam d hε hδ hθ hlam</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   refine ⟨N,?_⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro n hn U _ P P₀ Sel D m β Q π Rel Match hpos hprec v</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   apply hN n hn Q hpos ?_ v</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   intro x</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   convert hprec x using 1 &lt;;&gt; congr! 6 &lt;;&gt; exact Subsingleton.elim _ _</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> end Oberwolfach</span></pre></html>

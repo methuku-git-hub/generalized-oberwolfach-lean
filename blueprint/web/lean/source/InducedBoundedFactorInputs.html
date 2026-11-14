@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>InducedBoundedFactorInputs.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>InducedBoundedFactorInputs.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.InducedBoundedDeletionDegrees</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Numerical conditions for applying the almost-regular factor theorem</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> after removing a bounded set and a graph of maximum degree two. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem induced_bounded_factor_inputs {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (G Dgraph:SimpleGraph V) (S A:Finset V) (D δ α η ε:ℝ) (b:ℕ)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hδ:(1/2:ℝ)≤δ) (hα:0&lt;α) (hε:0&lt;ε)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hAS:A⊆S) (hbound:(S\A).card≤b) (hsize:S.card≤2*A.card)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hDlo:(δ+α)*S.card≤D) (hDhi:D≤S.card)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hnear:∀ v,|((G.neighborFinset v∩S).card:ℝ)-D|≤η*S.card)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hD:∀ v,Dgraph.degree v≤2)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (herrα:η*S.card+b+2≤(α/2)*S.card)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (herrε:η*S.card+b+2≤ε*A.card):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let Q:=triangleAugmentationGraph G Dgraph A;</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let P:=Q.induce (A:Set V);</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (Fintype.card (A:Set V):ℝ)/2≤D ∧ D≤2*Fintype.card (A:Set V) ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ v,(δ+α/8)*Fintype.card (A:Set V)≤(P.degree v:ℝ)) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ v,|(P.degree v:ℝ)-D|≤ε*Fintype.card (A:Set V)):=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   intro Q P</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hA:(A.card:ℝ)≤S.card:=by exact_mod_cast Finset.card_le_card hAS</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hsizeR:(S.card:ℝ)≤2*A.card:=by exact_mod_cast hsize</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hA0:(0:ℝ)≤A.card:=by positivity</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hS0:(0:ℝ)≤S.card:=by positivity</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hAcard:Fintype.card (A:Set V)=A.card:=Fintype.card_coe A</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨?_,?_,?_,?_⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · rw [hAcard];nlinarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · rw [hAcard];nlinarith</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   · intro v</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hh:=abs_le.mp (induced_bounded_deletion_degrees G Dgraph S A D η b hAS hbound hnear hD v)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hcoeff:0≤δ+α/8:=by linarith</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hprod:=mul_le_mul_of_nonneg_left hA hcoeff</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     rw [hAcard]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     change (δ+α/8)*A.card≤((triangleAugmentationGraph G Dgraph A).induce (A:Set V)).degree v</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     nlinarith</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   · intro v</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rw [hAcard]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     exact (induced_bounded_deletion_degrees G Dgraph S A D η b hAS hbound hnear hD v).trans herrε</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

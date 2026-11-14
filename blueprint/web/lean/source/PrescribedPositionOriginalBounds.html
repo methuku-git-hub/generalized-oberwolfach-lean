@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedPositionOriginalBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedPositionOriginalBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedPositionGreedySelection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The numerical hypotheses of the prescribed-position lemma supply the</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> edge and vertex budgets of the greedy selection. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {X:Type} [Fintype X] [DecidableEq X]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem prescribed_position_original_budgets (Q:SimpleGraph X) (hdeg:∀x,Q.degree x≤2)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (A:Finset X) (m z:ℕ) (hedges:Fintype.card X≤Q.edgeFinset.card+A.card)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hsize:8*A.card+8*m+4*z+10≤Fintype.card X):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     2*(prescribedClosedNeighbourhoods Q A).card+8*m≤Q.edgeFinset.card ∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (prescribedClosedNeighbourhoods Q A).card+4*m+3*z≤Fintype.card X := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hA:=prescribed_closed_neighbourhoods_card Q hdeg A</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   constructor &lt;;&gt; omega</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> end Oberwolfach</span></pre></html>

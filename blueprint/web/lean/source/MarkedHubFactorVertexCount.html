@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHubFactorVertexCount.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHubFactorVertexCount.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedHubFactorRootBijection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Each wheel has one marked root and m+1 disjoint rim vertices, giving</span>
+<span id="L3"><a href="#L3" class="ln">   3</a>  the manuscript&#x27;s hubwise vertex-count identity. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 16000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem marked_hub_factor_vertex_count</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {V U E K:Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (tail head:E→V) (ktail khead:K→V) (m b:ℕ) (π:Equiv.Perm V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (H₀ Hₖ:V→U→Prop) (u:U)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (M:Finset (HubMarkedCycle tail head ktail khead m π b H₀ Hₖ u))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hM:∀C∈M,∀D∈M,C≠D→Disjoint (hubMarkedCycleVertices u C) (hubMarkedCycleVertices u D))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (S Y:Finset V) (hcover:M.biUnion (hubMarkedCycleVertices u)=S)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hYS:Y⊆S) (hmarked:∀x,Hₖ x u↔x∈Y) (hsep:∀x,Hₖ x u→¬H₀ x u):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     S.card=(m+1)*Y.card := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   obtain ⟨select,hselected,honto⟩:=marked_hub_factor_root_bijection tail head ktail khead m b π H₀ Hₖ u M hM S Y hcover hYS hmarked hsep</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have himg:Finset.univ.image select=M:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ext C</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     simp only [Finset.mem_image,Finset.mem_univ,true_and]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     constructor</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     · rintro ⟨x,rfl⟩;exact (hselected x).1</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     · intro hC;exact honto C hC</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hmcard:M.card=Y.card:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     rw [←himg,Finset.card_image_of_injective _ select.injective]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     simp</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hcard:∀C:HubMarkedCycle tail head ktail khead m π b H₀ Hₖ u,</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (hubMarkedCycleVertices u C).card=m+1:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     intro C</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     rw [hubMarkedCycleVertices,Finset.card_image_of_injective _</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (permutationSeparated_injective π b C.val C.property.1.1)]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     simp</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hpair:(↑M:Set (HubMarkedCycle tail head ktail khead m π b H₀ Hₖ u)).PairwiseDisjoint (hubMarkedCycleVertices u):=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     intro C hC D hD hne</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact hM C hC D hD hne</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   calc</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     S.card=(M.biUnion (hubMarkedCycleVertices u)).card:=by rw [hcover]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     _=∑C∈M,(hubMarkedCycleVertices u C).card:=Finset.card_biUnion hpair</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     _=M.card*(m+1):=by simp [hcard]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     _=Y.card*(m+1):=by rw [hmcard]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     _=(m+1)*Y.card:=Nat.mul_comm _ _</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> end Oberwolfach</span></pre></html>

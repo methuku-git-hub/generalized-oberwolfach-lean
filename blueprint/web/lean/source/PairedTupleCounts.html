@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PairedTupleCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PairedTupleCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PairedLabelsFromTuples</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Quantitative greedy choices for the base cycle and all its common paths.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The finite sum retains every ordered choice; no independence is assumed. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 4000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V : Type*} [Fintype V] [DecidableEq V] {m : ℕ}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> abbrev PairedTupleChoice (x : Fin (m+1) → V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (Base : (Fin (m+1) → V) → Prop)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (Path : (Fin (m+1) → V) → ℕ → (Fin m → V) → Prop) :=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   Σ y : {y // Base y ∧ ∀ i,y i∉Finset.univ.image x},</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     {g : Fin (m+1) → Fin m → V //</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       DisjointTupleGood (Finset.univ.image x∪Finset.univ.image y.val) (Path y.val) g}</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem pairedTupleChoice_count (x : Fin (m+1) → V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (Base : (Fin (m+1) → V) → Prop)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (Path : (Fin (m+1) → V) → ℕ → (Fin m → V) → Prop)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (A M a : ℝ) (ha : 0≤a)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hbase : A+(m+1:ℝ)^2*(Fintype.card V:ℝ)^m≤Fintype.card {y // Base y})</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hcount : ∀ y,Base y → (∀ i,y i∉Finset.univ.image x) → ∀ n&lt;m+1,M≤Fintype.card {g // Path y n g})</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hinj : ∀ y,Base y → (∀ i,y i∉Finset.univ.image x) → ∀ n&lt;m+1,∀ g,Path y n g → Function.Injective g)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hbudget : a+(m:ℝ)*(2*(m+1)+(m+1)*m)*(Fintype.card V:ℝ)^(m-1)≤M) :</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     A*a^(m+1)≤Fintype.card (PairedTupleChoice x Base Path) := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let Y := {y // Base y ∧ ∀ i,y i∉Finset.univ.image x}</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hX : ((Finset.univ.image x).card:ℝ)≤m+1 := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     exact_mod_cast (Finset.card_image_le.trans_eq (Fintype.card_fin (m+1)))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hdel := tuple_family_avoiding_lower (m+1) Base (Finset.univ.image x)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hloss := mul_le_mul_of_nonneg_right</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (mul_le_mul_of_nonneg_left hX (by positivity : (0:ℝ)≤m+1))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (pow_nonneg (Nat.cast_nonneg (Fintype.card V)) m)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hY : A≤(Fintype.card Y:ℝ) := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     dsimp [Y]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     norm_num only [Nat.add_sub_cancel,Nat.cast_add,Nat.cast_one] at hdel</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     nlinarith [hdel]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hf (y : Y) : a^(m+1)≤Fintype.card</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       {g : Fin (m+1) → Fin m → V //</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         DisjointTupleGood (Finset.univ.image x∪Finset.univ.image y.val) (Path y.val) g} := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     apply sequential_disjoint_tuple_count m (m+1) _ (Path y.val) M a ha</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (hcount y.val y.property.1 y.property.2) (hinj y.val y.property.1 y.property.2)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hW : ((Finset.univ.image x∪Finset.univ.image y.val).card:ℝ)≤2*(m+1) := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       have hh := (Finset.card_union_le (Finset.univ.image x) (Finset.univ.image y.val)).trans</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         (Nat.add_le_add (Finset.card_image_le.trans_eq (Fintype.card_fin (m+1)))</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           (Finset.card_image_le.trans_eq (Fintype.card_fin (m+1))))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       have hh&#x27; : ((Finset.univ.image x∪Finset.univ.image y.val).card:ℝ)≤(m+1:ℝ)+(m+1) := by exact_mod_cast hh</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       linarith</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have hh := mul_le_mul_of_nonneg_right</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (mul_le_mul_of_nonneg_left (add_le_add_right hW ((m+1:ℝ)*m)) (Nat.cast_nonneg m))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (pow_nonneg (Nat.cast_nonneg (Fintype.card V)) (m-1))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     norm_num only [Nat.cast_add,Nat.cast_one]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     linarith</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   calc</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     A*a^(m+1) ≤ (Fintype.card Y:ℝ)*a^(m+1) := mul_le_mul_of_nonneg_right hY (pow_nonneg ha _)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     _ = ∑ _y : Y,a^(m+1) := by simp</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     _ ≤ ∑ y : Y,(Fintype.card {g : Fin (m+1) → Fin m → V //</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         DisjointTupleGood (Finset.univ.image x∪Finset.univ.image y.val) (Path y.val) g}:ℝ) :=</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       Finset.sum_le_sum (fun y _ =&gt; hf y)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     _ = Fintype.card (PairedTupleChoice x Base Path) := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       simp only [PairedTupleChoice,Fintype.card_sigma,Nat.cast_sum]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       congr!</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a> end Oberwolfach</span></pre></html>

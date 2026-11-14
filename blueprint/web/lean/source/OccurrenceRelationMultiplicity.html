@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OccurrenceRelationMultiplicity.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OccurrenceRelationMultiplicity.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TypedMatrixRealization</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A simple directed occurrence host is identified with its endpoint</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> relation, without changing the occurrence identifiers. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem occurrenceMultiplicity_eq_relation {V E:Type} [Fintype E] [DecidableEq V]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (tail head:E→V) (hinj:Function.Injective (fun e=&gt;(tail e,head e))):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     occurrenceMultiplicity tail head=relationMultiplicity (fun x y=&gt;∃ e,tail e=x∧head e=y):=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   funext x y</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   by_cases h:∃ e,tail e=x∧head e=y</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   · obtain ⟨e,rfl,rfl⟩:=h</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     rw [occurrenceMultiplicity_at_edge tail head hinj]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     simp only [relationMultiplicity,show ∃ e&#x27;,tail e&#x27;=tail e∧head e&#x27;=head e from ⟨e,rfl,rfl⟩,ite_true]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   · rw [occurrenceMultiplicity_zero tail head x y h]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     simp only [relationMultiplicity,h,ite_false]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem relationMultiplicity_delete_rectangle_le {V U:Type}</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (H:V→U→Prop) (A:Finset V) (B:Finset U) (v:V) (u:U):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     relationMultiplicity (fun x y=&gt;H x y∧¬(x∈A∧y∈B)) v u≤relationMultiplicity H v u:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   by_cases hh:H v u &lt;;&gt; by_cases ha:v∈A &lt;;&gt; by_cases hb:u∈B &lt;;&gt;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     simp [relationMultiplicity,hh,ha,hb]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> end Oberwolfach</span></pre></html>

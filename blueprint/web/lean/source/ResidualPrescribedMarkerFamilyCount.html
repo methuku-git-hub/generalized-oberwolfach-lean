@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ResidualPrescribedMarkerFamilyCount.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ResidualPrescribedMarkerFamilyCount.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResidualMarkerFamilyCard</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ResidualRunFamilyCounts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Count prescribed endpoints and surviving selected-path markers across</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> vertex-disjoint extended paths. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V I:Type} [Fintype V] [DecidableEq V] [DecidableEq I]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem residual_prescribed_marker_family_count (F:SimpleGraph V)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (s₁ s₂:Finset I) (hs:Disjoint s₁ s₂)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (u v:I→V) (P:∀i,F.Walk (u i) (v i))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hp:∀i∈s₁∪s₂,(P i).IsPath)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hP:(↑(s₁∪s₂):Set I).PairwiseDisjoint (fun i=&gt;(P i).support.toFinset))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (c d:ℕ) (hc:0&lt;c) (hd:0&lt;d) (hlen:∀i∈s₁∪s₂,(P i).length=c*d+4)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (T:I→Finset ℕ) (hT:∀i∈s₂,T i⊆Finset.range d):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let A₁:=s₁.biUnion (fun i=&gt;{(P i).getVert 2,(P i).getVert (2+c*d)})</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let A₂:=s₂.biUnion (fun i=&gt;(survivingSegmentMarkers d (T i)).image</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (fun j=&gt;(P i).getVert (2+c*j)))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let missing:=∑i∈s₂,(d-(T i).card)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let runs:=∑i∈s₂,(selectedSegmentRuns d (T i)).card;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (A₁∪A₂).card=2*s₁.card+s₂.card+missing+runs := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   let s:=s₁∪s₂</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let A₁:=s₁.biUnion (fun i=&gt;{(P i).getVert 2,(P i).getVert (2+c*d)})</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let A₂:=s₂.biUnion (fun i=&gt;(survivingSegmentMarkers d (T i)).image</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (fun j=&gt;(P i).getVert (2+c*j)))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hdisj:Disjoint A₁ A₂ := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     intro x hx hy</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     obtain ⟨i,hi,hx⟩:=Finset.mem_biUnion.mp hx</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     obtain ⟨j,hj,hy⟩:=Finset.mem_biUnion.mp hy</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hij:i≠j := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       intro h;subst j</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       exact Finset.disjoint_left.mp hs hi hj</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hxi:x∈(P i).support.toFinset := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       simp only [Finset.mem_insert,Finset.mem_singleton] at hx</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       rcases hx with rfl|rfl &lt;;&gt; simp</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     obtain ⟨k,hk,rfl⟩:=Finset.mem_image.mp hy</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hxj:(P j).getVert (2+c*k)∈(P j).support.toFinset := by simp</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     exact Finset.disjoint_left.mp (hP (Finset.mem_union_left _ hi) (Finset.mem_union_right _ hj) hij) hxi hxj</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hP₁:(↑s₁:Set I).PairwiseDisjoint (fun i=&gt;(P i).support.toFinset) := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     intro i hi j hj hij</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact hP (Finset.mem_union_left _ hi) (Finset.mem_union_left _ hj) hij</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hP₂:(↑s₂:Set I).PairwiseDisjoint (fun i=&gt;(P i).support.toFinset) := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     intro i hi j hj hij</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact hP (Finset.mem_union_right _ hi) (Finset.mem_union_right _ hj) hij</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have h₁:=extended_path_marker_family_card F s₁ u v P</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (fun i hi=&gt;hp i (Finset.mem_union_left _ hi)) hP₁ c d hc</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (fun i hi=&gt;hlen i (Finset.mem_union_left _ hi)) (fun _=&gt;{0,d})</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (by intro i hi j hj;simp only [Finset.mem_insert,Finset.mem_singleton] at hj;rcases hj with rfl|rfl &lt;;&gt; simp)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hA₁:A₁.card=2*s₁.card := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hh:(s₁.biUnion (fun i=&gt;({0,d}:Finset ℕ).image (fun j=&gt;(P i).getVert (2+c*j)))).card=2*s₁.card := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       rw [h₁]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       have h0d:(0:ℕ)≠d := by omega</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       simp [h0d,mul_comm]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     simpa [A₁] using hh</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have h₂:=extended_path_marker_family_card F s₂ u v P</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (fun i hi=&gt;hp i (Finset.mem_union_right _ hi)) hP₂ c d hc</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (fun i hi=&gt;hlen i (Finset.mem_union_right _ hi))</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (fun i=&gt;survivingSegmentMarkers d (T i))</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (by intro i hi;exact Finset.sdiff_subset)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hA₂:A₂.card=∑i∈s₂,(survivingSegmentMarkers d (T i)).card := h₂</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hsum:=(maximal_run_family_counts s₂ d hd T hT).1</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   change (A₁∪A₂).card=2*s₁.card+s₂.card+</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (∑i∈s₂,(d-(T i).card))+(∑i∈s₂,(selectedSegmentRuns d (T i)).card)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   rw [Finset.card_union_of_disjoint hdisj,hA₁,hA₂,hsum]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   omega</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> end Oberwolfach</span></pre></html>

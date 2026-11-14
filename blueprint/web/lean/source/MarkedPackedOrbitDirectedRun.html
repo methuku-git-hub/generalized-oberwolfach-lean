@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPackedOrbitDirectedRun.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPackedOrbitDirectedRun.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPackedWheelDirectedRun</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedOrbitTerminalSeparation</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The matching event&#x27;s injective permutation interval and ordinary-spoke</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> exclusion discharge terminal separation for a packed marked-wheel run. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 24000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem packed_marked_wheels_form_orbit_run</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {V U E K:Type} [Fintype V] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (G:SimpleGraph V) (tail head:E → V) (ktail khead:K → V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (m b:ℕ) (π:Equiv.Perm V) (hb:1≤b) (H₀ Hₖ:V → U → Prop)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (a:V) (d start n:ℕ) (hbound:start+n≤d) (hπ:∀x,π x≠x)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hinj:Function.Injective (fun k:Fin (d+1)=&gt;(π^k.val) a))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (W:∀ i, start ≤ i  →  i &lt; start+n  →  MarkedWheel tail head ktail khead m π b H₀ Hₖ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hroot:∀ i (hi:start ≤ i) (hj:i &lt; start+n),(W i hi hj).1.val 0=(π^i) a)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hpair:∀ i j (hi:start ≤ i) (hj:i &lt; start+n) (hi&#x27;:start ≤ j) (hj&#x27;:j &lt; start+n),i≠j → </span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       Disjoint (markedWheelPhysicalResources (W i hi hj)) (markedWheelPhysicalResources (W j hi&#x27; hj&#x27;)))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hhub:∀ i j (hi:start ≤ i) (hj:i &lt; start+n) (hi&#x27;:start ≤ j) (hj&#x27;:j &lt; start+n),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (W i hi hj).2.val=(W j hi&#x27; hj&#x27;).2.val)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (Ord:Finset V)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hOrd:∀ i (hi:start ≤ i) (hj:i &lt; start+n) (z:Fin (m+1)),z.val≠0 → (W i hi hj).1.val z∈Ord)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (havoid:(π^(start+n)) a∉Ord)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hE:∀e:E,G.Adj (tail e) (head e)) (hK:∀e:K,G.Adj (ktail e) (π (khead e)))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (R:V → V → Prop) (hER:∀e:E,R (tail e) (head e)) (hKR:∀e:K,R (ktail e) (π (khead e))):</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∃q:(SimpleGraph.completeGraph V).Walk ((π^start) a) ((π^(start+n)) a),q.IsPath ∧ q.length=n*(m+1) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀x,x∈q.support ↔ x=(π^(start+n)) a ∨</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         ∃ i, ∃ hi:start ≤ i, ∃ hj:i &lt; start+n, ∃ z:Fin (m+1),(W i hi hj).1.val z=x) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ j,j≤n → q.getVert ((m+1)*j)=(π^(start+j)) a) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ k,k&lt;q.length → R (q.getVert k) (q.getVert (k+1))):=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let v:ℕ → V:=fun i=&gt;(π^i) a</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hne:∀ i,v i≠v (i+1):=permutation_orbit_adjacent_ne π hπ a</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hnext:∀ i,v (i+1)=π (v i):=by intro i; simp only [v,pow_succ&#x27;,Equiv.Perm.mul_apply]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hterminal:∀ i (hi:start ≤ i) (hj:i &lt; start+n) (z:Fin (m+1)),v (start+n)≠(W i hi hj).1.val z:=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     intro i hi hj z heq</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     by_cases hz:z.val=0</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     · have hz&#x27;:z=0:=Fin.ext (by simpa using hz)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       subst z</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       have hh:=marked_orbit_subinterval_terminal_ne π a d start n hbound hinj i hi hj</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       exact hh (heq.trans (hroot i hi hj))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     · apply havoid</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       change v (start+n)∈Ord</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       rw [heq]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       exact hOrd i hi hj z hz</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   exact packed_marked_wheels_form_directed_run G tail head ktail khead m b π hb H₀ Hₖ v start n hne hnext W hroot hpair hhub hterminal hE hK R hER hKR</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> end Oberwolfach</span></pre></html>

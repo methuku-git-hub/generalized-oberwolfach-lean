@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongMatchingErrorBudget.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongMatchingErrorBudget.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongCommonIncidenceParameterBudget</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The existing common-event hierarchy makes both matching defects small. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem long_matching_error_budget</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (lam θ eps:ℝ) (d K:ℕ) (hlam:0≤lam) (hlam1:lam≤1) (hθ:0≤θ) (hK:5≤K)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (heps:3*eps≤lam*(θ/(100*(K:ℝ)^2))):</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     let a:=min (lam/(10*(d:ℝ))) (θ/(200*(K:ℝ)^2))</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     let γ:=min (eps/2) (min (1/2:ℝ) (min (lam/(10*(d:ℝ))) (lam/10)))</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     max a γ≤θ/4096:=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   intro a γ</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hK5:(5:ℝ)≤K:=by exact_mod_cast hK</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hKpos:0&lt;(K:ℝ):=by linarith</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hden:0&lt;100*(K:ℝ)^2:=by positivity</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hmass:θ/(100*(K:ℝ)^2)≥0:=div_nonneg hθ hden.le</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have heps&#x27;:eps≤θ/(300*(K:ℝ)^2):=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have hh:lam*(θ/(100*(K:ℝ)^2))≤θ/(100*(K:ℝ)^2):=by nlinarith</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     have heq:θ/(100*(K:ℝ)^2)=3*(θ/(300*(K:ℝ)^2)):=by ring</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     linarith</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have ha:a≤θ/(200*(K:ℝ)^2):=min_le_right _ _</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hg:γ≤eps/2:=min_le_left _ _</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hscale:θ/(200*(K:ℝ)^2)≤θ/4096:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     apply (div_le_iff₀ (by positivity : 0&lt;200*(K:ℝ)^2)).2</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     nlinarith [sq_nonneg ((K:ℝ)-5)]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hscale&#x27;:θ/(300*(K:ℝ)^2)≤θ/4096:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     apply (div_le_iff₀ (by positivity : 0&lt;300*(K:ℝ)^2)).2</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     nlinarith [sq_nonneg ((K:ℝ)-5)]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   apply max_le</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · exact ha.trans hscale</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   · have hh:=heps&#x27;.trans hscale&#x27;</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     linarith</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,108 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryRelativeProfileRestriction.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryRelativeProfileRestriction.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryRestrictedProfileLoads</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryRestrictedProfileAbsorbers</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrdinaryProfileRescaling</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.OrdinaryProfileDeletionMargins</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! The common-cycle profiles used by an ordinary transformer after linear</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> row deletions and bounded rim deletions. The tolerance is fixed before the</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> forbidden-edge allowance; the coefficients on surviving cycles are unchanged. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option synthInstance.maxSize 1024</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 7000000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> variable {Tpl : Type} [Fintype Tpl] [DecidableEq Tpl]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem ordinary_relative_profile_restriction (r : ℕ) (hr : 3≤r)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (S : Tpl → VertexAbsorberTemplate r) (β a b B τ : ℝ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hβ : 0&lt;β) (ha : 0&lt;a) (hb : 0&lt;b) (hB : 0&lt;B) (hτ : 0&lt;τ) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ ε : ℝ,0&lt;ε ∧ ε≤β/2 ∧ ∀ f : ℕ,∃ N : ℕ,1≤N ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ∀ (V : Type) [Fintype V] [DecidableEq V],N≤Fintype.card V →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ∀ (Q D F : SimpleGraph V) (T Z : Finset V),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       β*Fintype.card V≤(T.card:ℝ) → (Z.card:ℝ)≤ε*Fintype.card V → D.edgeFinset.card≤f →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       ∀ w : LocalOrdinaryCycle Q F T r → ℝ,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ C,b/(Fintype.card V:ℝ)^(r-1)≤w C ∧ w C≤B/(Fintype.card V:ℝ)^(r-1)) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ v∈T,|1-hypergraphWeightedDegree localOrdinaryVertices w v|≤τ/4) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ X : Finset V,X⊆T → X.card=r →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         a*(Fintype.card V:ℝ)^(r*r)≤Fintype.card (LabelledAbsorberFamily (localOrdinaryVertices (Q:=Q) (F:=F) (T:=T) (r:=r)) S X)) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       let k := ((T\Z).card:ℝ)/r</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       let w&#x27; := fun C : LocalOrdinaryCycle (Q\D) F (T\Z) r=&gt;</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         w (localOrdinaryRestrictionParent sdiff_le Finset.sdiff_subset C)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       0&lt;k ∧ (β/2)*Fintype.card V≤(r:ℝ)*k ∧ (r:ℝ)*k≤Fintype.card V ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ C,(b*(β/2)^(r-1)/(r:ℝ)^(r-1))/k^(r-1)≤w&#x27; C ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         w&#x27; C≤(B/(r:ℝ)^(r-1))/k^(r-1)) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ v∈T\Z,|1-hypergraphWeightedDegree localOrdinaryVertices w&#x27; v|≤3*τ/4) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ X : Finset V,X⊆T\Z → X.card=r →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         ((a/2)*(r:ℝ)^(r*r))*k^(r*r)≤</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>           Fintype.card (LabelledAbsorberFamily (localOrdinaryVertices (Q:=Q\D) (F:=F) (T:=T\Z) (r:=r)) S X)) := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let K : ℝ := (r^r:ℕ)*B</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let L : ℝ := ordinaryAbsorberDeletionCoefficient r (Fintype.card Tpl)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hK : 0≤K := by dsimp [K];positivity</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hL : 0≤L := Nat.cast_nonneg _</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   obtain ⟨ε,hε,hεβ,hN⟩ := ordinary_profile_deletion_margins β a τ K L hβ ha hτ hK hL</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   refine ⟨ε,hε,hεβ,?_⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro f</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨N,hN1,hN⟩ := hN f</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   refine ⟨N,hN1,?_⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   intro V _ _ hn Q D F T Z hT hZ hD w hw herr habs</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   dsimp only</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let k : ℝ := ((T\Z).card:ℝ)/r</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hn1 : 1≤Fintype.card V := hN1.trans hn</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hnR : (0:ℝ)&lt;Fintype.card V := by exact_mod_cast (show 0&lt;Fintype.card V by omega)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hrR : (0:ℝ)&lt;r := by exact_mod_cast (show 0&lt;r by omega)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hcard : T.card≤(T\Z).card+Z.card := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     apply (Finset.card_le_card (show T⊆(T\Z)∪Z from ?_)).trans (Finset.card_union_le _ _)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     intro v hv</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     by_cases hz : v∈Z</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     · exact Finset.mem_union_right _ hz</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     · exact Finset.mem_union_left _ (Finset.mem_sdiff.mpr ⟨hv,hz⟩)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hcardR : (T.card:ℝ)≤((T\Z).card:ℝ)+Z.card := by exact_mod_cast hcard</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hscale : (r:ℝ)*k=(T\Z).card := by dsimp [k];field_simp</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hlow : (β/2)*Fintype.card V≤(r:ℝ)*k := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     rw [hscale]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have hh := mul_le_mul_of_nonneg_right hεβ hnR.le</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     linarith only [hT,hZ,hcardR,hh]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hhigh : (r:ℝ)*k≤Fintype.card V := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     rw [hscale]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     exact_mod_cast Finset.card_le_univ (T\Z)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hk : 0&lt;k := by nlinarith only [hlow,mul_pos (half_pos hβ) hnR,hrR]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨hload,habsloss⟩ := hN (Fintype.card V) hn Z.card D.edgeFinset.card hZ hD</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   refine ⟨hk,hlow,hhigh,?_,?_,?_⟩</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   · intro C</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     exact ordinary_profile_weight_rescale r (by omega) _ k β b B _ hnR hk hβ hb.le hB.le</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       (by nlinarith only [hlow]) hhigh (hw _)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   · intro v hv</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     have h0 (C : LocalOrdinaryCycle Q F T r) : 0≤w C :=</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       (by positivity : (0:ℝ)≤b/(Fintype.card V:ℝ)^(r-1)).trans (hw C).1</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     have hh := ordinary_restricted_profile_loads Q D F T Z (by omega) (by omega) w B (τ/4)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       hB.le (fun C=&gt;⟨h0 C,(hw C).2⟩) herr v hv</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     have hload&#x27; : ((Z.card+D.edgeFinset.card:ℕ):ℝ)*((r^r:ℕ)*B/Fintype.card V)≤τ/2 := by</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       convert hload using 1 &lt;;&gt; dsimp [K] &lt;;&gt; ring</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     exact hh.trans (by linarith only [hload&#x27;])</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   · intro X hX hXr</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     have hXZ : Disjoint X Z := Finset.disjoint_left.mpr (fun v hv hz=&gt;(Finset.mem_sdiff.mp (hX hv)).2 hz)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     have hh := ordinary_restricted_profile_absorbers Q D F T Z X (by omega) hn1 hXr hXZ S</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     have hhR : (Fintype.card (LabelledAbsorberFamily (localOrdinaryVertices (Q:=Q) (F:=F) (T:=T) (r:=r)) S X):ℝ)≤</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>         Fintype.card (LabelledAbsorberFamily (localOrdinaryVertices (Q:=Q\D) (F:=F) (T:=T\Z) (r:=r)) S X)+</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>         ((Z.card+D.edgeFinset.card:ℕ):ℝ)*L*(Fintype.card V:ℝ)^(r*r-1) := by</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>       dsimp only [L]</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>       exact_mod_cast hh</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     have hp : (Fintype.card V:ℝ)*(Fintype.card V:ℝ)^(r*r-1)=(Fintype.card V:ℝ)^(r*r) := by</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       rw [←pow_succ&#x27;]</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>       congr 1</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>       have hh : 1≤r*r := by nlinarith</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       omega</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     have hloss := mul_le_mul_of_nonneg_right habsloss (pow_nonneg hnR.le (r*r-1))</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     rw [mul_assoc (a/2),hp] at hloss</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     have hparent := habs X (hX.trans Finset.sdiff_subset) hXr</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     have hcount : (a/2)*(Fintype.card V:ℝ)^(r*r)≤</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>         Fintype.card (LabelledAbsorberFamily (localOrdinaryVertices (Q:=Q\D) (F:=F) (T:=T\Z) (r:=r)) S X) := by</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       linarith only [hhR,hloss,hparent]</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     exact ordinary_profile_absorber_rescale r a _ k _ ha.le hk.le hhigh hcount</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a> </span>
+<span id="L105"><a href="#L105" class="ln"> 105</a> end Oberwolfach</span></pre></html>

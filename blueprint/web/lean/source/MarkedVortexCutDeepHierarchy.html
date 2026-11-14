@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVortexCutDeepHierarchy.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVortexCutDeepHierarchy.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedCutThresholdBeforeRatio</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedFixedGeometryDeepRatioChoice</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A joint cut and two-step vortex parameter choice, with the cut threshold</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> chosen before the vortex ratio and the cut-set parameter chosen afterwards. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem marked_vortex_cut_deep_hierarchy</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (r:ℕ) (α kstar tstar ζ hcap ρ ρ₀ t κ ξcap K εcap:ℝ)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hα:0&lt;α) (hk:0&lt;kstar) (htstar:0&lt;tstar) (hζ:ζ≤tstar/16) (hhcap:0&lt;hcap)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hρ:0&lt;ρ) (hρ₀:0&lt;ρ₀) (ht:0&lt;t) (hκ:0&lt;κ) (hξ:0&lt;ξcap) (hK:0≤K) (hεcap:0&lt;εcap):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ hcut ε₀:ℝ,0&lt;hcut ∧ hcut≤hcap ∧ 2*hcut≤α*kstar/4 ∧ 2*hcut≤tstar/8-ζ ∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       0&lt;ε₀ ∧ ε₀≤εcap ∧ ε₀≤hcut ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (∀ δcap:ℝ,0&lt;δcap→∃ δ:ℝ,0&lt;δ ∧ δ≤δcap ∧ δ&lt;1/4 ∧ δ≤α/32 ∧ δ≤kstar/32 ∧ 2*δ≤tstar/8) ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ∀ ε:ℝ,0&lt;ε→ε≤ε₀→∃ ω ξ:ℝ,0&lt;ω ∧ ω≤1 ∧ 0&lt;ξ ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>         ω≤ε/8 ∧ ω≤ρ₀*ε/64 ∧ ε^2≤ξ ∧ ξ≤ξcap ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>         (4*K+(3*r+50:ℕ))*ξ≤κ/2 ∧ (1+2/ρ)*ξ≤t*ω/32:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   obtain ⟨hcut,hh,hhcap&#x27;,hprod,hspoke,hδ⟩:=marked_cut_threshold_before_ratio α kstar tstar ζ hcap hα hk htstar hζ hhcap</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   obtain ⟨ε₀,hε₀,hεcap,hchoose⟩:=marked_fixed_geometry_deep_ratio_choice r ρ ρ₀ t κ ξcap K (min εcap hcut)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     hρ hρ₀ ht hκ hξ hK (by positivity)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   refine ⟨hcut,ε₀,hh,hhcap&#x27;,hprod,hspoke,hε₀,?_,?_,hδ,hchoose⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · exact hεcap.trans (min_le_left _ _)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   · exact hεcap.trans (min_le_right _ _)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> end Oberwolfach</span></pre></html>

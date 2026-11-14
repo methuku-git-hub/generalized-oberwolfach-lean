@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>WeightedEdgeColoring.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>WeightedEdgeColoring.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.HypergraphColorSampling</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Independent edge colours preserve every fixed nonnegative weight sum.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> This is the edge-partition step, before any proper edge colouring is used. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency true</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 800000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {E C J : Type*} [Fintype E] [Fintype C] [Fintype J]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [DecidableEq E] [Nonempty C]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem singleton_hypergraphWeightedDegree (w : E → ℝ) (e : E) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     hypergraphWeightedDegree (fun f : E=&gt;{f}) w e=w e := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   unfold hypergraphWeightedDegree</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   simp only [Finset.mem_singleton]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   simp</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem singleton_monochromaticWeightedSum (w : E → ℝ) (c : C) (σ : E → C) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     monochromaticWeightedSum (fun e : E=&gt;{e}) w c σ=∑ e,if σ e=c then w e else 0 := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   unfold monochromaticWeightedSum</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   apply Finset.sum_congr rfl</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   intro e _</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   rw [patternValue_indicator]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   simp only [Finset.mem_singleton,forall_eq]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   split_ifs &lt;;&gt; simp</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> </span>
+<span id="L31"><a href="#L31" class="ln">  31</a> theorem weightedEdgeColoring_tail (w : E → ℝ) (hw : ∀ e,0≤w e)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hW : 0&lt;∑ e,w e) (b : ℝ) (hb : ∀ e,w e≤b) (c : C) (t : ℝ) (ht : 0≤t) :</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (FiniteLaw.pi (fun _ : E=&gt;FiniteLaw.uniform C)).probability</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (fun σ=&gt;t≤|(∑ e,if σ e=c then w e else 0)-(∑ e,w e)/Fintype.card C|)≤</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       2*Real.exp (-2*t^2/(b*∑ e,w e)) := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hh := monochromaticWeightedSum_tail (fun e : E=&gt;{e}) w hw 1 (by omega)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (fun _=&gt;Finset.card_singleton _) hW b (by intro e;rw [singleton_hypergraphWeightedDegree];exact hb e) c t ht</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   simpa only [singleton_monochromaticWeightedSum,pow_one,Nat.cast_one,mul_one] using hh</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem weightedEdgeColoring_exists (w : J → E → ℝ) (hw : ∀ j e,0≤w j e)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hW : ∀ j,0&lt;∑ e,w j e) (b : J → ℝ) (hb : ∀ j e,w j e≤b j)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (t : J → ℝ) (ht : ∀ j,0≤t j)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hsmall : (∑ j : J,∑ _c : C,2*Real.exp (-2*(t j)^2/(b j*∑ e,w j e)))&lt;1) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∃ σ : E → C,∀ j c,|(∑ e,if σ e=c then w j e else 0)-(∑ e,w j e)/Fintype.card C|&lt;t j := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let μ := FiniteLaw.pi (fun _ : E=&gt;FiniteLaw.uniform C)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let A : J×C → (E → C) → Prop := fun jc σ=&gt;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     t jc.1≤|(∑ e,if σ e=jc.2 then w jc.1 e else 0)-(∑ e,w jc.1 e)/Fintype.card C|</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let p : J×C → ℝ := fun jc=&gt;2*Real.exp (-2*(t jc.1)^2/(b jc.1*∑ e,w jc.1 e))</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hp : (∑ jc,p jc)&lt;1 := by simpa only [p,Fintype.sum_prod_type] using hsmall</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   obtain ⟨σ,_hσ,hgood⟩ := finiteLaw_common_event_exists μ Finset.univ A p</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (by intro jc _;exact weightedEdgeColoring_tail (w jc.1) (hw jc.1) (hW jc.1) (b jc.1) (hb jc.1) jc.2 (t jc.1) (ht jc.1)) hp</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   exact ⟨σ,fun j c=&gt;lt_of_not_ge (hgood (j,c) (Finset.mem_univ _))⟩</span>
+<span id="L53"><a href="#L53" class="ln">  53</a> </span>
+<span id="L54"><a href="#L54" class="ln">  54</a> end Oberwolfach</span></pre></html>

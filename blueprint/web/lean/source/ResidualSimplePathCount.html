@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ResidualSimplePathCount.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ResidualSimplePathCount.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FactorWalkOrderedEdges</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Removing a simple path deletes one more edge than internal vertices. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> variable {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem simple_path_edges_and_internal_vertices (F:SimpleGraph V) {u v:V}</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (p:F.Walk u v) (hp:p.IsPath) (huv:u≠v):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     p.edges.toFinset.card = (p.support.toFinset \ {u,v}).card + 1 := by</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hs : p.support.toFinset.card=p.length+1 := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     rw [List.toFinset_card_of_nodup hp.support_nodup, p.length_support]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have he : p.edges.toFinset.card=p.length := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     rw [List.toFinset_card_of_nodup hp.isTrail.edges_nodup, p.length_edges]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hsub : ({u,v}:Finset V)⊆p.support.toFinset := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     intro x hx</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     simp only [Finset.mem_insert,Finset.mem_singleton] at hx</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     rcases hx with rfl|rfl</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     · simpa using p.start_mem_support</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     · simpa using p.end_mem_support</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hpair : ({u,v}:Finset V).card=2 := by simp [huv]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hdiff := Finset.card_sdiff_add_card_eq_card hsub</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   rw [hpair,hs] at hdiff</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   omega</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> end Oberwolfach</span></pre></html>

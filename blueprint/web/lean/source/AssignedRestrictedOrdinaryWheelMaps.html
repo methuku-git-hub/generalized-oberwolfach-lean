@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AssignedRestrictedOrdinaryWheelMaps.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AssignedRestrictedOrdinaryWheelMaps.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryComponentWheelFamilyMaps</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryRestrictedWheelDisjointness</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Maps for assigned components of the same hub are vertex-disjoint when</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> their sampled typed resource sets form a matching. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 6000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {n:ℕ} {U A X:Type} [Fintype U] [DecidableEq U] [Fintype X] [DecidableEq X]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem assigned_restricted_ordinary_wheel_maps</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (π:Equiv.Perm (Fin n)) (b:ℕ) (r:A→ℕ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (e:X↪(((Fin n×Fin n)⊕(Fin n×Fin n))⊕(Bool×Fin n×U)))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (Q:∀a,RestrictedResource (fun W:OrderedOrdinaryWheel (U:=U) π b (r a)=&gt;</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (orderedOrdinaryResources W).map ordinaryMarkedResourceEmbedding) e)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (C:∀a,(F (Q a).val.2).ConnectedComponent)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hsize:∀a,Fintype.card (C a)=r a)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hdis:∀a a&#x27;,a≠a&#x27;→(Q a).val.2=(Q a&#x27;).val.2→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       Disjoint (restrictedResourceSet (fun W:OrderedOrdinaryWheel (U:=U) π b (r a)=&gt;</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         (orderedOrdinaryResources W).map ordinaryMarkedResourceEmbedding) e (Q a))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         (restrictedResourceSet (fun W:OrderedOrdinaryWheel (U:=U) π b (r a&#x27;)=&gt;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (orderedOrdinaryResources W).map ordinaryMarkedResourceEmbedding) e (Q a&#x27;))):</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∃ f:∀a,(C a)↪Fin n,</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀a x,∃i:Fin (r a),f a x=(Q a).val.1.val i) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀a,∀i:Fin (r a),∃x:C a,f a x=(Q a).val.1.val i) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀a x y,(C a).toSimpleGraph.Adj x y→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         ∃i:Fin (r a),(f a x=(Q a).val.1.val i ∧ f a y=(Q a).val.1.val (cycleNext i)) ∨</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>           (f a y=(Q a).val.1.val i ∧ f a x=(Q a).val.1.val (cycleNext i))) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀a x,Sum.inr (f a x,(Q a).val.2)∈orderedOrdinaryResources (Q a).val) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀a a&#x27;,a≠a&#x27;→(Q a).val.2=(Q a&#x27;).val.2→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         Disjoint (Finset.univ.image (f a)) (Finset.univ.image (f a&#x27;))) :=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   apply ordinary_component_wheel_family_maps F hF π b (fun a=&gt;(Q a).val.2) r</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (fun a=&gt;(Q a).val) C hsize (fun _=&gt;rfl)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   intro a a&#x27; hne heq</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   apply ordinary_restricted_wheels_original_resources_disjoint π b (r a) (r a&#x27;) e (Q a) (Q a&#x27;)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   convert hdis a a&#x27; hne heq using 1 &lt;;&gt; congr 3 &lt;;&gt; exact Subsingleton.elim _ _</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

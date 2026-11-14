@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongCapacityAutomaticMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongCapacityAutomaticMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongCompatibleParameterChoices</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The fixed cutoff inequality persists at K+1, and the remaining order</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> condition holds for all sufficiently large n. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open Filter</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem long_capacity_cutoff_succ (m d K:ℕ) (hK:0&lt;K) (θ:ℝ)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (h:5/(((m:ℝ)+1)*(d:ℝ)+5)+((m:ℝ)+1)*(d:ℝ)/(K:ℝ)≤θ/2):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     5/(((m:ℝ)+1)*(d:ℝ)+5)+((m:ℝ)+1)*(d:ℝ)/(K+1)≤θ/2:=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hKpos:(0:ℝ)&lt;K:=by exact_mod_cast hK</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hquot:((m:ℝ)+1)*(d:ℝ)/((K:ℝ)+1)≤((m:ℝ)+1)*(d:ℝ)/(K:ℝ):=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     apply div_le_div_of_nonneg_left (by positivity) hKpos</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     linarith</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   linarith</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem long_capacity_large_order (m:ℕ) (θ:ℝ) (hθ:0&lt;θ):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃N:ℕ,∀n≥N,8*((m:ℝ)+1)/θ&lt;(n:ℝ)^((1:ℝ)/4):=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have ht:Filter.Tendsto (fun n:ℕ=&gt;(n:ℝ)^((1:ℝ)/4)) Filter.atTop Filter.atTop:=</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (tendsto_rpow_atTop (y:=(1:ℝ)/4) (by norm_num)).comp tendsto_natCast_atTop_atTop</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hh:=ht.eventually (eventually_gt_atTop (8*((m:ℝ)+1)/θ))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   exact Filter.eventually_atTop.1 hh</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> end Oberwolfach</span></pre></html>

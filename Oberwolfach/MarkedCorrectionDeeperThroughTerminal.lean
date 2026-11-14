@@ -1,0 +1,52 @@
+module
+
+public import Oberwolfach.MarkedVortexDeeperBoundsWithTerminal
+public import Oberwolfach.MarkedVortexCorrectionScaledFirstBalance
+public import Oberwolfach.MarkedLevelFiniteBalanceBound
+public import Oberwolfach.MarkedActualVortexBalanceProperty
+
+@[expose] public section
+/-! The deeper-domain event transfers to the same corrected sample at each
+later vortex level, together with all previously established level facts. -/
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxSize 16384
+set_option maxHeartbeats 22000000
+noncomputable section
+namespace Oberwolfach
+attribute [local instance] Classical.propDecidable
+variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]
+  [LinearOrder V] [Nonempty V] [DecidableEq U]
+
+theorem marked_correction_deeper_facts_through_terminal
+    (P:SimpleGraph V) (π:Equiv.Perm V) (d r size a₀ b₀ e₀ f₀:ℕ) (εAbs ζ:ℝ)
+    (D m:ℕ) (β ε:ℝ) (Q:Vortex U P D β ε m) (L:ℕ)
+    (hpres:∀i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i)
+    (hterminal:L+1=Q.length) (η epsBal ζBal:ℝ) (heps:0≤epsBal) (hζ:0≤ζBal) (a:Γ) (j:Color)
+    (z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a)
+    (hDeep:L=0 ∨ MarkedActualVortexBalanceProperty Q π hpres d (r+4) (L-1) a j epsBal ζBal
+      (markedVortexDeeperVertices Q) (markedVortexDeeperHubs Q) z)
+    (C:∀i,RawMarkedOutcome (markedVortexVertexType Q i) (markedVortexHubType Q i) Γ Color →
+      (Bool→markedVortexVertexType Q i→markedVortexHubType Q i→Prop)→Prop)
+    (hcor:
+      let H:=retainedRawMarkedSpokes π d (fun e=>z.1 (Sum.inr e)) a
+        (startRetentionMinimum (rawStartHubSet π d (fun e=>z.1 (Sum.inr e)) a)) z.2 a j;
+      MarkedVortexCorrectionWithScaledFirstBalance P π d r size a₀ b₀ e₀ f₀ εAbs ζ z.1 H D m β ε Q L C η):
+    let H:=retainedRawMarkedSpokes π d (fun e=>z.1 (Sum.inr e)) a
+      (startRetentionMinimum (rawStartHubSet π d (fun e=>z.1 (Sum.inr e)) a)) z.2 a j
+    let B:=fun i σi Hi=>C i σi Hi ∧
+      MarkedLevelFiniteBalanceBound (P.comap (markedVortexVertexEmbedding Q i))
+        (markedVortexPermutation Q π hpres i) d (r+4)
+        (markedVortexDeeperVertices Q i) (markedVortexDeeperHubs Q i)
+        ((epsBal+((r+4)+2:ℕ)*ζBal)*(markedVortexDeeperVertices Q i).card) σi Hi;
+    MarkedVortexCorrectionWithScaledFirstBalance P π d r size a₀ b₀ e₀ f₀ εAbs ζ z.1 H D m β ε Q L B η := by
+  intro H B
+  have hbase:=marked_vortex_deeper_bounds_with_terminal P π D m β ε Q hpres d (r+4) L a j epsBal ζBal heps hζ hterminal z hDeep
+  obtain ⟨DA,DS,hsub,havoid,hrim,hspoke,hdiv,habs,hbalance,hrestr,hfacts,hfirst⟩:=hcor
+  refine ⟨DA,DS,hsub,havoid,hrim,hspoke,hdiv,habs,hbalance,hrestr,?_,hfirst⟩
+  intro i hi hli
+  have hc:=hfacts i hi hli
+  refine ⟨hc,?_⟩
+  rw [(hrestr i hi).1,(hrestr i hi).2]
+  exact hbase i hli
+end Oberwolfach

@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVertexFamilyPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVertexFamilyPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.DirectedIncidenceHubAssignments</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedActualWheelPacking</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Actual vertex-wheel packing after a possibly noninjective row map.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The two ends of each mapped original arc are distinct; together with the</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> incidence permutations, this proves injectivity of the root--hub pairs. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 9000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U E K X A:Type} [Fintype V] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {tail head:E→V} {ktail khead:K→V} {π:Equiv.Perm V} {b:ℕ} {H₀ HK:V→U→Prop}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a>  theorem marked_vertex_wheel_family_packing (n:ℕ) (src dst:A→X)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (f:X→V) (hub:A→U) (hhub:Function.Injective hub)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hloop:∀ e,f (dst e)≠f (src e))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (σ:∀ v,Equiv.Perm (DirectedIncidence src dst v))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (p:(Σ v,DirectedIncidence src dst v)→(Fin (n+1)→V))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (j:(Σ v,DirectedIncidence src dst v)→Bool) (R:Finset V)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (W:(Σ v,DirectedIncidence src dst v)→MarkedWheel tail head ktail khead (n+1) π b H₀ HK)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hW:∀ i a,(W i).1.val a=rootedCycleOrder (markedRootOrder (n+1) (j i)) (f i.1) (p i) a)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hWu:∀ i,(W i).2.val=hub (directedIncidenceEdge (σ i.1 i.2)))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hroot:∀ i:Σ v,DirectedIncidence src dst v,f i.1∈R)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hfree:∀ i a,p i a∉R)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hdis:∀ i k,i≠k→Disjoint (Finset.univ.image (p i)) (Finset.univ.image (p k))):</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∀ i k,i≠k→Disjoint (markedWheelPhysicalResources (W i)) (markedWheelPhysicalResources (W k)):=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   apply marked_actual_spoke_wheel_packing n hp p (fun i=&gt;f i.1) j R W hW hroot hfree hdis</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro i k he</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   apply directed_incidence_assigned_hubs_injective f hub hhub hloop σ</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   simpa only [hWu] using he</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> end Oberwolfach</span></pre></html>

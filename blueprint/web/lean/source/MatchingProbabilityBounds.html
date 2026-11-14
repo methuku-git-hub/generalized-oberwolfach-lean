@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MatchingProbabilityBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MatchingProbabilityBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MatchingIntegerScales</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Analysis.Complex.ExponentialBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Scalar estimates for the three common events in weighted matching.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The estimates apply to the original weight functions; no random normalisation</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> or outcome-dependent test family is introduced. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem matching_exp_quadratic {x : ℝ} (hx : 0≤x) (hx1 : x≤1) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     Real.exp x≤1+x+x^2 := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hh := Real.exp_bound&#x27; hx hx1 (n:=2) (by norm_num)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   norm_num [Finset.sum_range_succ] at hh</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   nlinarith [sq_nonneg x]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem matching_degree_exponent {η h μ d : ℝ} (hη : 0&lt;η) (hη1 : η≤1/100)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (_hh : 0≤h) (hμ : μ≤(1+3*η)*h^4) (hd : (1+4*η)*h^4≤d) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     μ*(Real.exp (η/4)-1)-(η/4)*(d+1)≤-η^2*h^4/8 := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have he := matching_exp_quadratic (show 0≤η/4 by positivity) (show η/4≤1 by linarith)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hep : 0≤Real.exp (η/4)-1 := sub_nonneg.mpr (Real.one_le_exp_iff.mpr (by positivity))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hm := mul_le_mul_of_nonneg_right hμ hep</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have he&#x27; := mul_le_mul_of_nonneg_left (show Real.exp (η/4)-1≤η/4+(η/4)^2 by linarith)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (show 0≤(1+3*η)*h^4 by positivity)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hd&#x27; := mul_le_mul_of_nonneg_left hd (show 0≤η/4 by positivity)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hηsq : 3*η^3≤η^2 := by nlinarith [sq_nonneg η]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hc := mul_le_mul_of_nonneg_right hηsq (show 0≤h^4 by positivity)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   nlinarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem matching_codegree_exponent {h μ : ℝ} (hh : 2≤h) (hμ : μ≤1) :</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     μ*(Real.exp 1-1)-(h+1)≤-h/2 := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hep : 0≤Real.exp 1-1 := sub_nonneg.mpr (Real.one_le_exp_iff.mpr (by norm_num))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hm := mul_le_mul_of_nonneg_right hμ hep</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have he := Real.exp_one_lt_three</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   nlinarith</span>
+<span id="L38"><a href="#L38" class="ln">  38</a> </span>
+<span id="L39"><a href="#L39" class="ln">  39</a> theorem matching_weight_exponent {η z μ b : ℝ} (hη : 0≤η) (hη1 : η≤1/100)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hz : 0≤z) (hb : 0&lt;b) (hμ : μ≤(1+η)*z) :</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (μ*(Real.exp (1/4)-1)-(1/4)*(2*z))/b≤-z/(8*b) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have he := matching_exp_quadratic (show (0 : ℝ)≤1/4 by norm_num) (show (1 : ℝ)/4≤1 by norm_num)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hep : 0≤Real.exp (1/4)-1 := sub_nonneg.mpr (Real.one_le_exp_iff.mpr (by norm_num))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hm := mul_le_mul_of_nonneg_right hμ hep</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have he&#x27; := mul_le_mul_of_nonneg_left (show Real.exp (1/4)-1≤5/16 by linarith)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (show 0≤(1+η)*z by positivity)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hηz := mul_le_mul_of_nonneg_right hη1 hz</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   apply (div_le_iff₀ hb).mpr</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   field_simp</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   nlinarith</span>
+<span id="L51"><a href="#L51" class="ln">  51</a> </span>
+<span id="L52"><a href="#L52" class="ln">  52</a> theorem matching_normalization_error {x W D E η : ℝ}</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hW : 0≤W) (hD : 0&lt;D) (hη : 0≤η) (hDE : D≤E) (hED : E≤(1+8*η)*D)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hx : |x-W/E|&lt;η*W/D+η*W/E) :</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     |x-W/D|&lt;10*η*W/D := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hE : 0&lt;E := hD.trans_le hDE</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hdiv : W/E≤W/D := div_le_div_of_nonneg_left hW hD hDE</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hdiff : W/D-W/E≤8*η*W/D := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     apply (le_div_iff₀ hD).mpr</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have haux : E-D≤8*η*E := by nlinarith</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hm := mul_le_mul_of_nonneg_left haux hW</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     apply (mul_le_mul_iff_of_pos_right hE).mp</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     field_simp</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     nlinarith</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   calc</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     _ ≤ |x-W/E|+|W/E-W/D| := by convert abs_add_le (x-W/E) (W/E-W/D) using 1 &lt;;&gt; ring</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     _ &lt; (η*W/D+η*W/E)+8*η*W/D := add_lt_add_of_lt_of_le hx (by rw [abs_of_nonpos (by linarith)];linarith)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     _ ≤ 10*η*W/D := by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       have hm := mul_le_mul_of_nonneg_left hdiv hη</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       simp only [← mul_div_assoc] at hm</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       convert add_le_add_right (add_le_add_left hm (η*W/D)) (8*η*W/D) using 1 &lt;;&gt; ring</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> </span>
+<span id="L73"><a href="#L73" class="ln">  73</a> end Oberwolfach</span></pre></html>

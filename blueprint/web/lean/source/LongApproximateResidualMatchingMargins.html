@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongApproximateResidualMatchingMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongApproximateResidualMatchingMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongApproximateUnusedFromCommonIncidence</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The same surviving matching&#x27;s incidence and deletion bounds supply the</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> approximate residual-degree budget after the order is chosen. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem long_approximate_residual_matching_margins</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (lam:ℝ) (hlam:0&lt;lam) (d:ℕ):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∃N:ℕ,∀n:ℕ,N≤n→∀ (U C:Type) [Fintype U] [DecidableEq U] [Fintype C] [DecidableEq C]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       (P Del:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n))</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       (σ:∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Bool Bool e)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (g j:Bool) (R:C→Finset (LongRawHubResource n U)) (a γ δ:ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (hγ:0≤γ) (hCardU:Fintype.card U≤n) (hDel:∀x,(Del.degree x:ℝ)≤δ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (hsmall:2*max a (4*γ)≤lam/3) (hδ:δ≤(lam/3)*n),</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let raw:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=&gt;rawExpandedApproximateCollapse e (σ e)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let T:=bernoulliVertexSet (longRawHubState P π d raw g j)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let S:=longRawSurvivingResources P π d raw g j Del.edgeFinset</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let q:=survivingCandidateEmbedding R S T (long_raw_surviving_resources_subset P π d raw g j Del.edgeFinset)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let φ:=markedRawSampledPhysicalEmbedding P π d raw g j</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀M:Finset (RestrictedResource R (Function.Embedding.subtype (·∈S))),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀i,((longRawIncidenceSet S i\M.biUnion (restrictedResourceSet R (Function.Embedding.subtype (·∈S)))).card:ℝ)≤</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       max (a*n) (γ*(longRawIncidenceSet S i).card))→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀x,((longPhysicalStateGraph P σ {2,3}\physicalRimCandidateUnion φ</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (restrictedResourceSet R (Function.Embedding.subtype (·∈T))) (M.map q)).degree x:ℝ)≤lam*n:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   obtain ⟨N,hN⟩:=exists_nat_gt (3*((6*d+2:ℕ):ℝ)/lam)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨N,?_⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro n hn U C _ _ _ _ P Del π σ g j R a γ δ hγ hCardU hDel hsmall hδ raw T S q φ M hmatch x</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hnR:(N:ℝ)≤n:=by exact_mod_cast hn</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hlin:((6*d+2:ℕ):ℝ)≤(lam/3)*n:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hh:3*((6*d+2:ℕ):ℝ)/lam≤n:=(le_of_lt hN).trans hnR</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hh&#x27;:3*((6*d+2:ℕ):ℝ)≤(n:ℝ)*lam:=(div_le_iff₀ hlam).mp hh</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     linarith</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hsmall&#x27;:2*max a (4*γ)*(n:ℝ)≤(lam/3)*n:=</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     mul_le_mul_of_nonneg_right hsmall (Nat.cast_nonneg n)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hh:=long_approximate_unused_degree_from_common_incidence P Del π d σ g j R a γ δ hγ hCardU hDel M hmatch x</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   linarith</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

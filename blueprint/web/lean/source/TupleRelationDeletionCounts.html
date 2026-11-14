@@ -1,0 +1,133 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TupleRelationDeletionCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TupleRelationDeletionCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSpokeCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.BipartiteIntersectionEstimates</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.FiniteConfigurationLoss</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Counting changed binary constraints in tuples, with free or fixed</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> endpoints. These counts do not require the tuples to be graph embeddings. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 1600000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {I V : Type*} [Fintype I] [Fintype V] [DecidableEq I] [DecidableEq V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem tuple_relation_indicator_count (D : V → V → Prop) (i j : I) (hij : i≠j) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∑ z : I → V,if D (z i) (z j) then (1:ℝ) else 0)=</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∑ x,∑ y,bipAdj D x y)*(Fintype.card V:ℝ)^(Fintype.card I-2) := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have expand (z : I → V) : (if D (z i) (z j) then (1:ℝ) else 0)=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       ∑ x,∑ y,if D x y then (if z i=x ∧ z j=y then (1:ℝ) else 0) else 0 := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     have he (x y : V) : (if D x y then (if z i=x ∧ z j=y then (1:ℝ) else 0) else 0)=</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         if x=z i then (if y=z j then bipAdj D x y else 0) else 0 := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       by_cases hx : x=z i &lt;;&gt; by_cases hy : y=z j &lt;;&gt; by_cases hd : D x y &lt;;&gt; simp_all [bipAdj,eq_comm]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     simp only [he]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     simp [bipAdj]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   simp_rw [expand]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   rw [Finset.sum_comm]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   calc</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     _ = ∑ x,∑ y,∑ z : I → V,if D x y then (if z i=x ∧ z j=y then (1:ℝ) else 0) else 0 := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       apply Finset.sum_congr rfl</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       intro x _</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       exact Finset.sum_comm</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     _ = ∑ x,∑ y,bipAdj D x y*(Fintype.card V:ℝ)^(Fintype.card I-2) := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       apply Finset.sum_congr rfl</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       intro x _</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       apply Finset.sum_congr rfl</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       intro y _</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       by_cases hd : D x y</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       · simp only [hd,ite_true,bipAdj,one_mul]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         convert two_position_indicator_total i j hij x y using 1 &lt;;&gt; congr!</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       · simp only [hd,ite_false,bipAdj,zero_mul,Finset.sum_const_zero]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     _ = _ := by simp_rw [← Finset.sum_mul]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> </span>
+<span id="L45"><a href="#L45" class="ln">  45</a> theorem tuple_relation_deletion_count (D : V → V → Prop) (i j : I) (hij : i≠j)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (d : ℝ) (hD : ∀ x,(∑ y,bipAdj D x y)≤d) :</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (∑ z : I → V,if D (z i) (z j) then (1:ℝ) else 0)≤</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       d*(Fintype.card V:ℝ)^(Fintype.card I-1) := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   rw [tuple_relation_indicator_count D i j hij]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hh : (∑ x,∑ y,bipAdj D x y)≤(Fintype.card V:ℝ)*d := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     calc</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       _ ≤ ∑ _ : V,d := Finset.sum_le_sum (fun x _=&gt;hD x)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       _ = _ := by simp</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hI : 2≤Fintype.card I := Fintype.one_lt_card_iff.mpr ⟨i,j,hij⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have he : Fintype.card I-1=(Fintype.card I-2)+1 := by omega</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   calc</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     _ ≤ ((Fintype.card V:ℝ)*d)*(Fintype.card V:ℝ)^(Fintype.card I-2) :=</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       mul_le_mul_of_nonneg_right hh (by positivity)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     _ = _ := by rw [he,pow_succ];ring</span>
+<span id="L60"><a href="#L60" class="ln">  60</a> </span>
+<span id="L61"><a href="#L61" class="ln">  61</a> theorem tuple_unary_indicator_count (P : V → Prop) (i : I) :</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (∑ z : I → V,if P (z i) then (1:ℝ) else 0)=</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (∑ x,if P x then (1:ℝ) else 0)*(Fintype.card V:ℝ)^(Fintype.card I-1) := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have expand (z : I → V) : (if P (z i) then (1:ℝ) else 0)=</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       ∑ x,if P x then (if z i=x then (1:ℝ) else 0) else 0 := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have he (x : V) : (if P x then (if z i=x then (1:ℝ) else 0) else 0)=</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         if x=z i then (if P x then (1:ℝ) else 0) else 0 := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       by_cases hx : x=z i &lt;;&gt; by_cases hp : P x &lt;;&gt; simp_all [eq_comm]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     simp only [he]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     simp</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   simp_rw [expand]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   rw [Finset.sum_comm]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   calc</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     _ = ∑ x,(if P x then (1:ℝ) else 0)*(Fintype.card V:ℝ)^(Fintype.card I-1) := by</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       apply Finset.sum_congr rfl</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       intro x _</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       by_cases hp : P x</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       · simp only [hp,ite_true,one_mul]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>         convert one_position_indicator_total i x using 1 &lt;;&gt; congr!</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       · simp only [hp,ite_false,zero_mul,Finset.sum_const_zero]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     _ = _ := (Finset.sum_mul _ _ _).symm</span>
+<span id="L82"><a href="#L82" class="ln">  82</a> </span>
+<span id="L83"><a href="#L83" class="ln">  83</a> theorem tuple_unary_deletion_count (P : V → Prop) (i : I) (d : ℝ)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     (hP : (∑ x,if P x then (1:ℝ) else 0)≤d) :</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     (∑ z : I → V,if P (z i) then (1:ℝ) else 0)≤</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       d*(Fintype.card V:ℝ)^(Fintype.card I-1) := by</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   rw [tuple_unary_indicator_count P i]</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   exact mul_le_mul_of_nonneg_right hP (by positivity)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a> </span>
+<span id="L90"><a href="#L90" class="ln">  90</a> theorem finite_predicate_loss_union {A J : Type*} [Fintype A] [Fintype J]</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     (P Q : A → Prop) (bad : J → A → Prop)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     (hbad : ∀ a,P a → ¬Q a → ∃ j,bad j a) :</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     (Fintype.card {a // P a}:ℝ)-Fintype.card {a // Q a}≤</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>       ∑ j,∑ a,if bad j a then (1:ℝ) else 0 := by</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   have he (T : A → Prop) : (Fintype.card {a // T a}:ℝ)=∑ a,if T a then (1:ℝ) else 0 := by</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     simp only [Fintype.card_subtype,Finset.card_filter,Nat.cast_sum,Nat.cast_ite,Nat.cast_one,Nat.cast_zero]</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   rw [he P,he Q,← Finset.sum_sub_distrib,Finset.sum_comm]</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   apply Finset.sum_le_sum</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   intro a _</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   have hnon : 0≤∑ j,if bad j a then (1:ℝ) else 0 :=</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     Finset.sum_nonneg (fun j _=&gt;by split_ifs &lt;;&gt; norm_num)</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   by_cases hp : P a</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   · by_cases hq : Q a</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     · simpa only [hp,hq,ite_true,sub_self] using hnon</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     · have hh := finite_exists_indicator_le_sum (fun j=&gt;bad j a)</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       have hex := hbad a hp hq</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>       simpa only [hp,hq,hex,ite_true,ite_false,sub_zero] using hh</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>   · by_cases hq : Q a</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     · simp only [hp,hq,ite_true,ite_false,zero_sub];linarith</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     · simpa only [hp,hq,ite_false,sub_self] using hnon</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a> </span>
+<span id="L112"><a href="#L112" class="ln"> 112</a> theorem finite_constraint_loss {A J : Type*} [Fintype A] [Fintype J]</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     (base : A → Prop) (P Q : J → A → Prop) (M : ℝ)</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     (hM : ∀ j,(∑ a,if P j a ∧ ¬Q j a then (1:ℝ) else 0)≤M) :</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     (Fintype.card {a // base a ∧ ∀ j,P j a}:ℝ)-</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>       Fintype.card {a // base a ∧ ∀ j,Q j a}≤(Fintype.card J:ℝ)*M := by</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>   have hh := finite_predicate_loss_union (fun a=&gt;base a ∧ ∀ j,P j a)</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     (fun a=&gt;base a ∧ ∀ j,Q j a) (fun j a=&gt;P j a ∧ ¬Q j a) (by</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>       intro a hp hq</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>       have hnot : ¬∀ j,Q j a := fun h=&gt;hq ⟨hp.1,h⟩</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>       push_neg at hnot</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>       obtain ⟨j,hj⟩ := hnot</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>       exact ⟨j,hp.2 j,hj⟩)</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>   have hbound : (∑ j,∑ a,if P j a ∧ ¬Q j a then (1:ℝ) else 0)≤(Fintype.card J:ℝ)*M := by</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     calc</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>       _ ≤ ∑ _j : J,M := Finset.sum_le_sum (fun j _=&gt;hM j)</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>       _ = _ := by simp</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>   convert (hh.trans (by convert hbound using 1 &lt;;&gt; congr!)) using 1 &lt;;&gt; congr!</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a> </span>
+<span id="L130"><a href="#L130" class="ln"> 130</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ResidualSpokeCardinality.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ResidualSpokeCardinality.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Combinatorics.SimpleGraph.Finite</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Count the residual spoke set from the complement embedding, before any</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> completion of the reserved paths. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> def complementDomainEmbedding {X:Type*} [DecidableEq X] {A D:Finset X} (hDA:D⊆A) :</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {x // x∉A}↪{x // x∉D} where</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   toFun x:=⟨x.val,fun hx=&gt;x.property (hDA hx)⟩</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   inj&#x27; := by intro x y h;apply Subtype.ext;exact congrArg (fun z:{x // x∉D}=&gt;z.val) h</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def endpointDomainEmbedding {X:Type*} [DecidableEq X] {E D:Finset X} (hED:Disjoint E D) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {x // x∈E}↪{x // x∉D} where</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   toFun x:=⟨x.val,fun hx=&gt;Finset.disjoint_left.mp hED x.property hx⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   inj&#x27; := by intro x y h;apply Subtype.ext;exact congrArg (fun z:{x // x∉D}=&gt;z.val) h</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem residual_spoke_card_from_complement_embedding</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     {X V:Type*} [Fintype X] [DecidableEq X] [Fintype V] [DecidableEq V]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (A D E:Finset X) (hDA:D⊆A) (hEA:E⊆A) (hED:Disjoint E D)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (fC:{x // x∉D}↪V) (hcard:Fintype.card X=Fintype.card V)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (R Z B:Finset V)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hZ:Z=Finset.univ.image ((complementDomainEmbedding hDA).trans fC))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hB:B=Finset.univ.image ((endpointDomainEmbedding hED).trans fC))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hR:R=Finset.univ\(Z∪B)) : R.card=A.card-E.card := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   classical</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hZcard:Z.card=Fintype.card X-A.card:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     rw [hZ,Finset.card_image_of_injective _ ((complementDomainEmbedding hDA).trans fC).injective]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     simpa using Fintype.card_subtype_compl (fun x:X=&gt;x∈A)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hBcard:B.card=E.card:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     rw [hB,Finset.card_image_of_injective _ ((endpointDomainEmbedding hED).trans fC).injective]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     simp</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hZB:Disjoint Z B:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     rw [hZ,hB]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     intro v hvz hvb</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     obtain ⟨x,_,hx⟩:=Finset.mem_image.mp hvz</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     obtain ⟨y,_,hy⟩:=Finset.mem_image.mp hvb</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have heq:fC (complementDomainEmbedding hDA x)=fC (endpointDomainEmbedding hED y):=hx.trans hy.symm</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hxy:complementDomainEmbedding hDA x=endpointDomainEmbedding hED y:=fC.injective heq</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hval:x.val=y.val:=congrArg (fun z:{x // x∉D}=&gt;z.val) hxy</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     exact x.property (hval.symm ▸ hEA y.property)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   rw [hR,Finset.card_sdiff_of_subset (Finset.subset_univ _),Finset.card_univ,</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     Finset.card_union_of_disjoint hZB,hZcard,hBcard,←hcard]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hA:A.card≤Fintype.card X:=Finset.card_le_univ A</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hE:E.card≤A.card:=Finset.card_le_card hEA</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   omega</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> end Oberwolfach</span></pre></html>

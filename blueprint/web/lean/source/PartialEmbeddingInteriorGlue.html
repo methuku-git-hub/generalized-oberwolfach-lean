@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PartialEmbeddingInteriorGlue.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PartialEmbeddingInteriorGlue.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Combinatorics.SimpleGraph.Finite</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Glue a reserved-path map to a compatible embedding of its complement.</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> Only neighbours of the strict interior need to lie in the reserved domain. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem partial_embeddings_glue_across_interior</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {X Y:Type*} [DecidableEq X] (G:SimpleGraph X) (H:SimpleGraph Y)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (A D:Finset X) (hDA:D⊆A)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (fA:{x // x∈A}↪Y) (fC:{x // x∉D}↪Y)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hA:∀x y (hx:x∈A) (hy:y∈A),G.Adj x y→H.Adj (fA ⟨x,hx⟩) (fA ⟨y,hy⟩))</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hC:∀x y (hx:x∉D) (hy:y∉D),G.Adj x y→H.Adj (fC ⟨x,hx⟩) (fC ⟨y,hy⟩))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hbound:∀x (hx:x∈A) (hxD:x∉D),fA ⟨x,hx⟩=fC ⟨x,hxD⟩)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hdis:∀x (hx:x∈D) y (hy:y∉D),fA ⟨x,hDA hx⟩≠fC ⟨y,hy⟩)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hneigh:∀x,x∈D→∀y,G.Adj x y→y∈A) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃f:X↪Y,(∀x (hx:x∈D),f x=fA ⟨x,hDA hx⟩) ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∀x (hx:x∉D),f x=fC ⟨x,hx⟩) ∧ (∀x y,G.Adj x y→H.Adj (f x) (f y)) := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   classical</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let f:X→Y:=fun x=&gt;if hx:x∈D then fA ⟨x,hDA hx⟩ else fC ⟨x,hx⟩</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hf:Function.Injective f:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     intro x y hxy</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     by_cases hx:x∈D &lt;;&gt; by_cases hy:y∈D</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     · have h:fA ⟨x,hDA hx⟩=fA ⟨y,hDA hy⟩:=by simpa [f,hx,hy] using hxy</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       exact congrArg Subtype.val (fA.injective h)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     · have h:fA ⟨x,hDA hx⟩=fC ⟨y,hy⟩:=by simpa [f,hx,hy] using hxy</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       exact False.elim (hdis x hx y hy h)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     · have h:fA ⟨y,hDA hy⟩=fC ⟨x,hx⟩:=by simpa [f,hx,hy] using hxy.symm</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       exact False.elim (hdis y hy x hx h)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     · have h:fC ⟨x,hx⟩=fC ⟨y,hy⟩:=by simpa [f,hx,hy] using hxy</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       exact congrArg Subtype.val (fC.injective h)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   refine ⟨⟨f,hf⟩,?_,?_,?_⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   · intro x hx; simp [f,hx]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · intro x hx; simp [f,hx]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · intro x y hxy</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     by_cases hx:x∈D &lt;;&gt; by_cases hy:y∈D</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     · simpa [f,hx,hy] using hA x y (hDA hx) (hDA hy) hxy</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · have hyA:=hneigh x hx y hxy</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       have h:=hA x y (hDA hx) hyA hxy</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       rw [hbound y hyA hy] at h</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       simpa [f,hx,hy] using h</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     · have hxA:=hneigh y hy x hxy.symm</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       have h:=hA y x (hDA hy) hxA hxy.symm</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       rw [hbound x hxA hx] at h</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       simpa [f,hx,hy] using h.symm</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     · simpa [f,hx,hy] using hC x y hx hy hxy</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> end Oberwolfach</span></pre></html>

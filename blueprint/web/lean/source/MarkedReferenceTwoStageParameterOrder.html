@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceTwoStageParameterOrder.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceTwoStageParameterOrder.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceTwoStageInputs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Choose the configuration parameter before applying the two-stage</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> packing theorem and the later error tolerance afterwards. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem marked_reference_choose_two_stage_configuration_parameter</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (betaA t:ℝ) (hbetaA:0&lt;betaA) (ht:0&lt;t):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     ∃ beta:ℝ,0&lt;beta∧beta≤t/2∧2*beta≤3*(min betaA (t/4)):=by</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>   let beta:=min (betaA/4) (t/8)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   have hb:0&lt;beta:=by dsimp [beta];positivity</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hbA:beta≤betaA/4:=min_le_left _ _</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hbt:beta≤t/8:=min_le_right _ _</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   refine ⟨beta,hb,?_,?_⟩</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   · linarith</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   · by_cases h:betaA≤t/4</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     · rw [min_eq_left h];linarith</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     · rw [min_eq_right (le_of_not_ge h)];linarith</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> theorem marked_reference_choose_two_stage_error</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (eps₁ eps₂ theta:ℝ) (h₁:0&lt;eps₁) (h₂:0&lt;eps₂) (hθ:0&lt;theta):</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∃ kappa thetaDeep:ℝ,0&lt;kappa∧0&lt;thetaDeep∧kappa≤eps₂∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       kappa/4≤min eps₁ eps₂∧thetaDeep/4≤theta/2:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let kappa:=min eps₁ eps₂</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   let thetaDeep:=theta</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hk:0&lt;kappa:=by dsimp [kappa];positivity</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   refine ⟨kappa,thetaDeep,hk,hθ,min_le_right _ _,?_,?_⟩ &lt;;&gt; linarith</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> end Oberwolfach</span></pre></html>

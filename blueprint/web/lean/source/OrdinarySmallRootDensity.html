@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinarySmallRootDensity.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinarySmallRootDensity.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PairHubDensityBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Density products for at most two rim and two hub roots, including repetitions. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> open scoped BigOperators</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> variable {V U Color:Type} [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem ordinary_small_root_density (p pmin smin:ℝ) (s:U→Color→ℝ) (j:Color)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (hpmin:0&lt;pmin) (hp:pmin≤p) (hp1:p≤1)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hsmin:0&lt;smin) (hsmin1:smin≤1) (hs:∀ u,smin≤s u j):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∀ (S:Finset V) (J:Finset U),S.card≤2→J.card≤2→</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       pmin^2*smin^2≤p^S.card*(∏ u∈J,s u j) := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   intro S J hS hJ</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hpmin1:pmin≤1:=hp.trans hp1</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hpowp:pmin^2≤p^S.card:=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (pow_le_pow_of_le_one hpmin.le hpmin1 hS).trans (pow_le_pow_left₀ hpmin.le hp _)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hpowS:smin^2≤smin^J.card:=pow_le_pow_of_le_one hsmin.le hsmin1 hJ</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hprod:smin^J.card≤∏ u∈J,s u j:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     rw [←Finset.prod_const]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     exact Finset.prod_le_prod₀ (fun _ _=&gt;hsmin.le) (fun u _=&gt;hs u)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   exact mul_le_mul hpowp (hpowS.trans hprod) (pow_nonneg hsmin.le _) (pow_nonneg (hpmin.le.trans hp) _)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> end Oberwolfach</span></pre></html>

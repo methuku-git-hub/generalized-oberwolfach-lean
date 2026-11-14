@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ReservedMatchingLabelsFirstVortex.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ReservedMatchingLabelsFirstVortex.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedInitialInnerHubBound</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ReservedPairCommonEventMargins</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.RetainedMarkedAbsorberBudget</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Construct the matching labels and forbidden hubs from the common event. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 5000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem reserved_matching_labels_at_first_vortex_level</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {n:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (π:Equiv.Perm (Fin n)) (d:ℕ) (σ:RawIntervalFamilyOutcome (Fin n) U Bool Bool)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (t:ℕ) (J:StartRetentionOutcome (rawStartHubSet π d σ false) t)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (P:SimpleGraph (Fin n)) (Dv mv:ℕ) (βv εv:ℝ) (Q:Vortex U P Dv βv εv mv)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hεv:0≤εv) (Old:U→Finset (Fin n))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hOld:∀w,Disjoint (rawReservedSpokeList π d σ w) (Old w))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (Kbad:SimpleGraph (Fin n)) (ρ:ℝ) (hρ:0≤ρ) (hUlo:ρ*n≤Fintype.card U)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hεsmall:εv≤ρ/80000) (herror:(n:ℝ)^(3/4:ℝ)≤ρ*n/80000)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hpair:∀x y,x≠y→(5/8:ℝ)*(1/100:ℝ)^2*Fintype.card U-(n:ℝ)^(3/4:ℝ)≤</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (((Finset.univ:Finset U).filter (fun w=&gt;rawIntervalFamilyState π d σ (x,w)=some (Sum.inr false) ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         rawIntervalFamilyState π d σ (y,w)=some (Sum.inr false))).card:ℝ))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (m b:ℝ) (hm:0&lt;m) (hb:0≤b) (hU:Fintype.card U≤n)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hM:4/m≤b/2) (hN:4*(n:ℝ)^(3/4:ℝ)≤b*n/2)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hOcc:∀v,((rawIntervalExtendedAnyHubSet π d σ v).card:ℝ)≤</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       4*(Fintype.card U:ℝ)/m+4*(n:ℝ)^(3/4:ℝ)):</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let inner:=Q.extendedIndices 1</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let Lbad:=protectedPairEdgeHubs (rawReservedSpokeList π d σ) inner</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let Bad:=fun v:Fin n=&gt;Finset.univ.filter (fun w=&gt;v∈retainedFinalMarkedAt π d σ t J w)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀e,Disjoint (Lbad e) inner) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∀w e v,e∈Kbad.edgeFinset→v∈e.toFinset→v∈Old w→w∈Lbad e→w∈Bad v) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (∀e∈Kbad.edgeFinset,(ρ/40000)*n≤((Lbad e).card:ℝ)) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀v,((Bad v).card:ℝ)≤b*n):=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro inner Lbad Bad</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hinner:(inner.card:ℝ)≤ρ*n/80000:=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hh:=marked_initial_inner_hub_bound P Dv mv βv εv Q hεv (by simpa using hU)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hh&#x27;:=mul_le_mul_of_nonneg_right hεsmall (Nat.cast_nonneg n)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     simp only [Fintype.card_fin] at hh</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     nlinarith</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   obtain ⟨hOutside,hShield,hLabels⟩:=reserved_pair_common_event_hypotheses π d σ inner Old hOld Kbad Bad ρ hρ hUlo hinner herror hpair</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hBad:=retained_marked_absorber_budget π d σ t J m b hm hb hU hM hN hOcc</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   exact ⟨hOutside,hShield,hLabels,hBad⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> end Oberwolfach</span></pre></html>

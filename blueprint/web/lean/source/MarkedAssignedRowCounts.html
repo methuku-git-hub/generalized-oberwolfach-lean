@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedAssignedRowCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedAssignedRowCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedAssignedRowWheel</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Complete the three permitted type combinations of assigned incoming</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> arc, outgoing arc and root spoke, under actual extension-count hypotheses. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 5000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U E K : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem marked_assigned_row_wheel_from_counts</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {tail head : E → V} {ktail khead : K → V} {H₀ HK : V → U → Prop}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {π : Equiv.Perm V} {b l : ℕ} {c : ℝ}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hl : 2≤l) (v a z : V) (u : U) (jin jout : Bool)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (htypes : ¬(jin=true ∧ jout=true))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (W Z : Finset V) (hv : v∈Z)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (haW : a∉W) (hzW : z∉W) (haZ : a∉Z) (hzZ : z∉Z)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (haz : ¬PermutationClose π b a z)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (haF : ∀ x∈Z, ¬PermutationClose π b a x) (hzF : ∀ x∈Z, ¬PermutationClose π b z x)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (haH : if jout then HK a u else H₀ a u) (hzH : H₀ z u)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hroot : if jin then HK v u else H₀ v u)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hopen : markedArcPresent tail head ktail khead jout v a)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hclose : markedArcPresent tail head ktail khead jin z v)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hstep : ∀ t:Bool,∀ x,c≤((Finset.univ.filter (fun y=&gt;</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (if t then ∃ e,ktail e=x∧khead e=y else ∃ e,tail e=x∧head e=y)∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (if t then HK y u else H₀ y u))).card:ℝ))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hjoin : ∀ x y,x≠y→c≤((Finset.univ.filter (fun q=&gt;(∃ e,tail e=x∧head e=q)∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∃ e,tail e=q∧head e=y)∧H₀ q u)).card:ℝ))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hbudget : W.card+((Z.card:ℝ)+l+4)*(2*b+1)&lt;c) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∃ p : Fin (l+3) ↪ V, ∃ C : MarkedWheel tail head ktail khead (l+3) π b H₀ HK,</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       p 0=a ∧ p (Fin.last (l+2))=z ∧ C.2.val=u ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ i, C.1.val i=Fin.cons (α:=fun _=&gt;V) v p (markedAssignedRowOrder (l+3) jin jout i)) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ i, p i∉W ∧ p i∉Z ∧ ∀ x∈Z, ¬PermutationClose π b (p i) x) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       PermutationSeparated π b p := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   cases jout</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · have ho : (∃ e, tail e=v ∧ head e=a) ∧ (∃ e, tail e=v ∧ head e=a) := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       simpa [markedArcPresent] using hopen</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hc : if jin then (∃ e, ktail e=z ∧ khead e=v) ∧ (∃ e, ktail e=z ∧ khead e=v)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         else (∃ e, tail e=z ∧ head e=v) ∧ (∃ e, tail e=z ∧ head e=v) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       cases jin &lt;;&gt; simpa [markedArcPresent] using hclose</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hr : if jin then HK v u ∧ HK v u else H₀ v u ∧ H₀ v u := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       cases jin &lt;;&gt; simpa using hroot</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     obtain ⟨p,C,D,hp0,hplast,hCu,hDu,hC,hD,hav,hsep⟩ := marked_fixed_attachment_wheels</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       tail head ktail khead H₀ HK π b l hl v v a z u jin W Z hv hv haW hzW haZ hzZ</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       haz haF hzF ⟨haH,hzH⟩ hr ho hc c hstep hjoin hbudget</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact ⟨p,C,hp0,hplast,hCu,hC,hav,hsep⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   · have hjin : jin=false := by cases jin &lt;;&gt; simp_all</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     subst jin</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     obtain ⟨p,C,hp0,hplast,hCu,hC,hav,hsep⟩ := marked_fixed_opening_wheel</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       tail head ktail khead H₀ HK π b l (by omega) v a z u W Z hv haW hzW haZ hzZ</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       haz haF hzF haH hzH hroot hopen hclose c (hstep false) hjoin hbudget</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact ⟨p,C,hp0,hplast,hCu,hC,hav,hsep⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> </span>
+<span id="L56"><a href="#L56" class="ln">  56</a> end Oberwolfach</span></pre></html>

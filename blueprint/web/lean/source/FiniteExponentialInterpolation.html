@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FiniteExponentialInterpolation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FiniteExponentialInterpolation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BoundedDifferences</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Analysis.Convex.SpecificFunctions.Basic</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Hölder interpolation for exponential moments of a finite law, proved</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> directly from convexity of the exponential function. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 800000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem finiteLaw_exponential_interpolation</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {Ω : Type*} [Fintype Ω] (μ : FiniteLaw Ω) (X Y : Ω → ℝ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {a b θ : ℝ} (hθ0 : 0≤θ) (hθ1 : θ≤1)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hX : μ.expectation (fun ω=&gt;Real.exp (X ω))≤Real.exp a)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hY : μ.expectation (fun ω=&gt;Real.exp (Y ω))≤Real.exp b) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     μ.expectation (fun ω=&gt;Real.exp (θ*X ω+(1-θ)*Y ω))≤</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       Real.exp (θ*a+(1-θ)*b) := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hpoint (ω : Ω) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       Real.exp (θ*X ω+(1-θ)*Y ω)≤</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         Real.exp (θ*a+(1-θ)*b)*</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>           (θ*Real.exp (-a)*Real.exp (X ω)+(1-θ)*Real.exp (-b)*Real.exp (Y ω)) := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     have hc := convexOn_exp.2 (Set.mem_univ (X ω-a)) (Set.mem_univ (Y ω-b))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       hθ0 (sub_nonneg.mpr hθ1) (by ring : θ+(1-θ)=1)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     simp only [smul_eq_mul] at hc</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hh := mul_le_mul_of_nonneg_left hc (Real.exp_pos (θ*a+(1-θ)*b)).le</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     rw [← Real.exp_add] at hh</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     have he : θ*a+(1-θ)*b+(θ*(X ω-a)+(1-θ)*(Y ω-b))=</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         θ*X ω+(1-θ)*Y ω := by ring</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     rw [he] at hh</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     simpa only [sub_eq_add_neg,Real.exp_add,Real.exp_neg,mul_assoc,mul_comm,mul_left_comm] using hh</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have he : μ.expectation (fun ω=&gt;Real.exp (θ*a+(1-θ)*b)*</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (θ*Real.exp (-a)*Real.exp (X ω)+(1-θ)*Real.exp (-b)*Real.exp (Y ω)))=</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       Real.exp (θ*a+(1-θ)*b)*</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         (θ*Real.exp (-a)*μ.expectation (fun ω=&gt;Real.exp (X ω))+</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>           (1-θ)*Real.exp (-b)*μ.expectation (fun ω=&gt;Real.exp (Y ω))) := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     simp only [FiniteLaw.expectation,Finset.mul_sum,← Finset.sum_add_distrib]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     apply Finset.sum_congr rfl</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     intro ω _</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     ring</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hx := mul_le_mul_of_nonneg_left hX (mul_nonneg hθ0 (Real.exp_pos (-a)).le)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hy := mul_le_mul_of_nonneg_left hY</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (mul_nonneg (sub_nonneg.mpr hθ1) (Real.exp_pos (-b)).le)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hxa : θ*Real.exp (-a)*Real.exp a=θ := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     rw [mul_assoc,← Real.exp_add];simp</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hyb : (1-θ)*Real.exp (-b)*Real.exp b=1-θ := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     rw [mul_assoc,← Real.exp_add];simp</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   rw [hxa] at hx</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   rw [hyb] at hy</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   calc</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     _ ≤ _ := finiteLaw_expectation_mono μ _ _ hpoint</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     _ = _ := he</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     _ ≤ Real.exp (θ*a+(1-θ)*b)*1 :=</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       mul_le_mul_of_nonneg_left (by linarith) (Real.exp_pos _).le</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     _ = _ := mul_one _</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> </span>
+<span id="L57"><a href="#L57" class="ln">  57</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,137 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceFixedTransferredCompletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceFixedTransferredCompletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceFiniteIteration</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedReferenceTerminalTransfer</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedReferenceFixedTransferredIteration</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedReservedAbsorberChangedHostDeletion</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Iterate from a fixed reservoir chosen in another typed host. Only the</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> terminal remainder and the reservoir resources need compatible typed</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> representations; the modified host may have additional resources. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option synthInstance.maxSize 32768</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 30000000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> open scoped BigOperators</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> noncomputable section</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> namespace Oberwolfach</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> variable {Gamma Color:Type} [Fintype Gamma] [Fintype Color]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> variable {r d N NI Kgeom:ℕ}</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> variable {gamma rho omega t p0 betaA aLoA BA kappa ξ thetaDeep alphaInner omegaInner</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   iota β aLo B η x omegaI hIcut deltaI etaBal:ℝ}</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem marked_reference_completion_with_fixed_transferred_absorber</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (levels:ℕ → MarkedReferenceLevelData Gamma Color r d N NI Kgeom gamma rho omega t p0 betaA aLoA BA</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       kappa ξ thetaDeep alphaInner omegaInner iota β aLo B η x omegaI hIcut deltaI etaBal)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (count:ℕ) (hcount:0&lt;count) (gammaLoss sigmaLoss:ℝ):</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     letI : ∀ i,Fintype (levels i).VP:=fun i=&gt;(levels i).inst7</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     letI : ∀ i,Fintype (levels i).UP:=fun i=&gt;(levels i).inst8</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     letI : ∀ i,LinearOrder (levels i).VP:=fun i=&gt;(levels i).inst9</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     letI : ∀ i,DecidableEq (levels i).UP:=fun i=&gt;(levels i).inst10;</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀ chain:MarkedReferenceLevelChain levels count,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ i,i&lt;count → MarkedReferenceLevelStepProperty (levels i) gammaLoss sigmaLoss) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let VP:=(levels 0).VP</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let UP:=(levels 0).UP</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let E:=MarkedSampleArc (levels 0).PP (levels 0).πP (3*d) (fun e=&gt;(levels 0).σBase (Sum.inl e)) false</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let K:=MarkedSampleArc (levels 0).PP (levels 0).πP (3*d) (fun e=&gt;(levels 0).σBase (Sum.inl e)) true</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let tail:=fun e:E=&gt;e.val.1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let head:=fun e:E=&gt;e.val.2</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let ktail:=fun e:K=&gt;e.val.1</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let khead:=fun e:K=&gt;e.val.2</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let H₀:=(levels 0).HBase false</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let HK:=(levels 0).HBase true</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let π:=(levels 0).πP</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let R:=fun W:MarkedWheel tail head ktail khead (r+4) π (3*d) H₀ HK=&gt;markedWheelPhysicalResources W</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let last:=count-1</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let X:=(levels last).I.image (chain.intoV last)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     let Y:=(levels last).J.image (chain.intoU last);</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     ∀ (E₀ K₀:Type) [DecidableEq E₀] [DecidableEq K₀]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (tail₀ head₀:E₀→VP) (ktail₀ khead₀:K₀→VP) (H₀old HKold:VP→UP→Prop)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (A₀:Finset (E₀⊕K₀)) (S₀:Finset (VP×UP)) (C:Finset (Finset VP⊕(VP×UP))),</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     Function.Injective (markedPhysicalEdge tail₀ head₀ ktail₀ khead₀ π) →</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (∀ A⊆A₀,∀ S⊆S₀,MarkedRemainderDivisible tail₀ head₀ ktail₀ khead₀ HKold A S (r+4)→</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       IsResourceAbsorber</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         (fun W:MarkedWheel tail₀ head₀ ktail₀ khead₀ (r+4) π (3*d) H₀old HKold=&gt;markedWheelPhysicalResources W)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         (A.image (fun a=&gt;Sum.inl (markedPhysicalEdge tail₀ head₀ ktail₀ khead₀ π a))∪S.image Sum.inr) C) →</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (∀ a:E⊕K,Sum.elim tail ktail a∈X→Sum.elim head khead a∈X→</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       ∃ a₀∈A₀,Sum.elim tail₀ ktail₀ a₀=Sum.elim tail ktail a∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         Sum.elim head₀ khead₀ a₀=Sum.elim head khead a∧markedArcType a₀=markedArcType a) →</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (∀ z:VP×UP,z.1∈X→z.2∈Y→(H₀ z.1 z.2∨HK z.1 z.2)→</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       z∈S₀ ∧ (H₀old z.1 z.2↔H₀ z.1 z.2) ∧ (HKold z.1 z.2↔HK z.1 z.2)) →</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (∀ e:E₀,Sum.inl ({tail₀ e,head₀ e}:Finset VP)∈C→∃ e&#x27;:E,tail e&#x27;=tail₀ e∧head e&#x27;=head₀ e) →</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (∀ e:K₀,Sum.inl ({ktail₀ e,π (khead₀ e)}:Finset VP)∈C→∃ e&#x27;:K,ktail e&#x27;=ktail₀ e∧khead e&#x27;=khead₀ e) →</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (∀ v u,Sum.inr (v,u)∈C→H₀old v u→H₀ v u) →</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (∀ v u,Sum.inr (v,u)∈C→HKold v u→HK v u) →</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     HasResourceDecomposition</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (fun W:MarkedWheel tail₀ head₀ ktail₀ khead₀ (r+4) π (3*d) H₀old HKold=&gt;markedWheelPhysicalResources W) C →</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (∀ e∈C,match e with | Sum.inl a=&gt;∃ t:E₀⊕K₀,markedPhysicalEdge tail₀ head₀ ktail₀ khead₀ π t=a | Sum.inr _=&gt;True) →</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (∀ e∈C,¬MarkedOldResource tail₀ head₀ ktail₀ khead₀ π (levels 0).I (levels 0).J e) →</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     MarkedRemainderDivisible tail head ktail khead HK Finset.univ</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (Finset.univ.filter (fun z:VP×UP=&gt;H₀ z.1 z.2∨HK z.1 z.2)) (r+4) →</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (C.card:ℝ)≤gammaLoss*Fintype.card VP →</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (C.card:ℝ)≤sigmaLoss*Fintype.card VP →</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     let S:=Finset.univ.filter (fun z:VP×UP=&gt;H₀ z.1 z.2∨HK z.1 z.2)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     let Full:=markedFiniteResources tail head ktail khead π Finset.univ S;</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     HasResourceDecomposition R Full := by</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   intro chain hsteps VP UP E K tail head ktail khead H₀ HK π R last X Y</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     E₀ K₀ _ _ tail₀ head₀ ktail₀ khead₀ H₀old HKold A₀ S₀ C hp₀ habs hA hS hCE hCK hC₀ hCk</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     hCdec hCsupport hCold hdiv hG hStar S Full</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   letI : ∀ i,Fintype (levels i).VP := fun i=&gt;(levels i).inst7</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   letI : ∀ i,Fintype (levels i).UP := fun i=&gt;(levels i).inst8</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   letI : ∀ i,LinearOrder (levels i).VP := fun i=&gt;(levels i).inst9</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   letI : ∀ i,DecidableEq (levels i).UP := fun i=&gt;(levels i).inst10</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hEmpty:C.filter (markedInnerResource (levels 0).I (levels 0).J)=∅:=by</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     apply Finset.eq_empty_iff_forall_notMem.mpr</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     intro e he</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     obtain ⟨he,hi⟩:=Finset.mem_filter.mp he</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     exact hCold e he ((marked_old_resource_iff_inner (levels 0).I (levels 0).J (levels 0).hI e (hCsupport e he)).mpr hi)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hCdec&#x27;:HasResourceDecomposition R C:=</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     marked_decomposition_transfer_on_resources C hCE hCK hC₀ hCk hCdec</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   obtain ⟨D,hValid,hRemoved,hRemain⟩:=marked_reference_absorber_deletion</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     (levels 0).PP π d (r+4) (levels 0).σBase (levels 0).HBase (levels 0).I (levels 0).J</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     (gammaLoss*Fintype.card VP) (sigmaLoss*Fintype.card VP)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     (fun v u=&gt;(levels 0).hdtypesBase u v) hdiv C hCdec&#x27; hEmpty hG hStar</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   let F:=markedResourceEmbedding (chain.intoV 0).toEmbedding (chain.intoU 0)</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   have hFid:(F:Finset VP⊕(VP×UP) → Finset VP⊕(VP×UP))=id:=by</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     funext z</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     cases z with</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     | inl a=&gt;</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>       simp only [F,markedResourceEmbedding,Function.Embedding.sumMap,Function.Embedding.coeFn_mk,Sum.map_inl]</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>       congr 1</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>       ext v</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       simp only [Finset.mem_image]</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       constructor</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>       · rintro ⟨x,hx,hxv⟩</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>         change chain.intoV 0 x=v at hxv</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>         rw [chain.firstV] at hxv</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>         exact hxv ▸ hx</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>       · intro hv</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>         exact ⟨v,hv,chain.firstV v⟩</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     | inr a=&gt;</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       cases a with</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       | mk v u=&gt;</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>         change Sum.inr ((chain.intoV 0) v,(chain.intoU 0) u)=Sum.inr (v,u)</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>         rw [chain.firstV,chain.firstU]</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   have hImage:(D.remaining (levels 0).HBase).image F=Full\C:=by</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     rw [hRemain,hFid,Finset.image_id]</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>   have hDis:Disjoint C ((D.remaining (levels 0).HBase).image F):=by</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     rw [hImage]</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     exact Finset.disjoint_left.mpr (fun _ ha hb=&gt;(Finset.mem_sdiff.mp hb).2 ha)</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>   have hResult:=marked_reference_iteration_with_fixed_transferred_absorber</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     levels count hcount gammaLoss sigmaLoss chain hsteps E₀ K₀ tail₀ head₀ ktail₀ khead₀ H₀old HKold</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     A₀ S₀ C hp₀ habs hA hS hCE hCK hC₀ hCk D hValid hDis</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>   have hCsub:C⊆Full:=by</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     have hh:=D.removed_subset (levels 0).HBase (r+4) (levels 0).I (levels 0).J</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>       (gammaLoss*Fintype.card VP) (sigmaLoss*Fintype.card VP) hValid</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     simpa only [hRemoved] using hh</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>   have hUnion:C∪(Full\C)=Full:=by</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     ext e</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     have hh:=fun he=&gt;hCsub (x:=e) he</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     simp only [Finset.mem_union,Finset.mem_sdiff]</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     tauto</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>   rw [hImage,hUnion] at hResult</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>   exact hResult</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a> </span>
+<span id="L134"><a href="#L134" class="ln"> 134</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinarySampledProfileCommonEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinarySampledProfileCommonEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinarySampledProfileProperty</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryPairHubLocalDegreeEvent</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.RawOrdinaryRowEvent</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.GoodPlacementEvents</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! One original-law event supplies the sampled two-hub profile inputs. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 20000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 32768</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   [DecidableEq V] [DecidableEq U] {r:ℕ}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ordinary_sampled_profile_property_common_event</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (P F:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (hr:2≤r) (hd:2≤d)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hn:0&lt;Fintype.card V) (hF:permutationConflictGraph π (3*d)≤F)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hnoshort:∀ x k,0&lt;k→k&lt;2*d+1→(π^k) x≠x)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (weight:OrdinaryCycle P r→ℝ) (hweight:∀ C,0≤weight C)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (a b:ℝ) (ha:0≤a) (hb:0&lt;b)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hwlo:∀ C,a/(Fintype.card V:ℝ)^(r-2)≤weight C)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hwhi:∀ C,weight C≤b/(Fintype.card V:ℝ)^(r-2))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (L α:ℝ) (hL:0≤L) (hα:0≤α) (hdeg:∀ v,(F.degree v:ℝ)≤L)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hP:∀ v,(1/2+α)*Fintype.card V≤(P.degree v:ℝ))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (he:∀ x y,(∑ C,if C.val.val.Adj x y then weight C else 0)=if P.Adj x y then 1 else 0)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (D ε:ℝ) (hD:(Fintype.card V:ℝ)/2≤D) (hDhi:D≤2*Fintype.card V)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hnear:∀ v,|(P.degree v:ℝ)-D|≤ε*Fintype.card V)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (p pmin smin:ℝ) (hpmin:0&lt;pmin) (hp:pmin≤p) (hp1:p≤1) (hsmin:0&lt;smin) (hsmin1:smin≤1)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hS:∀ u,∑ j,s u j ≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (j:Color) (hslo:∀ u,smin≤s u j) (hshi:∀ u,s u j≤1)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (t trow β η:ℝ) (ht:0&lt;t) (htrow:0&lt;trow)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hmargin:β*Fintype.card V≤(pmin^2*smin^2)*(2*α)*Fintype.card V-trow-2*L)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (herr: t/(pmin^r*(smin*smin)^(r-1))+</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (6*(r:ℝ)^4*b*L+ε*Fintype.card V)/D≤η):</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let μ:=FiniteLaw.pi (rawWheelLaw (fun _ : Sym2 V=&gt;p) (fun _=&gt;le_trans hpmin.le hp) (fun _=&gt;hp1) d hd q hq hQ s hs hS)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let C:ℝ:=2*(4*(d:ℝ)+3)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let errD:=(Fintype.card (U×U):ℝ)*(Fintype.card (Sym2 V⊕(V×Unit)):ℝ)*</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (2*Real.exp (-2*t^2/(C^2*((r:ℝ)^4*(4*b)/Fintype.card V)*(2*r)*((r:ℝ)^2*(4*b)))))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let errR:=(Fintype.card V+1:ℝ)^2*(Fintype.card U+1:ℝ)^2*</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (2*Real.exp (-2*trow^2/((4*(d:ℝ)+3)^2*(2*(2*(2:ℝ)+1)*Fintype.card V))));</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     1-errD-errR≤μ.probability (ordinarySampledProfileProperty (r:=r) P F π d · pmin smin j β η a b) := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro μ C errD errR</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hnR:0&lt;(Fintype.card V:ℝ):=by exact_mod_cast hn</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hp0:0&lt;p:=lt_of_lt_of_le hpmin hp</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hsp:∀ u,0&lt;s u j:=fun u=&gt;lt_of_lt_of_le hsmin (hslo u)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hA:(Finset.univ:Finset V).Nonempty:=Finset.card_pos.mp (by simpa using hn)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   let E:=fun (σ:RawWheelOutcome V U Γ Color)=&gt;∀ u u&#x27;,u≠u&#x27;→∀ v,</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     let c:=p^r*(s u j*s u&#x27; j)^(r-1);</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     ordinaryPairHubSpokes π d σ j u u&#x27; v () →</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       |1-ordinaryPairHubLocalDegree P F π d σ j u u&#x27; weight D c v|≤</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         t/c+(6*(r:ℝ)^4*b*L+ε*Fintype.card V)/D</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   let R:RawWheelOutcome V U Γ Color→Prop:=RawOrdinaryRows P π d 2 Finset.univ p s j trow</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hE:1-errD≤μ.probability E:=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hh:=ordinary_pair_hub_local_degree_common_event P F π r d hr hd hn hF hnoshort weight hweight b hb hwhi L hdeg he D ε hD hnear p hp0 hp1 q hq hQ s hs hS j hsp t ht</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     dsimp only at hh</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     convert hh using 1 &lt;;&gt; try ring &lt;;&gt; congr!</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hR:1-errR≤μ.probability R:=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hh:=rawOrdinaryRows_common_event P π d hd p hp0.le hp1 q hq hQ s hs hS hnoshort Finset.univ hA 2 j trow htrow</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     simp only [Finset.card_univ] at hh</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     convert hh using 1 &lt;;&gt; try ring &lt;;&gt; congr!</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hjoint:=finiteLaw_good_intersection μ E R errR hR</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hprob:1-errD-errR≤μ.probability (fun σ=&gt;E σ∧R σ):=by linarith only [hE,hjoint]</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   apply hprob.trans</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   apply finiteLaw_probability_mono</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   intro σ hσ</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   apply ordinary_sampled_profile_property_from_inputs P F π d σ p pmin smin s j α trow L β η a b D</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     hr hnR hα hL hP hdeg hpmin hp hp1 hsmin hsmin1 hslo hshi ha hb.le hD hDhi weight hwlo hwhi hσ.2 hmargin</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   intro u u&#x27; hne v hv</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hpair:=pair_hub_density_bounds r p pmin (s u j) (s u&#x27; j) smin hpmin hp hp1 hsmin (hslo u) (hslo u&#x27;) (hshi u) (hshi u&#x27;)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hdiv:t/(p^r*(s u j*s u&#x27; j)^(r-1))≤t/(pmin^r*(smin*smin)^(r-1)):=</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     div_le_div_of_nonneg_left ht.le hpair.1 hpair.2.1</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   exact (hσ.1 u u&#x27; hne v hv).trans (by linarith only [hdiv,herr])</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> end Oberwolfach</span></pre></html>

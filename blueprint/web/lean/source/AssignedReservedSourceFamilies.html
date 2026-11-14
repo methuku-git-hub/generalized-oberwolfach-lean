@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AssignedReservedSourceFamilies.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AssignedReservedSourceFamilies.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AssignedFactorResidualFamilies</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongReservedPrescribedPaths</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.FiniteSequenceSimpleWalk</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Allocate the original buffered source paths and select the assigned short</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> cycles using the same global cyclic orders. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 26000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem assigned_reserved_source_families</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {X I A B J:Type} [Fintype X] [DecidableEq X] [Fintype I] [Fintype A] [Fintype B] [Fintype J]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [DecidableEq A] [DecidableEq B] [DecidableEq J]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (F:SimpleGraph X) (hF:F.IsRegularOfDegree 2)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (E:∀C:F.ConnectedComponent,SimpleGraph.cycleGraph (Fintype.card C) ≃g C.toSimpleGraph)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (components:I↪F.ConnectedComponent) (cycles:J↪F.ConnectedComponent)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (c d cutoff:ℕ) (hlong:∀i,cutoff≤Fintype.card (components i))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hshort:∀j,Fintype.card (cycles j)&lt;cutoff)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (ℓ:J→ℕ) (hsize:∀j,Fintype.card (cycles j)=ℓ j)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hcapacity:Fintype.card (A⊕B)≤∑i:I,Fintype.card (components i)/(c*d+5)):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃(index:A⊕B↪LongReservedBlockIndex F components c d)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (ext:∀i:A⊕B,Fin (c*d+5)↪X) (inner:∀i:A⊕B,Fin (c*d+1)↪X),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀i,ext i=longReservedSigmaBlock F components c d (fun j=&gt;E (components j)) (index i) d (le_refl _)) ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀i k,inner i k=ext i ⟨k.val+2,by omega⟩) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀i j,i≠j→Disjoint (Finset.univ.image (ext i)) (Finset.univ.image (ext j))) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       ∃(P:∀i:A⊕B,F.Walk (ext i 0) (ext i (Fin.last (c*d+4)))) (root:J→X) (C:∀j,F.Walk (root j) (root j)),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀i,(P i).IsPath) ∧ (∀i,(P i).length=c*d+4) ∧ (∀i,(P i).support=List.ofFn (ext i)) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀i j,i≠j→Disjoint (P i).support.toFinset (P j).support.toFinset) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀j,(C j).IsCycle) ∧ (∀j,(C j).length=ℓ j) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀j k,k&lt;(C j).length→factorCycleOrientation F E ((C j).getVert k)=(C j).getVert (k+1)) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀j,(C j).toSubgraph.verts=(cycles j).supp) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀i j,i≠j→Disjoint (C i).support.toFinset (C j).support.toFinset) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀i j,Disjoint (P i).support.toFinset (C j).support.toFinset):=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨index,ext,inner,hext,hadj,hinner,_,hcomponent,hdis⟩:=</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     long_reserved_prescribed_paths F hF components (fun j=&gt;E (components j)) c d (fun _ : A⊕B=&gt;d) (fun _=&gt;le_refl _) hcapacity</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hw:∀i:A⊕B,∃p:F.Walk (ext i 0) (ext i (Fin.last (c*d+4))),</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       p.IsPath ∧ p.length=c*d+4 ∧ p.support=List.ofFn (ext i):=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     intro i</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     exact finite_sequence_simple_walk F (c*d+4) (ext i) (hadj i)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   choose P hp hlen hsupp using hw</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hh:=assigned_factor_residual_families F hF E c d cutoff (fun i=&gt;components (index i).1) cycles</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (fun i=&gt;hlong (index i).1) hshort ℓ hsize ext hdis hcomponent _ _ P hp hsupp</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨hP,root,C,hcycle,hlenC,hdir,hcomp,hC,hcross⟩:=hh</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   exact ⟨index,ext,inner,hext,hinner,hdis,P,root,C,hp,hlen,hsupp,hP,hcycle,hlenC,hdir,hcomp,hC,hcross⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> end Oberwolfach</span></pre></html>

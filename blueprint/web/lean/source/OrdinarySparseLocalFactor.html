@@ -1,0 +1,109 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinarySparseLocalFactor.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinarySparseLocalFactor.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryLocalAbsorbers</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SingleClassFactorExtraction</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedHubAbsorberAbundance</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.HubFactorWeightScales</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Ordinary factors from actual sparse common-neighbourhood estimates.</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> Absorber existence and counts are constructed; only the original positive</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> vertex weights and their incident error are supplied. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option synthInstance.maxSize 512</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 5000000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> open scoped BigOperators</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> noncomputable section</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> namespace Oberwolfach</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem ordinary_sparse_local_factor (m : ℕ) (hm : 2≤m) (γ κ b B : ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hγ : 0&lt;γ) (hκ : 0&lt;κ) (hb : 0&lt;b) (hB : 0≤B) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃ ε η : ℝ,0&lt;ε ∧ 0&lt;η ∧ ∃ N : ℕ,</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       ∀ (V : Type) [Fintype V] [DecidableEq V],N≤Fintype.card V →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ∀ (Q F : SimpleGraph V) (T : Finset V),κ*Fintype.card V≤(T.card:ℝ) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (m+1)∣T.card → (∀ v,(F.degree v:ℝ)≤ε*Fintype.card V) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ S : Finset V,S.card≤(if m=2 then 3 else 2) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         γ*Fintype.card V≤((common T S (fun x=&gt;Q.neighborFinset x)).card:ℝ)) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       ∀ wt : LocalOrdinaryCycle Q F T (m+1)→ℝ,</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ C,b/(Fintype.card V:ℝ)^m≤wt C ∧ wt C≤B/(Fintype.card V:ℝ)^m) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ v∈T,|1-hypergraphWeightedDegree localOrdinaryVertices wt v|≤η) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       HasResourceDecomposition (localOrdinaryVertices (Q:=Q) (F:=F) (T:=T) (r:=m+1)) T := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let β := ordinaryLocalCountCoeff m γ</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hβ : 0&lt;β := ordinaryLocalCountCoeff_pos m γ hγ</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let a := (β/2)^(m+2)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have ha : 0&lt;a := by dsimp [a];positivity</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let α := a*(m+1:ℝ)^((m+1)*(m+1))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hα : 0&lt;α := by dsimp [α];positivity</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let κ&#x27; := κ/(m+1:ℝ)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hκ&#x27; : 0&lt;κ&#x27; := by dsimp [κ&#x27;];positivity</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   obtain ⟨η,hη,k₀,hfactor⟩ := single_class_factor_extraction (m+1) ((m+1)^(m+1))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (by omega) α (b*κ&#x27;^m) B hα (by positivity) hB</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   obtain ⟨Na,hNa⟩ := paired_absorber_order_threshold m β hβ</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   obtain ⟨N₁,hN₁⟩ := exists_nat_gt (max (4*(m+3:ℝ)/γ) ((k₀:ℝ)/κ&#x27;))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let ε := γ/(4*(m+3:ℝ))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hε : 0&lt;ε := by dsimp [ε];positivity</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   refine ⟨ε,η,hε,hη,max Na (max N₁ 1),?_⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro V _ _ hn Q F T hsize hdiv hF hcommon wt hw herr</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let n : ℝ := Fintype.card V</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hnn : 1≤Fintype.card V := (le_max_right N₁ 1).trans ((le_max_right Na _).trans hn)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hnpos : 0&lt;n := by dsimp [n];exact_mod_cast hnn</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hNn : (N₁:ℝ)≤n := by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     dsimp [n]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     exact_mod_cast (le_max_left N₁ 1).trans ((le_max_right Na _).trans hn)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hlarge : 4*(m+3:ℝ)≤γ*n := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hh := (le_max_left (4*(m+3:ℝ)/γ) _).trans (hN₁.le.trans hNn)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     nlinarith only [(div_le_iff₀ hγ).mp hh]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hbudget : (m+3:ℝ)*(ε*n+1)≤γ/2*n := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have he : (m+3:ℝ)*ε=γ/4 := by dsimp [ε];field_simp</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     nlinarith only [congrArg (fun z : ℝ=&gt;z*n) he,hlarge]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   obtain ⟨k,hkT⟩ := hdiv</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hkTreal : (T.card:ℝ)=(m+1:ℝ)*k := by exact_mod_cast hkT</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hkappa : κ&#x27;*n≤(k:ℝ) := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     dsimp [κ&#x27;]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     rw [div_mul_eq_mul_div]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     apply (div_le_iff₀ (show (0:ℝ)&lt;m+1 by positivity)).mpr</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     nlinarith only [hsize,hkTreal]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hkpos : (0:ℝ)&lt;k := (mul_pos hκ&#x27; hnpos).trans_le hkappa</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hkn : (k:ℝ)≤n := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     have ht : (T.card:ℝ)≤n := by dsimp [n];exact_mod_cast Finset.card_le_univ T</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     have hmR : (0:ℝ)≤m := Nat.cast_nonneg _</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     nlinarith only [ht,hkTreal,mul_nonneg hmR hkpos.le]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hk : k₀≤k := by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have hh := (le_max_right (4*(m+3:ℝ)/γ) ((k₀:ℝ)/κ&#x27;)).trans (hN₁.le.trans hNn)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     have hh&#x27; : (k₀:ℝ)≤κ&#x27;*n := by nlinarith only [(div_le_iff₀ hκ&#x27;).mp hh]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     exact_mod_cast hh&#x27;.trans hkappa</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hweights (C : LocalOrdinaryCycle Q F T (m+1)) :</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       (b*κ&#x27;^m)/(k:ℝ)^((m+1)-1)≤wt C ∧ wt C≤B/(k:ℝ)^((m+1)-1) := by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     simpa only [Nat.add_sub_cancel] using hub_factor_weight_scale m n k κ&#x27; b B (wt C)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       hnpos hkpos hκ&#x27; hb.le hB hkn hkappa (hw C)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   apply hfactor k hk V (LocalOrdinaryCycle Q F T (m+1)) T localOrdinaryVertices wt hkT</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     (fun C v hv=&gt;C.property.1 v (Set.mem_toFinset.mp hv)) localOrdinaryVertices_card</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     (local_ordinary_multiplicity Q F T) hweights herr</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   intro X hXT hXr</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   let e : Fin (m+1)≃X := Fintype.equivOfCardEq (by simp only [Fintype.card_fin,Fintype.card_coe,hXr])</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   let x : Fin (m+1)→V := fun i=&gt;(e i).val</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have hx : Function.Injective x := by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     intro i j h;exact e.injective (Subtype.ext h)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have hxT (i : Fin (m+1)) : x i∈T := hXT (e i).property</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hxX : Finset.univ.image x=X := by</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     ext v</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     simp only [Finset.mem_image,Finset.mem_univ,true_and]</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     constructor</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     · rintro ⟨i,rfl⟩;exact (e i).property</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     · intro hv</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       obtain ⟨i,hi⟩ := e.surjective ⟨v,hv⟩</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>       exact ⟨i,congrArg Subtype.val hi⟩</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   have habs := ordinary_local_paired_absorber_count Q F T hm γ (ε*n) hγ (by positivity)</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     hF hcommon hbudget (hNa _ ((le_max_left Na _).trans hn)).1</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     (hNa _ ((le_max_left Na _).trans hn)).2 x hx hxT</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   rw [hxX] at habs</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hscale : α*(k:ℝ)^((m+1)*(m+1))≤a*n^((m+1)*(m+1)) := by</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     have hc : (m+1:ℝ)*k≤n := by rw [← hkTreal];dsimp [n];exact_mod_cast Finset.card_le_univ T</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     calc</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       _ = a*((m+1:ℝ)*k)^((m+1)*(m+1)) := by dsimp [α];rw [mul_pow];ring</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>       _ ≤ _ := mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (by positivity) hc _) ha.le</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   exact hscale.trans habs</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a> </span>
+<span id="L106"><a href="#L106" class="ln"> 106</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongHostOrderedLocalRetentionMatching.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongHostOrderedLocalRetentionMatching.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongFixedSpacingOrderedLocalRetentionEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongHostEventSpecializationOrderedLocalRetention</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.LongHostEventMatchingFirstInnerColumnOrderedLocalRetention</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 30000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem long_host_ordered_local_retention_and_matching</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (r k₀ Qpow:ℕ) (hr:2≤r) (hQpow:0&lt;Qpow) (hlen:r+4+1=(k₀+2)*2)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (αRef sstar ω γRich tstar kstar:ℝ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hαRef:0&lt;αRef) (hsstar:0&lt;sstar) (hsstar1:sstar≤1/100) (hω:0&lt;ω)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hmargin:successorCycleRatio k₀+αRef/2≤1/2+αRef)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hγRich:0&lt;γRich) (hγRich1:γRich≤1/2) (hγcap:γRich≤αRef)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (htstar:0&lt;tstar) (htstar1:tstar≤1) (horder:tstar≤sstar) (hkstar:0&lt;kstar)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (K:ℕ) (hK3:3≤K) (hm:7≤(r+4))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (θ ρ₀:ℝ) (hθpos:0&lt;θ) (hθ:θ≤1/100) (hρ₀:0&lt;ρ₀) (hωBound:4*ω≤ρ₀)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (ζret:ℝ) (hζret:0&lt;ζret) (d:ℕ) (hd:2≤d)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hcut:(1/((((r+4):ℕ):ℝ)+1))/(d:ℝ)≤θ) (hspace:1/(8*(d:ℝ))≤θ/2)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (BM:ℝ) (hBM:0&lt;BM) (BO:Fin K→ℝ) (hBO:∀i,0&lt;BO i)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (αHost A:ℝ) (hαHost:0&lt;αHost) (hαmargin:2*αRef≤αHost)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (htstarBound:tstar≤(1/100)/(((r+4):ℕ):ℝ))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hkBound:∀ρ:ℝ,ρ₀≤ρ→kstar≤ρ*(1/100)/2 ∧ kstar≤ρ*((1/100)/(((r+4):ℕ):ℝ))/2)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hHost:HostMatchingVortexContinuation (r+4) K d αHost A BM BO):</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     HostVortexFixedSpacingEventConclusionWithFirstInnerColumnMatchingAndOrderedLocalRetentionRates r k₀ Qpow hr hQpow hlen</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       αRef sstar ω γRich tstar kstar hαRef hsstar hsstar1 hω hmargin hγRich hγRich1 hγcap</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       htstar htstar1 horder hkstar K hK3 hm θ ρ₀ hθpos hθ hρ₀ hωBound ζret hζret d hd hcut</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       BM hBM BO hBO αHost A hαHost hαmargin htstarBound hkBound:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hEvent:=long_fixed_spacing_event_first_vortex_matching_margins_with_local_retention r k₀ Qpow hr hQpow hlen</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     αRef sstar ω γRich tstar kstar hαRef hsstar hsstar1 hω hmargin hγRich hγRich1 hγcap</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     htstar htstar1 horder hkstar K hK3 hm θ ρ₀ hθpos hθ hρ₀ hωBound ζret hζret d hd hcut hspace BM hBM BO hBO</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hOutcome:=long_host_fixed_spacing_event_specialization_first_vortex_matching_margins_with_local_retention r k₀ Qpow hr hQpow hlen</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     αRef sstar ω γRich tstar kstar hαRef hsstar hsstar1 hω hmargin hγRich hγRich1 hγcap</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     htstar htstar1 horder hkstar K hK3 hm θ ρ₀ hθpos hθ hρ₀ hωBound ζret hζret d hd hcut BM hBM BO hBO</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     αHost A hαHost hαmargin htstarBound hkBound hHost hEvent</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   exact host_vortex_fixed_spacing_event_with_first_inner_column_matching_and_ordered_local_retention_rates r k₀ Qpow hr hQpow hlen</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     αRef sstar ω γRich tstar kstar hαRef hsstar hsstar1 hω hmargin hγRich hγRich1 hγcap</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     htstar htstar1 horder hkstar K hK3 hm θ ρ₀ hθpos hθ hρ₀ hωBound ζret hζret d hd hcut BM hBM BO hBO</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     αHost A hαHost hαmargin htstarBound hkBound hOutcome</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

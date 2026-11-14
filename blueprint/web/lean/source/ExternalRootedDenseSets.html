@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExternalRootedDenseSets.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExternalRootedDenseSets.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.DenseRootedSetsWithin</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.EnlargedNeighbourDensity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Many admissible bounded sets through roots which need not belong to</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> the sampled neighbourhood. All degree assumptions use the original roots. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem external_rooted_dense_sets (s : ℕ) (α β : ℝ) (hα : 0&lt;α) (hα1 : α≤1) (hβ : 0&lt;β) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃ K : ℕ,∀ k : ℕ,K≤k → ∃ c : ℝ,0&lt;c ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∀ L : ℝ,0≤L → ∃ N : ℕ,∀ (V : Type) [Fintype V] [DecidableEq V],N≤Fintype.card V →</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ (P F : SimpleGraph V) (A Z : Finset V),Z.card=s → β*Fintype.card V≤(A.card:ℝ) →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ θ : ℝ,0≤θ → θ≤1 →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ v∈A∪Z,(θ+α/2)*(A.card:ℝ)≤((P.neighborFinset v∩A).card:ℝ)) →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (∀ v,(F.degree v:ℝ)≤L) → (∀ x∈Z,∀ y∈Z,¬F.Adj x y) →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     c*(Fintype.card V:ℝ)^k≤</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       Fintype.card {S : FixedSubset V (s+k) // Z⊆S.val ∧ S.val⊆A∪Z ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         (∀ v∈S.val,(θ+α/4)*(s+k:ℝ)≤((P.neighborFinset v∩S.val).card:ℝ)) ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         (∀ x∈S.val,∀ y∈S.val,¬F.Adj x y)} := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   obtain ⟨K,hK⟩ := dense_rooted_sets_within s (α/8) (by positivity)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   refine ⟨K,?_⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   intro k hk</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let c : ℝ := β^k/((2:ℝ)^(k+1)*k.factorial)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨c,by dsimp [c];positivity,?_⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro L hL</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   obtain ⟨N₀,hN₀⟩ := hK k hk L hL</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨N₁,hN₁⟩ := eventually_constant_le_linear (N₀:ℝ) β hβ</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   obtain ⟨N₂,hN₂⟩ := eventually_constant_le_linear (16*(s:ℝ)) (α*β) (by positivity)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   refine ⟨max N₁ N₂,?_⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro V _ _ hn P F A Z hZ hA θ hθ hθ1 hP hF hind</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hN : N₀≤(A∪Z).card := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hh := hN₁ (Fintype.card V) (le_trans (le_max_left _ _) hn)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have ha : (A.card:ℝ)≤(A∪Z).card := by exact_mod_cast Finset.card_le_card Finset.subset_union_left</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact_mod_cast hh.trans (hA.trans ha)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hmargin : ((θ+α/4)+(α/4)/2)*(Z.card:ℝ)≤(α/4)*(A.card:ℝ)/2 := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hh := hN₂ (Fintype.card V) (le_trans (le_max_right _ _) hn)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have ha := mul_le_mul_of_nonneg_left hA hα.le</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hcoeff : (θ+α/4)+(α/4)/2≤2 := by linarith only [hθ1,hα1]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hb := mul_le_mul_of_nonneg_right hcoeff (Nat.cast_nonneg (α:=ℝ) s)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     rw [hZ]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     nlinarith only [hh,ha,hb]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hp := enlarged_neighbour_density P A Z (θ+α/4) (α/4)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (by positivity) hmargin</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (by intro v hv;convert hP v hv using 1 &lt;;&gt; ring)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hh := hN₀ V P F (A∪Z) Z hN hZ Finset.subset_union_right (θ+α/4)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (by intro v hv;convert hp v hv using 1 &lt;;&gt; ring) hF hind</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   let Strong := {S : FixedSubset V (s+k) // Z⊆S.val ∧ S.val⊆A∪Z ∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (∀ v∈S.val,((θ+α/4)+(α/8)/2)*(s+k:ℝ)&lt;((P.neighborFinset v∩S.val).card:ℝ)) ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (∀ x∈S.val,∀ y∈S.val,¬F.Adj x y)}</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   let Weak := {S : FixedSubset V (s+k) // Z⊆S.val ∧ S.val⊆A∪Z ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (∀ v∈S.val,(θ+α/4)*(s+k:ℝ)≤((P.neighborFinset v∩S.val).card:ℝ)) ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (∀ x∈S.val,∀ y∈S.val,¬F.Adj x y)}</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   let f (S : Strong) : Weak := ⟨S.val,S.property.1,S.property.2.1,</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       intro v hv</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       have hd := S.property.2.2.1 v hv</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       have hm : 0≤(α/16)*(s+k:ℝ) := by positivity</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       nlinarith only [hd,hm]),S.property.2.2.2⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hinj : Function.Injective f := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     intro S T he</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     apply Subtype.ext</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     exact congrArg (fun a : Weak=&gt;a.val) he</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hc : (Fintype.card Strong:ℝ)≤Fintype.card Weak := by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     exact_mod_cast Fintype.card_le_of_injective f hinj</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hsize : β*Fintype.card V≤((A∪Z).card:ℝ) := hA.trans (by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     exact_mod_cast Finset.card_le_card (Finset.subset_union_left (s₁:=A) (s₂:=Z)))</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hscale : c*(Fintype.card V:ℝ)^k≤((A∪Z).card:ℝ)^k/((2:ℝ)^(k+1)*k.factorial) := by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     dsimp [c]</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     calc</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       _ = (β*Fintype.card V)^k/((2:ℝ)^(k+1)*k.factorial) := by rw [mul_pow];ring</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       _ ≤ _ := div_le_div_of_nonneg_right (pow_le_pow_left₀ (by positivity) hsize k) (by positivity)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   exact hscale.trans (hh.trans hc)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> </span>
+<span id="L79"><a href="#L79" class="ln">  79</a> end Oberwolfach</span></pre></html>

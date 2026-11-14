@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVortexChooseScaleForAbsorber.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVortexChooseScaleForAbsorber.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedVortexReservedCapacityFields</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.VortexPermutation</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Fix a terminal scale and an absorber capacity before the graph order;</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> the resulting vortex and permutation have the required first and final sizes. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 12000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem marked_vortex_choose_scale_for_absorber</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (β ε ρ₀ εAbs:ℝ) (hb:0&lt;β) (he:0&lt;ε) (heq:ε&lt;1/4) (hρ:0&lt;ρ₀)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (heAbs:ε≤εAbs) (h required:ℕ):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ m size:ℕ,1≤m ∧ required≤m ∧ size=2*m ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ∀ (V U:Type) [Fintype V] [Fintype U] [LinearOrder V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>         (G:SimpleGraph V) (D:ℕ),G.IsRegularOfDegree D →</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>         (Fintype.card V:ℝ)/2≤D → ρ₀≤ initialIndexDensity U D → initialIndexDensity U D≤1 →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>         m≤Fintype.card V →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>         ∃ Q:Vortex U G D β ε m,∃ π:Equiv.Perm V,∃ L:ℕ,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>           L+1=Q.length ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>           (∀ i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>           (∀ x k,0&lt;k→k&lt;h→(π^k) x≠x) ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>           ((markedVortexInnerVertices Q 0).card:ℝ)≤εAbs*Fintype.card (markedVortexVertexType Q 0) ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>           ((markedVortexInnerHubs Q 0).card:ℝ)≤εAbs*Fintype.card (markedVortexVertexType Q 0) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>           (markedVortexInnerVertices Q L).card+(markedVortexInnerHubs Q L).card≤size := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   obtain ⟨m₀,hm₀,hvortex⟩:=vortex_with_permutation_exists hb he heq hρ h</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let m:=max m₀ required</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hm:1≤m:=hm₀.trans (le_max_left _ _)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨m,2*m,hm,le_max_right _ _,rfl,?_⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro V U _ _ _ _ G D hreg hD hρlo hρhi hmn</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   obtain ⟨Q,π,hpres,_,hshort⟩:=hvortex V U G D m hreg hD hρlo hρhi ((le_max_left _ _)) hmn</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let L:=Q.length-1</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hL:L+1=Q.length:=by dsimp [L];have hh:=Q.length_pos;omega</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hn:0&lt;Fintype.card V:=by omega</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hDpos:0&lt;D:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hn&#x27;:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact_mod_cast (show (0:ℝ)&lt;D by linarith)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hf:=marked_vortex_inner_upper_size_inputs Q hreg hn hDpos hρhi he.le εAbs heAbs 0 (by have hh:=Q.length_pos;omega) 0 (by omega)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have ht:=marked_vortex_terminal_pair_capacity Q hreg hn hDpos hρhi he.le L hL</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   exact ⟨Q,π,L,hL,hpres,hshort,hf.1,hf.2,ht⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

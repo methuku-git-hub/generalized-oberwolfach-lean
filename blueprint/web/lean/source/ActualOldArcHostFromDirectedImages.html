@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualOldArcHostFromDirectedImages.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualOldArcHostFromDirectedImages.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ActualOldImageDirected</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ActualOldArcWalkPieces</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.ActualParentGlobalOrientation</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.ActualSelectedRunInheritsRelation</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The actual directed cycle and run images discharge old-arc containment</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> for the original globally oriented source factor. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 16000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem actual_old_arc_host_from_directed_images</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {X V K J I:Type} [Fintype X] [DecidableEq X] [Fintype V] [DecidableEq V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     [DecidableEq K] [DecidableEq J] [Fintype I]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (G:SimpleGraph X) (hG:G.IsRegularOfDegree 2)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (E:∀C:G.ConnectedComponent,SimpleGraph.cycleGraph (Fintype.card C) ≃g C.toSimpleGraph)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (pieces:List (PrescribedSourcePiece X)) (D:X→X→Prop)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hpair:pieces.Pairwise (fun p q=&gt;Disjoint p.vertices.toFinset q.vertices.toFinset))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hvalid:∀p∈pieces,p.OriginalValid D)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hArcs:∀x y,D x y↔(x,y)∈sourcePieceArcsUnion pieces)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (halign:∀x,D x (factorCycleOrientation G E x))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (data:ActualResidualData (K:=K) (J:=J) G) (ψ:X→V)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (components:I↪G.ConnectedComponent)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (index:{i // i∈data.s₂}→LongReservedBlockIndex G components data.c data.d)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hparent:∀i:{i // i∈data.s₂},(data.P i.val).support=List.ofFn</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (longReservedSigmaBlock G components data.c data.d (fun j=&gt;E (components j)) (index i) data.d (le_refl _)))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hcycleStep:∀j∈data.t,∀k&lt;(data.C j).length,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       factorCycleOrientation G E ((data.C j).getVert k)=(data.C j).getVert (k+1))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (R:V→V→Prop) (himage:ActualOldImageDirected data ψ R):</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∀x y,s(x,y)∈data.deletedEdges\(Finset.univ.biUnion</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (fun i:{i // i∈data.s₁}=&gt;(data.path (.inl i)).edges.toFinset))→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       D x y→R (ψ x) (ψ y):=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let H:Finset (V×V):=Finset.univ.filter (fun e=&gt;R e.1 e.2)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hrunStep:∀r:SelectedRunIndex data.s₂ data.d data.T,∀k&lt;(data.path (.inr r)).length,</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       factorCycleOrientation G E ((data.path (.inr r)).getVert k)=(data.path (.inr r)).getVert (k+1):=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     apply actual_selected_run_inherits_parent_relation data (fun x y=&gt;factorCycleOrientation G E x=y)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     intro i hi</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     exact parent_walk_follows_global_reserved_orientation G hG components E data.c data.d (index ⟨i,hi⟩)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       data.d (le_refl _) (data.P i) (data.hlen i (Finset.mem_union_right _ hi)) (hparent ⟨i,hi⟩)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hc:∀j∈data.t,∀k&lt;(data.C j).length,</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (ψ ((data.C j).getVert k),ψ ((data.C j).getVert (k+1)))∈H:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     intro j hj k hk</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     simpa only [H,Finset.mem_filter,Finset.mem_univ,true_and] using himage.1 j hj k hk</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hr:∀r:SelectedRunIndex data.s₂ data.d data.T,∀k&lt;(data.path (.inr r)).length,</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (ψ ((data.path (.inr r)).getVert k),ψ ((data.path (.inr r)).getVert (k+1)))∈H:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     intro r k hk</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     simpa only [H,Finset.mem_filter,Finset.mem_univ,true_and] using himage.2 r k hk</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro x y he hd</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hh:=actual_old_arc_host_from_selected_walks G hG E pieces D hpair hvalid hArcs halign data ψ H hcycleStep hc hrunStep hr x y he hd</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   simpa only [H,Finset.mem_filter,Finset.mem_univ,true_and] using hh</span>
+<span id="L53"><a href="#L53" class="ln">  53</a> end Oberwolfach</span></pre></html>

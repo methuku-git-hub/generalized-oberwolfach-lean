@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The vortex construction</title>
+<link rel="next" href="sect0011.html" title="Cyclic-partite fractional decompositions" />
+<link rel="prev" href="sect0009.html" title="Uniform fixed-size subsets and partitions" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000011">9 The vortex construction</h1>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:vortex-step">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">9.1</span>
+    <span class="lemma_thmtitle">Successive subsets and external roots</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0010.html#bp:vortex-step">#</a>
+    
+    <a class="icon proof" href="sect0010.html#a0000000105"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0009.html#bp:normalized-subset-counts">Lemma 8.6</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.vortex_graph_step" class="lean_decl">Oberwolfach.vortex_graph_step</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.vortex_set_sequence" class="lean_decl">Oberwolfach.vortex_set_sequence</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.nested_normalized_count_estimate" class="lean_decl">Oberwolfach.nested_normalized_count_estimate</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    At each step, a set of size \(\lfloor \epsilon |B|\rfloor \) can be chosen inside \(B\) so that every prescribed vertex in a set of at most \(2|B|/\epsilon \) vertices has normalized neighbourhood error less than \(|B|^{-1/3}\). The tested vertices need not belong to \(B\). Successive choices give the two-level root domains of the manuscript. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000105">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Restrict each ambient neighbourhood to the subtype corresponding to \(B\). The fixed-size concentration bound and the union bound give a common successful outcome once \(|B|\) exceeds a threshold depending only on \(\epsilon \). Construct the sequence by induction on its length. Nesting implies that each vertex tested at a later step was tested at every earlier step needed for its telescoping estimate. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:vortex">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">9.2</span>
+    <span class="lemma_thmtitle">Existence of paired vortices</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0010.html#bp:vortex">#</a>
+    
+    <a class="icon proof" href="sect0010.html#a0000000106"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0010.html#bp:vortex-step">Lemma 9.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex" class="lean_decl">Oberwolfach.Vortex</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.vortex_exists" class="lean_decl">Oberwolfach.vortex_exists</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.vertexVortex_exists" class="lean_decl">Oberwolfach.vertexVortex_exists</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.floorOrbit_stopping" class="lean_decl">Oberwolfach.floorOrbit_stopping</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.rounded_vortex_centre_error" class="lean_decl">Oberwolfach.rounded_vortex_centre_error</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.vortex_accumulated_error" class="lean_decl">Oberwolfach.vortex_accumulated_error</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For \(\beta ,\rho _*{\gt}0\) and \(0{\lt}\epsilon {\lt}1/4\), there is \(m_0\) such that every \(D\)-regular graph \(P\) on \(n\ge m_*\ge m_0\) vertices with \(D\ge n/2\), and every index set with \(\rho =2|U|/D\in [\rho _*,1]\), admit nested sets \((V_i,U_i)\) with independent recursions \(n_{i+1}=\lfloor \epsilon n_i\rfloor \) and \(u_{i+1}=\lfloor \epsilon u_i\rfloor \). Their terminal vertex size lies in \([\epsilon m_*/2,m_*)\). For \(1\le i\le \ell \) and \(v\in V_{\max (0,i-2)}\), </p>
+<div class="displaymath" id="a0000000107">
+  \[  \left|2u_i/\rho -(D/n)n_i\right|\le \beta n_i,\qquad \left|d_P(v;V_i)-2u_i/\rho \right|\le \beta n_i.  \]
+</div>
+<p> The vertex and index types are separate, and no regularity is asserted for the induced graphs. </p>
+<p><i class="itshape">Manuscript label:</i> def:completion:vortex.</p>
+<p><i class="itshape">Manuscript label:</i> lem:writing:nested-pairs.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000106">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The accumulated normalized error is at most \(m_*^{-1/3}/(1-\epsilon ^{1/3})\). For \(a=|U|/n\), the two floor recursions give \(|u_i-a n_i|{\lt}1/(1-\epsilon )\). Thus the error in the real degree centre is less than \(3/\rho _*\). The order threshold makes each of these errors at most \(\beta n_i/2\). Nested index sets of the required sizes are constructed explicitly from initial segments of a finite enumeration. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:shell-permutation">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">9.3</span>
+    <span class="lemma_thmtitle">A permutation preserving all vortex levels</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0010.html#bp:shell-permutation">#</a>
+    
+    <a class="icon proof" href="sect0010.html#a0000000108"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0010.html#bp:vortex">Lemma 9.2</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.fibre_cycles" class="lean_decl">Oberwolfach.fibre_cycles</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.nested_shell_permutation" class="lean_decl">Oberwolfach.nested_shell_permutation</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.permutation_short_interval_injective" class="lean_decl">Oberwolfach.permutation_short_interval_injective</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For nested finite sets starting with the whole vertex set, suppose each nonempty difference \(V_i\setminus V_{i+1}\) and the terminal set have at least \(h\) vertices. There is a permutation preserving membership in every \(V_i\) such that \(\pi ^k(x)\ne x\) whenever \(0{\lt}k{\lt}h\). Every orbit stays in one of these differences or the terminal set, and \(x,\pi (x),\ldots ,\pi ^{h-1}(x)\) are pairwise distinct. </p>
+<p><i class="itshape">Manuscript label:</i> lem:writing:shell-permutation.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000108">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Assign each vertex to the largest level containing it, and choose a cyclic permutation on each fibre. The combined permutation is explicitly constructed with its inverse. Its return times at a vertex are exactly the multiples of the fibre’s cardinality. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:vortex-differences">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">9.4</span>
+    <span class="lemma_thmtitle">Vortex estimates on difference domains</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0010.html#bp:vortex-differences">#</a>
+    
+    <a class="icon proof" href="sect0010.html#a0000000109"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0010.html#bp:vortex">Lemma 9.2</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.estimates_including_zero" class="lean_decl">Oberwolfach.Vortex.estimates_including_zero</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.later_size_le_quarter" class="lean_decl">Oberwolfach.Vortex.later_size_le_quarter</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.difference_degree_estimates" class="lean_decl">Oberwolfach.Vortex.difference_degree_estimates</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.nested_domains_degree_subtraction" class="lean_decl">Oberwolfach.nested_domains_degree_subtraction</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.extended_difference_degree_estimates" class="lean_decl">Oberwolfach.Vortex.extended_difference_degree_estimates</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.completion_difference_estimates" class="lean_decl">Oberwolfach.Vortex.completion_difference_estimates</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.Vortex.local_degree_margin" class="lean_decl">Oberwolfach.Vortex.local_degree_margin</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Append \(V_{\ell +1}=U_{\ell +1}=\varnothing \). For \(j{\lt}k\le \ell +1\), put \(A=V_j\setminus V_k\) and \(B=U_j\setminus U_k\). For \(v\in V_{\max (0,k-2)}\), </p>
+<div class="displaymath" id="a0000000110">
+  \[  \left|2|B|/\rho -(D/n)|A|\right|\le \tfrac 53\beta |A|, \qquad \left|d_P(v;A)-2|B|/\rho \right|\le \tfrac 53\beta |A|.  \]
+</div>
+<p> The same formulas include \(j=0\), using regularity of the initial graph. The added empty level has zero degree errors; no size recursion is asserted at this level. The caller substitutions with \(\beta \le \min \{ \alpha _0/40,\delta _P/16\} \) give the stated comparability, centre bounds and strict degree margin on each difference domain. </p>
+<p><i class="itshape">Manuscript label:</i> eq:completion:vortex-differences:ordinary.</p>
+<p><i class="itshape">Manuscript label:</i> eq:completion:vortex-differences:marked.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000109">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The finite-set cardinality and neighbourhood identities give exact subtraction. The error is at most \(\beta (n_j+n_k)\). Since \(n_k\le n_j/4\), this is at most \(\tfrac 53\beta (n_j-n_k)\). Nesting verifies the root domains for both estimates being subtracted. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0009.html" title="Uniform fixed-size subsets and partitions"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0011.html" title="Cyclic-partite fractional decompositions"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

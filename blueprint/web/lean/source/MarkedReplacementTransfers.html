@@ -1,0 +1,85 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReplacementTransfers.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReplacementTransfers.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReplacementPairs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteBasisRectangles</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.SparseAlternatingCorrection</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Actual four-wheel corrections from pairs of cycles differing at one</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> position. Both rim cancellation and typed spoke equations are exact. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 2000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E K : Type*} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {tail head : E → V} {ktail khead : K → V} {m : ℕ} {π : Equiv.Perm V} {b : ℕ}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {H₀ Hₖ : V → U → Prop}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> def markedReplacementTransfer (i : Fin (m+1)) (v v&#x27; : V) (u u&#x27; : U) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     MarkedWheel tail head ktail khead m π b H₀ Hₖ → ℝ :=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   averagedBasisRectangle</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (markedReplacementWheel (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=Hₖ) (i:=i) (v:=v) (v&#x27;:=v&#x27;) (u:=u) (u&#x27;:=u&#x27;) false false)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (markedReplacementWheel true false) (markedReplacementWheel true true) (markedReplacementWheel false true)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> </span>
+<span id="L25"><a href="#L25" class="ln">  25</a> theorem markedReplacementTransfer_rim (i : Fin (m+1)) (v v&#x27; : V) (u u&#x27; : U) (e : E⊕K) :</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     markedWheelRimLoad (markedReplacementTransfer (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=Hₖ) i v v&#x27; u u&#x27;) e=0 := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   unfold markedWheelRimLoad markedReplacementTransfer</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   rw [averagedBasisRectangle_test]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   apply div_eq_zero_iff.mpr</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   left</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   apply Finset.sum_eq_zero</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   intro P _</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   change (markedCycleIncidence tail head ktail khead m P.val.1.val e-</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     markedCycleIncidence tail head ktail khead m P.val.2.val e+</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     markedCycleIncidence tail head ktail khead m P.val.2.val e-</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     markedCycleIncidence tail head ktail khead m P.val.1.val e)=0</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   ring</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem markedReplacementTransfer_spoke (i : Fin (m+1)) (v v&#x27; : V) (u u&#x27; : U)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hc : 0&lt;Fintype.card (MarkedReplacementPair tail head ktail khead m π b H₀ Hₖ i v v&#x27; u u&#x27;))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (j : Bool) (a : V) (h : U) :</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     markedWheelSpokeLoad (markedReplacementTransfer (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=Hₖ) i v v&#x27; u u&#x27;) j a h=</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       if markedPositionType i=j then alternatingRectangle v v&#x27; u u&#x27; a h else 0 := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   unfold markedWheelSpokeLoad markedReplacementTransfer</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   rw [averagedBasisRectangle_test]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hpoint (P : MarkedReplacementPair tail head ktail khead m π b H₀ Hₖ i v v&#x27; u u&#x27;) :</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (if u=h then markedSpokeIndicator P.val.1.val j a else 0)-</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (if u=h then markedSpokeIndicator P.val.2.val j a else 0)+</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (if u&#x27;=h then markedSpokeIndicator P.val.2.val j a else 0)-</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (if u&#x27;=h then markedSpokeIndicator P.val.1.val j a else 0)=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         if markedPositionType i=j then alternatingRectangle v v&#x27; u u&#x27; a h else 0 := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hd := markedSpokeIndicator_replacement P.val.1.val P.val.2.val i P.property.2.2.1 j a</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     rw [P.property.1,P.property.2.1] at hd</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     calc</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       _ = ((if u=h then (1:ℝ) else 0)-(if u&#x27;=h then 1 else 0))*</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           (markedSpokeIndicator P.val.1.val j a-markedSpokeIndicator P.val.2.val j a) := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         split_ifs &lt;;&gt; ring</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       _ = _ := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         have hV (s t : V) : (if s=t then (1:ℝ) else 0)=(if t=s then 1 else 0) := by simp only [eq_comm]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         have hU (s t : U) : (if s=t then (1:ℝ) else 0)=(if t=s then 1 else 0) := by simp only [eq_comm]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         rw [hd,hV v a,hV v&#x27; a,hU u h,hU u&#x27; h]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         unfold alternatingRectangle</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         split_ifs &lt;;&gt; ring</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   change (∑ P : MarkedReplacementPair tail head ktail khead m π b H₀ Hₖ i v v&#x27; u u&#x27;,</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     ((if u=h then markedSpokeIndicator P.val.1.val j a else 0)-</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>      (if u=h then markedSpokeIndicator P.val.2.val j a else 0)+</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>      (if u&#x27;=h then markedSpokeIndicator P.val.2.val j a else 0)-</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>      (if u&#x27;=h then markedSpokeIndicator P.val.1.val j a else 0)))/_= _</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   simp only [hpoint,Finset.sum_const,Finset.card_univ,nsmul_eq_mul]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hn : (Fintype.card (MarkedReplacementPair tail head ktail khead m π b H₀ Hₖ i v v&#x27; u u&#x27;):ℝ)≠0 :=</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (Nat.cast_pos.mpr hc).ne&#x27;</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   field_simp</span>
+<span id="L75"><a href="#L75" class="ln">  75</a> </span>
+<span id="L76"><a href="#L76" class="ln">  76</a> theorem markedReplacementTransfer_bound (i : Fin (m+1)) (v v&#x27; : V) (u u&#x27; : U)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     (D : MarkedWheel tail head ktail khead m π b H₀ Hₖ) :</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     |markedReplacementTransfer i v v&#x27; u u&#x27; D|≤</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       4/(Fintype.card (MarkedReplacementPair tail head ktail khead m π b H₀ Hₖ i v v&#x27; u u&#x27;):ℝ) :=</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   averagedBasisRectangle_bound _ _ _ _ D</span>
+<span id="L81"><a href="#L81" class="ln">  81</a> </span>
+<span id="L82"><a href="#L82" class="ln">  82</a> end Oberwolfach</span></pre></html>

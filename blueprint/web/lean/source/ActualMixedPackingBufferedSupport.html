@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualMixedPackingBufferedSupport.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualMixedPackingBufferedSupport.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ActualMixedPackingTargetPieces</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ActualMatchedEmbeddingWithoutCrossHypothesis</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Assemble the physical mixed packing and the prescribed anchors into one</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> injection on the actual buffered complement. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 32000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem actual_mixed_packing_buffered_embedding_with_support</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {X V U E L K J I:Type} [Fintype X] [DecidableEq X] [Fintype V] [LinearOrder V] [Fintype U] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [DecidableEq K] [DecidableEq J] [Fintype K] [Fintype I] [Nonempty V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {F:SimpleGraph X} (data:ActualResidualData (K:=K) (J:=J) F)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (G:SimpleGraph V) (tail head:E→V) (ktail khead:L→V) (m b:ℕ) (hc:data.c=m+1)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (π:Equiv.Perm V) (hb:1≤b) (hπ:∀x,π x≠x) (H₀ Hₖ:V→U→Prop) (root:K→V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hinj:∀i,Function.Injective (fun j:Fin (data.d+1)=&gt;(π^j.val) (root i)))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hdis:∀i j,i≠j→Disjoint (permutationWindow π 0 data.d (root i)) (permutationWindow π 0 data.d (root j)))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ Hₖ)) (hub:U)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hpack:∀W∈M,∀Z∈M,W≠Z→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources Z))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hT:∀i∈data.s₂,data.T i=packedMarkedPositions tail head ktail khead m b data.d π H₀ Hₖ M hub (root i))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (Ord:Finset V) (hOrd:∀W∈M,∀a:Fin (m+1),a.val≠0→W.1.val a∈Ord)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (havoid:∀i,Disjoint (permutationWindow π 0 data.d (root i)) Ord)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (n:{j // j∈data.t}→ℕ) (hn:∀j,2≤n j)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (C:∀j:{j // j∈data.t},OrderedOrdinaryWheel (U:=U) π b (n j+1))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hlenC:∀j,(data.C j.val).length=n j+1) (hhubC:∀j,(C j).2=hub)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hOrdC:∀j a,(C j).1.val a∈Ord)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hCC:∀j k,j≠k→Disjoint (ordinaryWheelPhysicalResources (C j)) (ordinaryWheelPhysicalResources (C k)))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hCM:∀j W,W∈M→Disjoint (ordinaryWheelPhysicalResources (C j)) (markedWheelPhysicalResources W))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hE:∀e:E,G.Adj (tail e) (head e)) (hK:∀e:L,G.Adj (ktail e) (π (khead e)))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (R:V→V→Prop) (hER:∀e:E,R (tail e) (head e)) (hKR:∀e:L,R (ktail e) (π (khead e)))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hCR:∀j a,R ((C j).1.val a) ((C j).1.val (cycleNext a)))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hG:F.IsRegularOfDegree 2)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hCycle:data.t.biUnion (fun j=&gt;(data.C j).support.toFinset)⊆data.Cembed)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (ext:∀i:K,Fin (data.c*data.d+5)↪X)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hsupp:∀i∈data.s₁∪data.s₂,(data.P i).support=List.ofFn (ext i))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hsrc:∀i j,i≠j→Disjoint (Finset.univ.image (ext i)) (Finset.univ.image (ext j)))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (index:I≃{i // i∈data.s₁}) (finalExt:∀i:I,Fin (data.c*data.d+5)↪X)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (inner:∀i:I,Fin (data.c*data.d+1)↪X)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hinner:∀i p,inner i p=finalExt i ⟨p.val+2,by omega⟩)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hfinal:∀i,(data.P (index i).val).support=List.ofFn (finalExt i))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let A:=Finset.univ.biUnion (fun z:actualOldPieceIndex data=&gt;(actualOldPieceWalk data z).support.toFinset)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     ∃(W:actualSelectedSegmentIndex data→MarkedWheel tail head ktail khead m π b H₀ Hₖ)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (u v:actualOldPieceIndex data→V) (q:∀z,(SimpleGraph.completeGraph V).Walk (u z) (v z))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (g:{x // x∈data.prescribed}↪V) (f:{x // x∈A}↪V) (ψ:X→V),</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∀z,W z∈M ∧ (W z).2.val=hub ∧ (W z).1.val 0=(π^z.2.val.val) (root z.1.1.val)) ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀z,(q z).IsPath) ∧ (∀z,(q z).length=(actualOldPieceWalk data z).length) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (∀z z&#x27;,z≠z&#x27;→Disjoint (q z).support.toFinset (q z&#x27;).support.toFinset) ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (∀j:{j // j∈data.t},∀x∈(q (.inl j)).support,x∈Ord) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (∀r:SelectedRunIndex data.s₂ data.d data.T,∀x∈(q (.inr r)).support,x∉Ord→</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         ∃j:Fin (data.d+1),r.2.val.1≤j.val ∧ j.val≤r.2.val.2+1 ∧ x=(π^j.val) (root r.1.val)) ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (∀i (j:Fin (data.d+1)) (hj:bufferedMarker data.c data.d (ext i) j∈data.prescribed),</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         g ⟨bufferedMarker data.c data.d (ext i) j,hj⟩=(π^j.val) (root i)) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (∀z (k:Fin ((actualOldPieceWalk data z).length+1)),</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         f ⟨(actualOldPieceWalk data z).getVert k.val,</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           Finset.mem_biUnion.mpr ⟨z,Finset.mem_univ _,List.mem_toFinset.mpr ((actualOldPieceWalk data z).getVert_mem_support _)⟩⟩=</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>           (q z).getVert k.val) ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       Set.InjOn ψ (↑(data.oldDomain\bufferedPathStrictInterior (fun _=&gt;data.c*data.d) inner):Set X) ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (∀x (hx:x∈A),ψ x=f ⟨x,hx⟩) ∧ (∀x (hx:x∈data.prescribed),ψ x=g ⟨x,hx⟩) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (∀r:SelectedRunIndex data.s₂ data.d data.T,∀j,j≤r.2.val.2+1-r.2.val.1→</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         ψ ((data.P r.1.val).getVert (2+data.c*(r.2.val.1+j)))=(π^(r.2.val.1+j)) (root r.1.val)) ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (∀j:{j // j∈data.t},u (.inl j)=(C j).1.val (cycleNext 0) ∧ v (.inl j)=(C j).1.val 0) ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (∀j:{j // j∈data.t},R (v (.inl j)) (u (.inl j))) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (∀j:{j // j∈data.t},∀k,k&lt;(q (.inl j)).length→∃a:Fin (n j+1),</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         (q (.inl j)).getVert k=(C j).1.val a ∧ (q (.inl j)).getVert (k+1)=(C j).1.val (cycleNext a)) ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (∀z k,k&lt;(q z).length→R ((q z).getVert k) ((q z).getVert (k+1))) ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (∀r:SelectedRunIndex data.s₂ data.d data.T,∀e:Sym2 V,e∈(q (.inr r)).edges→∃z:actualSelectedSegmentIndex data,z.1=r ∧</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         e.toFinset∈markedCyclePhysicalEdges tail head ktail khead m π b (W z).1):=by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   intro A</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   obtain ⟨W,u,v,q,hW,hq,hlen,hqdis,hu,hv,hcy,hrun,hmarks,hends,hclose,hcedges,hdir,hedges⟩:=</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     actual_mixed_packing_target_pieces data G tail head ktail khead m b hc π hb hπ H₀ Hₖ root hinj hdis M hub hpack hT Ord hOrd havoid n hn C hlenC hhubC hOrdC hCC hCM hE hK R hER hKR hCR</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   obtain ⟨g,f,ψ,hg,hf,hψ,hψf,hψg⟩:=</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     actual_matched_old_embedding_without_cross_hypothesis data hG hCycle ext hsupp hsrc index finalExt inner hinner hfinal π root hinj hdis Ord havoid (SimpleGraph.completeGraph V) u v q hq hlen hqdis hu hv hcy hrun hmarks</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have hparent:=matched_actual_run_preserves_parent_markers data (SimpleGraph.completeGraph V) u v q ψ f hψf hf π (fun i=&gt;root i.val) hmarks</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   exact ⟨W,u,v,q,g,f,ψ,hW,hq,hlen,hqdis,hcy,hrun,hg,hf,hψ,hψf,hψg,hparent,hends,hclose,hcedges,hdir,hedges⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> end Oberwolfach</span></pre></html>

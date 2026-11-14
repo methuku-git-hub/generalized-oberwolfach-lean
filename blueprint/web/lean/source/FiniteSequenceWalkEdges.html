@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FiniteSequenceWalkEdges.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FiniteSequenceWalkEdges.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteSequenceSimpleWalk</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Combinatorics.SimpleGraph.Walk.Traversal</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A walk with a given vertex sequence has exactly the consecutive edges</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> of that sequence, position by position. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 12000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem finite_sequence_walk_edge_at</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {V:Type*} [DecidableEq V] (G:SimpleGraph V) (n:ℕ) (f:Fin (n+1)→V)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {a b:V} (p:G.Walk a b) (hlen:p.length=n) (hsupp:p.support=List.ofFn f)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (i:Fin n):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (p.edges[ i.val ]&#x27; (by simpa [SimpleGraph.Walk.length_edges,hlen] using i.isLt)).toFinset=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       {f i.castSucc,f i.succ} := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hv:∀j:ℕ,(hj:j≤n)→p.getVert j=f ⟨j,by omega⟩:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     intro j hj</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     have hh:=p.getVert_eq_support_getElem? (n:=j) (by omega)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     rw [hsupp] at hh</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     simpa only [List.getElem?_ofFn, dif_pos (show j&lt;n+1 by omega), Option.some.injEq] using hh</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hedge:i.val&lt;p.edges.length:=by simpa [SimpleGraph.Walk.length_edges,hlen] using i.isLt</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   rw [SimpleGraph.Walk.getElem_edges hedge]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   rw [hv i.val (by omega),hv (i.val+1) (by omega)]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   rw [Sym2.toFinset_mk_eq]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have h1:(⟨i.val,by omega⟩:Fin (n+1))=i.castSucc:=by apply Fin.ext;rfl</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have h2:(⟨i.val+1,by omega⟩:Fin (n+1))=i.succ:=by apply Fin.ext;rfl</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   rw [h1,h2]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> end Oberwolfach</span></pre></html>

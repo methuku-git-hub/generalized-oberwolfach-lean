@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BoundaryPathMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BoundaryPathMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointBoundaryCompletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Explicit numerical margins for the square-root cap in boundary-path</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> completion. The fixed conflict degree enters only the order requirement. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 3000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem boundary_path_square_root_margin (n N D r:ℕ) (hn:0&lt;n)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (κ C β L d₀ e₀:ℝ) (hκ:0&lt;κ) (hκ1:κ≤1) (hC:0≤C) (hβ:0&lt;β)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hN:(N:ℝ)≤C*κ^2*(n:ℝ)^2) (hD:(D:ℝ)≤C*κ^2*n)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hd:d₀≤C*κ^2*n) (he:e₀≤C*κ^2*n)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hsmall:((2*(r:ℝ)+10)*C+4)*κ≤β/4)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (horder:4*(((r:ℝ)+3)*(L+1)+4)≤β*n):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     0&lt;Nat.ceil (κ*n) ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (N*r:ℕ)/(Nat.ceil (κ*n):ℝ)+((r:ℝ)+3)*(L+1)+</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>         2*(d₀+2*(Nat.ceil (κ*n)+D:ℕ))+e₀+(D*r:ℕ)+3*D&lt;β*n:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hnR:(0:ℝ)&lt;n:=Nat.cast_pos.mpr hn</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hK:0&lt;Nat.ceil (κ*n):=Nat.ceil_pos.mpr (mul_pos hκ hnR)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hKlo:κ*n≤(Nat.ceil (κ*n):ℝ):=Nat.le_ceil _</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hKhi:(Nat.ceil (κ*n):ℝ)≤κ*n+1:=(Nat.ceil_lt_add_one (by positivity : (0:ℝ)≤κ*n)).le</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hNr:(N*r:ℕ)/(Nat.ceil (κ*n):ℝ)≤C*r*κ*n:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     apply (div_le_iff₀ (Nat.cast_pos.mpr hK)).mpr</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     calc</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (N*r:ℕ)≤C*κ^2*(n:ℝ)^2*r:=by exact_mod_cast mul_le_mul_of_nonneg_right hN (Nat.cast_nonneg r)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       _=(C*r*κ*n)*(κ*n):=by ring</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       _≤(C*r*κ*n)*(Nat.ceil (κ*n):ℝ):=</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         mul_le_mul_of_nonneg_left hKlo (by positivity)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hκsq:κ^2≤κ:=by nlinarith only [hκ.le,hκ1]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hscale:C*κ^2*n≤C*κ*n:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hκsq hC) hnR.le</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hD&#x27;:(D:ℝ)≤C*κ*n:=hD.trans hscale</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hdr:d₀≤C*κ*n:=hd.trans hscale</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have her:e₀≤C*κ*n:=he.trans hscale</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hDr:(D:ℝ)*r≤C*κ*n*r:=mul_le_mul_of_nonneg_right hD&#x27; (Nat.cast_nonneg r)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hmain:((2*(r:ℝ)+10)*C+4)*κ*n≤β*n/4:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     nlinarith only [mul_le_mul_of_nonneg_right hsmall hnR.le]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨hK,?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   push_cast</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hNr&#x27;:(N:ℝ)*r/(Nat.ceil (κ*n):ℝ)≤C*r*κ*n:=by exact_mod_cast hNr</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   nlinarith only [hNr&#x27;,hKhi,hD&#x27;,hdr,her,hDr,hmain,horder,mul_pos hβ hnR]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> </span>
+<span id="L45"><a href="#L45" class="ln">  45</a> theorem boundary_path_square_root_degrees (n D r:ℕ) (κ C ν:ℝ)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hκ:0&lt;κ) (hκ1:κ≤1) (hC:0≤C) (hscale:1≤κ*n)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hD:(D:ℝ)≤C*κ^2*n)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hrow:3*(C+2)*κ≤ν) (hcol:C*r*κ≤ν):</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (3*(Nat.ceil (κ*n)+D):ℕ)≤ν*n ∧ (D*r:ℕ)≤ν*n:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hn:(0:ℝ)≤n:=Nat.cast_nonneg _</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hKhi:(Nat.ceil (κ*n):ℝ)≤κ*n+1:=(Nat.ceil_lt_add_one (by positivity : (0:ℝ)≤κ*n)).le</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hκsq:κ^2≤κ:=by nlinarith only [hκ.le,hκ1]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hD&#x27;:(D:ℝ)≤C*κ*n:=hD.trans</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hκsq hC) hn)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   constructor</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   · push_cast</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     nlinarith only [hKhi,hscale,hD&#x27;,mul_le_mul_of_nonneg_right hrow hn]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   · push_cast</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     nlinarith only [mul_le_mul_of_nonneg_right hD&#x27; (Nat.cast_nonneg r),</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       mul_le_mul_of_nonneg_right hcol hn]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> end Oberwolfach</span></pre></html>

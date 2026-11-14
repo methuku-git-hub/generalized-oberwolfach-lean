@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FiniteLawUniversalPrior.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FiniteLawUniversalPrior.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CommonEvents</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A uniform intersection principle gives a lower bound for its projected</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> witness event, without requiring independence. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem finiteLaw_probability_of_universal_prior_witness</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {Ω:Type*} [Fintype Ω] (μ:FiniteLaw Ω) (Good:Ω→Prop) (ε:ℝ)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (h:∀ Prior:Ω→Prop,1-ε≤μ.probability Prior→∃ω,Prior ω ∧ Good ω):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ε&lt;μ.probability Good :=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   by_contra hn</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hc:=finiteLaw_probability_compl μ Good</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hp:1-ε≤μ.probability (fun ω=&gt;¬Good ω):=by linarith</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   obtain ⟨ω,hbad,hgood⟩:=h (fun ω=&gt;¬Good ω) hp</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   exact hbad hgood</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem finiteLaw_join_projected_witness_with_endpoint</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     {Ω Ξ:Type*} [Fintype Ω] (μ:FiniteLaw Ω) (project:Ξ→Ω)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (Good:Ξ→Prop) (Endpoint:Ω→Prop) (ε:ℝ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hmatch:∀ Prior:Ω→Prop,1-ε≤μ.probability Prior→∃x:Ξ,Prior (project x) ∧ Good x)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hendpoint:∀ Extra:Ω→Prop,ε≤μ.probability Extra→∃y:Ω,Extra y ∧ Endpoint y):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃x:Ξ,Good x ∧ Endpoint (project x) :=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let ProjectedGood:=fun y:Ω=&gt;∃x:Ξ,project x=y ∧ Good x</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hProb:ε&lt;μ.probability ProjectedGood:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     apply finiteLaw_probability_of_universal_prior_witness μ ProjectedGood ε</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     intro Prior hPrior</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     obtain ⟨x,hx,hgood⟩:=hmatch Prior hPrior</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     exact ⟨project x,hx,x,rfl,hgood⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   obtain ⟨y,⟨x,hxy,hgood⟩,hend⟩:=hendpoint ProjectedGood hProb.le</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   exact ⟨x,hgood,hxy.symm ▸ hend⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> end Oberwolfach</span></pre></html>

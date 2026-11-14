@@ -1,0 +1,130 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ResidualActualAssignedComplement.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ResidualActualAssignedComplement.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResidualActualFamilyForPositions</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.CompleteRemainderAndGlue</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Assign the actual bad edges, embed the actual residual source graphs,</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> protect the old physical packing, and glue the source embeddings. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 18000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {I K J V:Type} [Fintype I] [DecidableEq I] [Nonempty I] [DecidableEq K] [DecidableEq J]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   [Fintype V] [DecidableEq V] {X:I→Type} [∀i,Fintype (X i)] [∀i,DecidableEq (X i)]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem actual_factor_remainder_assigned_and_complement_glued</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (F:∀i,SimpleGraph (X i)) (hF:∀i,(F i).IsRegularOfDegree 2):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃ (D:∀i,X i→X i→Prop) (orig:∀i,List (PrescribedSourcePiece (X i))),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (∀i,(orig i).Pairwise (fun p q=&gt;Disjoint p.vertices.toFinset q.vertices.toFinset)) ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (∀i p,p∈orig i→∃a xs,p=.cycle a xs ∧ p.OriginalValid (D i)) ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∀i,sourcePieceVerticesUnion (orig i)=Finset.univ ∧ sourcePieceEdgesUnion (orig i)=(F i).edgeFinset) ∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (∀i x y,D i x y ↔ (x,y)∈sourcePieceArcsUnion (orig i)) ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       ∀ a:∀i,ActualResidualData (K:=K) (J:=J) (F i),</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ∃ pieces:∀i,List (PrescribedSourcePiece {x // x∈(a i).remaining}),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀i,prescribedDependentGraph pieces i=((a i).graph).induce (↑(a i).remaining:Set (X i))) ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀i x y,prescribedDependentDigraph pieces i x y ↔ D i x.1 y.1 ∧ (a i).graph.Adj x.1 y.1) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       ∀ (Final:∀i,Finset (X i)) (hFinal:∀i,Disjoint (Final i) (a i).remaining)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         (hCycle:∀i,(a i).t.biUnion (fun j=&gt;((a i).C j).support.toFinset)⊆(a i).Cembed)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         (ψ:∀i,X i→V) (hψ:∀i,Set.InjOn (ψ i) (↑((a i).oldDomain\Final i):Set (X i)))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (Kbad Jbad:SimpleGraph V) (Lbad:Sym2 V→Finset I) (Bad:V→Finset I) (inner:Finset I) (Z:I→Finset V)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (hOutside:∀e∈Kbad.edgeFinset,Disjoint (Lbad e) inner)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         (hOldZ:∀i,Disjoint (((a i).oldDomain\Final i).image (ψ i)) (Z i)) (houter:∀i,i∉inner→Z i=∅)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (hOldShield:∀i e v,e∈Kbad.edgeFinset→v∈e.toFinset→v∈((a i).oldDomain\Final i).image (ψ i)→i∈Lbad e→i∈Bad v)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         (α b:ℝ) (hα:0&lt;α) (hb:0≤b) (hbsmall:b≤α/16) (hnV:0&lt;Fintype.card V)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (hLbad:∀e∈Kbad.edgeFinset,α*Fintype.card V≤((Lbad e).card:ℝ))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         (hBad:∀v,((Bad v).card:ℝ)≤b*Fintype.card V)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         (hKbad:∀v,(Kbad.degree v:ℝ)≤b*Fintype.card V)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         (hcapacity:∀i,8*(residualSubtypeSet (a i).remaining (a i).prescribed).card+</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>           8*⌈4*(Kbad.edgeFinset.card:ℝ)/(α*Fintype.card V)⌉₊+4*(Z i).card+10≤Fintype.card {x // x∈(a i).remaining})</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         (β δ:ℝ) (hβ:0&lt;β) (hβ1:β≤1) (hδ:0&lt;δ) (hδbound:δ≤(β/100)^2)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (hnβ:100/β≤(Fintype.card V:ℝ)) (hn:2/Real.sqrt δ≤(Fintype.card V:ℝ))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (hI:(Fintype.card I:ℝ)≤Fintype.card V)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         (hsize:∀i,(Fintype.card {x // x∈(a i).remaining}:ℝ)≤δ*Fintype.card V)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (hold:∀v,((Finset.univ.filter (fun i=&gt;v∈</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>           (residualSubtypeSet (a i).remaining (a i).prescribed).image (fun x=&gt;ψ i x.1))).card:ℝ)+Kbad.degree v+</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>           ((Finset.univ.filter (fun i=&gt;v∈Z i)).card:ℝ)≤δ*Fintype.card V)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         (hJ:∀v,(Jbad.degree v:ℝ)≤δ*Fintype.card V) (hKJ:Disjoint Kbad.edgeFinset Jbad.edgeFinset)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         (Dfree Dstar:V→V→Prop) (hDD:∀x y,Dfree x y→Dstar x y)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         (hDstar:∀x y,Kbad.Adj x y→Dstar x y ∨ Dstar y x)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         (Pack:Finset (Sym2 V)) (hKPack:Disjoint Kbad.edgeFinset Pack) (hDPack:∀x y,Dfree x y→s(x,y)∉Pack)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         (Lists:I→Finset V) (hext:∀i,IsExtendingList Dfree (Lists i) β)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         (hListOld:∀i,Disjoint (Lists i) (((a i).oldDomain\Final i).image (ψ i))),</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       ∃ (assign:Sym2 V→I) (orient:Sym2 V→V×V)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         (B:∀i,Finset {x // x∈(a i).remaining})</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         (g Φ:∀i,{x // x∈(a i).remaining}→V) (fC:∀i,{x // x∉Final i}↪V),</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         (∀i (x:{x // x∉Final i}),x.val∈(a i).oldDomain→fC i x=ψ i x.val) ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (∀i (x:{x // x∈(a i).remaining}) (hx:x.val∉Final i),fC i ⟨x.val,hx⟩=Φ i x) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         (∀i,residualSubtypeSet (a i).remaining (a i).prescribed⊆B i ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>           (∀x∈residualSubtypeSet (a i).remaining (a i).prescribed,g i x=ψ i x.1) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           (B i).image (g i)=</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>             (residualSubtypeSet (a i).remaining (a i).prescribed).image (fun x=&gt;ψ i x.1)∪</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>               prescribedMatchingEndpoints (prescribedAssignedArcs Kbad assign orient i)∪Z i) ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (∀i v,v∈prescribedMatchingEndpoints (prescribedAssignedArcs Kbad assign orient i)→i∉Bad v) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         (∀i v,v∈prescribedMatchingEndpoints (prescribedAssignedArcs Kbad assign orient i)→</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>           ∃e∈Kbad.edgeFinset,v∈e.toFinset ∧ i∈Lbad e) ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         (∀i x,x∈B i→Φ i x=g i x) ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         (∀i v,v∈Z i→∃x,Φ i x=v) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         (∀i x,x∉B i→Φ i x∈Lists i) ∧</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         (∀i x y,prescribedDependentDigraph pieces i x y→Dstar (Φ i x) (Φ i y) ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>           ((x∉B i ∨ y∉B i)→Dfree (Φ i x) (Φ i y))) ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         let E:I→Finset (Sym2 V):=fun i=&gt;((prescribedDependentGraph pieces i).edgeFinset).image (Sym2.map (Φ i));</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         PairwisePhysicalDisjoint E ∧ Kbad.edgeFinset⊆Finset.univ.biUnion E ∧</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         (∀i,Disjoint (E i) Jbad.edgeFinset) ∧ (∀i,Disjoint (E i) Pack) ∧</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         (∀v,(((Finset.univ.filter (fun z:(Σi,{x // x∈(a i).remaining})=&gt;z.2∉B z.1)).filter</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>           (fun z=&gt;Φ z.1 z.2=v)).card:ℝ)≤Real.sqrt δ*Fintype.card V+1) ∧</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         (prescribedPhysicalUnion E).edgeFinset=Finset.univ.biUnion E ∧</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>         (∀v,((prescribedPhysicalUnion E).degree v:ℝ)≤5*Real.sqrt δ*Fintype.card V) :=by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   obtain ⟨D,orig,hpair0,hcycles,hwhole,hD,hres⟩:=actual_factor_residuals_ready_for_positions (K:=K) (J:=J) F hF</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   refine ⟨D,orig,hpair0,hcycles,hwhole,hD,?_⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   intro a</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   obtain ⟨pieces,hapart,hvalid,hcover,hgraph,harcs,hA,harc,hoverlap,hdom⟩:=hres a</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   refine ⟨pieces,hgraph,harcs,?_⟩</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   intro Final hFinal hCycle ψ hψ Kbad Jbad Lbad Bad inner Z hOutside hOldZ houter hOldShield α b hα hb hbsmall hnV hLbad hBad hKbad hcapacity β δ hβ hβ1 hδ hδbound hnβ hn hI hsize hold hJ hKJ Dfree Dstar hDD hDstar Pack hKPack hDPack Lists hext hListOld</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   letI:Nonempty V:=Fintype.card_pos_iff.mp hnV</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   let A:=fun i=&gt;residualSubtypeSet (a i).remaining (a i).prescribed</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   let Old:=fun i=&gt;(a i).oldDomain\Final i</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   let f₀:=fun i (x:{x // x∈(a i).remaining})=&gt;ψ i x.1</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   let embed:=fun i=&gt; (⟨Subtype.val,Subtype.val_injective⟩ : {x // x∈(a i).remaining}↪X i)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hdom&#x27;:∀i (x:{x // x∈(a i).remaining}),x∈A i ↔ embed i x∈Old i:=by</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     intro i x</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     rw [hdom i x]</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     change x.val∈(a i).oldDomain ↔ x.val∈(a i).oldDomain\Final i</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     simp only [Finset.mem_sdiff]</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     constructor</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     · intro hx</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>       refine ⟨hx,?_⟩</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>       intro hfinal</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       exact Finset.disjoint_left.mp (hFinal i) hfinal x.property</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     · exact And.left</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have hAinj:∀i,Set.InjOn (f₀ i) (↑(A i):Set {x // x∈(a i).remaining}):=by</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     intro i x hx y hy hxy</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     apply Subtype.ext</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     exact hψ i ((hdom&#x27; i x).1 hx) ((hdom&#x27; i y).1 hy) hxy</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   obtain ⟨assign,orient,B,g,Φ,f,hinj,holdf,hresf,hBg,hEnd,hEndList,hΦinj,hΦold,hZ,hL,hArc,hPair,hKcover,hJavoid,hPack,hFree,hUnion,hDegree⟩:=</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     complete_remainder_and_glue_from_lists pieces (by intro i p hp;exact (hvalid i p hp).1) hapart A hA f₀ hAinj</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>       embed Old ψ hdom&#x27; hψ (by intro i x hx;rfl)</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>       Kbad Jbad Lbad Bad inner Z hOutside hOldZ houter hOldShield α b hα hb hbsmall hnV hLbad hBad hKbad</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       harc hcapacity β δ hβ hβ1 hδ hδbound hnβ hn hI hsize hold hJ hKJ Dfree Dstar hDD hDstar Pack hKPack hDPack Lists hext hListOld</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>   have hmem:∀i (x:{x // x∉Final i}),x.val∈Old i∪Finset.univ.image (embed i):=by</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     intro i x</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     have hx:x.val∈(a i).oldDomain ∨ x.val∈(a i).remaining:=by</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       have hh:x.val∈(a i).oldDomain∪(a i).remaining:=by</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>         rw [(a i).old_domain_union_remaining (hCycle i)]</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>         exact Finset.mem_univ _</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>       exact Finset.mem_union.mp hh</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     rcases hx with ho | hr</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     · exact Finset.mem_union_left _ (Finset.mem_sdiff.mpr ⟨ho,x.property⟩)</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     · apply Finset.mem_union_right</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>       exact Finset.mem_image.mpr ⟨⟨x.val,hr⟩,Finset.mem_univ _,rfl⟩</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>   let fC:∀i,{x // x∉Final i}↪V:=fun i=&gt;⟨fun x=&gt;f i x.val,by</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     intro x y hxy</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     apply Subtype.ext</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     exact hinj i (hmem i x) (hmem i y) hxy⟩</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>   refine ⟨assign,orient,B,g,Φ,fC,?_,?_,hBg,hEnd,hEndList,hΦold,hZ,hL,hArc,hPair,hKcover,hJavoid,hPack,hFree,hUnion,hDegree⟩</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>   · intro i x hx</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     exact holdf i x.val (Finset.mem_sdiff.mpr ⟨hx,x.property⟩)</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>   · intro i x hx</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     exact hresf i x</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a> end Oberwolfach</span></pre></html>

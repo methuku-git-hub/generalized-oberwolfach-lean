@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHubPackingSupport.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHubPackingSupport.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedRowCoverPackings</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Recover row and hub support from the exact spoke-union conclusion of</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> the proved hub-cover theorem. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 5000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U E T : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {tail head : E→V} {ktail khead : T→V} {H₀ HK : V→U→Prop}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {π : Equiv.Perm V} {m b n : ℕ}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_hub_cover_support</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (M : Finset (MarkedWheel tail head ktail khead m π b H₀ HK)) (u : Fin n→U)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hcover : M.biUnion markedWheelPhysicalResources=(markedPackingRims M).image Sum.inl∪</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       Finset.univ.biUnion (fun i=&gt;(Finset.univ.filter (fun v=&gt;H₀ v (u i)∨HK v (u i))).image (fun v=&gt;Sum.inr (v,u i))))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (F : Finset V) (hF : ∀ z,π z∈F ↔ z∈F)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hneighbours : ∀ i x,H₀ x (u i)∨HK x (u i)→x∈F) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ W∈M,W.2.val∈Finset.univ.image u) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ W∈M,markedWheelRows W⊆F) ∧ GraphSupportedOn F (markedPackingRimGraph M) := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hhub (W) (hW : W∈M) : W.2.val∈Finset.univ.image u := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     have he : Sum.inr (W.1.val 0,W.2.val)∈M.biUnion markedWheelPhysicalResources :=</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       Finset.mem_biUnion.mpr ⟨W,hW,(markedWheelPhysicalResources_spoke W _ _).mpr</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         ⟨rfl,Finset.mem_image.mpr ⟨0,Finset.mem_univ _,rfl⟩⟩⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     rw [hcover] at he</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     rcases Finset.mem_union.mp he with he|he</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     · obtain ⟨e,_,he⟩ := Finset.mem_image.mp he</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       cases he</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     · obtain ⟨i,_,hi⟩ := Finset.mem_biUnion.mp he</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       obtain ⟨x,hx,he⟩ := Finset.mem_image.mp hi</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       exact Finset.mem_image.mpr ⟨i,Finset.mem_univ _,(Prod.mk.inj (Sum.inr.inj he)).2⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hrows (W) (hW : W∈M) : markedWheelRows W⊆F := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     obtain ⟨i,_,hi⟩ := Finset.mem_image.mp (hhub W hW)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     intro x hx</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have he := markedWheelPhysicalResources_spoke_present W x W.2.val</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ((markedWheelPhysicalResources_spoke W x W.2.val).mpr ⟨rfl,hx⟩)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     rw [←hi] at he</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     exact hneighbours i x he</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   refine ⟨hhub,hrows,?_⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   intro x y hxy</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   obtain ⟨W,hW,he⟩ := Finset.mem_biUnion.mp hxy.2</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hs := markedWheelRimGraph_supported W x y ⟨hxy.1,he⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hsub : markedWheelRows W∪(markedWheelRows W).image π⊆F := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     intro z hz</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     rcases Finset.mem_union.mp hz with hz|hz</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     · exact hrows W hW hz</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     · obtain ⟨a,ha,rfl⟩ := Finset.mem_image.mp hz</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       exact (hF a).mpr (hrows W hW ha)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   exact ⟨hsub hs.1,hsub hs.2⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a> </span>
+<span id="L53"><a href="#L53" class="ln">  53</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BalancedClassTolerance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BalancedClassTolerance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Tactic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Choose the balancing tolerances before the bounded forbidden-set size.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The resulting inequalities are the degree, size and count margins used</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> by common-neighbourhood balancing. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 8000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a>  theorem balanced_class_tolerances (m:ℕ) (q β η K:ℝ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hq:0&lt;q) (hβ:0&lt;β) (hη:0&lt;η) (hK:0≤K):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ ε δ:ℝ,0&lt;ε∧0&lt;δ∧ε+δ≤q/2∧ε+K*δ≤η∧(m+1)*δ≤β/2∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       ∀ f:ℝ,0≤f→∃ N:ℕ,1≤N∧∀ n:ℕ,N≤n→</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>         4*(m+1)*ε*n+2*(m+1)*f+(m+1)≤δ*n:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   let c:ℝ:=m+1</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hc:0&lt;c:=by dsimp [c];positivity</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   let δ:ℝ:=min (q/4) (min (η/(2*(K+1))) (β/(2*c)))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hδ:0&lt;δ:=by dsimp [δ];positivity</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hδq:δ≤q/4:=min_le_left _ _</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hδη:δ≤η/(2*(K+1)):=(min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hδβ:δ≤β/(2*c):=(min_le_right _ _).trans (min_le_right _ _)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let ε:ℝ:=min (δ/(8*c)) (min (q/4) (η/2))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hε:0&lt;ε:=by dsimp [ε];positivity</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hεδ:ε≤δ/(8*c):=min_le_left _ _</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hεq:ε≤q/4:=(min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hεη:ε≤η/2:=(min_le_right _ _).trans (min_le_right _ _)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hεc:4*c*ε≤δ/2:=by nlinarith only [(le_div_iff₀ (by positivity:0&lt;8*c)).mp hεδ]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hKδ:K*δ≤η/2:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have hh:δ*(2*(K+1))≤η:=(le_div_iff₀ (by positivity)).mp hδη</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     nlinarith only [hh,hδ.le]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   refine ⟨ε,δ,hε,hδ,by linarith,by linarith,?_,?_⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   · have hh:δ*(2*c)≤β:=(le_div_iff₀ (by positivity)).mp hδβ</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     dsimp [c] at hh</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     nlinarith only [hh]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · intro f hf</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     obtain ⟨N,hN⟩:=exists_nat_gt (max 1 (2*(2*c*f+c)/δ))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hN1:1≤N:=by have hh: (1:ℝ)&lt;N:=(le_max_left _ _).trans_lt hN;exact_mod_cast hh.le</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     refine ⟨N,hN1,?_⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     intro n hn</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hnR:(N:ℝ)≤n:=by exact_mod_cast hn</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hh:2*(2*c*f+c)/δ≤n:=(le_max_right _ _).trans (hN.le.trans hnR)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hbig:2*c*f+c≤δ*n/2:=by nlinarith only [(div_le_iff₀ hδ).mp hh]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hsmall:=mul_le_mul_of_nonneg_right hεc (show (0:ℝ)≤n by positivity)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     change 4*c*ε*n+2*c*f+c≤δ*n</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     linarith</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> end Oberwolfach</span></pre></html>

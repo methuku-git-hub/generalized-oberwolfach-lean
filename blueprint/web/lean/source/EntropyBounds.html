@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EntropyBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EntropyBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.Concentration</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Scalar inequalities used to retain the manuscript&#x27;s Chernoff constants. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open Set</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem log_one_add_lower_quadratic {x : ℝ} (hx : 0 ≤ x) :</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     x - x ^ 2 / 2 ≤ Real.log (1 + x) := by</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   let F (y : ℝ) := Real.log (1 + y) - y + y ^ 2 / 2</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hd (y : ℝ) (hy : y ∈ Icc 0 x) :</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       HasDerivAt F (1 / (1 + y) - 1 + y) y := by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     have hn : 1 + y ≠ 0 := ne_of_gt (by linarith [hy.1])</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     convert ((((hasDerivAt_id y).const_add 1).log hn).sub (hasDerivAt_id y)).add</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (((hasDerivAt_id y).pow 2).div_const 2) using 1</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     · rfl</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     · dsimp</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       ring</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hm : MonotoneOn F (Icc 0 x) := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     apply monotoneOn_of_hasDerivWithinAt_nonneg (convex_Icc 0 x)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (fun y hy =&gt; (hd y hy).continuousAt.continuousWithinAt)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (fun y hy =&gt; (hd y (interior_subset hy)).hasDerivWithinAt)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     intro y hy</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have hy0 : 0 ≤ y := (interior_subset hy).1</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hn : 0 &lt; 1 + y := by linarith</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have he : 1 / (1 + y) - 1 + y = y ^ 2 / (1 + y) := by field_simp; ring</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     rw [he]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     positivity</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hh := hm ⟨le_rfl, hx⟩ ⟨hx,le_rfl⟩ hx</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   simp only [F, add_zero, Real.log_one, sub_zero, zero_pow (by decide : 2 ≠ 0),</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     zero_div] at hh</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   linarith</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> theorem chernoff_upper_entropy {x : ℝ} (hx : 0 ≤ x) (hx1 : x ≤ 1) :</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     x ^ 2 / 3 ≤ (1 + x) * Real.log (1 + x) - x := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let F (y : ℝ) := (1 + y) * Real.log (1 + y) - y - y ^ 2 / 2 + y ^ 3 / 6</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hd (y : ℝ) (hy : y ∈ Icc 0 x) :</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       HasDerivAt F (Real.log (1 + y) - y + y ^ 2 / 2) y := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hn : 1 + y ≠ 0 := ne_of_gt (by linarith [hy.1])</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     convert (((((hasDerivAt_id y).const_add 1).mul</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (((hasDerivAt_id y).const_add 1).log hn)).sub (hasDerivAt_id y)).sub</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (((hasDerivAt_id y).pow 2).div_const 2)).add</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (((hasDerivAt_id y).pow 3).div_const 6) using 1</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     · rfl</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     · dsimp</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       field_simp [hn]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       ring</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hm : MonotoneOn F (Icc 0 x) := by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     apply monotoneOn_of_hasDerivWithinAt_nonneg (convex_Icc 0 x)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (fun y hy =&gt; (hd y hy).continuousAt.continuousWithinAt)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (fun y hy =&gt; (hd y (interior_subset hy)).hasDerivWithinAt)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     intro y hy</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have h := log_one_add_lower_quadratic (interior_subset hy).1</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     linarith</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hh := hm ⟨le_rfl,hx⟩ ⟨hx,le_rfl⟩ hx</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hc : x ^ 3 ≤ x ^ 2 := by nlinarith [mul_nonneg (sq_nonneg x) (sub_nonneg.mpr hx1)]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   dsimp [F] at hh</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   norm_num at hh</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   linarith</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> theorem exp_neg_upper_quadratic {x : ℝ} (hx : 0 ≤ x) :</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     Real.exp (-x) ≤ 1 - x + x ^ 2 / 2 := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   let F (y : ℝ) := 1 - y + y ^ 2 / 2 - Real.exp (-y)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hd (y : ℝ) : HasDerivAt F (-1 + y + Real.exp (-y)) y := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     convert (((hasDerivAt_const y 1).sub (hasDerivAt_id y)).add</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (((hasDerivAt_id y).pow 2).div_const 2)).sub ((hasDerivAt_id y).neg.exp) using 1</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     · rfl</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · dsimp</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       ring</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hm : MonotoneOn F (Icc 0 x) := by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     apply monotoneOn_of_hasDerivWithinAt_nonneg (convex_Icc 0 x)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       (fun y _ =&gt; (hd y).continuousAt.continuousWithinAt)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       (fun y _ =&gt; (hd y).hasDerivWithinAt)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     intro y _</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     have h := Real.add_one_le_exp (-y)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     linarith</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hh := hm ⟨le_rfl,hx⟩ ⟨hx,le_rfl⟩ hx</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   dsimp [F] at hh</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   norm_num at hh</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   linarith</span>
+<span id="L82"><a href="#L82" class="ln">  82</a> </span>
+<span id="L83"><a href="#L83" class="ln">  83</a> end Oberwolfach</span></pre></html>

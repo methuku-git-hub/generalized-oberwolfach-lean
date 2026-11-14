@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualReindexedFinalEdgeUnion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualReindexedFinalEdgeUnion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ActualFinalEdgeIdentification</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The retained marked indices and the residual data&#x27;s selected indices may</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> be different presentations of the same family; the final edge union is</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> preserved by their explicit equivalence. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 8000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem actual_reindexed_final_edge_union</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {X K J I:Type} [Fintype X] [DecidableEq X] [DecidableEq K] [DecidableEq J] [Fintype I]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {F:SimpleGraph X} (data:ActualResidualData (K:=K) (J:=J) F)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (b:I≃{i // i∈data.s₁})</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (ext:∀i:I,Fin (data.c*data.d+5)↪X) (inner:∀i:I,Fin (data.c*data.d+1)↪X)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hinner:∀i p,inner i p=ext i ⟨p.val+2,by omega⟩)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hsupp:∀i,(data.P (b i).val).support=List.ofFn (ext i))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (p:∀i:I,F.Walk (inner i 0) (inner i (Fin.last (data.c*data.d))))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hp:∀i,(p i).support=List.ofFn (inner i)):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (Finset.univ.biUnion (fun i:I=&gt;(p i).edges.toFinset))=</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (Finset.univ.biUnion (fun i:{i // i∈data.s₁}=&gt;(data.path (.inl i)).edges.toFinset)):=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   ext edge</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   constructor</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   · intro h</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     obtain ⟨i,_,hi⟩:=Finset.mem_biUnion.mp h</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     apply Finset.mem_biUnion.mpr</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     refine ⟨b i,Finset.mem_univ _,?_⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     rw [←actual_final_path_edge_set_matches_buffered_sequence data (b i) (ext i) (inner i) (hinner i) (hsupp i) (p i) (hp i)]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     exact hi</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · intro h</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     obtain ⟨j,_,hj⟩:=Finset.mem_biUnion.mp h</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     apply Finset.mem_biUnion.mpr</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     refine ⟨b.symm j,Finset.mem_univ _,?_⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have he:=actual_final_path_edge_set_matches_buffered_sequence data (b (b.symm j)) (ext (b.symm j)) (inner (b.symm j))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (hinner (b.symm j)) (hsupp (b.symm j)) (p (b.symm j)) (hp (b.symm j))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     rw [he]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     rw [b.apply_symm_apply j]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact hj</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,64 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedRawSpokeTypes.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedRawSpokeTypes.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedWheelRawCoordinates</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Recover the prescribed spoke types in the unrotated cyclic order.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> In a rim-wheel pair, the tail root has an ordinary spoke and the head</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> root has a marked spoke exactly when the original arc is marked. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 9000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U E K:Type} [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {tail head:E→V} {ktail khead:K→V} {π:Equiv.Perm V} {b:ℕ} {H₀ HK:V→U→Prop}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a>  theorem marked_wheel_raw_spoke_types {m:ℕ}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (W:MarkedWheel tail head ktail khead m π b H₀ HK) (z:Fin (m+1)→V) (k:Fin (m+1))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hW:∀ i,W.1.val i=z (canonicalMarkedRotation k i)):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     HK (z (finRotate (m+1) k)) W.2.val∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       ∀ i,i≠finRotate (m+1) k→H₀ (z i) W.2.val:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   constructor</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   · simpa only [hW,canonicalMarkedRotation_zero] using W.2.property.1</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · intro i hi</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let a:Fin (m+1):=(canonicalMarkedRotation k).symm i</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     have hai:canonicalMarkedRotation k a=i:=Equiv.apply_symm_apply _ _</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have ha:a≠0:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       intro he</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       rw [he,canonicalMarkedRotation_zero] at hai</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       exact hi hai.symm</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have ht:H₀ (W.1.val a) W.2.val:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       revert ha</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       refine Fin.cases (fun h=&gt;False.elim (h rfl)) (fun j _=&gt;W.2.property.2 j) a</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     simpa only [hW,hai] using ht</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a>  theorem marked_rim_wheel_root_spoke_types (n:ℕ) (hn:2≤n)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (W:MarkedWheel tail head ktail khead (n+2) π b H₀ HK)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (v w:V) (p:Fin (n+1)→V) (j:Bool)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hW:∀ i,W.1.val i=Fin.cons (α:=fun _=&gt;V) v (Fin.cons w p)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (canonicalMarkedRotation (if j then 0 else 3) i)):</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     H₀ v W.2.val∧(if j then HK w W.2.val else H₀ w W.2.val):=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have ht:=marked_wheel_raw_spoke_types W (Fin.cons v (Fin.cons w p)) (if j then 0 else 3) hW</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hrot0:finRotate (n+3) (0:Fin (n+3))=(0:Fin (n+2)).succ:=finRotate_castSucc_eq_succ (n+2) 0</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hrot3val:(finRotate (n+3) (3:Fin (n+3))).val=4:=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     rw [finRotate_apply]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     change ((3%(n+3))+1)%(n+3)=4</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     rw [Nat.mod_eq_of_lt (by omega : 3&lt;n+3),Nat.mod_eq_of_lt (by omega : 3+1&lt;n+3)]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hzero3:(0:Fin (n+3))≠finRotate (n+3) 3:=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     intro he;have hh:=congrArg Fin.val he;simp only [Fin.val_zero,hrot3val] at hh;omega</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hone3:(0:Fin (n+2)).succ≠finRotate (n+3) 3:=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     intro he;have hh:=congrArg Fin.val he;simp only [Fin.val_succ,Fin.val_zero,hrot3val] at hh;omega</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   cases j with</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   | false=&gt;</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     simp only [Bool.false_eq_true,ite_false] at ht ⊢</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     exact ⟨by simpa only [Fin.cons_zero] using ht.2 0 hzero3,</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       by simpa only [Fin.cons_succ,Fin.cons_zero] using ht.2 (0:Fin (n+2)).succ hone3⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   | true=&gt;</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     simp only [ite_true] at ht ⊢</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hz:(0:Fin (n+3))≠finRotate (n+3) 0:=by rw [hrot0];exact Ne.symm (Fin.succ_ne_zero _)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     exact ⟨by simpa only [Fin.cons_zero] using ht.2 0 hz,</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       by simpa only [hrot0,Fin.cons_succ,Fin.cons_zero] using ht.1⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a> </span>
+<span id="L61"><a href="#L61" class="ln">  61</a> end Oberwolfach</span></pre></html>

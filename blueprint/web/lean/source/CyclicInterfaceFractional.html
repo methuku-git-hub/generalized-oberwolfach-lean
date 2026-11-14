@@ -1,0 +1,169 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CyclicInterfaceFractional.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CyclicInterfaceFractional.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CyclicWeightData</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Fractional weights on compatible tuples of paths in actual interfaces.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> All transportation data are derived from the given adjacency relations. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 800000 in</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem cyclic_interfaces_fractional_weighting_with_formula {k : ℕ} {X Y : Type*}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [Fintype X] [Fintype Y] [Nonempty X]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (L : Fin (k + 2) → X → Y → Prop) (R : Fin (k + 2) → Y → X → Prop)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (δ : ℝ) (hn : 0 &lt; Fintype.card Y)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hthreshold : (k + 2 : ℝ) * Fintype.card Y ≤ (2 * (k + 2) - 1) * δ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hdL : ∀ i x, δ ≤ (Finset.univ.filter (L i x)).card)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hY : ∀ i y, (Finset.univ.filter (fun x =&gt; L i x y)).card =</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (Finset.univ.filter (R i y)).card)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hX : ∀ i z, (Finset.univ.filter (fun y =&gt; R i y z)).card =</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (Finset.univ.filter (L (finRotate (k + 2) i) z)).card) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ Q : transportProduct (cyclicInterfaceMarginal L) (finRotate (k + 2)),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃ ω : (Fin (k + 2) → X × Y × X) → ℝ,</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ p, 0 ≤ ω p) ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∑ p, ω p) = (∑ x, cyclicInterfaceDegree L 0 x) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ i x y, (∑ p, if ((p i).1, (p i).2.1) = (x, y) then ω p else 0) =</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         interfaceCapacity (L i) x y) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ i y z, (∑ p, if ((p i).2.1, (p i).2.2) = (y, z) then ω p else 0) =</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         interfaceCapacity (R i) y z) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ p, 0 &lt; ω p → ∀ i, (p i).2.2 = (p (finRotate (k + 2) i)).1) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i x z, Q.val i x z = walkTransport (cyclicInterfaceMarginal L)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (cyclicResidualSystem L R Q) (finRotate (k + 2))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         (finRotate (k + 2) i) (k + 1) z x) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ p, (∀ i, (p i).2.2 = (p (finRotate (k + 2) i)).1) →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         ω p = ∑ c, cyclicSectorWeight L R Q c p) := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let m (i : Fin (k + 2)) (x : X) := cyclicInterfaceDegree L i x / (k + 2 : ℝ)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   let B := ∑ x, m 0 x</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨hB, hm, hms⟩ := cyclic_interface_marginals L R δ hn hthreshold hdL hY hX</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hk : (2 : ℝ) ≤ k + 2 := by linarith [Nat.cast_nonneg (α := ℝ) k]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hk0 : (0 : ℝ) &lt; k + 2 := by positivity</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hδ : 0 ≤ δ := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hn&#x27; : (0 : ℝ) &lt; Fintype.card Y := by exact_mod_cast hn</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hp : 0 &lt; (2 * (k + 2 : ℝ) - 1) * δ :=</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       lt_of_lt_of_le (mul_pos hk0 hn&#x27;) hthreshold</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     exact (pos_of_mul_pos_right hp (by linarith [Nat.cast_nonneg (α := ℝ) k])).le</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hdR (i : Fin (k + 2)) (z : X) :</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       δ ≤ (Finset.univ.filter (fun y =&gt; R i y z)).card := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     rw [hX i z]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     exact hdL _ z</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let T := transportProduct m (finRotate (k + 2))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hQmat (Q : T) (i : Fin (k + 2)) :</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       Q.val i ∈ transportMatrices</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         (fun x =&gt; (Finset.univ.filter (L i x)).card / (k + 2 : ℝ))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (fun z =&gt; (Finset.univ.filter (fun y =&gt; R i y z)).card / (k + 2 : ℝ)) := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     simpa only [hX, m, cyclicInterfaceDegree] using Q.property i (Set.mem_univ i)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   let H (Q : T) (i : Fin (k + 2)) :=</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     intervalResidualMap (L i) (R i) (k + 2 : ℝ) (Q.val i)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hHm (Q : T) (i : Fin (k + 2)) :</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       H Q i ∈ transportMatrices (m i) (m (finRotate (k + 2) i)) := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     simpa only [H, hX, m, cyclicInterfaceDegree] using</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       intervalResidualMap_mem (L i) (R i) (k + 2) δ hk hn hδ hthreshold</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         (hdL i) (hdR i) (hY i) (hQmat Q i)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hH : Continuous H := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     apply continuous_pi</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     intro i</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     let ev : T → transportMatrices</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         (fun x =&gt; (Finset.univ.filter (L i x)).card / (k + 2 : ℝ))</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         (fun z =&gt; (Finset.univ.filter (fun y =&gt; R i y z)).card / (k + 2 : ℝ)) :=</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       fun Q =&gt; ⟨Q.val i, hQmat Q i⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have he : Continuous ev := Continuous.subtype_mk</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       ((continuous_apply i).comp continuous_subtype_val) _</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     change Continuous (fun Q : T =&gt; intervalResidualMap (L i) (R i)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       (k + 2 : ℝ) (ev Q).val)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     exact (intervalResidualMap_continuous (L i) (R i) (k + 2) δ hk hn hδ</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       hthreshold (hdL i) (hdR i) (hY i)).comp he</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   let ρ (Q : T) (i : Fin (k + 2)) (p : X × Y × X) :=</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     endpointReserve (L i) (R i) (Q.val i) p.1 p.2.1 p.2.2</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   let S (Q : T) (i : Fin (k + 2)) (p : X × Y × X) :=</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     scaledResidualPath (interfaceCapacity (L i)) (interfaceCapacity (R i))</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       (endpointReserve (L i) (R i) (Q.val i)) (k + 2 : ℝ) p.1 p.2.1 p.2.2</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hρ (Q : T) (i : Fin (k + 2)) (p : X × Y × X) : 0 ≤ ρ Q i p :=</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     endpointReserve_nonneg _ _ _ (hQmat Q i).1 _ _ _</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have hS (Q : T) (i : Fin (k + 2)) (p : X × Y × X) : 0 ≤ S Q i p :=</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     interval_scaled_path_nonneg (L i) (R i) (k + 2) δ hk hn hδ hthreshold</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       (hdL i) (hdR i) (hY i) (hQmat Q i) _ _ _</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hendρ (Q : T) (i : Fin (k + 2)) (x z : X) :</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       (∑ y, endpointReserve (L i) (R i) (Q.val i) x y z) = Q.val i x z :=</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     endpointReserve_endpoints _ _ _</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>       (intervalCommon_pos _ _ (k + 2) δ hk hn hδ hthreshold (hdL i) (hdR i)) x z</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   have hρtotal (Q : T) (i : Fin (k + 2)) : ∑ p, ρ Q i p = B := by</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     rw [triple_total_of_endpoints _ (Q.val i) (m i) (hendρ Q i)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       (Q.property i (Set.mem_univ i)).2.1]</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     exact hms i</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   have hStotal (Q : T) (i : Fin (k + 2)) : ∑ p, S Q i p = B := by</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     rw [triple_total_of_endpoints _ (H Q i) (m i) (fun _ _ =&gt; rfl) (hHm Q i).2.1]</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     exact hms i</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   obtain ⟨Q, ω, hω, htotal, hmarg, hclosed, hfixed, hformula⟩ :=</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     fractional_cycle_path_assembly_with_formula m B hB hm hms</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>       (fun _ (p : X × Y × X) =&gt; (p.1, p.2.2)) H hH hHm ρ S hρ hS hρtotal hStotal</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       (by intro Q i x z; dsimp only [ρ]; rw [triple_endpoint_sum]; exact hendρ Q i x z)</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       (by intro Q i x z; dsimp only [S]; rw [triple_endpoint_sum]; rfl)</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   refine ⟨Q, ω, hω, ?_, ?_, ?_, hclosed, hfixed, hformula⟩</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   · rw [htotal]</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     dsimp only [B, m]</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     rw [← Finset.sum_div]</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     exact mul_div_cancel₀ _ hk0.ne&#x27;</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>   · intro i x y</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     have hh := finite_marginal_test ω (fun p =&gt; p i)</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       (fun p =&gt; ρ Q i p + (k + 1 : ℝ) * S Q i p) (hmarg i)</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       (fun p =&gt; if (p.1, p.2.1) = (x, y) then (1 : ℝ) else 0)</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     simp only [mul_ite, mul_one, mul_zero] at hh</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     rw [hh, triple_left_sum (fun a b c =&gt; ρ Q i (a, b, c) + (k + 1 : ℝ) * S Q i (a, b, c))]</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     have hb (y : Y) : (∑ x, interfaceCapacity (L i) x y) =</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>         ∑ z, interfaceCapacity (R i) y z := by</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>       rw [interfaceCapacity_column, interfaceCapacity_row, hY i y]</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     have hc := (endpointReserve_capacities (L i) (R i) (Q.val i) (k + 2) δ</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>       hk hn hδ hthreshold (hdL i) (hdR i) (hQmat Q i)).1</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     convert reserve_residual_reconstructs_left (interfaceCapacity (L i))</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>       (interfaceCapacity (R i)) (endpointReserve (L i) (R i) (Q.val i))</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>       (k + 2) (by linarith) hc hb x y using 1 &lt;;&gt; dsimp only [ρ, S]</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     congr 1</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     funext z</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     congr 2 &lt;;&gt; ring</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>   · intro i y z</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     have hh := finite_marginal_test ω (fun p =&gt; p i)</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>       (fun p =&gt; ρ Q i p + (k + 1 : ℝ) * S Q i p) (hmarg i)</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>       (fun p =&gt; if (p.2.1, p.2.2) = (y, z) then (1 : ℝ) else 0)</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     simp only [mul_ite, mul_one, mul_zero] at hh</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     rw [hh, triple_right_sum (fun a b c =&gt; ρ Q i (a, b, c) + (k + 1 : ℝ) * S Q i (a, b, c))]</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     have hb (y : Y) : (∑ x, interfaceCapacity (L i) x y) =</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>         ∑ z, interfaceCapacity (R i) y z := by</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>       rw [interfaceCapacity_column, interfaceCapacity_row, hY i y]</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     have hc := (endpointReserve_capacities (L i) (R i) (Q.val i) (k + 2) δ</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>       hk hn hδ hthreshold (hdL i) (hdR i) (hQmat Q i)).2</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     convert reserve_residual_reconstructs_right (interfaceCapacity (L i))</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>       (interfaceCapacity (R i)) (endpointReserve (L i) (R i) (Q.val i))</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>       (k + 2) (by linarith) hc hb y z using 1 &lt;;&gt; dsimp only [ρ, S]</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>     congr 1</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>     funext x</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     congr 2 &lt;;&gt; ring</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a> </span>
+<span id="L143"><a href="#L143" class="ln"> 143</a> set_option maxHeartbeats 800000 in</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a> theorem cyclic_interfaces_fractional_weighting {k : ℕ} {X Y : Type*}</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>     [Fintype X] [Fintype Y] [Nonempty X]</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     (L : Fin (k + 2) → X → Y → Prop) (R : Fin (k + 2) → Y → X → Prop)</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>     (δ : ℝ) (hn : 0 &lt; Fintype.card Y)</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>     (hthreshold : (k + 2 : ℝ) * Fintype.card Y ≤ (2 * (k + 2) - 1) * δ)</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>     (hdL : ∀ i x, δ ≤ (Finset.univ.filter (L i x)).card)</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>     (hY : ∀ i y, (Finset.univ.filter (fun x =&gt; L i x y)).card =</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>       (Finset.univ.filter (R i y)).card)</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>     (hX : ∀ i z, (Finset.univ.filter (fun y =&gt; R i y z)).card =</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>       (Finset.univ.filter (L (finRotate (k + 2) i) z)).card) :</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>     ∃ ω : (Fin (k + 2) → X × Y × X) → ℝ,</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>       (∀ p, 0 ≤ ω p) ∧</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>       (∑ p, ω p) = (∑ x, cyclicInterfaceDegree L 0 x) ∧</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>       (∀ i x y, (∑ p, if ((p i).1, (p i).2.1) = (x, y) then ω p else 0) =</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>         interfaceCapacity (L i) x y) ∧</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>       (∀ i y z, (∑ p, if ((p i).2.1, (p i).2.2) = (y, z) then ω p else 0) =</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>         interfaceCapacity (R i) y z) ∧</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>       (∀ p, 0 &lt; ω p → ∀ i, (p i).2.2 = (p (finRotate (k + 2) i)).1) := by</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>   obtain ⟨_, ω, hω, ht, hL, hR, hc, _, _⟩ :=</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>     cyclic_interfaces_fractional_weighting_with_formula L R δ hn hthreshold hdL hY hX</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>   exact ⟨ω, hω, ht, hL, hR, hc⟩</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a> </span>
+<span id="L166"><a href="#L166" class="ln"> 166</a> end Oberwolfach</span></pre></html>

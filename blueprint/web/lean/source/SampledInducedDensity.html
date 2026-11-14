@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SampledInducedDensity.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SampledInducedDensity.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RootedInducedDensity</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.EdgeRetentionDensity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.ProductFailureBounds</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.InducedFractionalCycles</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Sampling a fixed number of vertices and independently retaining the</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> original physical edges. The failure estimate is conditional on fixed roots. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 1200000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> def sampledInducedGraph {V : Type*} {m : ℕ} (G : SimpleGraph V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (z : FixedSubset V m × (Sym2 V → Bool)) : SimpleGraph V :=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   spanningRestriction (retainedGraph G z.2) z.1.val</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> def sampledInducedDense {V : Type*} [Fintype V] [DecidableEq V] {m : ℕ}</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (G : SimpleGraph V) (δ α : ℝ) (z : FixedSubset V m × (Sym2 V → Bool)) : Prop :=</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   ∀ v∈z.1.val,(δ+α/4)*m&lt;(retainedNeighbourCount G z.1.val z.2 v:ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem sampled_induced_dense_failure {V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (G : SimpleGraph V) (T : Finset V) (m : ℕ) (hm : m≤Fintype.card V)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hTm : T.card+1&lt;m) [Nonempty (FixedSubset V m)]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (μ : Sym2 V → FiniteLaw Bool) (δ α : ℝ) (hα : 0&lt;α)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hdeg : ∀ v,(δ+α)*Fintype.card V≤(G.degree v:ℝ))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hroots : (T.card:ℝ)+1≤α*m/4)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hμ : ∀ e,1-α/8≤(μ e).mass true) :</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ((FiniteLaw.uniform (FixedSubset V m)).prod (FiniteLaw.pi μ)).probability</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (fun z =&gt; T⊆z.1.val ∧ ¬sampledInducedDense G δ α z)≤</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       4*m*Real.exp (-α^2*m/32)*</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         (FiniteLaw.uniform (FixedSubset V m)).probability (fun S =&gt; T⊆S.val) := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let ρ := FiniteLaw.uniform (FixedSubset V m)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let A (S : FixedSubset V m) := ∃ v∈S.val,</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ((G.neighborFinset v∩S.val).card:ℝ)≤(δ+α/2)*m</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   let B (S : FixedSubset V m) (σ : Sym2 V → Bool) := ∃ v∈S.val,</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (retainedNeighbourCount G S.val σ v:ℝ)≤(δ+α/4)*m</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let c := 2*m*Real.exp (-α^2*m/32)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hc : 0≤c := by dsimp [c];positivity</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hA : ρ.probability (fun S =&gt; T⊆S.val ∧ A S)≤</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       c*ρ.probability (fun S =&gt; T⊆S.val) := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hh := fixedSubset_dense_neighbourhoods T m hm hTm (fun v =&gt; G.neighborFinset v)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       δ α hα (by simpa only [SimpleGraph.card_neighborFinset_eq_degree] using hdeg) hroots</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hcoef : (2*Real.exp (-α^2*m/8))*(m:ℝ)≤c := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       dsimp [c]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       have he : Real.exp (-α^2*m/8)≤Real.exp (-α^2*m/32) := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         apply Real.exp_le_exp.mpr</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         have hn : 0≤α^2*(m:ℝ) := by positivity</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         nlinarith</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       nlinarith [mul_le_mul_of_nonneg_right he (Nat.cast_nonneg (α:=ℝ) m)]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     exact hh.trans (mul_le_mul_of_nonneg_right hcoef (finiteLaw_probability_nonneg _ _))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hB (S : FixedSubset V m) (hS : ¬A S) : (FiniteLaw.pi μ).probability (B S)≤c := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hraw (v : V) (hv : v∈S.val) : (δ+α/2)*S.val.card≤((G.neighborFinset v∩S.val).card:ℝ) := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       rw [S.property]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       exact (not_le.mp (fun hh =&gt; hS ⟨v,hv,hh⟩)).le</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hh := retained_induced_min_degree_failure G S.val μ δ α hα</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (by rw [S.property];omega) hμ hraw</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     simpa only [S.property,B,c] using hh</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hh := finiteLaw_product_rooted_failure ρ (FiniteLaw.pi μ)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (fun S =&gt; T⊆S.val) A B c c hc hA hB</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have he : (fun z : FixedSubset V m × (Sym2 V → Bool) =&gt; T⊆z.1.val ∧ ¬sampledInducedDense G δ α z)=</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (fun z =&gt; T⊆z.1.val ∧ B z.1 z.2) := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     funext z</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     apply propext</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     simp only [sampledInducedDense,B,not_forall,not_lt]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     simp</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   rw [he]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   convert hh using 1</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   dsimp [c]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   ring</span>
+<span id="L73"><a href="#L73" class="ln">  73</a> </span>
+<span id="L74"><a href="#L74" class="ln">  74</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryAssignedClassAtBoundVacuous.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryAssignedClassAtBoundVacuous.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryAssignedClassAtBound</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryAssignedTriangleAtBound</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! If the requested host degree exceeds the order, the corresponding</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> finite-order statement is vacuous; no upper-margin hypothesis is needed. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> local instance (priority := high) vacuousFiniteEquality (n:ℕ):DecidableEq (Fin n):=Classical.decEq (Fin n)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem ordinary_assigned_class_at_bound_vacuous</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (m d K:ℕ) (hm:3≤m) (hd:2≤d)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (θhost α ρ₀ s₀ ω βP ηP row ηH L:ℝ) (hρ₀:0&lt;ρ₀) (hs₀:0&lt;s₀)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (k:ℕ) (βH c B:ℝ) (N:ℕ) (hhigh:1&lt;θhost+α):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ordinaryAssignedClassAtBound m d K hm hd θhost α ρ₀ s₀ ω βP ηP row ηH L hρ₀ hs₀ k βH c B N := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   intro n hn hn0 P D hreg hdeg</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   let v:Fin n:=⟨0,hn0⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hnR:(0:ℝ)&lt;n:=by exact_mod_cast hn0</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hlt:(P.degree v:ℝ)&lt;n:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     have hh:=P.degree_lt_card_verts v</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     simp only [Fintype.card_fin] at hh</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     exact_mod_cast hh</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hgt:(n:ℝ)&lt;(θhost+α)*n:=by nlinarith</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   exact (not_le_of_gt (hlt.trans hgt) (hdeg v)).elim</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem ordinary_assigned_triangle_at_bound_vacuous</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (d K:ℕ) (hd:2≤d)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (θhost α ρ₀ s₀ ω βP ηP ηH L:ℝ) (hρ₀:0&lt;ρ₀) (hs₀:0&lt;s₀)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (k:ℕ) (βH c B:ℝ) (N:ℕ) (hhigh:1&lt;θhost+α):</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ordinaryAssignedTriangleAtBound d K hd θhost α ρ₀ s₀ ω βP ηP ηH L hρ₀ hs₀ k βH c B N := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro n hn hn0 P D hreg hdeg</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   let v:Fin n:=⟨0,hn0⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hnR:(0:ℝ)&lt;n:=by exact_mod_cast hn0</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hlt:(P.degree v:ℝ)&lt;n:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hh:=P.degree_lt_card_verts v</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     simp only [Fintype.card_fin] at hh</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact_mod_cast hh</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hgt:(n:ℝ)&lt;(θhost+α)*n:=by nlinarith</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   exact (not_le_of_gt (hlt.trans hgt) (hdeg v)).elim</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedVertexCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedVertexCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FixedCoordinateCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Prescribing distinct vertices fixes their classes. If two prescriptions</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> conflict in one class, no selection satisfies them. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem prescribedVertices_card_le {I X V : Type*}</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     [Fintype I] [Fintype X] [DecidableEq I] [DecidableEq V]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (S : Finset V) (cl : V → I) (val : V → X)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hinj : Function.Injective (fun v =&gt; (cl v, val v))) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     Fintype.card {f : I → X // ∀ v ∈ S, f (cl v) = val v} ≤</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       Fintype.card X ^ (Fintype.card I - S.card) := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   classical</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   by_cases hex : ∃ f : I → X, ∀ v ∈ S, f (cl v) = val v</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   · obtain ⟨f₀, hf₀⟩ := hex</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     have hcl : Set.InjOn cl S := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       intro u hu v hv huv</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       apply hinj</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       apply Prod.ext huv</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       change val u = val v</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       rw [← hf₀ u hu, ← hf₀ v hv, huv]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hcard : (S.image cl).card = S.card := Finset.card_image_of_injOn hcl</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have hp (f : I → X) : (∀ v ∈ S, f (cl v) = val v) ↔</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (∀ i ∈ S.image cl, f i = f₀ i) := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       constructor</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       · intro h i hi</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         obtain ⟨v, hv, rfl⟩ := Finset.mem_image.mp hi</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         exact (h v hv).trans (hf₀ v hv).symm</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       · intro h v hv</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         exact (h (cl v) (Finset.mem_image.mpr ⟨v, hv, rfl⟩)).trans (hf₀ v hv)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have he := Fintype.card_congr (Equiv.subtypeEquivRight hp)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     rw [he, fixedCoordinates_card, hcard]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · have hz : IsEmpty {f : I → X // ∀ v ∈ S, f (cl v) = val v} :=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ⟨fun f =&gt; hex ⟨f.val, f.property⟩⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     letI := hz</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     simp only [Fintype.card_eq_zero, zero_le]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> theorem prescribedVertices_weight_le {I X V : Type*}</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     [Fintype I] [Fintype X] [DecidableEq I] [DecidableEq V]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (S : Finset V) (cl : V → I) (val : V → X)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hinj : Function.Injective (fun v =&gt; (cl v, val v)))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (w : (I → X) → ℝ) (M : ℝ) (hM : 0 ≤ M) (hw : ∀ f, w f ≤ M) :</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (∑ f : I → X, if (∀ v ∈ S, f (cl v) = val v) then w f else 0) ≤</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (Fintype.card X : ℝ) ^ (Fintype.card I - S.card) * M := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   classical</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   calc</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     _ ≤ ∑ f : I → X, if (∀ v ∈ S, f (cl v) = val v) then M else 0 := by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       apply Finset.sum_le_sum</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       intro f _</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       split_ifs</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       · exact hw f</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       · exact le_refl _</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     _ = (Fintype.card {f : I → X // ∀ v ∈ S, f (cl v) = val v} : ℝ) * M := by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       simp only [← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul,</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         Fintype.card_subtype]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     _ ≤ _ := mul_le_mul_of_nonneg_right (by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       exact_mod_cast prescribedVertices_card_le S cl val hinj) hM</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> </span>
+<span id="L63"><a href="#L63" class="ln">  63</a> end Oberwolfach</span></pre></html>

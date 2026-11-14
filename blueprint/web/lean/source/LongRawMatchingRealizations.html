@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongRawMatchingRealizations.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongRawMatchingRealizations.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongMixedRawHubPreservation</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The selected raw mixed-family resource matching gives distinct,</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> physically edge-disjoint wheel realizations. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 10000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> local instance longRawMatchingRealizationsDecidableEqFin1 (n:ℕ) : DecidableEq (Fin n) := Classical.decEq _</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem long_raw_matching_realizations</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d m:ℕ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool) (ℓ:Fin K→ℕ):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     let state:=typedMarkedResourceState (rawMarkedPairRims P π d raw) (rawMarkedPairSpokes π d raw g j)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     let e:{z // z∈bernoulliVertexSet state}↪_:=Function.Embedding.subtype _</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let φ:=fun z=&gt;physicalResourceToFinite (markedRawSampledPhysicalEmbedding P π d raw g j z)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let R:=longRawSeedResources (U:=U) π d m ℓ</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let lift:=longRawRealizeComponent P π d m raw g j ℓ</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let B:=longRawRealizedPhysicalResources P π d m raw g j ℓ</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀(w:∀i,longRawSeedFamilies (U:=U) π d m ℓ i→ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (M:Finset (RestrictedResource (mixedCandidateResources R) e)),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀i c,0&lt;w i c→1≤(R i c).card) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀c∈M,0&lt;mixedCandidateWeight w c.val) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀c∈M,∀d∈M,c≠d→Disjoint (restrictedResourceSet (mixedCandidateResources R) e c)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (restrictedResourceSet (mixedCandidateResources R) e d)) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (∀c∈M,∀d∈M,c≠d→Disjoint</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (B (mixedRestrictedPhysicalLift R e lift c).1 (mixedRestrictedPhysicalLift R e lift c).2)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (B (mixedRestrictedPhysicalLift R e lift d).1 (mixedRestrictedPhysicalLift R e lift d).2)) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     Set.InjOn (mixedRestrictedPhysicalLift R e lift) (↑M:Set _) :=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   intro state e φ R lift B w M hsize hpos hmatch</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   letI:∀i,Fintype (longRawSeedFamilies (U:=U) π d m ℓ i):=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     intro i</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     cases i with</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     | none =&gt; dsimp [longRawSeedFamilies,LongMixedSeedFamily];infer_instance</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     | some i =&gt; dsimp [longRawSeedFamilies,LongMixedSeedFamily];infer_instance</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   letI:∀i,DecidableEq (longRawSeedFamilies (U:=U) π d m ℓ i):=fun _=&gt;Classical.decEq _</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hφ:Function.Injective φ:=physical_resource_to_finite_injective.comp</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (markedRawSampledPhysicalEmbedding P π d raw g j).injective</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   apply mixed_positive_matching_physical_realizations R e φ hφ lift B ?_ w hsize M hpos hmatch</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   intro i c</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   exact long_raw_realize_component_resources P π d m raw g j ℓ i c</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> end Oberwolfach</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> </span>
+<span id="L46"><a href="#L46" class="ln">  46</a> namespace Oberwolfach</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> local instance longRawMatchingRealizationsDecidableEqFin2 (n:ℕ) : DecidableEq (Fin n) := Classical.decEq _</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> variable {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> theorem long_raw_matching_realization_preserves_hub</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d m:ℕ)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool) (ℓ:Fin K→ℕ):</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     let state:=typedMarkedResourceState (rawMarkedPairRims P π d raw) (rawMarkedPairSpokes π d raw g j)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     let e:{z // z∈bernoulliVertexSet state}↪_:=Function.Embedding.subtype _</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     let R:=longRawSeedResources (U:=U) π d m ℓ</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     let lift:=longRawRealizeComponent P π d m raw g j ℓ</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     ∀c:RestrictedResource (mixedCandidateResources R) e,</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       longRawRealizedHub P π d m raw g j ℓ (mixedRestrictedPhysicalLift R e lift c).1</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (mixedRestrictedPhysicalLift R e lift c).2 = longRawSeedHub π d m ℓ c.val.1 c.val.2 :=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   intro state e R lift c</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   exact long_raw_realize_component_hub P π d m raw g j ℓ c.val.1 ((mixedRestrictedFamilyEquiv R e c).2)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,171 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AveragedRimIsolator.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AveragedRimIsolator.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.IsolatorConfigurationCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteSignedAverages</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Averaging signed rim isolators at all admissible hubs and k-sets.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The denominator is the actual number of configurations. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1800000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem root_configuration_quotient (n γ : ℝ) (hn : n≠0) {k s : ℕ}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hs : 1≤s) (hsk : s≤k) :</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     n^(k-s)/(γ*n^(k-1))=1/(γ*n^(s-1)) := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have he : k-1=(k-s)+(s-1) := by omega</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   rw [he,pow_add]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   field_simp</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem averaged_rim_isolator_loads {V U : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     [Fintype U] [DecidableEq U] {r k : ℕ} {P Q F : SimpleGraph V}</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     {H : V → U → Prop} {θ α : ℝ} {x y : V}</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (ψ : OrdinaryIsolatorConfiguration P Q F H k θ α x y → OrdinaryWheel Q F H r → ℝ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hT : 0&lt;Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (he : ∀ T a b,ordinaryRimLoad (ψ T) a b=if (SimpleGraph.edge x y).Adj a b then 1 else 0)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hv : ∀ T z h,ordinarySpokeLoad (ψ T) z h=</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (if h=T.hub then (1:ℝ) else 0)*(1/2)*(if z=x ∨ z=y then 1 else 0)) :</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀ a b,ordinaryRimLoad (finiteSignedAverage ψ) a b=</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       if (SimpleGraph.edge x y).Adj a b then 1 else 0) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ z h,ordinarySpokeLoad (finiteSignedAverage ψ) z h=</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ((1/2:ℝ)*(if z=x ∨ z=y then 1 else 0))*</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (∑ T : OrdinaryIsolatorConfiguration P Q F H k θ α x y,if T.hub=h then (1:ℝ) else 0)/</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         (Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y):ℝ)) := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   constructor</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · intro a b</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact finiteSignedAverage_indicator_constant hT ψ</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (fun D =&gt; (ordinaryWheelRim D).Adj a b)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (if (SimpleGraph.edge x y).Adj a b then 1 else 0) (fun T =&gt; he T a b)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   · intro z h</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let t (D : OrdinaryWheel Q F H r) : ℝ :=</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       if ordinaryWheelHub D=h ∧ z∈(ordinaryWheelRim D).support then 1 else 0</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have htest (T : OrdinaryIsolatorConfiguration P Q F H k θ α x y) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         (∑ D,ψ T D*t D)=(if h=T.hub then (1:ℝ) else 0)*(1/2)*(if z=x ∨ z=y then 1 else 0) := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       calc</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         _ = ordinarySpokeLoad (ψ T) z h := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>           unfold ordinarySpokeLoad</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           apply Finset.sum_congr rfl</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           intro D _</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>           dsimp only [t]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>           split_ifs &lt;;&gt; simp</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         _ = _ := hv T z h</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     calc</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       _ = ∑ D,finiteSignedAverage ψ D*t D := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         unfold ordinarySpokeLoad</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         apply Finset.sum_congr rfl</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         intro D _</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         dsimp only [t]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         split_ifs &lt;;&gt; simp</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       _ = (∑ T,∑ D,ψ T D*t D)/(Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y):ℝ) :=</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         finiteSignedAverage_test ψ t</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       _ = _ := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         simp only [htest]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         congr 1</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         rw [Finset.mul_sum]</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         apply Finset.sum_congr rfl</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         intro T _</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         simp only [eq_comm]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         ring</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> </span>
+<span id="L71"><a href="#L71" class="ln">  71</a> theorem averaged_rim_isolator_coefficient_bound {V U : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     [Fintype U] {r k : ℕ} (hr : 3≤r) (hk : r+2≤k)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     {P Q F : SimpleGraph V} {H : V → U → Prop} {θ α : ℝ} {x y : V}</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (ψ : OrdinaryIsolatorConfiguration P Q F H k θ α x y → OrdinaryWheel Q F H r → ℝ)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (hb : ∀ T D,|ψ T D|≤1)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     (hs : ∀ T D,ψ T D≠0 → ordinaryWheelHub D=T.hub ∧ (ordinaryWheelRim D).support⊆(T.vertices.val:Set V))</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     (γ : ℝ) (hγ : 0&lt;γ) (hn : 0&lt;Fintype.card V)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (hT : γ*(Fintype.card V:ℝ)^(k-1)≤</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       (Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y):ℝ))</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     (D : OrdinaryWheel Q F H r) :</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     |finiteSignedAverage ψ D|≤1/(γ*(Fintype.card V:ℝ)^</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       (((ordinaryWheelRim D).support.toFinset∪{x,y}).card-1)) := by</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   let R := (ordinaryWheelRim D).support.toFinset∪{x,y}</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have hc : (ordinaryWheelRim D).support.toFinset.card=r := D.val.1.val.property.support_card</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   have hR1 : 1≤R.card := by</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     have hx : x∈R := by simp [R]</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     exact Finset.card_pos.mpr ⟨x,hx⟩</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hRk : R.card≤k := by</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     have hh := Finset.card_union_le (ordinaryWheelRim D).support.toFinset ({x,y}:Finset V)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     have hp : ({x,y}:Finset V).card≤2 := by</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>       by_cases hxy : x=y &lt;;&gt; simp [hxy]</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     rw [hc] at hh</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     dsimp [R]</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     omega</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   have hcoeff (T : OrdinaryIsolatorConfiguration P Q F H k θ α x y) :</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       |ψ T D| ≤ if T.hub=ordinaryWheelHub D ∧ R⊆T.vertices.val then (1:ℝ) else 0 := by</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     by_cases hz : ψ T D=0</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     · rw [hz,abs_zero]</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>       split_ifs &lt;;&gt; norm_num</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     · have hh := hs T D hz</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       have hsub : R⊆T.vertices.val := by</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>         apply Finset.union_subset</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>         · intro z hz</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>           exact hh.2 (Set.mem_toFinset.mp hz)</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>         · simpa only [Finset.insert_subset_iff,Finset.singleton_subset_iff] using T.endpoints</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       rw [if_pos ⟨hh.1.symm,hsub⟩]</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>       exact hb T D</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>   have hn&#x27; : (0:ℝ)&lt;Fintype.card V := Nat.cast_pos.mpr hn</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   have hden : 0&lt;γ*(Fintype.card V:ℝ)^(k-1) := by positivity</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>   calc</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     _ ≤ (∑ T,|ψ T D|)/(Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y):ℝ) :=</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>       finiteSignedAverage_abs_le ψ D</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     _ ≤ (∑ T,|ψ T D|)/(γ*(Fintype.card V:ℝ)^(k-1)) :=</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>       div_le_div_of_nonneg_left (Finset.sum_nonneg (fun _ _ =&gt; abs_nonneg _)) hden hT</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     _ ≤ (Fintype.card V:ℝ)^(k-R.card)/(γ*(Fintype.card V:ℝ)^(k-1)) := by</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>       apply div_le_div_of_nonneg_right _ hden.le</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>       exact (Finset.sum_le_sum (fun T _ =&gt; hcoeff T)).trans</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>         (isolator_configuration_hub_root_count (ordinaryWheelHub D) R hRk)</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     _ = _ := root_configuration_quotient _ γ hn&#x27;.ne&#x27; hR1 hRk</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a> </span>
+<span id="L121"><a href="#L121" class="ln"> 121</a> theorem averaged_rim_isolator_spoke_bound {V U : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     [Fintype U] [DecidableEq U] {r k : ℕ} (hk : 2≤k)</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     {P Q F : SimpleGraph V} {H : V → U → Prop} {θ α : ℝ} {x y : V} (hxy : x≠y)</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     (ψ : OrdinaryIsolatorConfiguration P Q F H k θ α x y → OrdinaryWheel Q F H r → ℝ)</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     (he : ∀ T a b,ordinaryRimLoad (ψ T) a b=if (SimpleGraph.edge x y).Adj a b then 1 else 0)</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     (hv : ∀ T z h,ordinarySpokeLoad (ψ T) z h=</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>       (if h=T.hub then (1:ℝ) else 0)*(1/2)*(if z=x ∨ z=y then 1 else 0))</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     (γ : ℝ) (hγ : 0&lt;γ) (hn : 0&lt;Fintype.card V)</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     (hT : γ*(Fintype.card V:ℝ)^(k-1)≤</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>       (Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y):ℝ))</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     (z : V) (h : U) :</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     |ordinarySpokeLoad (finiteSignedAverage ψ) z h|≤</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>       (if z=x ∨ z=y then (1:ℝ) else 0)/(2*γ*Fintype.card V) := by</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>   have hn&#x27; : (0:ℝ)&lt;Fintype.card V := Nat.cast_pos.mpr hn</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>   have hd : 0&lt;γ*(Fintype.card V:ℝ)^(k-1) := by positivity</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>   have hpos : 0&lt;Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y) := by</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     exact_mod_cast hd.trans_le hT</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>   have heq := (averaged_rim_isolator_loads ψ hpos he hv).2 z h</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>   rw [heq]</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>   by_cases hz : z=x ∨ z=y</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>   · rw [if_pos hz,mul_one]</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>     have hc : 0≤∑ T : OrdinaryIsolatorConfiguration P Q F H k θ α x y,</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>         if T.hub=h then (1:ℝ) else 0 := Finset.sum_nonneg (fun _ _ =&gt; by split_ifs &lt;;&gt; norm_num)</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>     have hcount : (∑ T : OrdinaryIsolatorConfiguration P Q F H k θ α x y,</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>         if T.hub=h then (1:ℝ) else 0)≤(Fintype.card V:ℝ)^(k-2) := by</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>       have hh := isolator_configuration_hub_count (P:=P) (Q:=Q) (F:=F) (H:=H)</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>         (θ:=θ) (α:=α) h hxy hk</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>       convert hh using 1</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>       apply Finset.sum_congr rfl</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>       intro T _</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>       split_ifs &lt;;&gt; rfl</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>     rw [abs_of_nonneg (by positivity)]</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>     calc</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>       _ = (1/2:ℝ)*((∑ T : OrdinaryIsolatorConfiguration P Q F H k θ α x y,</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>           if T.hub=h then (1:ℝ) else 0)/(Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y):ℝ)) := by ring</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>       _ ≤ (1/2:ℝ)*((∑ T : OrdinaryIsolatorConfiguration P Q F H k θ α x y,</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>           if T.hub=h then (1:ℝ) else 0)/(γ*(Fintype.card V:ℝ)^(k-1))) := by</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>         exact mul_le_mul_of_nonneg_left (div_le_div_of_nonneg_left hc hd hT) (by norm_num)</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>       _ ≤ (1/2:ℝ)*((Fintype.card V:ℝ)^(k-2)/(γ*(Fintype.card V:ℝ)^(k-1))) := by</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>         exact mul_le_mul_of_nonneg_left (div_le_div_of_nonneg_right</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>           hcount hd.le) (by norm_num)</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>       _ = _ := by</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>         rw [root_configuration_quotient _ γ hn&#x27;.ne&#x27; (by norm_num : 1≤2) hk]</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>         norm_num</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>         ring</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>   · simp [hz]</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a> </span>
+<span id="L168"><a href="#L168" class="ln"> 168</a> end Oberwolfach</span></pre></html>

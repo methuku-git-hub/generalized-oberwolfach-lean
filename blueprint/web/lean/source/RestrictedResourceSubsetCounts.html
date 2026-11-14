@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RestrictedResourceSubsetCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RestrictedResourceSubsetCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResourceRestriction</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Restriction to a sampled resource set does not change the number of</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> resources of a surviving candidate in a fixed hub class. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 5000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V W C:Type} [Fintype V] [Fintype W] [Fintype C] [DecidableEq V] [DecidableEq W] [DecidableEq C]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def restrictedResourceSubset (e:W↪V) (S:Finset V):Finset W:=</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   Finset.univ.filter (fun w=&gt;e w∈S)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem restricted_resource_subset_card</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (R:C→Finset V) (e:W↪V) (S:Finset V) (c:RestrictedResource R e):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ((restrictedResourceSet R e c)∩restrictedResourceSubset e S).card=(R c.val∩S).card := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have himage : ((restrictedResourceSet R e c)∩restrictedResourceSubset e S).image e=R c.val∩S := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ext v</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     constructor</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     · intro h</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       obtain ⟨a,ha,rfl⟩:=Finset.mem_image.mp h</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       exact Finset.mem_inter.mpr ⟨(restrictedResourceSet_mem R e c a).mp (Finset.mem_inter.mp ha).1,</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (Finset.mem_filter.mp (Finset.mem_inter.mp ha).2).2⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     · intro h</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       obtain ⟨hr,hs⟩:=Finset.mem_inter.mp h</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       obtain ⟨a,rfl⟩:=c.property v hr</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       refine Finset.mem_image.mpr ⟨a,Finset.mem_inter.mpr ⟨?_,?_⟩,rfl⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       · exact (restrictedResourceSet_mem R e c a).mpr hr</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       · exact Finset.mem_filter.mpr ⟨Finset.mem_univ _,hs⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   rw [←himage,Finset.card_image_of_injective _ e.injective]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> end Oberwolfach</span></pre></html>

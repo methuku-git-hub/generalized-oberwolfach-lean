@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedDeepRatioParameterChoice.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedDeepRatioParameterChoice.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedActiveHubDensityArithmetic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A compatible choice for the two-step vortex error and active density.</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> The geometric constant is allowed to grow like C/ε. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_deep_ratio_parameter_choice</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (r:ℕ) (ρ ρ₀ t κ ξcap C:ℝ)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hρ:0&lt;ρ) (hρ₀:0&lt;ρ₀) (ht:0&lt;t) (hκ:0&lt;κ) (hξ:0&lt;ξcap) (hC:0≤C):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ ε₀:ℝ,0&lt;ε₀ ∧ ∀ ε:ℝ,0&lt;ε→ε≤ε₀→</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       ∀ K:ℝ,0≤K→K≤C/ε→</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       ∃ ω ξ:ℝ,0&lt;ω ∧ 0&lt;ξ ∧ ω≤ε/8 ∧ ω≤ρ₀*ε/64 ∧ ε^2≤ξ ∧ ξ≤ξcap ∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>         (4*K+(3*r+50:ℕ))*ξ≤κ/2 ∧ (1+2/ρ)*ξ≤t*ω/32:=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   let a:=min (1/16:ℝ) (ρ₀/128)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have ha:0&lt;a:=by dsimp [a];positivity</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have ha1:a≤1/16:=min_le_left _ _</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have ha2:a≤ρ₀/128:=min_le_right _ _</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let B:=4*C+(3*r+50:ℕ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hB:0&lt;B:=by dsimp [B];positivity</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let D:=1+2/ρ</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hD:0&lt;D:=by dsimp [D];positivity</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let ε₀:=min 1 (min ξcap (min (κ/(4*B)) (t*a/(64*D))))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hε₀:0&lt;ε₀:=by dsimp [ε₀];positivity</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   refine ⟨ε₀,hε₀,?_⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   intro ε he he₀ K hK hKC</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have he1:ε≤1:=he₀.trans (min_le_left _ _)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have heξ:ε≤ξcap:=he₀.trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have heκ:ε≤κ/(4*B):=he₀.trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _)))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have het:ε≤t*a/(64*D):=he₀.trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _)))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have heκ&#x27;:ε*(4*B)≤κ:=(le_div_iff₀ (by positivity)).mp heκ</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have het&#x27;:ε*(64*D)≤t*a:=(le_div_iff₀ (by positivity)).mp het</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hKε:K*ε≤C:=(le_div_iff₀ he).mp hKC</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let ω:=a*ε</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let ξ:=ε^2</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hω:0&lt;ω:=by dsimp [ω];positivity</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hxi:0&lt;ξ:=by dsimp [ξ];positivity</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hωv:ω≤ε/8:=by dsimp [ω];nlinarith [mul_le_mul_of_nonneg_right ha1 he.le]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hωu:ω≤ρ₀*ε/64:=by dsimp [ω];nlinarith [mul_le_mul_of_nonneg_right ha2 he.le]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hxicap:ξ≤ξcap:=by dsimp [ξ];nlinarith [mul_nonneg he.le (sub_nonneg.mpr he1)]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hscale:(4*K+(3*r+50:ℕ))*ξ≤κ/2:=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hk1:=mul_le_mul_of_nonneg_right hKε he.le</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have he2:ε^2≤ε:=by nlinarith [mul_nonneg he.le (sub_nonneg.mpr he1)]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hn:(0:ℝ)≤(3*r+50:ℕ):=by positivity</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have hh:=mul_le_mul_of_nonneg_left he2 hn</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     dsimp [ξ,B] at *</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     nlinarith [hk1,hh,heκ&#x27;]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hgap:(1+2/ρ)*ξ≤t*ω/32:=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hh:=mul_le_mul_of_nonneg_right het&#x27; he.le</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     dsimp [D,ξ,ω] at *</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     nlinarith [hh]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   exact ⟨ω,ξ,hω,hxi,hωv,hωu,le_rfl,hxicap,hscale,hgap⟩</span>
+<span id="L53"><a href="#L53" class="ln">  53</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedBoundaryCoverScales.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedBoundaryCoverScales.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedInnerDomainPackingNumerics</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The all-root extension event has a p^3 lower bound, rather than the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> p^2 bound available for particular configurations. The explicit free-use</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> scale p^4 still covers a p^9 remainder and is small enough for that bound.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> All tolerances are fixed before the permutation separation radius. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem marked_boundary_cover_scale_choices (l:ℕ) (β ν:ℝ) (hβ:0&lt;β) (hν:0&lt;ν):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ p₀:ℝ,0&lt;p₀∧∀ p:ℝ,0&lt;p→p≤p₀→</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       (p≤1)∧(p^4≤1)∧(100*((l:ℝ)+20)*p^4≤p^3*β/2)∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       (p^9≤(p^4)^2)∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       ((30+3*((l:ℝ)+5))*p^4≤p^3)∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ((30+3*((l:ℝ)+5))*p^4≤ν*p^3):=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   let C:ℝ:=30+3*((l:ℝ)+5)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hC:0&lt;C:=by dsimp [C];positivity</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   let p₀:=min 1 (min (β/(200*((l:ℝ)+20))) (min (1/C) (ν/C)))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hp₀:0&lt;p₀:=lt_min (by norm_num) (lt_min (div_pos hβ (by positivity))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (lt_min (one_div_pos.mpr hC) (div_pos hν hC)))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   refine ⟨p₀,hp₀,?_⟩</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   intro p hp hsmall</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hp1:p≤1:=hsmall.trans (min_le_left _ _)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hβp:p≤β/(200*((l:ℝ)+20)):=hsmall.trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hCp:p≤1/C:=hsmall.trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _)))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hνp:p≤ν/C:=hsmall.trans ((min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _)))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hsc:100*((l:ℝ)+20)*p≤β/2:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     have h:=(le_div_iff₀ (by positivity : (0:ℝ)&lt;200*((l:ℝ)+20))).mp hβp</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     linarith only [h]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hc:C*p≤1:=by have h:=(le_div_iff₀ hC).mp hCp;linarith only [h]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hv:C*p≤ν:=by have h:=(le_div_iff₀ hC).mp hνp;linarith only [h]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   refine ⟨hp1,pow_le_one₀ hp.le hp1,?_,?_,?_,?_⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   · have h:=mul_le_mul_of_nonneg_right hsc (pow_nonneg hp.le 3)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     nlinarith only [h]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · have h:=pow_le_pow_of_le_one hp.le hp1 (by omega : 8≤9)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     nlinarith only [h]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · have h:=mul_le_mul_of_nonneg_right hc (pow_nonneg hp.le 3)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     dsimp only [C] at h</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     nlinarith only [h]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   · have h:=mul_le_mul_of_nonneg_right hv (pow_nonneg hp.le 3)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     dsimp only [C] at h</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     nlinarith only [h]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> end Oberwolfach</span></pre></html>

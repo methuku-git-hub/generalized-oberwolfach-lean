@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FiniteSequenceWalkEdgeSet.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FiniteSequenceWalkEdgeSet.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteSequenceWalkEdges</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The physical edge set of a walk is the set of consecutive vertex pairs</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> of its finite vertex sequence. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 12000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> def walkPhysicalEdges {V:Type*} [DecidableEq V] {G:SimpleGraph V} {a b:V} (p:G.Walk a b):Finset (Finset V) :=</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   (p.edges.map Sym2.toFinset).toFinset</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem finite_sequence_walk_edge_set</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {V:Type*} [DecidableEq V] (G:SimpleGraph V) (n:ℕ) (f:Fin (n+1)→V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {a b:V} (p:G.Walk a b) (hlen:p.length=n) (hsupp:p.support=List.ofFn f):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     walkPhysicalEdges p=Finset.univ.image (fun i:Fin n=&gt;{f i.castSucc,f i.succ}) := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   ext s</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   simp only [walkPhysicalEdges,List.mem_toFinset,List.mem_map,Finset.mem_image,Finset.mem_univ,true_and]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   constructor</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   · rintro ⟨e,he,rfl⟩</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     obtain ⟨i,hi,heq⟩:=List.mem_iff_getElem.mp he</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     subst e</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     have hin:i&lt;n:=by simpa [SimpleGraph.Walk.length_edges,hlen] using hi</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     exact ⟨⟨i,hin⟩,(finite_sequence_walk_edge_at G n f p hlen hsupp ⟨i,hin⟩).symm⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · rintro ⟨i,heq⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have hi:i.val&lt;p.edges.length:=by simpa [SimpleGraph.Walk.length_edges,hlen] using i.isLt</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     refine ⟨p.edges[i.val],List.getElem_mem hi,?_⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     exact (finite_sequence_walk_edge_at G n f p hlen hsupp i).trans heq</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> end Oberwolfach</span></pre></html>

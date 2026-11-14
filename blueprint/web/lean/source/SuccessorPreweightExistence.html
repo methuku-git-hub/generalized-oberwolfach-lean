@@ -1,0 +1,98 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SuccessorPreweightExistence.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SuccessorPreweightExistence.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SuccessorPreweights</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SuccessorParameterChoice</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.SuccessorOrderMargins</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.SuccessorCyclicMargin</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! The preliminary weighting with the manuscript quantifier order:</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> positive weight constants precede the approximation tolerance; the graph</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> order threshold precedes the graph and permutation. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 2000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> def successorWeightLower (k : ℕ) (β : ℝ) : ℝ :=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   ((k+2 : ℝ) * cyclicSectorLower k (β/2)) / 8</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> def successorWeightUpper (k : ℕ) (β : ℝ) : ℝ :=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   ((k+2 : ℝ) * cyclicSectorUpper k (β/2)) * (2*(2*(k+2 : ℝ))) ^ (2*(k+2))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> theorem successorWeightConstants_pos (k : ℕ) (β : ℝ) (hβ : 0 &lt; β) :</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     0 &lt; successorWeightLower k β ∧ 0 &lt; successorWeightUpper k β := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   obtain ⟨hl,hu⟩ := cyclicSectorConstants_pos k (β/2) (by positivity)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   unfold successorWeightLower successorWeightUpper</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   constructor &lt;;&gt; positivity</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem successor_preweight_existence (k : ℕ) (β : ℝ) (hβ : 0 &lt; β) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀ τ : ℝ, 0 &lt; τ → ∃ ε₀ : ℝ, 0 &lt; ε₀ ∧ ∃ N : ℕ,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       ∀ (V : Type) [Fintype V] [Nonempty V], N ≤ Fintype.card V →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ∀ (G : SimpleGraph V) (π : Equiv.Perm V) (b : Fin (k+2) → Bool) (D : ℝ),</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (Fintype.card V : ℝ)/2 ≤ D → D ≤ 2*Fintype.card V →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ v, |(G.degree v : ℝ)-D| ≤ ε₀*Fintype.card V) →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ v, (successorCycleRatio k + β)*Fintype.card V ≤ (G.degree v : ℝ)) →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       ∃ w, SuccessorPreweightConditions G (fun i =&gt; choosePermutation π (b i)) D (τ/2) (τ/2)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (successorWeightLower k β) (successorWeightUpper k β) w := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   obtain ⟨C,η₀,hC,hη₀,hall⟩ := successor_preweights_quantitative (β/4) (by positivity)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   intro τ hτ</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let c := Fintype.card (Fin (k+2) ⊕ Fin (k+2))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hcval : c = 2*(k+2) := by simp only [c,Fintype.card_sum,Fintype.card_fin]; omega</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hc : 0 &lt; c := by omega</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hcR : (0 : ℝ) &lt; c := by exact_mod_cast hc</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hc1 : (1 : ℝ) ≤ c := by exact_mod_cast hc</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨η,ε₀,hη,hηsmall,hε₀,hεη,hs,hηβ,hsβ,hsτ,hpτ,hcp⟩ :=</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     successor_small_parameters c C η₀ β τ hcR hC hη₀ hβ hτ</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨m₀,hm₀⟩ := hall η hη hηsmall</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨N,hN⟩ := successor_order_margins c m₀ hc η (τ/64) (min (β/4) (τ/32))</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     hη (by positivity) (by positivity)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨ε₀,hε₀,N,?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   intro V _ _ hn G π b D hD hDup hnear hminG</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   let n := Fintype.card V</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   let m := n/c</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   let d := equalCellSizes n c</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   let a := equalCellAssignment (Fin (k+2) ⊕ Fin (k+2))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   letI : Nonempty (FixedPartition V (c+1) d) := equalCellPartition_nonempty c</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   obtain ⟨hn2,hmpos,hmlarge,hscale,hmrecip,hnrecip,hδ,hδtuple⟩ := hN n hn</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hmR : (0 : ℝ) &lt; m := by exact_mod_cast hmpos</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hnR : (0 : ℝ) &lt; n := by exact_mod_cast (show 0 &lt; n by omega)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hmβ : (1 : ℝ)/m ≤ β/4 := hmrecip.trans (min_le_left _ _)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hmτ : (1 : ℝ)/m ≤ τ/32 := hmrecip.trans (min_le_right _ _)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hnτ : (2 : ℝ)/n ≤ τ/32 := hnrecip.trans (min_le_right _ _)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hDmin := successor_mean_lower G D (successorCycleRatio k) β ε₀ hminG hnear</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨hmin,harg,hthreshold⟩ := successor_cyclic_numeric_inputs k n m D β ε₀ η hnR hmR hβ</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     hDmin hD hηβ hs (by linarith)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hpnon : 0 ≤ C*Real.sqrt η := mul_nonneg hC.le (Real.sqrt_nonneg _)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hp1 : C*Real.sqrt η ≤ 1 := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     have hh := mul_le_mul_of_nonneg_right hc1 hpnon</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     nlinarith</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hm : ∀ s, d (a s) = m := equalCellAssignment_size _ n</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hK : (n : ℝ) ≤ (2*c : ℝ)*m := by exact_mod_cast hscale</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hcp&#x27; : 2*(k+2 : ℝ)*(C*Real.sqrt η) ≤ 1/2 := by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have hcc : (c : ℝ) = 2*(k+2 : ℝ) := by exact_mod_cast hcval</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     rw [← hcc]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     linarith</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have hδ&#x27; : 4*(2*(k+2 : ℝ))*n*Real.exp (-η^2*m/2) ≤</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       (τ/64)*successorPairProbability m n := by</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     simpa only [partitionFailure,m,hcval,Nat.cast_mul,Nat.cast_add,Nat.cast_ofNat] using hδ</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   have hδt&#x27; : 4*(2*(k+2 : ℝ))*n*Real.exp (-η^2*m/2) ≤ (1/2)*((m : ℝ)/n)^(2*(k+2)) := by</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     simpa only [partitionFailure,m,hcval,Nat.cast_mul,Nat.cast_add,Nat.cast_ofNat] using hδtuple</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   obtain ⟨w,hw⟩ := hm₀ V k (c+1) d G π b a m hm hmpos hmlarge hn2 (Nat.div_le_self n c)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     D ε₀ (β/2) (τ/64) (τ/2) (2*c) (by positivity) (by positivity) hD hDup hεη hnear hmin hK</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     hthreshold harg hp1 hcp&#x27; (by linarith) hδ&#x27; hδt&#x27;</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   refine ⟨w,⟨hw.nonneg,hw.invalid_zero,?_,hw.lower,?_,?_,hw.positions⟩⟩</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   · intro t</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     have hh : (2*c : ℝ) = 2*(2*(k+2 : ℝ)) := by rw [hcval]; push_cast; ring</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     simpa only [hh,successorWeightUpper] using hw.upper t</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   · intro i x y hxy hG</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     obtain ⟨hl,hu⟩ := hw.left i x y hxy hG</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     exact ⟨by linarith,hu⟩</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   · intro i x y hxy hG</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     obtain ⟨hl,hu⟩ := hw.right i x y hxy hG</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     exact ⟨by linarith,hu⟩</span>
+<span id="L94"><a href="#L94" class="ln">  94</a> </span>
+<span id="L95"><a href="#L95" class="ln">  95</a> end Oberwolfach</span></pre></html>

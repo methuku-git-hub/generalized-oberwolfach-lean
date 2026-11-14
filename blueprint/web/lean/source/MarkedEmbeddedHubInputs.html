@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedEmbeddedHubInputs.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedEmbeddedHubInputs.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedEmbeddedHubPaths</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedEmbeddedHostGeometry</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.InnerAmbientCountWeightScale</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The local count and fixed-weight hypotheses supply the ambient inputs</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> of the mixed boundary selector. Only the numerical bounds are converted;</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> the cycle weights, omitted-root path conditions and original arc IDs stay fixed. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option synthInstance.maxSize 4096</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 14000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_embedded_hub_inputs</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     {W V U E K:Type} [Fintype W] [Fintype V] [DecidableEq W] [DecidableEq V]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (f:W↪V) (ρ:Equiv.Perm W) (π:Equiv.Perm V) (hf:∀ x,f (ρ x)=π (f x))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (tail head:E→W) (ktail khead:K→W) (m b:ℕ) (H₀ HK:W→U→Prop) (u:U)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (κ κhub β bLo B η:ℝ) (hk:0&lt;κ) (hk1:κ≤1) (hkh:0≤κhub) (hβ:0≤β) (hb:0≤bLo) (hB:0≤B)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hn:0&lt;Fintype.card V) (hkn:κ*Fintype.card V≤Fintype.card W)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hphys:Function.Injective (markedPhysicalEdge tail head ktail khead ρ))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hdis:∀ x,¬(H₀ x u∧HK x u)) (hsep:∀ x y,H₀ x u→HK y u→x≠ρ y)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hsize:κhub*Fintype.card W≤((Finset.univ.filter (fun v=&gt;H₀ v u∨HK v u)).card:ℝ))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hcycles:β*(Fintype.card W:ℝ)^(m+1)≤Fintype.card (HubMarkedCycle tail head ktail khead m ρ b H₀ HK u))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hpaths:∀ j:Bool,∀ x y:W,x≠y→(if j then HK x u else H₀ x u)→(if j then HK y u else H₀ y u)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       β*(Fintype.card W:ℝ)^m≤Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m ρ b H₀ HK j x y u u))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (wt:HubMarkedCycle tail head ktail khead m ρ b H₀ HK u→ℝ)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hw:∀ C,bLo/(Fintype.card W:ℝ)^m≤wt C∧wt C≤B/(Fintype.card W:ℝ)^m)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (herr:∀ x,H₀ x u∨HK x u→|1-hypergraphWeightedDegree (hubMarkedCycleVertices u) wt x|≤η):</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let H₀&#x27;:=spokeRelationImage f H₀</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let HK&#x27;:=spokeRelationImage f HK</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let wt&#x27;:=fun C=&gt;wt ((hubCycleEmbeddingEquiv f ρ π hf tail head ktail khead m b H₀ HK u).symm C)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     Function.Injective (markedPhysicalEdge (f∘tail) (f∘head) (f∘ktail) (f∘khead) π)∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (∀ v,¬(H₀&#x27; v u∧HK&#x27; v u))∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∀ v z,H₀&#x27; v u→HK&#x27; z u→v≠π z)∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (κhub*κ)*Fintype.card V≤((Finset.univ.filter (fun v=&gt;H₀&#x27; v u∨HK&#x27; v u)).card:ℝ)∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (β*κ^(m+1))*(Fintype.card V:ℝ)^(m+1)≤</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       Fintype.card (HubMarkedCycle (f∘tail) (f∘head) (f∘ktail) (f∘khead) m π b H₀&#x27; HK&#x27; u)∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ j:Bool,∀ v z:V,v≠z→(if j then HK&#x27; v u else H₀&#x27; v u)→(if j then HK&#x27; z u else H₀&#x27; z u)→</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (β*κ^(m+1))*(Fintype.card V:ℝ)^m≤</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         Fintype.card (RootFirstCommonMarkedPath (f∘tail) (f∘head) (f∘ktail) (f∘khead) m π b H₀&#x27; HK&#x27; j v z u u))∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (∀ C,bLo/(Fintype.card V:ℝ)^m≤wt&#x27; C∧wt&#x27; C≤(B/κ^m)/(Fintype.card V:ℝ)^m)∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (∀ v,H₀&#x27; v u∨HK&#x27; v u→|1-hypergraphWeightedDegree (hubMarkedCycleVertices u) wt&#x27; v|≤η):=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro H₀&#x27; HK&#x27; wt&#x27;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hnR:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have haR:(0:ℝ)&lt;Fintype.card W:=(mul_pos hk hnR).trans_le hkn</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have han:(Fintype.card W:ℝ)≤Fintype.card V:=by exact_mod_cast Fintype.card_le_of_injective f f.injective</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hsc:=inner_ambient_count_scales m (Fintype.card V) (Fintype.card W) κ β</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     hnR.le haR.le hk.le hk1 hβ hkn</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   refine ⟨markedPhysicalEdge_embedding_injective f ρ π hf tail head ktail khead hphys,</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     spokeRelationImage_disjoint f H₀ HK u hdis,</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     spokeRelationImage_separated f ρ π hf H₀ HK u hsep,?_,?_,?_,?_,?_⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   · change (κhub*κ)*Fintype.card V≤((Finset.univ.filter (fun v=&gt;spokeRelationImage f H₀ v u∨spokeRelationImage f HK v u)).card:ℝ)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     rw [spokeRelationImage_neighbourhood_card]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     nlinarith only [mul_le_mul_of_nonneg_left hkn hkh,hsize]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   · have hc:=Fintype.card_congr (hubCycleEmbeddingEquiv f ρ π hf tail head ktail khead m b H₀ HK u)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     exact hsc.1.trans (hcycles.trans_eq (by exact_mod_cast hc))</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   · intro j v z hvz hv hz</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hv&#x27;:∃ x,f x=v∧(if j then HK x u else H₀ x u):=by cases j &lt;;&gt; exact hv</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hz&#x27;:∃ x,f x=z∧(if j then HK x u else H₀ x u):=by cases j &lt;;&gt; exact hz</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     obtain ⟨x,hx,hxH⟩:=hv&#x27;</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     obtain ⟨y,hy,hyH⟩:=hz&#x27;</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     have hxy:x≠y:=by intro he;apply hvz;exact hx.symm.trans ((congrArg f he).trans hy)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have hp:=hpaths j x y hxy hxH hyH</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hcard:=hubPathEmbedding_card f ρ π hf tail head ktail khead m b H₀ HK j x y u u</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     have hcardR:(Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m ρ b H₀ HK j x y u u):ℝ)≤</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       Fintype.card (RootFirstCommonMarkedPath (f∘tail) (f∘head) (f∘ktail) (f∘khead) m π b H₀&#x27; HK&#x27; j (f x) (f y) u u):=by exact_mod_cast hcard</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     rw [hx,hy] at hcardR</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     exact hsc.2.trans (hp.trans hcardR)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   · intro C</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     exact inner_ambient_weight_scale m _ _ κ bLo B _ hnR haR hk hb hB han hkn (hw _)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   · intro v hv</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     have hv&#x27;:∃ x,f x=v∧(H₀ x u∨HK x u):=by</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       rcases hv with ⟨x,hx,hH⟩|⟨x,hx,hH⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       · exact ⟨x,hx,Or.inl hH⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       · exact ⟨x,hx,Or.inr hH⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     obtain ⟨x,hx,hxH⟩:=hv&#x27;</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     subst v</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     rw [hubCycleEmbedding_weighted_degree]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     exact herr x hxH</span>
+<span id="L82"><a href="#L82" class="ln">  82</a> </span>
+<span id="L83"><a href="#L83" class="ln">  83</a> end Oberwolfach</span></pre></html>

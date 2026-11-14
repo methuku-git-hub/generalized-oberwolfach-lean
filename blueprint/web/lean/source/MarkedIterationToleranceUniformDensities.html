@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedIterationToleranceUniformDensities.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedIterationToleranceUniformDensities.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedIterationToleranceChoices</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> set_option autoImplicit false</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> namespace Oberwolfach</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> theorem marked_iteration_global_tolerance_choice_uniform_densities</span>
+<span id="L6"><a href="#L6" class="ln">   6</a>     (r h:ℕ) (κ γ p₀ k₀ omega₀ C θ b₀:ℝ)</span>
+<span id="L7"><a href="#L7" class="ln">   7</a>     (hκ:0&lt;κ) (hγ:0&lt;γ) (hp₀:0&lt;p₀) (hk₀:0&lt;k₀) (ho₀:0&lt;omega₀)</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (hC:0≤C) (hθ:0&lt;θ) (hb₀:0&lt;b₀):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     ∃ ζmax:ℝ,0&lt;ζmax ∧ ∀ p k omega b:ℝ,p₀≤p → k₀≤k → omega₀≤omega → b₀≤b →</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>       ∀ ε ζ:ℝ,ε≤κ/4 → 0≤ζ → ζ≤ζmax →</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>       ε+ζ≤κ ∧ ε+4*ζ≤κ ∧ ε+2*h*ζ≤κ ∧ ε+h*ζ≤κ ∧</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       ζ≤(κ-ε)*omega ∧ ε≤κ ∧ 2*ζ≤(3/4)*γ*p^2 ∧ ζ≤γ*min p k/8 ∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       C*ζ≤κ/4 ∧ C*ζ≤θ/4 ∧ 2*(r+5:ℝ)*ζ≤b ∧ (2*r+11:ℝ)*ζ≤b :=by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   obtain ⟨z,hz,hbase⟩:=marked_iteration_global_tolerance_choice r h κ γ p₀ k₀ omega₀ C θ b₀ hκ hγ hp₀ hk₀ ho₀ hC hθ hb₀</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   refine ⟨z,hz,?_⟩</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   intro p k omega b hp hk ho hb ε ζ he hz0 hzmax</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   obtain ⟨h1,h2,h3,h4,h5,h6,h7,h8,h9,h10,h11,h12⟩:=hbase ε ζ he hz0 hzmax</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hp0:0≤p:=hp₀.le.trans hp</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hp2:p₀^2≤p^2:=by nlinarith [sq_nonneg (p-p₀)]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hmin:min p₀ k₀≤min p k:=min_le_min hp hk</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hω:=mul_le_mul_of_nonneg_left ho (show 0≤κ-ε by linarith)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hγp:=mul_le_mul_of_nonneg_left hp2 (show 0≤(3/4:ℝ)*γ by positivity)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hγm:=mul_le_mul_of_nonneg_left hmin hγ.le</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   refine ⟨h1,h2,h3,h4,h5.trans hω,h6,h7.trans hγp,?_,h9,h10,h11.trans hb,h12.trans hb⟩</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   nlinarith only [h8,hγm]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem marked_iteration_local_tolerance_choice_uniform_density</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (m h:ℕ) (x eps C t₀ β η:ℝ)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hx:0&lt;x) (heps:0&lt;eps) (hC:0≤C) (ht₀:0&lt;t₀) (hβ:0&lt;β) (hη:0&lt;η):</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∃ sigmaMax:ℝ,0&lt;sigmaMax ∧ ∀ t:ℝ,t₀≤t → ∀ sigma:ℝ,0≤sigma→sigma≤sigmaMax→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (m+2:ℝ)*sigma≤x/4 ∧ 2*(h:ℝ)*sigma≤x/2 ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       4*C*sigma/eps≤min (t/8) (min β (η/4)):=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   obtain ⟨s,hs,hbase⟩:=marked_iteration_local_tolerance_choice m h x eps C t₀ β η hx heps hC ht₀ hβ hη</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   refine ⟨s,hs,?_⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro t ht sigma hsigma hmax</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨h1,h2,h3⟩:=hbase sigma hsigma hmax</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   exact ⟨h1,h2,h3.trans (min_le_min (by linarith) le_rfl)⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a> end Oberwolfach</span></pre></html>

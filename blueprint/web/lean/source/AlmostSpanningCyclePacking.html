@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AlmostSpanningCyclePacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AlmostSpanningCyclePacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FractionalAlmostPerfectMatching</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.CycleVertexMatchingWeights</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PositiveOrdinaryCycleWeights</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.TwoComponentLower</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Actual vertex-disjoint cycle packings in almost-regular dense graphs.</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> The threshold and regularity tolerance are chosen before the graph. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 2200000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ordinary_cycle_incidence_load_adjacency</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     {V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (G : SimpleGraph V) (r : ℕ) (a : OrdinaryCycle G r → ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (he : ∀ e : G.edgeSet, ∑ C, a C*ordinaryCycleIncidence G r C e=1) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ x y, (∑ C, if C.val.val.Adj x y then a C else 0)=if G.Adj x y then 1 else 0 := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   intro x y</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   by_cases hxy : G.Adj x y</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · have hh := he ⟨s(x,y),hxy⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     simpa only [ordinaryCycleIncidence,SimpleGraph.mem_edgeSet,mul_ite,mul_one,mul_zero,</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       hxy,ite_true] using hh</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · rw [if_neg hxy]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     apply Finset.sum_eq_zero</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     intro C _</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hn : ¬ C.val.val.Adj x y := fun h =&gt; hxy (C.property h)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     simp [hn]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem almost_spanning_cycle_packing</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (r : ℕ) (hr : 3≤r) (α ξ : ℝ) (hα : 0&lt;α) (hξ : 0&lt;ξ) (hξ1 : ξ≤1) :</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∃ η : ℝ, 0&lt;η ∧ ∃ N : ℕ, 0&lt;N ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       ∀ (V : Type) [Fintype V] [DecidableEq V], N≤Fintype.card V →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       ∀ G : SimpleGraph V,</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (∀ v, (cycleThreshold r+α)*Fintype.card V≤(G.degree v : ℝ)) →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∀ d : ℝ, (∀ v, (1-η)*d≤(G.degree v : ℝ) ∧ (G.degree v : ℝ)≤d) →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       ∃ M : Finset (OrdinaryCycle G r),</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (M : Set (OrdinaryCycle G r)).Pairwise (fun C D =&gt;</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>           Disjoint (ordinaryCycleVertices G r C) (ordinaryCycleVertices G r D)) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (1-ξ)*Fintype.card V≤((M.biUnion (ordinaryCycleVertices G r)).card : ℝ) := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let μ := HadwigerLean.Theorem2.matchingMu r ξ</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hμ : 0&lt;μ := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     dsimp [μ,HadwigerLean.Theorem2.matchingMu]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hrR : (0 : ℝ)&lt;r := by exact_mod_cast (show 0&lt;r by omega)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     positivity</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨c,C,hc,hC,N₀,hN₀,hweights⟩ := positive_ordinary_fractional_cycle_weights r hr α hα</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   let N := max N₀ ⌈16*(r : ℝ)^2*C/μ⌉₊</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨μ/4,by positivity,N,lt_of_lt_of_le hN₀ (le_max_left _ _),?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   intro V _ _ hn G hG d hd</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hn₀ : N₀≤Fintype.card V := (le_max_left _ _).trans hn</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hnpos : 0&lt;Fintype.card V := hN₀.trans_le hn₀</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hnR : (0 : ℝ)&lt;Fintype.card V := Nat.cast_pos.mpr hnpos</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   obtain ⟨a,ha,he⟩ := hweights V hn₀ G hG</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have ha0 (A : OrdinaryCycle G r) : 0≤a A :=</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (div_nonneg hc.le (by positivity)).trans (ha A).1</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hnlarge : 16*(r : ℝ)^2*C/μ≤(Fintype.card V : ℝ) :=</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (Nat.le_ceil _).trans (by exact_mod_cast ((le_max_right _ _).trans hn : ⌈16*(r : ℝ)^2*C/μ⌉₊≤_))</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hpairnum : 4*(r : ℝ)^2*C/(Fintype.card V : ℝ)≤μ/4 := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hh := (div_le_iff₀ hμ).mp hnlarge</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     apply (div_le_iff₀ hnR).mpr</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     nlinarith</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hdhalf : (Fintype.card V : ℝ)/2≤d := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     obtain ⟨v⟩ := Fintype.card_pos_iff.mp hnpos</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have ht := cycleThreshold_half_le hr</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     have hg := hG v</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     have hh := (hd v).2</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hn0 : (0 : ℝ)≤Fintype.card V := hnR.le</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     nlinarith [mul_nonneg hα.le hn0,mul_nonneg (sub_nonneg.mpr ht) hn0]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨b,hb,hload,hpair⟩ := ordinary_cycle_vertex_matching_weights G r (by omega) hnpos</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     a ha0 C hC.le (fun A =&gt; (ha A).2)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (ordinary_cycle_incidence_load_adjacency G r a he) hdhalf hd</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   exact almost_perfect_matching_of_fractional_weights (ordinaryCycleVertices G r) r (by omega)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     (ordinaryCycleVertices_card G r) ξ hξ hξ1 b hb hload</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     (fun x y hxy =&gt; (hpair x y hxy).trans hpairnum)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a> </span>
+<span id="L78"><a href="#L78" class="ln">  78</a> end Oberwolfach</span></pre></html>

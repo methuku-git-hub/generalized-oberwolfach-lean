@@ -1,0 +1,13 @@
+{
+  "status": "UNVERIFIED_PORT",
+  "source_manifest_sha256": "f0bde89333913d94170d0a8570128cc68c16634f0025294d0ea3edbd3f7e7e43",
+  "source_project": "/Users/Methuku/Documents/Codex/2026-10-31/oberwolfach-lean-continuation/work/release-isolated-6340-10Nov2026/project",
+  "source_aggregate_import_count": 14167,
+  "aggregate_chunks": [
+    "public import Oberwolfach.PalomarAggregate0001\n",
+    "public import Oberwolfach.PalomarAggregate0002\n",
+    "public import Oberwolfach.PalomarAggregate0003\n",
+    "public import Oberwolfach.PalomarAggregate0004\n"
+  ],
+  "converted_source_files": 14232
+}

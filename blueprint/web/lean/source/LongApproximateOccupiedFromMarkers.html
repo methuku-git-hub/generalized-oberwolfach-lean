@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongApproximateOccupiedFromMarkers.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongApproximateOccupiedFromMarkers.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.InnerRequiredApproximateOccupied</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ActualResidualSumIndices</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Recover occupancy of every approximate label from the marker witness</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> retained in the actual component data. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 10000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem long_approximate_labels_occupied_from_markers</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {n:ℕ} {U A J:Type} [Fintype U] [DecidableEq U] [Fintype A] [DecidableEq A] [DecidableEq J]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (π:Equiv.Perm (Fin n)) (d:ℕ) (σ:RawIntervalFamilyOutcome (Fin n) U Bool Bool) (w:U)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {F:SimpleGraph (Fin n)}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (data:ActualResidualData (K:=A⊕{a:Fin n // rawIntervalColouredStart π d (fun e=&gt;σ (w,e)) a true}) (J:=J) F)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hs₂:data.s₂=secondSumIndices)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (inner:Finset (Fin n)) (ψ:Fin n→Fin n)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (root:(A⊕{a:Fin n // rawIntervalColouredStart π d (fun e=&gt;σ (w,e)) a true})→Fin n)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hroot:∀b,root (.inr b)=b.val)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hmarkers:∀i∈data.s₂,∀j:Fin (d+1),∃x∈data.oldDomain\inner,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ψ x=(π^j.val) (root i)):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀x,rawIntervalFamilyState π d σ (x,w)=some (Sum.inl true)→x∈(data.oldDomain\inner).image ψ:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro x hx</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hcov:rawIntervalCovered π d (fun e=&gt;σ (w,e)) x true:=</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (rawIntervalState_interval_iff π d (fun e=&gt;σ (w,e)) x true).mp hx</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨a,ha,hwin⟩:=hcov</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   obtain ⟨j,hj⟩:=(permutationWindow_mem_iff π 0 (d-1) a x).mp hwin</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hjlt:j.val&lt;d+1:=by have hj&#x27;:=j.isLt;omega</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let b:{a:Fin n // rawIntervalColouredStart π d (fun e=&gt;σ (w,e)) a true}:=⟨a,ha⟩</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hi:(Sum.inr b)∈data.s₂:=by rw [hs₂];simp [secondSumIndices]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨y,hy,heq⟩:=hmarkers (.inr b) hi ⟨j.val,hjlt⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hj&#x27;:(π^j.val) a=x:=by simpa using hj</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   apply Finset.mem_image.mpr</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   refine ⟨y,hy,?_⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   rw [hroot] at heq</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   dsimp [b] at heq</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   exact heq.trans hj&#x27;</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> end Oberwolfach</span></pre></html>

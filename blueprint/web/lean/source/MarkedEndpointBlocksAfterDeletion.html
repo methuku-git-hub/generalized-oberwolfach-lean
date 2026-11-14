@@ -1,0 +1,78 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedEndpointBlocksAfterDeletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedEndpointBlocksAfterDeletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedNeighbourhoodPhysicalDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedEndpointBlockNumerics</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Actual endpoint degree and cut bounds after a later physical deletion.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The profile tolerance is chosen before the separation radius. All modified</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> neighbourhoods are computed from the supplied outcome and deletion graphs;</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> the new degree/cut properties are conclusions rather than caller inputs. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 16000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_endpoint_blocks_after_deletion</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (p₀ a eta:ℝ) (hp₀:0&lt;p₀) (hp₀1:p₀≤1) (ha:0&lt;a) (heta:0&lt;eta)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hetaSmall:eta≤p₀*a/8):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ eps:ℝ,0&lt;eps ∧ ∀ d:ℕ,∃ N:ℕ,1≤N ∧ ∀ n:ℕ,N≤n→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ (V U Γ Color:Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       [LinearOrder V] [DecidableEq U],</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ (P:SimpleGraph V) (π:Equiv.Perm V) (h:ℕ),3≤h→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (A:Finset V) (B:Finset U) (p k:ℝ) (q:U→Γ→ℝ) (s:U→Color→ℝ) (g:Γ) (j:Color)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (errR errI deltaR deltaV deltaU:ℝ),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     0≤errR→0≤errI→0≤deltaR→0≤deltaV→0≤deltaU→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     errR+h*(deltaR+deltaU)≤eps*n→errI+h*deltaV≤eps*n→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     MarkedRowsWithSpokes P π d h A p k q s g j errR σ H→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     MarkedIndicesWithSpokes π d h B q s g j errI σ H→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∀ (DR:SimpleGraph V) (DS:SimpleGraph (V⊕U)),</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ x,(DR.degree x:ℝ)≤deltaR)→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ x,(DS.degree (Sum.inl x):ℝ)≤deltaV)→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∀ u,(DS.degree (Sum.inr u):ℝ)≤deltaU)→</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∀ w:Bool→ℝ,(∀ u∈B,q u g=w true)→(∀ u∈B,s u j=w false)→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀ t,p₀≤w t ∧ w t≤1)→</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let σ&#x27;:=rawMarkedDeleteRims σ DR.edgeFinset</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let H&#x27;:=markedDeletePhysicalSpokes H DS</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∀ (root:Bool×Bool×V) (r t:Bool),</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     a*n≤((markedEndpointLabels P π d A root σ&#x27;).card:ℝ)→</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     a*n≤((B.filter (H&#x27; r root.2.2)).card:ℝ)→</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     ((B.filter (H&#x27; r root.2.2)).card:ℝ)≤n→</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     BipartiteBlockBounds (H&#x27; t) (fun z=&gt;z∈markedEndpointLabels P π d A root σ&#x27;)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (fun u=&gt;u∈B.filter (H&#x27; r root.2.2)) ((p₀*a/2)*n) (eta*n) (p₀/2) ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     2*(eta*n)+(2*(2*(3*d)+1):ℕ)≤(p₀*a/2)*n ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (2*(2*(3*d)+1):ℕ)&lt;(p₀/2)*(eta*n):=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨eps,e,heps,he,hnum⟩:=marked_endpoint_block_numeric_threshold p₀ a eta hp₀ hp₀1 ha heta hetaSmall</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   refine ⟨eps,heps,?_⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro d</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨N,hN⟩:=hnum d</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   refine ⟨max N 1,le_max_right _ _,?_⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro n hn V U Γ Color _ _ _ _ _ _ P π h hh A B p k q s g j</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     errR errI deltaR deltaV deltaU hR hI hdR hdV hdU htolR htolI σ H hr hi</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     DR DS hDR hDSV hDSU w hq hs hw</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   dsimp only</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   intro root r t hL hY hYn</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   let σ&#x27;:=rawMarkedDeleteRims σ DR.edgeFinset</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   let H&#x27;:=markedDeletePhysicalSpokes H DS</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hn&#x27;:N≤n:=(le_max_left _ _).trans hn</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hnp:(0:ℝ)&lt;n:=by exact_mod_cast (lt_of_lt_of_le Nat.zero_lt_one ((le_max_right _ _).trans hn))</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hYp:0&lt;(B.filter (H&#x27; r root.2.2)).card:=by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hp:0&lt;((B.filter (H&#x27; r root.2.2)).card:ℝ):=(mul_pos ha hnp).trans_le hY</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact_mod_cast hp</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   obtain ⟨hr&#x27;,hi&#x27;⟩:=marked_neighbourhoods_after_physical_deletion P π d h A B p k q s g j</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     errR errI deltaR deltaV deltaU hdR hdV hdU σ H hr hi DR DS hDR hDSV hDSU</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨hrelR,hrelI,hsmall,hlarge,hdL,hdY,htau,hlam,hdeg,hmargin⟩:=</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     hN n hn&#x27; (markedEndpointLabels P π d A root σ&#x27;).card (B.filter (H&#x27; r root.2.2)).card</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       hL hY hYn (w t) (hw t).1 (hw t).2</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hb:=marked_endpoint_block_bounds P π d h hh A B p k q s g j</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (errR+h*(deltaR+deltaU)) (errI+h*deltaV) e eta ((p₀*a/2)*n) (eta*n) (p₀/2)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (by positivity) (by positivity) he.le heta σ&#x27; H&#x27; hr&#x27; hi&#x27; w hq hs</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (fun t=&gt;⟨hp₀.trans_le (hw t).1,(hw t).2⟩) root r t hYp</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (by linarith only [hrelR,htolR]) (by linarith only [hrelI,htolI])</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     hsmall hlarge hdY hdL htau hlam</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   exact ⟨hb,hdeg,hmargin⟩</span>
+<span id="L74"><a href="#L74" class="ln">  74</a> </span>
+<span id="L75"><a href="#L75" class="ln">  75</a> end Oberwolfach</span></pre></html>

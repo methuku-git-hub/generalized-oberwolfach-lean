@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MixedBoundarySelectionAvoidance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MixedBoundarySelectionAvoidance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MappedFactorGraph</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.IndexedGraphSelection</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.EndpointPairingGraph</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Joint selection retains avoidance of an already used physical graph.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> Its two single-copy inputs explicitly retain that same avoidance guarantee. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 5000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem select_mixed_boundary_pairings_avoiding (p:ℝ) (hp:0&lt;p):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃ N:ℕ,∀ (V W J K:Type) [Fintype V] [DecidableEq V] [Fintype W] [DecidableEq W]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       [Fintype J] [DecidableEq J] [Fintype K] [DecidableEq K],N≤Fintype.card W→</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ (r:ℕ) (Q F:SimpleGraph V) (P B Z:SimpleGraph W) (e:V↪W),Q.map e≤P→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ (T Y:J→Finset V) (S U:K→Finset W),</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ i j:J⊕K,i≠j→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ((Sum.elim (fun j=&gt;(Y j).image e) (fun k=&gt;S k∪U k) i∩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         Sum.elim (fun j=&gt;(Y j).image e) (fun k=&gt;S k∪U k) j).card:ℝ)≤p^2*Fintype.card W)→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ w,((Finset.univ.filter (fun i:J⊕K=&gt;w∈Sum.elim (fun j=&gt;(Y j).image e) (fun k=&gt;S k∪U k) i)).card:ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ≤p*Fintype.card W)→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀ j,∀ H:SimpleGraph V,</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ v,(H.degree v:ℝ)≤2*(p*Real.sqrt p*Fintype.card W)+</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         2*(Nat.ceil (4*(p*Real.sqrt p*Fintype.card W)):ℝ))→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       ∃ D:Finset (LocalOrdinaryCycle Q F (T j) r),</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         ((∀ C∈D,∀ E∈D,C≠E→Disjoint (localOrdinaryVertices C) (localOrdinaryVertices E)) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>           D.biUnion localOrdinaryVertices=Y j) ∧ Disjoint (localOrdinaryFactorGraph D) H ∧ Disjoint ((localOrdinaryFactorGraph D).map e) Z)→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ k,∀ H:SimpleGraph W,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ w,(H.degree w:ℝ)≤2*(p*Real.sqrt p*Fintype.card W)+</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         2*(Nat.ceil (4*(p*Real.sqrt p*Fintype.card W)):ℝ))→</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       ∃ E:EndpointPairing P B (S k) (U k),Disjoint E.graph H ∧ Disjoint E.graph Z)→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∃ D:∀ j,Finset (LocalOrdinaryCycle Q F (T j) r),</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∃ E:∀ k,EndpointPairing P B (S k) (U k),</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ j,(∀ C∈D j,∀ C&#x27;∈D j,C≠C&#x27;→Disjoint (localOrdinaryVertices C) (localOrdinaryVertices C&#x27;)) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (D j).biUnion localOrdinaryVertices=Y j) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       let G:J⊕K→SimpleGraph W:=Sum.elim</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (fun j=&gt;(localOrdinaryFactorGraph (D j)).map e) (fun k=&gt;(E k).graph)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (∀ i,G i≤spanningRestriction P (Sum.elim (fun j=&gt;(Y j).image e) (fun k=&gt;S k∪U k) i)) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (∀ i j,i≠j→Disjoint (G i) (G j)) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (∀ i,Disjoint (G i) Z) ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       ∀ w,((⨆ i,G i).degree w:ℝ)≤2*(p*Fintype.card W):=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   obtain ⟨N,hN⟩:=bounded_degree_selection_indexed p hp</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   refine ⟨N,?_⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro V W J K _ _ _ _ _ _ _ _ hn r Q F P B Z e hQ T Y S U hinter hmem ho he</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let family:J⊕K→Set (SimpleGraph W):=Sum.elim</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (fun j G=&gt;∃ D:Finset (LocalOrdinaryCycle Q F (T j) r),</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       ((∀ C∈D,∀ E∈D,C≠E→Disjoint (localOrdinaryVertices C) (localOrdinaryVertices E)) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         D.biUnion localOrdinaryVertices=Y j) ∧ (localOrdinaryFactorGraph D).map e=G ∧ Disjoint G Z)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (fun k G=&gt;∃ E:EndpointPairing P B (S k) (U k),E.graph=G ∧ Disjoint G Z)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hchoice (i:J⊕K) (H:SimpleGraph W)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (_hH:H≤spanningRestriction P (Sum.elim (fun j=&gt;(Y j).image e) (fun k=&gt;S k∪U k) i))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (hdeg:∀ w,(H.degree w:ℝ)≤(2:ℕ)*(p*Real.sqrt p*Fintype.card W)+</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (2:ℕ)*(Nat.ceil (4*(p*Real.sqrt p*Fintype.card W)):ℝ)):</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       ∃ G:SimpleGraph W,G∈family i ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         G≤spanningRestriction P (Sum.elim (fun j=&gt;(Y j).image e) (fun k=&gt;S k∪U k) i) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         (∀ w,G.degree w≤2) ∧ Disjoint G H:=by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     cases i with</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     | inl j=&gt;</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       obtain ⟨D,hD,hd,hZ⟩:=ho j (H.comap e) (fun v=&gt;</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         (Nat.cast_le.mpr (graph_comap_degree_le H e v)).trans (by simpa using hdeg (e v)))</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       refine ⟨_,⟨D,hD,rfl,hZ⟩,?_⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       simpa only [Sum.elim_inl,←SimpleGraph.ncard_neighborSet] using</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         mapped_local_factor_choice Q F P H e (T j) (Y j) r hQ D hD hd</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     | inr k=&gt;</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       obtain ⟨E,hE,hZ⟩:=he k H (by simpa using hdeg)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       exact ⟨E.graph,⟨E,rfl,hZ⟩,E.graph_le,E.graph_degree,hE⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   obtain ⟨G,hG,hdis,hdeg⟩:=hN W (J⊕K) hn 2 P</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (Sum.elim (fun j=&gt;(Y j).image e) (fun k=&gt;S k∪U k)) family hinter hmem hchoice</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have ho&#x27; (j:J):∃ D:Finset (LocalOrdinaryCycle Q F (T j) r),</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       ((∀ C∈D,∀ E∈D,C≠E→Disjoint (localOrdinaryVertices C) (localOrdinaryVertices E)) ∧</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>         D.biUnion localOrdinaryVertices=Y j) ∧ (localOrdinaryFactorGraph D).map e=G (Sum.inl j) ∧ Disjoint (G (Sum.inl j)) Z:=(hG (Sum.inl j)).1</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have he&#x27; (k:K):∃ E:EndpointPairing P B (S k) (U k),E.graph=G (Sum.inr k) ∧ Disjoint (G (Sum.inr k)) Z:=(hG (Sum.inr k)).1</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   choose D hD using ho&#x27;</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   choose E hE using he&#x27;</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have heq (i:J⊕K):Sum.elim (fun j=&gt;(localOrdinaryFactorGraph (D j)).map e)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       (fun k=&gt;(E k).graph) i=G i:=by</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     cases i with</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     | inl j=&gt;exact (hD j).2.1</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     | inr k=&gt;exact (hE k).1</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   refine ⟨D,E,fun j=&gt;(hD j).1,?_,?_,?_,?_⟩</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   · intro i;rw [heq];exact (hG i).2.1</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   · intro i j hij;rw [heq,heq];exact hdis i j hij</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   · intro i;rw [heq]</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     cases i with</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     | inl j=&gt;exact (hD j).2.2</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     | inr k=&gt;exact (hE k).2</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   · intro w</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     have hu:(⨆ i,Sum.elim (fun j=&gt;(localOrdinaryFactorGraph (D j)).map e)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>         (fun k=&gt;(E k).graph) i)=⨆ i,G i:=iSup_congr heq</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     rw [hu];simpa only [Nat.cast_ofNat] using hdeg w</span>
+<span id="L93"><a href="#L93" class="ln">  93</a> </span>
+<span id="L94"><a href="#L94" class="ln">  94</a> end Oberwolfach</span></pre></html>

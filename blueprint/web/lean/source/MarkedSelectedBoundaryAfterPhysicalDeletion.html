@@ -1,0 +1,167 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSelectedBoundaryAfterPhysicalDeletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSelectedBoundaryAfterPhysicalDeletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSelectedBoundaryCompletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedBoundaryPhysicalDeletion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedHubFactorPhysicalRestriction</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedEndpointPhysicalRestriction</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedPackingPhysicalAvoidance</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.MarkedRootArcRestriction</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> /-! Complete the selected boundary in the actual host remaining after a</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> physical deletion. The incoming and outgoing arcs, root spokes, selected</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> factors and endpoint assignments all retain their original identities. -/</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option autoImplicit false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> set_option synthInstance.maxSize 4096</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> set_option maxHeartbeats 24000000</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> noncomputable section</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> namespace Oberwolfach</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> variable {V U E T J I:Type} [Fintype V] [Fintype U] [Fintype J] [Fintype I]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     [DecidableEq V] [DecidableEq U] [DecidableEq J] [DecidableEq I]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     {tail head:E→V} {ktail khead:T→V} {H₀ HK:V→U→Prop}</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     {π:Equiv.Perm V} {b l:ℕ} {c:ℝ}</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> theorem marked_selected_boundary_after_physical_deletion</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (X:Finset V) (Q:MarkedBoundaryExtensionCounts tail head ktail khead H₀ HK X c)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hl:2≤l) (hb:1≤b) (hphys:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hX:∀ x,π x∈X↔x∈X) (root:J↪V) (hrootX:∀ j,root j∉X)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (A₀ A₁ X₀ X₁:J→Finset V) (Y₀ Y₁:J→Finset U)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (P:∀ j,MarkedEndpointPairing (A₀ j) (A₁ j) (X₀ j) (X₁ j) (Y₀ j) (Y₁ j) H₀ HK π b)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hcross:∀ j k,j≠k→Disjoint (P j).graph (P k).graph)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (incoming:∀ j,(A₀ j⊕A₁ j)↪E⊕T) (outgoing:∀ j,(X₀ j⊕X₁ j)↪E⊕T)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hinhead:∀ j a,Sum.elim head khead (incoming j a)=root j)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hintail:∀ j a,Sum.elim tail ktail (incoming j a)=taggedSubsetValue (A₀ j) (A₁ j) a)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (houttail:∀ j a,Sum.elim tail ktail (outgoing j a)=root j)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (houthead:∀ j a,Sum.elim head khead (outgoing j a)=taggedSubsetValue (X₀ j) (X₁ j) a)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hintype:∀ j a,(incoming j a).isRight=a.isRight)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (houttype:∀ j a,(outgoing j a).isRight=a.isRight)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hAX:∀ j,A₀ j∪A₁ j⊆X) (hXX:∀ j,X₀ j∪X₁ j⊆X)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hsepA:∀ j a,a∈A₀ j∪A₁ j→¬PermutationClose π b a (root j))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hsepX:∀ j a,a∈X₀ j∪X₁ j→¬PermutationClose π b a (root j))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hY₀:∀ j u,u∈Y₀ j→H₀ (root j) u) (hY₁:∀ j u,u∈Y₁ j→HK (root j) u)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (D K:ℕ) (hK:0&lt;K) (hdeg:∀ w,(⨆ j,(P j).graph).degree w≤D)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (Z:Finset U) (hYZ:∀ j,Y₀ j∪Y₁ j⊆Z)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hub:I↪U) (houtside:∀ j,hub j∉Z) (Y:I→Finset V) (hYX:∀ j,Y j⊆X)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (F:∀ j,MarkedHubFactorOn tail head ktail khead (l+3) π b H₀ HK (hub j) (Y j))</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hFcross:∀ j k,j≠k→Disjoint (F j).rim (F k).rim)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hFsep:∀ j v z,H₀ v (hub j)→HK z (hub j)→v≠π z)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (δ:ℝ) (hδ:0≤δ) (hG:∀ v,((⨆ j,(F j).rim).degree v:ℝ)≤δ)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (D₀:SimpleGraph (V⊕U)) (δ₀:ℝ) (hδ₀:0≤δ₀) (hD₀:∀ z,(D₀.degree z:ℝ)≤δ₀)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hPD₀:∀ j,Disjoint (P j).graph D₀) (hFD₀:∀ i,Disjoint (F i).graph D₀)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hrootSpokeD₀:∀ j u,u∈Y₀ j∪Y₁ j→¬D₀.Adj (Sum.inl (root j)) (Sum.inr u))</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hfactorSpokeD₀:∀ i v,v∈Y i→¬D₀.Adj (Sum.inl v) (Sum.inr (hub i)))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hinD₀:∀ j a,Sum.elim</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (fun e=&gt;¬D₀.Adj (Sum.inl (tail e)) (Sum.inl (head e)))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (fun e=&gt;¬D₀.Adj (Sum.inl (ktail e)) (Sum.inl (π (khead e)))) (incoming j a))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (houtD₀:∀ j a,Sum.elim</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (fun e=&gt;¬D₀.Adj (Sum.inl (tail e)) (Sum.inl (head e)))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (fun e=&gt;¬D₀.Adj (Sum.inl (ktail e)) (Sum.inl (π (khead e)))) (outgoing j a))</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (hbudget:(Fintype.card (Σ j,Y₀ j⊕Y₁ j)*(l+4):ℕ)/(K:ℝ)+D+(D*(l+4):ℕ)+</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (l+5)*(2*b+1)+2*(δ+4*(K+D:ℕ))&lt;c-3*δ₀):</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     ∃ M:Finset (MarkedWheel tail head ktail khead (l+3) π b H₀ HK),</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (∀ W∈M,∀ W&#x27;∈M,W≠W&#x27;→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources W&#x27;))∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (∀ j a,Sum.inl (markedPhysicalEdge tail head ktail khead π (incoming j a))∈M.biUnion markedWheelPhysicalResources)∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (∀ j a,Sum.inl (markedPhysicalEdge tail head ktail khead π (outgoing j a))∈M.biUnion markedWheelPhysicalResources)∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (∀ j u,u∈Y₀ j∪Y₁ j→Sum.inr (root j,u)∈M.biUnion markedWheelPhysicalResources)∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (∀ j x,x∈Y j→Sum.inr (x,hub j)∈M.biUnion markedWheelPhysicalResources)∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (∀ v,((spanningRestriction (markedPackingRimGraph M) X).degree v:ℝ)≤δ+4*(K+D:ℕ))∧</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (∀ v∈X,(Z.filter (markedPackingSpokes M v)).card≤K+D)∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (∀ u∈Z,(Finset.univ.filter (fun v=&gt;markedPackingSpokes M v u)).card≤D*(l+4))∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       Disjoint (ordinaryPhysicalGraph (markedPackingRimGraph M) (markedPackingSpokes M)) D₀∧</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       (∀ B:Finset (Finset V⊕(V×U)),</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         (∀ e∈B,¬markedInnerResource X Z e)→</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         (∀ j a,Sum.inl (markedPhysicalEdge tail head ktail khead π (incoming j a))∉B)→</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>         (∀ j a,Sum.inl (markedPhysicalEdge tail head ktail khead π (outgoing j a))∉B)→</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         (∀ j u,u∈Y₀ j∪Y₁ j→Sum.inr (root j,u)∉B)→</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>         (∀ j x,x∈Y j→Sum.inr (x,hub j)∉B)→</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>         Disjoint (M.biUnion markedWheelPhysicalResources) B) :=by</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   let PE:=fun e:E=&gt;¬D₀.Adj (Sum.inl (tail e)) (Sum.inl (head e))</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   let PT:=fun e:T=&gt;¬D₀.Adj (Sum.inl (ktail e)) (Sum.inl (π (khead e)))</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   let H₀&#x27;:=fun v u=&gt;H₀ v u∧¬D₀.Adj (Sum.inl v) (Sum.inr u)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   let HK&#x27;:=fun v u=&gt;HK v u∧¬D₀.Adj (Sum.inl v) (Sum.inr u)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have hP (j:J):∃ P&#x27;:MarkedEndpointPairing (A₀ j) (A₁ j) (X₀ j) (X₁ j) (Y₀ j) (Y₁ j) H₀&#x27; HK&#x27; π b,</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       P&#x27;.incoming=(P j).incoming∧P&#x27;.outgoing=(P j).outgoing∧P&#x27;.graph=(P j).graph:=</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     marked_endpoint_physical_restriction _ _ _ _ _ _ _ _ _ _ (P j) D₀ (hPD₀ j)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   choose P&#x27; hPi hPo hPg using hP</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   have hF (i:I):∃ F&#x27;:MarkedHubFactorOn (fun e:{e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       (fun e:{e // PT e}=&gt;ktail e.val) (fun e=&gt;khead e.val) (l+3) π b H₀&#x27; HK&#x27; (hub i) (Y i),</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       F&#x27;.rim=(F i).rim∧F&#x27;.graph=(F i).graph:=</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     marked_hub_factor_physical_restriction (by omega) hb (hub i) (Y i) (F i) D₀ (hFD₀ i) (hfactorSpokeD₀ i)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   choose F&#x27; hFr hFg using hF</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   let inc:=fun j=&gt;restrictedSumEmbedding (incoming j) PE PT (hinD₀ j)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   let out:=fun j=&gt;restrictedSumEmbedding (outgoing j) PE PT (houtD₀ j)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   have hPcross:∀ j k,j≠k→Disjoint (P&#x27; j).graph (P&#x27; k).graph:=by</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     intro j k hne;rw [hPg,hPg];exact hcross j k hne</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   have hFcross&#x27;:∀ j k,j≠k→Disjoint (F&#x27; j).rim (F&#x27; k).rim:=by</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     intro j k hne;rw [hFr,hFr];exact hFcross j k hne</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   have hPdeg:∀ w,(⨆ j,(P&#x27; j).graph).degree w≤D:=by</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     have he:(⨆ j,(P&#x27; j).graph)=⨆ j,(P j).graph:=iSup_congr hPg</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     intro w;rw [he];exact hdeg w</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   have hFdeg:∀ v,((⨆ j,(F&#x27; j).rim).degree v:ℝ)≤δ:=by</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     have he:(⨆ j,(F&#x27; j).rim)=⨆ j,(F j).rim:=iSup_congr hFr</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     intro v;rw [he];exact hG v</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   have Q&#x27;:=marked_boundary_counts_after_physical_deletion π X c Q D₀ δ₀ hδ₀ hD₀</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   obtain ⟨M,hM,hi,ho,hroot,hcol,hr,hs,hc,havoidB⟩:=marked_selected_boundary_completion X Q&#x27; hl hb</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     (markedRestrictedPhysical_injective PE PT hphys) hX root hrootX</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     A₀ A₁ X₀ X₁ Y₀ Y₁ P&#x27; hPcross inc out</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     (fun j a=&gt;(restrictedSumEmbedding_elim (incoming j) PE PT (hinD₀ j) head khead a).trans (hinhead j a))</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     (fun j a=&gt;(restrictedSumEmbedding_elim (incoming j) PE PT (hinD₀ j) tail ktail a).trans (hintail j a))</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     (fun j a=&gt;(restrictedSumEmbedding_elim (outgoing j) PE PT (houtD₀ j) tail ktail a).trans (houttail j a))</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     (fun j a=&gt;(restrictedSumEmbedding_elim (outgoing j) PE PT (houtD₀ j) head khead a).trans (houthead j a))</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     (fun j a=&gt;(restrictedSumEmbedding_type (incoming j) PE PT (hinD₀ j) a).trans (hintype j a))</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     (fun j a=&gt;(restrictedSumEmbedding_type (outgoing j) PE PT (houtD₀ j) a).trans (houttype j a))</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     hAX hXX hsepA hsepX</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     (fun j u hu=&gt;⟨hY₀ j u hu,hrootSpokeD₀ j u (Finset.mem_union_left _ hu)⟩)</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     (fun j u hu=&gt;⟨hY₁ j u hu,hrootSpokeD₀ j u (Finset.mem_union_right _ hu)⟩)</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     D K hK hPdeg Z hYZ hub houtside Y hYX F&#x27; hFcross&#x27;</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     (fun i v z hv hz=&gt;hFsep i v z hv.1 hz.1) δ hδ hFdeg hbudget</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>   let lift:=fun W:MarkedWheel (fun e:{e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>       (fun e:{e // PT e}=&gt;ktail e.val) (fun e=&gt;khead e.val) (l+3) π b H₀&#x27; HK&#x27;=&gt;</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     markedWheelToLarger PE PT (fun x u (h:H₀&#x27; x u)=&gt;h.1) (fun x u (h:HK&#x27; x u)=&gt;h.1) W</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>   let N:=M.image lift</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>   have hcover:N.biUnion markedWheelPhysicalResources=M.biUnion markedWheelPhysicalResources:=</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     markedWheelToLarger_cover PE PT _ _ M</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>   have hrim:markedPackingRimGraph N=markedPackingRimGraph M:=marked_packing_lift_rim PE PT _ _ M</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>   have hspokes:markedPackingSpokes N=markedPackingSpokes M:=marked_packing_lift_spokes PE PT _ _ M</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>   have hphysical (a:{e // PE e}⊕{e // PT e}):</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>       markedPhysicalEdge (fun e:{e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>         (fun e:{e // PT e}=&gt;ktail e.val) (fun e=&gt;khead e.val) π a=</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>       markedPhysicalEdge tail head ktail khead π (Sum.map Subtype.val Subtype.val a):=by cases a &lt;;&gt; rfl</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>   refine ⟨N,markedWheelToLarger_matching PE PT _ _ M hM,?_,?_,?_,?_,?_,?_,?_,?_,?_⟩</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>   · intro j a</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     rw [hcover]</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     have hh:=hi j a</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     rw [hphysical,restrictedSumEmbedding_forget] at hh</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     exact hh</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>   · intro j a</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     rw [hcover]</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     have hh:=ho j a</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     rw [hphysical,restrictedSumEmbedding_forget] at hh</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>     exact hh</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>   · intro j u hu;rw [hcover];exact hroot j u hu</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>   · intro i v hv;rw [hcover];exact hcol i v hv</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>   · intro v;rw [hrim];convert hr v using 1 &lt;;&gt; congr!</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>   · intro v hv;rw [hspokes];convert hs v hv using 1 &lt;;&gt; congr!</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>   · intro u hu;rw [hspokes];convert hc u hu using 1 &lt;;&gt; congr!</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>   · rw [hrim,hspokes]</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     exact marked_restricted_packing_physical_avoidance D₀ M</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a> </span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>   · intro B hB hiB hoB hrB hhB</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>     rw [hcover]</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>     apply havoidB B hB</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>     · intro j a</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>       change Sum.inl (markedPhysicalEdge (fun e:{e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>         (fun e:{e // PT e}=&gt;ktail e.val) (fun e=&gt;khead e.val) π (inc j a))∉B</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>       rw [hphysical,restrictedSumEmbedding_forget]</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>       exact hiB j a</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>     · intro j a</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>       change Sum.inl (markedPhysicalEdge (fun e:{e // PE e}=&gt;tail e.val) (fun e=&gt;head e.val)</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>         (fun e:{e // PT e}=&gt;ktail e.val) (fun e=&gt;khead e.val) π (out j a))∉B</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>       rw [hphysical,restrictedSumEmbedding_forget]</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>       exact hoB j a</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>     · exact hrB</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>     · exact hhB</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a> </span>
+<span id="L164"><a href="#L164" class="ln"> 164</a> end Oberwolfach</span></pre></html>

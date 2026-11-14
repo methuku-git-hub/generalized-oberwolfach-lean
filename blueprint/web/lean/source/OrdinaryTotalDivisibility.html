@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryTotalDivisibility.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryTotalDivisibility.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryBalancedRootCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Total rim/spoke equality and cycle-length divisibility follow from</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> local row balance and hub divisibility, without a decomposition premise. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 4000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem ordinary_balanced_total_edges (G : SimpleGraph V) (H : V → U → Prop)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hbal : ∀ v,G.degree v=2*(Finset.univ.filter (H v)).card) :</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     G.edgeFinset.card=Fintype.card {e:V×U // H e.1 e.2} := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   exact (balanced_root_edge_counts G H hbal (Fintype.card V) (Fintype.card U)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (fun _ =&gt; Finset.card_le_univ _) (Fintype.card_subtype_le _)).1</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> theorem ordinary_spoke_total_divisible (H : V → U → Prop) (r : ℕ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hdiv : ∀ u,r∣(Finset.univ.filter (fun v =&gt; H v u)).card) :</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     r∣Fintype.card {e:V×U // H e.1 e.2} := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let e : {e:V×U // H e.1 e.2} ≃ (Σ u,{v:V // H v u}) := {</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     toFun := fun a =&gt; ⟨a.val.2,⟨a.val.1,a.property⟩⟩</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     invFun := fun a =&gt; ⟨(a.2.val,a.1),a.2.property⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     left_inv := by rintro ⟨⟨v,u⟩,h⟩;rfl</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     right_inv := by rintro ⟨u,⟨v,h⟩⟩;rfl }</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   rw [Fintype.card_congr e,Fintype.card_sigma]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   simp only [Fintype.card_subtype]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   exact Finset.dvd_sum (fun u _ =&gt; hdiv u)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem ordinary_balanced_rim_total_divisible (G : SimpleGraph V) (H : V → U → Prop) (r : ℕ)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hbal : ∀ v,G.degree v=2*(Finset.univ.filter (H v)).card)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hdiv : ∀ u,r∣(Finset.univ.filter (fun v =&gt; H v u)).card) : r∣G.edgeFinset.card := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   rw [ordinary_balanced_total_edges G H hbal]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   exact ordinary_spoke_total_divisible H r hdiv</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> </span>
+<span id="L38"><a href="#L38" class="ln">  38</a> end Oberwolfach</span></pre></html>

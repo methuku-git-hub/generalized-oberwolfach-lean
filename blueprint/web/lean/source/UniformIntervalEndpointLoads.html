@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>UniformIntervalEndpointLoads.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>UniformIntervalEndpointLoads.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedIntervalEndpointSeparation</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Algebra.BigOperators.Ring.Finset</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Uniform root loads convert the rowwise interval boundary identity into</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> pointwise equality of start and finish loads. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 16000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem uniform_root_load_endpoint_balance</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {V U:Type*} [Fintype V] [DecidableEq V] [Fintype U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (π:Equiv.Perm V) (Y B T:U→Finset V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hrow:∀w,Y w∪B w=(Y w).image π∪T w)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hYB:∀w,Disjoint (Y w) (B w))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hπT:∀w,Disjoint ((Y w).image π) (T w))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (huniform:∀v z,(Finset.univ.filter (fun w=&gt;v∈Y w)).card=</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (Finset.univ.filter (fun w=&gt;z∈Y w)).card):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀v,(Finset.univ.filter (fun w=&gt;v∈B w)).card=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (Finset.univ.filter (fun w=&gt;v∈T w)).card:=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   classical</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   intro v</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hpoint (w:U):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (if v∈Y w then 1 else 0)+(if v∈B w then 1 else 0)=</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (if π.symm v∈Y w then 1 else 0)+(if v∈T w then 1 else 0):=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have heq:(v∈Y w∨v∈B w)↔(v∈(Y w).image π∨v∈T w):=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       have hh:=congrArg (fun s:Finset V=&gt;v∈s) (hrow w)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       simp only [Finset.mem_union] at hh</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       exact Iff.of_eq hh</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hi:v∈(Y w).image π ↔ π.symm v∈Y w:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       constructor</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       · intro h</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         obtain ⟨a,ha,hav⟩:=Finset.mem_image.mp h</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         rw [←hav,Equiv.symm_apply_apply]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         exact ha</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       · intro h</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         exact Finset.mem_image.mpr ⟨π.symm v,h,π.apply_symm_apply v⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hn1:¬(v∈Y w ∧ v∈B w):=fun h=&gt;Finset.disjoint_left.mp (hYB w) h.1 h.2</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hn2:¬(π.symm v∈Y w ∧ v∈T w):=fun h=&gt;Finset.disjoint_left.mp (hπT w) (hi.mpr h.1) h.2</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     rw [hi] at heq</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     by_cases h₁:v∈Y w &lt;;&gt; by_cases h₂:v∈B w &lt;;&gt;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       by_cases h₃:π.symm v∈Y w &lt;;&gt; by_cases h₄:v∈T w &lt;;&gt;</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       simp_all</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hs:=Finset.sum_congr (s₁:=Finset.univ) (s₂:=Finset.univ) rfl (fun w _=&gt;hpoint w)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   simp only [Finset.sum_add_distrib,Finset.sum_boole,Nat.cast_id] at hs</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hu:=huniform v (π.symm v)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   omega</span>
+<span id="L49"><a href="#L49" class="ln">  49</a> end Oberwolfach</span></pre></html>

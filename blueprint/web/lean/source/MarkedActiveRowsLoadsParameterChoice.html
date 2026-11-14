@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedActiveRowsLoadsParameterChoice.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedActiveRowsLoadsParameterChoice.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedActiveRowParameterChoice</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedLargerHubLoadTolerance</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Compatible active row and load errors, with the larger-hub retention</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> error chosen after the vortex ratio. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem marked_active_rows_loads_parameter_choice</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (η tstar τcap tolcap rowcap ζrowcap:ℝ)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hη:0&lt;η) (ht:0&lt;tstar) (hτcap:0&lt;τcap) (htolcap:0&lt;tolcap)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hrowcap:0&lt;rowcap) (hζrowcap:0&lt;ζrowcap):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ τ tol rowErr ζRow:ℝ,</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       0&lt;τ ∧ τ≤τcap ∧ 0&lt;tol ∧ tol≤tolcap ∧ τ+tol≤η/8 ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       0&lt;rowErr ∧ rowErr≤rowcap ∧ 0&lt;ζRow ∧ ζRow≤ζrowcap ∧ rowErr+ζRow≤tstar/8 ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ∀ ε capWide C:ℝ,0&lt;ε→0&lt;capWide→0≤C→</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>         ∃ ζWide:ℝ,0&lt;ζWide ∧ ζWide≤capWide ∧ τ+tol+C*(4/ε)*ζWide≤η/4:=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   let τ:=min τcap (η/64)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let tol:=min tolcap (η/64)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hτ:0&lt;τ:=by dsimp [τ];positivity</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have htol:0&lt;tol:=by dsimp [tol];positivity</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hτcap&#x27;:τ≤τcap:=min_le_left _ _</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have htolcap&#x27;:tol≤tolcap:=min_le_left _ _</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hτbound:τ≤η/64:=min_le_right _ _</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have htolbound:tol≤η/64:=min_le_right _ _</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hbase:τ+tol≤η/8:=by linarith</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨rowErr,ζRow,hrow,hrowcap&#x27;,hζrow,hζrowcap&#x27;,hrowbound⟩:=</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     marked_active_row_parameter_choice 1 tstar rowcap ζrowcap ht hrowcap hζrowcap</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hrowbound&#x27;:rowErr+ζRow≤tstar/8:=by simpa only [Nat.cast_one,one_mul] using hrowbound</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   refine ⟨τ,tol,rowErr,ζRow,hτ,hτcap&#x27;,htol,htolcap&#x27;,hbase,hrow,hrowcap&#x27;,hζrow,hζrowcap&#x27;,hrowbound&#x27;,?_⟩</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro ε capWide C he hcap hC</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   exact marked_larger_hub_load_tolerance η capWide C (4/ε) τ tol hη hcap hC (by positivity) hbase</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> end Oberwolfach</span></pre></html>

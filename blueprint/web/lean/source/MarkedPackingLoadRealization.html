@@ -1,0 +1,85 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPackingLoadRealization.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPackingLoadRealization.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SuccessorWeightFamilies</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPackingLoadVortex</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Construct the packing coefficient functions from parent graph hypotheses</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> and then realize their rim and root-omitted spoke loads on one raw sample.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> Weights are chosen before the actual sampling marginals; the near-regularity</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> tolerance precedes the separation parameter. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 3000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option quotPrecheck false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_packing_load_realization</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (k₀ m : ℕ) (hlen : m+1=(k₀+2)*2)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (β τ pstar ε K η χ : ℝ) (hβ : 0&lt;β) (hτ : 0&lt;τ) (hpstar : 0&lt;pstar)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hε : 0&lt;ε) (hη : 0&lt;η) (hη1 : η&lt;1) (hχ : 0&lt;χ) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ δ : ℝ,0&lt;δ ∧ ∀ d : ℕ,∀ hd : 2≤d,∃ M₀ : ℕ,1≤M₀ ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (V U Γ Color : Type) (W Z H : ℕ→Type)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [LinearOrder V] [DecidableEq U]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       [∀ i,Fintype (W i)] [∀ i,Fintype (Z i)] [∀ i,Fintype (H i)]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       [∀ i,LinearOrder (W i)] [∀ i,DecidableEq (Z i)] [∀ i,DecidableEq (H i)],</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ (P : SimpleGraph V) (π : Equiv.Perm V),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀ (f : ∀ i,W i↪oV) (g : ∀ i,Z i↪U) (b : ∀ i,H i↪Z i) (ρ : ∀ i,Equiv.Perm (W i)),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ i x,f i (ρ i x)=π (f i x)) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀ L : ℕ,(∀ i≤L,M₀≤Fintype.card (W i)) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ i&lt;L,(Fintype.card (W (i+1)):ℝ)≤η*Fintype.card (W i)) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i≤L,(Fintype.card (Z i):ℝ)≤K*Fintype.card (W i)) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ i≤L,Fintype.card (H i)≤Fintype.card (W i)) →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀ D : ℕ→ℝ,(∀ i≤L,(Fintype.card (W i):ℝ)/2≤D i) →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ i≤L,D i≤2*Fintype.card (W i)) →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ i≤L,∀ v,|((P.comap (f i)).degree v:ℝ)-D i|≤δ*Fintype.card (W i)) →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ i≤L,∀ v,(successorCycleRatio k₀+β)*Fintype.card (W i)≤((P.comap (f i)).degree v:ℝ)) →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ∃ weight : ∀ i,(Fin (m+1)→W i)→ℝ,</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀ i≤L,SuccessorSequenceWeightConditions (P.comap (f i)) (ρ i) (3*d) (D i) τ</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (successorWeightLower k₀ β) (successorWeightUpper k₀ β) (weight i)) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     ∀ (p k s₀ : ℝ) (hp : 0&lt;p) (hk : 0&lt;k) (hsum : 2*p+2*k≤1),</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       pstar≤p → pstar≤k → pstar≤s₀ → p≤1 → k≤1 → s₀≤1 →</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (∀ i≤L,(Fintype.card (H i):ℝ)*(s₀/m)=D i*k) →</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∀ i≤L,(Fintype.card (H i):ℝ)*(s₀/m)*m=D i*p) →</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     ∀ (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (a : Γ) (j : Color),(∀ u,q u a=s₀/m) → (∀ u,s u j=s₀) →</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (∀ i≤L,∀ C : Fin (m+1)→W i,</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       SuccessorSequenceValid (P.comap (f i)) (ρ i) C → PermutationSeparated (ρ i) (3*d) C →</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (successorWeightLower k₀ β/2)/(Fintype.card (W i):ℝ)^m≤weight i C/(D i*p^m*k*s₀^m) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       weight i C/(D i*p^m*k*s₀^m)≤(2*successorWeightUpper k₀ β/pstar^(2*m+1))/(Fintype.card (W i):ℝ)^m) ∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     1-χ≤(FiniteLaw.pi (rawMarkedWheelLaw p k hp.le hk.le hsum d hd q hq hQ s hs hS)).probability</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (fun σ=&gt;∀ i≤L,RawMarkedPackingLoads (P.comap (f i)) (ρ i) d m (D i) p k s₀ (weight i) a j</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         (b i) (fun z=&gt;q (g i z)) (fun z=&gt;s (g i z)) (τ+ε)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         (rawMarkedRestrictPair (f i) (g i) σ)) := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hm : 3≤m := by omega</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   obtain ⟨hA,hB⟩ := successorWeightConstants_pos k₀ β hβ</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   obtain ⟨δ,hδ,hfamilies⟩ := successor_sequence_weight_families k₀ m hlen β τ hβ hτ</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   refine ⟨δ,hδ,?_⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   intro d hd</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   obtain ⟨N,hN1,hN⟩ := hfamilies (3*d)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   obtain ⟨M,hM1,hM⟩ := marked_packing_loads_vortex_event m d hm hd (successorWeightUpper k₀ β)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     pstar ε K η χ hB hpstar hε hη hη1 hχ</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   refine ⟨max N M,hN1.trans (le_max_left _ _),?_⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   intro V U Γ Color W Z H _ _ _ _ _ _ _ _ _ _ _ _ P π hnoshort f g b ρ hcomm L hn hstep hZ hH D hDlo hDhi hnear hmin</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   obtain ⟨weight,hw⟩ := hN W (fun i=&gt;P.comap (f i)) ρ D L</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (fun i hi=&gt;(le_max_left N M).trans (hn i hi)) hDlo hDhi hnear hmin</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   refine ⟨weight,hw,?_⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   intro p k s₀ hp hk hsum hpp hpk hps hp1 hk1 hs1 hmarked hord q hq hQ s hs hS a j hq₀ hs₀</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   constructor</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   · intro i hi C hvalid hsep</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have hni : 0&lt;Fintype.card (W i) := by have hh:=hn i hi;omega</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     exact ⟨successor_seed_positive_lower (hw i hi) (by omega) hni (hDlo i hi) (hDhi i hi)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       p k s₀ pstar hpstar hpp hpk hps hp1 hk1 hs1 hA.le hB.le C hvalid hsep,</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       (successor_seed_nonneg_upper (hw i hi) (by omega) hni (hDlo i hi) (hDhi i hi)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       p k s₀ pstar hpstar hpp hpk hps hp1 hk1 hs1 hB.le C).2⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   · exact hM V U Γ Color W Z H P π hnoshort f g b ρ hcomm L</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       (fun i hi=&gt;(le_max_right N M).trans (hn i hi)) hstep hZ hH D τ (successorWeightLower k₀ β)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       hDlo hDhi weight hw p k s₀ hp hk hsum hpp hpk hps hp1 hk1 hs1 hmarked hord q hq hQ s hs hS a j hq₀ hs₀</span>
+<span id="L81"><a href="#L81" class="ln">  81</a> </span>
+<span id="L82"><a href="#L82" class="ln">  82</a> end Oberwolfach</span></pre></html>

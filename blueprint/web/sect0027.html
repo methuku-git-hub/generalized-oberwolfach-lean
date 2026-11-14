@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reference states, reindexing and bounded cycle weights</title>
+<link rel="next" href="sect0028.html" title="Local configurations and full-hub potential loads" />
+<link rel="prev" href="sect0026.html" title="Reference states, reindexing and bounded cycle weights" />
+<link rel="up" href="sect0018.html" title="Uniform weighted matching and support reduction" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class=" active">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000028">E.9 Reference states, reindexing and bounded cycle weights</h1>
+<div class="definition_thmwrapper theorem-style-plain" id="bp:markedambientterminalrepresentation-definitions">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">E.447</span>
+    <span class="definition_thmtitle">Ambient Terminal Representation</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedambientterminalrepresentation-definitions">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.MarkedAmbientTerminalRepresentation" class="lean_decl">Oberwolfach.MarkedAmbientTerminalRepresentation</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  A divisible terminal remainder represented in the original reference host, with its typed endpoints inside the prescribed terminal pair. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedreferenceterminaltransfer">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.448</span>
+    <span class="lemma_thmtitle">Reference Terminal Transfer</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedreferenceterminaltransfer">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000599"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_terminal_transfer" class="lean_decl">Oberwolfach.marked_reference_terminal_transfer</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  The terminal remainder lifts from the last reference to the first reference as actual typed arcs and spokes. Its four balance equations and its physical resource set are preserved. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000599">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedreferencereservediteration">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.449</span>
+    <span class="lemma_thmtitle">Reference Reserved Iteration</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedreferencereservediteration">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000600"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_reserved_iteration" class="lean_decl">Oberwolfach.marked_reference_reserved_iteration</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  A reservoir is chosen before the initial deletion state. The actual constructed reference-level steps are iterated and their terminal typed remainder is absorbed in the first reference. This theorem still requires the displayed fixed level inputs and the reserved absorber property. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000600">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markeduniformreferencereservediteration">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.450</span>
+    <span class="lemma_thmtitle">Uniform Reference Reserved Iteration</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markeduniformreferencereservediteration">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000601"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_uniform_reference_reserved_iteration" class="lean_decl">Oberwolfach.marked_uniform_reference_reserved_iteration</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Apply protected cover-down to the actual finite deletion of a fixed reference. All analytic estimates of the current sample are derived from those of the reference and the displayed global and star allowances. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000601">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedtypedhostcoverreferencestate">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.451</span>
+    <span class="lemma_thmtitle">Typed Host Cover Reference State</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedtypedhostcoverreferencestate">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000602"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_typed_host_cover_reference_state" class="lean_decl">Oberwolfach.marked_typed_host_cover_reference_state</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  The protected cover-down theorem in an order usable for iteration. The analytic input tolerance is chosen before the arbitrary requested star loss. The inner correction is then smaller than that loss; only inner-root imbalance needs the still smaller correction tolerance. All packings are constructed from the displayed graph inputs. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000602">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedreferencelevelgeometry">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.452</span>
+    <span class="lemma_thmtitle">Reference Level Geometry</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedreferencelevelgeometry">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000603"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_level_in_first_pair" class="lean_decl">Oberwolfach.marked_reference_level_in_first_pair</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_terminal_pair_in_first_pair" class="lean_decl">Oberwolfach.marked_reference_terminal_pair_in_first_pair</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Nested embeddings place the terminal pair inside the first protected pair. No additional size, sampling or host assumption is used. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000603">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedreferenceabsorberdeletion">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.453</span>
+    <span class="lemma_thmtitle">Reference Absorber Deletion</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedreferenceabsorberdeletion">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000604"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_deletion" class="lean_decl">Oberwolfach.marked_reference_absorber_deletion</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Delete a previously constructed wheel-decomposable reservoir from a fixed reference. The state, its exact physical complement, the two incidence bounds and canonical divisibility are derived from the actual wheels. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000604">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedreferencereservedcompletion">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.454</span>
+    <span class="lemma_thmtitle">Reference Reserved Completion</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedreferencereservedcompletion">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000605"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_reserved_completion" class="lean_decl">Oberwolfach.marked_reference_reserved_completion</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Complete a fixed reference host using the reserved terminal absorber. The initial state is constructed by deleting its actual wheel decomposition; its divisibility and both loss bounds are not independent hypotheses. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000605">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markeduniformreferencereservedcompletion">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.455</span>
+    <span class="lemma_thmtitle">Uniform Reference Reserved Completion</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markeduniformreferencereservedcompletion">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000606"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_uniform_reference_reserved_completion" class="lean_decl">Oberwolfach.marked_uniform_reference_reserved_completion</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Apply protected cover-down to the actual finite deletion of a fixed reference. All analytic estimates of the current sample are derived from those of the reference and the displayed global and star allowances. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000606">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedreferenceabsorbercommonevent">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.456</span>
+    <span class="lemma_thmtitle">Reference Absorber Common Event</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedreferenceabsorbercommonevent">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000607"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_common_event" class="lean_decl">Oberwolfach.marked_reference_absorber_common_event</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_common_event_separate_thresholds" class="lean_decl">Oberwolfach.marked_reference_absorber_common_event_separate_thresholds</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  The original retained experiment simultaneously supplies the fixed reference estimates at all vortex levels and the reserved terminal absorber property. The reference conclusion remains uniform over later bounded deletions, which may depend on the entire retained outcome. A separate-threshold version chooses the level-size threshold before the absorber size and the host-order threshold afterwards. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000607">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedreferenceabsorberconfigurationevent">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.457</span>
+    <span class="lemma_thmtitle">Reference Absorber Configuration Event</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedreferenceabsorberconfigurationevent">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000608"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_configuration_common_event" class="lean_decl">Oberwolfach.marked_reference_absorber_configuration_common_event</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_configuration_common_event_separate_thresholds" class="lean_decl">Oberwolfach.marked_reference_absorber_configuration_common_event_separate_thresholds</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  The original retained experiment simultaneously supplies the fixed reference estimates at all vortex levels and the reserved terminal absorber property. The reference conclusion remains uniform over later bounded deletions, which may depend on the entire retained outcome. A separate-threshold version chooses the level-size threshold before the absorber size and the host-order threshold afterwards. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000608">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedreferenceabsorberconfigurationbalanceevent">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.458</span>
+    <span class="lemma_thmtitle">Reference Absorber Configuration Balance Event</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedreferenceabsorberconfigurationbalanceevent">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000609"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_configuration_balance_event" class="lean_decl">Oberwolfach.marked_reference_absorber_configuration_balance_event</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_configuration_balance_event_separate_thresholds" class="lean_decl">Oberwolfach.marked_reference_absorber_configuration_balance_event_separate_thresholds</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  The original retained experiment simultaneously supplies the fixed reference estimates at all vortex levels and the reserved terminal absorber property. The reference conclusion remains uniform over later bounded deletions, which may depend on the entire retained outcome. A separate-threshold version chooses the level-size threshold before the absorber size and the host-order threshold afterwards. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000609">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedreferenceabsorberconfigurationbalanceneighbourhoodevent">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.459</span>
+    <span class="lemma_thmtitle">Reference Absorber Configuration Balance Neighbourhood Event</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedreferenceabsorberconfigurationbalanceneighbourhoodevent">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000610"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_configuration_balance_neighbourhood_event" class="lean_decl">Oberwolfach.marked_reference_absorber_configuration_balance_neighbourhood_event</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_configuration_balance_neighbourhood_event_separate_thresholds" class="lean_decl">Oberwolfach.marked_reference_absorber_configuration_balance_neighbourhood_event_separate_thresholds</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  On one retained outcome, the reference and common-configuration estimates, fixed-domain balance and row and index neighbourhood estimates hold at all specified levels, together with the reserved terminal absorber property. The estimates remain valid for all later deletions satisfying the displayed bounds, including deletions chosen after observing the retained outcome. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000610">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:markedreferenceabsorberconfigurationbalanceneighbourhoodloadevent">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">E.460</span>
+    <span class="lemma_thmtitle">Reference Absorber Configuration Balance Neighbourhood Load Event</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0027.html#bp:markedreferenceabsorberconfigurationbalanceneighbourhoodloadevent">#</a>
+    
+    <a class="icon proof" href="sect0027.html#a0000000611"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_configuration_balance_neighbourhood_load_event" class="lean_decl">Oberwolfach.marked_reference_absorber_configuration_balance_neighbourhood_load_event</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.marked_reference_absorber_configuration_balance_neighbourhood_load_event_separate_thresholds" class="lean_decl">Oberwolfach.marked_reference_absorber_configuration_balance_neighbourhood_load_event_separate_thresholds</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  On one retained outcome, the reference, configuration, fixed-domain balance, neighbourhood and weighted-load estimates hold at all specified levels, together with the reserved terminal absorber property. The weights and root domains are fixed before sampling, and the conclusions hold for every later deletion satisfying the displayed bounds. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000611">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The stated conclusion follows from the displayed hypotheses, via the checked Lean proof. This is not a proof of Theorem&#160;1.1. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0026.html" title="Reference states, reindexing and bounded cycle weights"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="sect0018.html" title="Uniform weighted matching and support reduction"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0028.html" title="Local configurations and full-hub potential loads"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

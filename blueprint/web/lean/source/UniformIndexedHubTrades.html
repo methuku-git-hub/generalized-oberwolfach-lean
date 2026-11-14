@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>UniformIndexedHubTrades.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>UniformIndexedHubTrades.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryHubTradeCertificate</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.UniformRootBoundHubTrade</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.FiniteConflictSeparatedChoices</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Choose a bounded family of hub switches one at a time. The new row</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> sets and root sets are pairwise disjoint and all switches use the original</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> physical host and forbidden-edge set. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 6000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem regular_host_indexed_hub_trades_uniform (m:ℕ) (hm:2≤m) (α:ℝ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hα:0&lt;α) (hα1:α≤1):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃ ξ:ℝ,0&lt;ξ ∧ ∀ q p:ℕ,∃ t:ℕ,∀ (L:ℝ) (f:ℕ),0≤L→∃ N:ℕ,</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ (V U I:Type) [Fintype V] [Fintype U] [Fintype I] [DecidableEq V] [DecidableEq U] [DecidableEq I],N≤Fintype.card V→Fintype.card I≤p→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ (G F F₀:SimpleGraph V) (D:ℕ),G.IsRegularOfDegree D→F₀.edgeFinset.card≤f→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ v,(F.degree v:ℝ)≤L)→∀ (H:V→U→Prop) (u u&#x27;:I→U) (W:Finset V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (T:I→Finset V) (z:I→ℕ),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ i,u i≠u&#x27; i)→(∀ i,z i≤q)→(∀ i,(T i).card=(m+1)*z i)→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ i,T i⊆W)→(∀ i j,i≠j→Disjoint (T i) (T j))→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀ i,∀ v∈T i,H v (u i)∧H v (u&#x27; i))→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀ i,∀ x∈T i,∀ y∈T i,¬F.Adj x y)→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀ i,(((Finset.univ:Finset V).filter (fun v=&gt;¬H v (u i))).card:ℝ)≤ξ*Fintype.card V)→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀ i,(((Finset.univ:Finset V).filter (fun v=&gt;¬H v (u&#x27; i))).card:ℝ)≤ξ*Fintype.card V)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (W.card:ℝ)≤ξ*Fintype.card V→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     cycleThreshold (m+1)+α≤(D:ℝ)/Fintype.card V→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∃ S:I→Finset V,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ i,(S i).card≤t ∧ Disjoint (S i) W ∧ Disjoint (S i) (T i) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (∀ v∈S i∪T i,H v (u i)∧H v (u&#x27; i)) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         (∀ x∈S i∪T i,∀ y∈S i∪T i,¬F.Adj x y) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         OrdinaryHubTradeCertificate (G\F₀) F H (u i) (u&#x27; i) (S i) (T i) (m+1)) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ i j,i≠j→Disjoint (S i∪T i) (S j∪T j)) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ i j,i≠j→∀ x∈S i,∀ y∈S j,¬F.Adj x y):=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨ξ₀,hξ₀,hbase⟩:=regular_host_spoke_hub_trade_uniform_root_bound m hm α hα hα1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   refine ⟨ξ₀/2,by positivity,?_⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   intro q p</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨t,hbase⟩:=hbase q</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨t,?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   intro L f hL</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   obtain ⟨N₀,hN₀⟩:=hbase L f hL</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   obtain ⟨N₁,hN₁⟩:=eventually_constant_le_linear ((p:ℝ)*t*(L+1)) (ξ₀/2) (by positivity)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   refine ⟨max N₀ N₁,?_⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro V U I _ _ _ _ _ _ hn hI G F F₀ D hreg hF₀ hF H u u&#x27; W T z hune hz hT hTW hTT hTH hTfree h₁ h₂ hW hθ</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hn0:(0:ℝ)≤Fintype.card V:=by positivity</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hbudget:(p:ℝ)*t*(L+1)≤(ξ₀/2)*Fintype.card V:=hN₁ _ (by omega)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have h₁&#x27; (i:I):(((Finset.univ:Finset V).filter (fun v=&gt;¬H v (u i))).card:ℝ)≤ξ₀*Fintype.card V:=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hh:=h₁ i</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     nlinarith</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have h₂&#x27; (i:I):(((Finset.univ:Finset V).filter (fun v=&gt;¬H v (u&#x27; i))).card:ℝ)≤ξ₀*Fintype.card V:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have hh:=h₂ i</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     nlinarith</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   let Good:I→Finset V→Prop:=fun i S=&gt;Disjoint S W ∧ Disjoint S (T i) ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (∀ v∈S∪T i,H v (u i)∧H v (u&#x27; i)) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (∀ x∈S∪T i,∀ y∈S∪T i,¬F.Adj x y) ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     OrdinaryHubTradeCertificate (G\F₀) F H (u i) (u&#x27; i) S (T i) (m+1)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hchoose:∀ i:I,∀ B:Finset V,</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (B.card:ℝ)≤(∅:Finset V).card+Fintype.card (I)*t*(L+1)→</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       ∃ S,Good i S ∧ S.card≤t ∧ Disjoint S B:=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     intro i B hB</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     let W&#x27;:=W∪B</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     have hW&#x27;R:(W&#x27;.card:ℝ)≤W.card+B.card:=by exact_mod_cast Finset.card_union_le W B</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     have hB&#x27;:(B.card:ℝ)≤(p:ℝ)*t*(L+1):=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       have hIr:(Fintype.card I:ℝ)≤p:=by exact_mod_cast hI</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       have hh:=mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hIr (by positivity:0≤(t:ℝ))) (by linarith:0≤L+1)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       simp only [Finset.card_empty,Nat.cast_zero,zero_add] at hB</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       exact hB.trans hh</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hW&#x27;budget:(W&#x27;.card:ℝ)≤ξ₀*Fintype.card V:=by linarith</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     obtain ⟨S,hSH,hSc,hSW,hST,hfree,R,hplus,hminus,hp,hm&#x27;,hR,hsupp,hno,hSp,hSm,hid⟩:=</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       hN₀ V U (by omega) G F F₀ D hreg hF₀ hF H (u i) (u&#x27; i) (hune i) W&#x27; (T i) (z i) (hz i)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         (hTH i) (hT i) (hTfree i) (h₁&#x27; i) (h₂&#x27; i) hW&#x27;budget hθ</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     exact ⟨S,⟨hSW.mono_right Finset.subset_union_left,hST,hSH,hfree,R,hplus,hminus,hp,hm&#x27;,hR,hsupp,hno,hSp,hSm,hid⟩,</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       hSc,hSW.mono_right Finset.subset_union_right⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   obtain ⟨S,hS,hsep⟩:=finite_conflict_separated_choices (fun S:Finset V=&gt;S) Good ∅ t F L hL hF hchoose</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   refine ⟨S,?_,?_,?_⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   · intro i</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     exact ⟨(hS i).2.1,(hS i).1.1,(hS i).1.2.1,(hS i).1.2.2.1,(hS i).1.2.2.2.1,(hS i).1.2.2.2.2⟩</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   · intro i j hij</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     apply Finset.disjoint_union_left.mpr</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     constructor</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     · apply Finset.disjoint_union_right.mpr</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       exact ⟨(hsep i j hij).1,(hS i).1.1.mono_right (hTW j)⟩</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     · apply Finset.disjoint_union_right.mpr</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       exact ⟨((hS j).1.1.mono_right (hTW i)).symm,hTT i j hij⟩</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   · intro i j hij</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     exact (hsep i j hij).2</span>
+<span id="L88"><a href="#L88" class="ln">  88</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedInitialDiagramIdentity.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedInitialDiagramIdentity.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedInitialDiagramData</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPackedAttachmentIdentity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedInitialFamilyOldSpokes</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The constructed diagram supplies the two exact decompositions and the</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> signed resource identity used by the hub switches. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 14000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E K A S:Type} [Fintype V] [Fintype U] [Fintype A] [Fintype S]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [DecidableEq V] [DecidableEq U] [DecidableEq A] [DecidableEq S]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b l:ℕ}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     {src dst:A→V} {row:S→V} {φ:V→V} {u u&#x27;:S→U} {jr:A→Bool} {js:S→Bool}</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     {W Z:Finset V} {B:Finset U}</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> def markedRootGraphResources (π:Equiv.Perm V) (src dst:A→V) (row:S→V) (jr:A→Bool) (u:S→U):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     Finset (Finset V⊕(V×U)):=</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   Finset.univ.image (fun e=&gt;Sum.inl (if jr e then ({src e,π (dst e)}:Finset V) else {src e,dst e}))∪</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     Finset.univ.image (fun s=&gt;Sum.inr (row s,u s))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> </span>
+<span id="L25"><a href="#L25" class="ln">  25</a> def markedDiagramPlus (D:MarkedInitialDiagram tail head ktail khead H₀ HK π b l src dst row φ u u&#x27; jr js W Z B):</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     Finset (Finset V⊕(V×U)):=</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   Finset.univ.biUnion (fun i:A⊕(S⊕(Σ v,DirectedIncidence src dst v))=&gt;</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     markedWheelPhysicalResources (Sum.elim D.RC (Sum.elim D.SC D.VD) i))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> def markedDiagramMinus (D:MarkedInitialDiagram tail head ktail khead H₀ HK π b l src dst row φ u u&#x27; jr js W Z B):</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     Finset (Finset V⊕(V×U)):=</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   Finset.univ.biUnion (fun i:A⊕(S⊕(Σ v,DirectedIncidence src dst v))=&gt;</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     markedWheelPhysicalResources (Sum.elim D.RD (Sum.elim D.SD D.VC) i))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> theorem marked_diagram_exact_identity (hl:0≤l)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (D:MarkedInitialDiagram tail head ktail khead H₀ HK π b l src dst row φ u u&#x27; jr js W Z B)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π)) (ψ:U→U) (hu&#x27;:∀ s,u&#x27; s=ψ (u s))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hr:Function.Injective (fun e=&gt;if jr e then ({src e,π (dst e)}:Finset V) else {src e,dst e}))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hr&#x27;:Function.Injective (fun e=&gt;if jr e then ({φ (src e),π (φ (dst e))}:Finset V) else {φ (src e),φ (dst e)}))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hs:Function.Injective (fun s=&gt;(row s,u s))) (hs&#x27;:Function.Injective (fun s=&gt;(φ (row s),u&#x27; s))):</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     HasResourceDecomposition (markedWheelPhysicalResources (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (m:=l+4) (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=HK)) (markedDiagramPlus D)∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     HasResourceDecomposition (markedWheelPhysicalResources (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (m:=l+4) (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=HK)) (markedDiagramMinus D)∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     ∀ e:Finset V⊕(V×U),(if e∈markedDiagramPlus D then (1:ℤ) else 0)-(if e∈markedDiagramMinus D then 1 else 0)=</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (if e∈markedRootGraphResources π src dst row jr u then 1 else 0)-</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (if e∈markedRootGraphResources π (fun a=&gt;φ (src a)) (fun a=&gt;φ (dst a)) (fun s=&gt;φ (row s)) jr u&#x27; then 1 else 0)+</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       ∑ z:U,((if e∈(spokePathHubVertices (l+4) D.ps u z).image (fun v=&gt;Sum.inr (v,z)) then 1 else 0)-</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         (if e∈(spokePathHubVertices (l+4) D.ps u z).image (fun v=&gt;Sum.inr (v,ψ z)) then 1 else 0)):=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   exact marked_packed_attachment_identity (l+2) (by omega) hp src dst row φ D.hub u u&#x27; jr js D.a D.d D.τ</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (fun e=&gt;D.pr e) D.ps (fun z=&gt;D.pv z) (fun z=&gt;markedIncidenceSpokeType jr (D.τ z.1 z.2))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     D.RC D.RD D.SC D.SD D.VC D.VD D.rimCoordinates D.imageRimCoordinates D.rimHubs</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     D.spokeCoordinates D.imageSpokeCoordinates D.spokeHubs D.vertexCoordinates D.imageVertexCoordinates D.vertexHubs</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (fun v e=&gt;⟨(D.incomingType v e).symm,(D.vertexEnds ⟨v,Sum.inl e⟩).1,(D.vertexEnds ⟨v,Sum.inl e⟩).2⟩)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (fun v e=&gt;⟨D.outgoingType v e,(D.vertexEnds ⟨v,Sum.inr e⟩).1,(D.vertexEnds ⟨v,Sum.inr e⟩).2⟩)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ψ hu&#x27; D.spokeDisjoint hr hr&#x27; hs hs&#x27; D.plusPacking D.minusPacking</span>
+<span id="L57"><a href="#L57" class="ln">  57</a> </span>
+<span id="L58"><a href="#L58" class="ln">  58</a> theorem marked_diagram_opposite_spokes</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (D:MarkedInitialDiagram tail head ktail khead H₀ HK π b l src dst row φ u u&#x27; jr js W Z B)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (ψ:U→U) (hu&#x27;:∀ s,u&#x27; s=ψ (u s)) (hU:∀ s,u s∈B∧u&#x27; s∈B)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (hψ:∀ s,u s≠u&#x27; s) (hR:∀ s,row s∈Z∧φ (row s)∈Z):</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     ∀ z v,v∈spokePathHubVertices (l+4) D.ps u z→</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (Sum.inr (v,ψ z):Finset V⊕(V×U))∉markedDiagramPlus D∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (Sum.inr (v,z):Finset V⊕(V×U))∉markedDiagramMinus D:=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   apply marked_initial_family_old_spokes D.ps row (fun s=&gt;φ (row s)) u ψ js B</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (fun s=&gt;by simpa only [←hu&#x27;] using hU s) (fun s=&gt;by simpa only [←hu&#x27;] using hψ s)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     D.RC D.RD D.SC D.SD D.VC D.VD</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   · intro e</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     simpa only [(D.rimHubs e).1,(D.rimHubs e).2] using And.intro (D.freshHub e) (D.freshHub e)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · intro z</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     simpa only [(D.vertexHubs z).1,(D.vertexHubs z).2] using</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       And.intro (D.freshHub (directedIncidenceEdge (D.τ z.1 z.2))) (D.freshHub (directedIncidenceEdge (D.τ z.1 z.2)))</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   · exact D.spokeCoordinates</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   · exact D.imageSpokeCoordinates</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · intro s</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     exact ⟨(D.spokeHubs s).1,(D.spokeHubs s).2.trans (hu&#x27; s)⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   · intro s t k</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     exact ⟨fun he=&gt;(D.spokeAvoid s k).2.1 (he ▸ (hR t).1),fun he=&gt;(D.spokeAvoid s k).2.1 (he ▸ (hR t).2)⟩</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   · exact D.spokeDisjoint</span>
+<span id="L80"><a href="#L80" class="ln">  80</a> </span>
+<span id="L81"><a href="#L81" class="ln">  81</a> end Oberwolfach</span></pre></html>

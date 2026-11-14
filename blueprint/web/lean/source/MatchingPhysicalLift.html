@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MatchingPhysicalLift.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MatchingPhysicalLift.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResourceRootEmbedding</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! An injective resource map transfers a matching to the physical sets of</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> its chosen realizations, without identifying or discarding candidates. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem matching_physical_lift {C X Y W:Type} [DecidableEq C] [DecidableEq X] [DecidableEq Y]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (S:Finset C) (R:C→Finset X) (φ:X→Y) (lift:C→W) (B:W→Finset Y)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hφ:Function.Injective φ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hmatch:∀c∈S,∀d∈S,c≠d→Disjoint (R c) (R d))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hphysical:∀c∈S,B (lift c)=(R c).image φ):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∀c∈S,∀d∈S,c≠d→Disjoint (B (lift c)) (B (lift d)) :=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   intro c hc d hd hcd</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   rw [hphysical c hc,hphysical d hd]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   intro y hyc hyd</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   obtain ⟨x,hxc,hxy⟩:=Finset.mem_image.mp hyc</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   obtain ⟨x&#x27;,hx&#x27;d,hx&#x27;y⟩:=Finset.mem_image.mp hyd</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hxx&#x27;:x=x&#x27;:=hφ (hxy.trans hx&#x27;y.symm)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   subst x&#x27;</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   exact (Finset.disjoint_left.mp (hmatch c hc d hd hcd)) hxc hx&#x27;d</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> </span>
+<span id="L25"><a href="#L25" class="ln">  25</a> theorem matching_physical_lift_injective_on {C X Y W:Type} [DecidableEq C] [DecidableEq X] [DecidableEq Y]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (S:Finset C) (R:C→Finset X) (φ:X→Y) (lift:C→W) (B:W→Finset Y)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hφ:Function.Injective φ)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hmatch:∀c∈S,∀d∈S,c≠d→Disjoint (R c) (R d))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hphysical:∀c∈S,B (lift c)=(R c).image φ)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hne:∀c∈S,(R c).Nonempty):</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     Set.InjOn lift (↑S:Set C) :=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   intro c hc d hd heq</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   by_contra hcd</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hdis:=matching_physical_lift S R φ lift B hφ hmatch hphysical c hc d hd hcd</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   rw [heq] at hdis</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨x,hx⟩:=hne d hd</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hy:φ x∈B (lift d):=by rw [hphysical d hd];exact Finset.mem_image.mpr ⟨x,hx,rfl⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   exact (Finset.disjoint_left.mp hdis) hy hy</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> end Oberwolfach</span></pre></html>

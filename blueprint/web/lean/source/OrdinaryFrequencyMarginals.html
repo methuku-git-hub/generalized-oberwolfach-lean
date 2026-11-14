@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryFrequencyMarginals.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryFrequencyMarginals.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteHighEventsCommon</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The ordinary-class retained frequencies give the actual marked,</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> ordinary and unassigned index-state marginals. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem ordinary_frequency_marginal_bounds</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (s θ c long short omitted:ℝ)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hs0:0≤s) (hs1:s≤1/100) (hθ0:0≤θ) (hθ1:θ≤1/100) (hc:8≤c)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hlong:0≤long) (hshort:0≤short) (homit:0≤omitted) (homitmax:omitted≤θ/50)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hfreq:long+short+omitted=1-s):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     let a:=(1-θ)*long/c</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     let b:=(c-1)*a+(1-θ)*short</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     let u:=1-s-a-b;</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     u=θ*(1-s)+(1-θ)*omitted ∧ θ/2≤u ∧ u≤2*θ ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     0≤a ∧ a≤1/c ∧ 1/2≤b ∧ s+a+b+u=1 := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   intro a b u</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hc0:0&lt;c:=by linarith</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hθc:0≤1-θ:=by linarith</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hlong1:long≤1:=by linarith</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hlongprod:0≤θ*long:=mul_nonneg hθ0 hlong</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have homitprod:0≤θ*omitted:=mul_nonneg hθ0 homit</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hsprod:0≤θ*s:=mul_nonneg hθ0 hs0</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hθsbound:0≤θ*(1/100-s):=mul_nonneg hθ0 (by linarith)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have ha:0≤a:=by dsimp [a];positivity</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have ha1:a≤1/c:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     dsimp [a]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     apply (div_le_div_iff_of_pos_right hc0).2</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     nlinarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hca:c*a=(1-θ)*long:=by dsimp [a];field_simp</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hu:u=θ*(1-s)+(1-θ)*omitted:=by dsimp [u,b];nlinarith</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have huLo:θ/2≤u:=by rw [hu];nlinarith</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have huHi:u≤2*θ:=by rw [hu];nlinarith</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have ha8:a≤1/8:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hh:1/c≤(1/8:ℝ):=by apply (div_le_div_iff₀ hc0 (by norm_num)).2;nlinarith</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact ha1.trans hh</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hb:1/2≤b:=by dsimp [u] at huHi;nlinarith</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   refine ⟨hu,huLo,huHi,ha,ha1,hb,?_⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   dsimp [u];ring</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

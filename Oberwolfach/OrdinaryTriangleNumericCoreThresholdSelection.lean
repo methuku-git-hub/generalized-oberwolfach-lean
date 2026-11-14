@@ -1,0 +1,86 @@
+module
+
+public import Oberwolfach.OrdinaryTriangleNumericSampleCertificateFromCore
+
+@[expose] public section
+/-! Name the uniformly selected level-certificate callback so that matching
+and history constructions can use one threshold chosen before the host. -/
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 45000000
+set_option maxRecDepth 16384
+set_option synthInstance.maxSize 32768
+noncomputable section
+namespace Oberwolfach
+attribute [local instance] Classical.propDecidable
+
+def OrdinaryTriangleNumericCoreAfterThreshold
+    (β ε ρ₀ α pmin εrows tpot lamInner:ℝ) (d k:ℕ)
+    (ω βout b Bweight hpack δpack εstar cLinear bHub BHub ηhub:ℝ)
+    (p βeGeo βhGeo ν cap τ eps ellCap:ℝ) (M v₀:ℕ):Prop :=
+    ∀(n q D mv:ℕ) (P:SimpleGraph (Fin n)),P.IsRegularOfDegree D→0<n→
+      (n:ℝ)/2≤D→ρ₀ ≤ initialIndexDensity (Fin q) D→initialIndexDensity (Fin q) D≤1→v₀≤mv→
+      (M:ℝ)≤ε*mv/2→
+    ∀(Q:Vortex (Fin q) P D β ε mv) (π:Equiv.Perm (Fin n))
+      (hπ:∀i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i)
+      (θhost pR pH εR εH Ledit rateParent βeParent βhParent:ℝ),cycleThreshold 3≤θhost→
+      (θhost+α)*(n:ℝ)≤D→pmin≤pR→pR≤1→pmin≤pH→pH≤1→
+      pR=initialIndexDensity (Fin q) D*pH→0≤εR→2*εR≤εrows→0≤εH→2*εH≤εrows→0≤Ledit→
+      rateParent≤lamInner*ε/4→
+    ∀(i:ℕ),i<Q.length→
+    ∀(pstar βP ηP ηH βH cParent Bparent εTri δref href κ aLoad bInner BInner ηInner capInner βeInner βhInner:ℝ)
+      (density tR tH:ℕ→ℝ) (s:Fin q→Bool→ℝ) (j:Bool)
+      (raw:RawWheelOutcome (Fin n) (Fin q) Bool Bool) (coins:Sym2 (Fin n)→Bool)
+      (weightTri:OrdinaryCycle (P.comap (markedVortexVertexEmbedding Q i)) 3→ℝ),
+    OrdinaryTriangleSelectedSampleLevelData n q D mv k d β ε P Q π hπ
+      α ρ₀ pstar βP ηP ηH βH cParent Bparent εTri δref href pR pH pmin κ aLoad εR εH
+      bInner BInner ηInner capInner βeInner βhInner density tR tH s j raw coins i weightTri→
+    ∀(G:SimpleGraph (markedVortexVertexType Q i)) (H:markedVortexVertexType Q i→markedVortexHubType Q i→Prop)
+      (weight:markedVortexVertexType Q i→Sym2 (markedVortexVertexType Q i⊕markedVortexHubType Q i)→ℝ)
+      (ξroot rate:ℝ),
+    let Ploc:=P.comap (markedVortexVertexEmbedding Q i);
+    let Floc:=(permutationConflictGraph π (3*d)).comap (markedVortexVertexEmbedding Q i);
+    let I:=markedVortexInnerVertices Q i;let T:=ordinaryVortexBufferedVertices Q i 2;
+    let B:=markedVortexInnerHubs Q i;let W:=ordinaryVortexBufferedHubs Q i 2;
+    let perm:=markedVortexPermutation Q π hπ i;let sloc:=fun u=>s (markedVortexHubEmbedding Q i u);
+    let rawloc:=ordinaryRawRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) raw;
+    EndpointPhysicalParentWeights Ploc I Iᶜ weight→
+    EndpointPhysicalPotentialEvent Ploc Floc I B Iᶜ perm d j weight pR pH tpot rawloc→
+    OrdinaryTriangleLocalSharpInputs Ploc G Floc H I T B W perm d k (by omega) sloc j rawloc
+      α ω βout b Bweight hpack δpack εstar cLinear p τ eps bHub BHub ηhub
+      pR pH (θhost+α-β/2) (εR*I.card) (εH*B.card) Ledit rateParent βeParent βhParent
+      ξroot aLoad ellCap cap βeGeo βhGeo→
+    βeGeo+3*max cap ellCap≤βeParent→βhGeo+2*ellCap≤βhParent→ν+cap+4*p≤rate→
+    OrdinaryWheelLikelySeparateCostsCertificate G Floc H I T B W 3
+      (rate*Fintype.card (markedVortexVertexType Q i⊕markedVortexHubType Q i)) (10*ξroot*I.card)
+
+theorem ordinary_triangle_numeric_core_threshold_selection
+    (β ε ρ₀ α pmin Kdom ηend εf γold κold δ εrows tpot lamInner bold Bold:ℝ)
+    (hβ:0≤β) (hβ1:β≤1/4) (hβα:β≤α/8) (hε:0<ε) (hε1:ε<1/4)
+    (hρ₀:0<ρ₀) (hα:0<α) (hpmin:0<pmin)
+    (hKdom:1+1/(ε/2)+1/((ε/2)*(ρ₀/8))≤Kdom)
+    (deepNum:OrdinaryDeepNumericParameters pmin (ρ₀/8) (1/Kdom) ηend εf (2*Kdom)
+      γold κold δ εrows tpot lamInner bold Bold)
+    (innerNum:OrdinaryTriangleInnerNumericParameters pmin (ρ₀/8) εf ηend εrows δ εrows tpot lamInner)
+    (hβbalance:β≤2*δ*(ρ₀/8)*pmin) (d k:ℕ) (hk:4≤k)
+    (ω βout b Bweight hpack δpack εstar cLinear bHub BHub ηhub ζfresh:ℝ)
+    (p βeGeo βhGeo ν cap εsup δsample τ eps:ℝ)
+    (hfixed:OrdinaryTriangleRootFreeActualCoverAfterCleanup α k ω βout b Bweight hpack δpack εstar cLinear (ρ₀/8) pmin
+      bHub BHub εf ηhub ηend ζfresh εrows p βeGeo βhGeo ν cap εsup δsample τ)
+    (heps:0<eps) (hp:0<p) (hp1:p≤1) (hτ:0≤τ) (hζfresh:0<ζfresh)
+    (hεsup:εsup≤p^2/4) (hsupport:τ+ν≤p^2/4)
+    (ellCap:ℝ)
+    (hclass:τ+ν+(p*ellCap+δsample)≤ζfresh*(min (pmin^4/32) (endpointCountCoefficient pmin (ρ₀/8)/4)/4)*ε*p/4)
+    (hblock:ν+cap≤ζfresh*(min (pmin^4/32) (endpointCountCoefficient pmin (ρ₀/8)/4)/4)*ε*p/4)
+    (hpκ:p≤4*(ζfresh*(min (pmin^4/32) (endpointCountCoefficient pmin (ρ₀/8)/4)/4)*ε))
+    (hsqrt:20*Real.sqrt (2*p)≤(ζfresh*(min (pmin^4/32) (endpointCountCoefficient pmin (ρ₀/8)/4)/4)*ε)/2)
+    (Norder:ℕ) (horder:∀n:ℕ,Norder≤n→
+      2≤(ζfresh*(min (pmin^4/32) (endpointCountCoefficient pmin (ρ₀/8)/4)/4)*ε)*p*n/4):
+    ∃M v₀:ℕ,64≤M ∧ 1≤v₀ ∧
+    OrdinaryTriangleNumericCoreAfterThreshold β ε ρ₀ α pmin εrows tpot lamInner d k
+      ω βout b Bweight hpack δpack εstar cLinear bHub BHub ηhub p βeGeo βhGeo ν cap τ eps ellCap M v₀ :=by
+  exact ordinary_triangle_numeric_sample_level_certificate_from_core β ε ρ₀ α pmin Kdom ηend εf γold κold δ εrows tpot lamInner bold Bold
+    hβ hβ1 hβα hε hε1 hρ₀ hα hpmin hKdom deepNum innerNum hβbalance d k hk
+    ω βout b Bweight hpack δpack εstar cLinear bHub BHub ηhub ζfresh p βeGeo βhGeo ν cap εsup δsample τ eps
+    hfixed heps hp hp1 hτ hζfresh hεsup hsupport ellCap hclass hblock hpκ hsqrt Norder horder
+end Oberwolfach

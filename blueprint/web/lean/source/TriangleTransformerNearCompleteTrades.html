@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TriangleTransformerNearCompleteTrades.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TriangleTransformerNearCompleteTrades.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TriangleFactorHubTrade</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryHubFactorTrade</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The selected ordinary triangle factors produce the two wheel</span>
+<span id="L4"><a href="#L4" class="ln">   4</a>  decompositions in the triangular transformer&#x27;s hub switch. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 10000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def TriangleHubTradeConclusion (G:SimpleGraph V) (H:V→U→Prop) (A Z:Finset V) (u u&#x27;:U):Prop :=</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ R:SimpleGraph V,</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     let Splus:V→U→Prop:=fun v z=&gt;(v∈A∪Z∧z=u)∨(v∈A∧z=u&#x27;)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     let Sminus:V→U→Prop:=fun v z=&gt;(v∈A∪Z∧z=u&#x27;)∨(v∈A∧z=u)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     HasOrdinaryWheelDecomposition R Splus 3 ∧ HasOrdinaryWheelDecomposition R Sminus 3 ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     HasResourceDecomposition (ordinaryWheelResources (P:=G) (F:=⊥) (Hbase:=H) (r:=3)) (ordinaryHostResources R Splus) ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     HasResourceDecomposition (ordinaryWheelResources (P:=G) (F:=⊥) (Hbase:=H) (r:=3)) (ordinaryHostResources R Sminus) ∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     R≤G ∧ (∀ v w,R.Adj v w→v∈A∪Z ∧ w∈A∪Z) ∧ (∀ v w,v∈Z→w∈Z→¬R.Adj v w) ∧ (∀ v z,Splus v z→H v z) ∧ (∀ v z,Sminus v z→H v z) ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ e:Sym2 V⊕(V×U),</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (if e∈ordinaryHostResources R Splus then (1:ℤ) else 0)-</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (if e∈ordinaryHostResources R Sminus then 1 else 0)=</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (if e∈Z.image (fun v=&gt;Sum.inr (v,u)) then 1 else 0)-</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (if e∈Z.image (fun v=&gt;Sum.inr (v,u&#x27;)) then 1 else 0))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem triangular_transformer_wheel_trades_from_near_complete_spokes</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (K₀ L:ℕ) (β:ℝ) (hβ:0&lt;β) (hβ1:β≤1):</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∃ s₀:ℕ,∀ s:ℕ,s₀≤s → 3∣s → ∃ N:ℕ,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀ (V U J:Type) [Fintype V] [Fintype U] [Fintype J] [DecidableEq V] [DecidableEq U] [DecidableEq J],</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     N≤Fintype.card V → Fintype.card J≤K₀ → ∀ (ι:J↪U),</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∀ (G Q F:SimpleGraph V) (H K:V→U→Prop) (ψ:U→U),</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∀ (p:{e:V×U // H e.1 e.2}→(Σ a:V,Σ b:V,Q.Walk a b)),</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀ i,(p i).2.2.IsPath∧(p i).2.2.length=1) →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (∀ i j,i≠j→Disjoint (p i).2.2.support.toFinset (p j).2.2.support.toFinset) →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∀ i j,∀ v∈(p i).2.2.support,∀ w∈(p j).2.2.support,¬F.Adj v w) →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (∀ i,∀ v∈(p i).2.2.support,K v i.val.2∧K v (ψ i.val.2)) →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∀ u,3∣((Finset.univ:Finset V).filter (fun v=&gt;H v u)).card) →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (∀ u,2*((Finset.univ:Finset V).filter (fun v=&gt;H v u)).card≤L) →</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (∀ v,(3/4+β)*(Fintype.card V:ℝ)≤(G.degree v:ℝ)) →</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     ∀ (W:Finset V) (ε:ℝ),</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ u,(((Finset.univ:Finset V).filter (fun v=&gt;¬K v u)).card:ℝ)≤ε*(Fintype.card V:ℝ)) →</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     2*ε*(Fintype.card V:ℝ)+(W.card:ℝ)≤(β/4)*(Fintype.card V:ℝ) →</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let Z:U→Finset V:=fun u=&gt;(Finset.univ.filter (fun i:{e:V×U // H e.1 e.2}=&gt;i.val.2=u)).biUnion</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (fun i=&gt;(p i).2.2.support.toFinset)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (∀ i,Z (ι i)⊆W) →</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (∀ i,ι i≠ψ (ι i)) →</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     ∃ S:J→Finset V,</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀ i,(S i).card=s ∧ Disjoint (S i) W ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         (∀ v∈S i∪Z (ι i),K v (ι i)∧K v (ψ (ι i))) ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         TriangleHubTradeConclusion G K (S i) (Z (ι i)) (ι i) (ψ (ι i))) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (∀ i j,i≠j→Disjoint (S i∪Z (ι i)) (S j∪Z (ι j))) := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   obtain ⟨s₀,hs⟩:=triangular_transformer_factors_from_near_complete_spokes K₀ L β hβ hβ1</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   refine ⟨s₀,?_⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   intro s hs₀ hdivs</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   obtain ⟨N,hN⟩:=hs s hs₀ hdivs</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   refine ⟨N,?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   intro V U J _ _ _ _ _ _ hn hJ ι G Q F H K ψ p hpath hdis hF hH hdiv hsize hdeg W ε hnear hbudget Z hZW hdistinct</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   obtain ⟨S,hS,hpair⟩:=hN V U J hn hJ ι G Q F H K ψ p hpath hdis hF hH hdiv hsize hdeg W ε hnear hbudget hZW</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   refine ⟨S,?_,hpair⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   intro i</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hAZ:Disjoint (S i) (Z (ι i)):=(hS i).2.1.mono_right (hZW i)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   exact ⟨(hS i).1,(hS i).2.1,(hS i).2.2.1,</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     triangle_factor_pair_hub_trade G K (S i) (Z (ι i)) hAZ (ι i) (ψ (ι i))</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (hdistinct i) (hS i).2.2.2 (hS i).2.2.1⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> end Oberwolfach</span></pre></html>

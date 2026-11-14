@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedAssignedArcCard.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedAssignedArcCard.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedBadEdgeAssignments</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Orienting an assigned physical edge does not change the number of</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> edges in its assigned class. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {I V:Type} [Fintype I] [Fintype V] [DecidableEq I] [DecidableEq V]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem prescribed_assigned_arc_card (K:SimpleGraph V) (assign:Sym2 V→I) (orient:Sym2 V→V×V)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (horient:∀e∈K.edgeFinset,prescribedArcPhysical (orient e)=e) (i:I):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (prescribedAssignedArcs K assign orient i).card=(K.edgeFinset.filter (fun e=&gt;assign e=i)).card := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   unfold prescribedAssignedArcs</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   apply Finset.card_image_of_injOn</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   intro a ha b hb h</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have haK:a∈K.edgeFinset:=(Finset.mem_filter.mp ha).1</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hbK:b∈K.edgeFinset:=(Finset.mem_filter.mp hb).1</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   calc</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     a=prescribedArcPhysical (orient a):=(horient a haK).symm</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     _=prescribedArcPhysical (orient b):=congrArg prescribedArcPhysical h</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     _=b:=horient b hbK</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> end Oberwolfach</span></pre></html>

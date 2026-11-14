@@ -1,0 +1,38 @@
+\contentsline {chapter}{\numberline {1}The target and its mathematical representation}{4}{chapter.1}%
+\contentsline {chapter}{\numberline {2}A checked conditional reduction to the fixed-set theorem}{9}{chapter.2}%
+\contentsline {chapter}{\numberline {3}Checked finite stability arguments}{11}{chapter.3}%
+\contentsline {chapter}{\numberline {4}Checked transfers used in iteration}{13}{chapter.4}%
+\contentsline {chapter}{\numberline {5}Bipartite edge colourings and the last partition step}{15}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Prescribed degrees and the deterministic protected partition}{17}{chapter.6}%
+\contentsline {chapter}{\numberline {7}Finite categorical laws and sampling implications}{20}{chapter.7}%
+\contentsline {chapter}{\numberline {8}Uniform fixed-size subsets and partitions}{24}{chapter.8}%
+\contentsline {chapter}{\numberline {9}The vortex construction}{27}{chapter.9}%
+\contentsline {chapter}{\numberline {10}Cyclic-partite fractional decompositions}{29}{chapter.10}%
+\contentsline {chapter}{\numberline {11}The remaining main-proof dependencies}{33}{chapter.11}%
+\contentsline {chapter}{\numberline {12}Release criteria and scope}{43}{chapter.12}%
+\contentsline {chapter}{\numberline {A}Whole-manuscript statement inventory}{44}{appendix.A}%
+\contentsline {chapter}{\numberline {B}Marked capacities and the ordinary fractional-threshold bridge}{47}{appendix.B}%
+\contentsline {chapter}{\numberline {C}Further checked matching ingredients}{51}{appendix.C}%
+\contentsline {chapter}{\numberline {D}Completed colouring iteration and finite weighted matching}{54}{appendix.D}%
+\contentsline {chapter}{\numberline {E}Uniform weighted matching and support reduction}{56}{appendix.E}%
+\contentsline {section}{\numberline {E.1}Relative ordinary transformer from the original profiles}{118}{section.E.1}%
+\contentsline {section}{\numberline {E.2}Actual marked balance events and local iteration profiles}{171}{section.E.2}%
+\contentsline {section}{\numberline {E.3}Reindexing the marked remainder and preserving iteration margins}{172}{section.E.3}%
+\contentsline {section}{\numberline {E.4}The marked cover-down step from fixed reference estimates}{175}{section.E.4}%
+\contentsline {section}{\numberline {E.5}Exact typed host encoding and the first cover-down step}{177}{section.E.5}%
+\contentsline {section}{\numberline {E.6}Reference states, reindexing and bounded cycle weights}{179}{section.E.6}%
+\contentsline {section}{\numberline {E.7}Reference states, reindexing and bounded cycle weights}{181}{section.E.7}%
+\contentsline {section}{\numberline {E.8}Reference states, reindexing and bounded cycle weights}{181}{section.E.8}%
+\contentsline {section}{\numberline {E.9}Reference states, reindexing and bounded cycle weights}{183}{section.E.9}%
+\contentsline {section}{\numberline {E.10}Local configurations and full-hub potential loads}{186}{section.E.10}%
+\contentsline {section}{\numberline {E.11}Protected absorber inputs after physical deletion}{187}{section.E.11}%
+\contentsline {section}{\numberline {E.12}Adaptive absorber and protected completion}{190}{section.E.12}%
+\contentsline {section}{\numberline {E.13}Ordinary cycle profiles from neighbourhoods}{191}{section.E.13}%
+\contentsline {section}{\numberline {E.14}Restricted hosts and ordinary pair profiles}{191}{section.E.14}%
+\contentsline {section}{\numberline {E.15}Ordinary absorber callers and marked retained agreement}{192}{section.E.15}%
+\contentsline {section}{\numberline {E.16}Physical-rim completion and exact encoding criteria}{194}{section.E.16}%
+\contentsline {section}{\numberline {E.17}Typed subhosts and protected completion}{196}{section.E.17}%
+\contentsline {section}{\numberline {E.18}A fixed absorber in a changed host}{196}{section.E.18}%
+\contentsline {section}{\numberline {E.19}Encoded completion from the original reservoir}{198}{section.E.19}%
+\contentsline {section}{\numberline {E.20}Two-hub weights on the original sample}{199}{section.E.20}%
+\contentsline {section}{\numberline {E.21}Degree-normalized two-hub mean and concentration}{200}{section.E.21}%

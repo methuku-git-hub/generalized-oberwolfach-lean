@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVariableHubSeedBound.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVariableHubSeedBound.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSeedNormalization</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SuccessorSequenceWeights</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedWheels</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! A uniform bound for variable-hub seed coefficients, using the supplied</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> fixed density lower bound and no division by the marked interval marginal. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 2500000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_variable_hub_seed_upper</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (m b:ℕ) (hm:1≤m)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (D τ A B p k pstar:ℝ) (hn:0&lt;Fintype.card V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hDlo:(Fintype.card V:ℝ)/2≤D) (hDhi:D≤2*Fintype.card V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hpstar:0&lt;pstar) (hp:pstar≤p) (hk:pstar≤k) (hp1:p≤1) (hk1:k≤1)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (s:U→ℝ) (hs:∀ u,pstar≤s u) (hs1:∀ u,s u≤1) (hB:0≤B)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (w:(Fin (m+1)→V)→ℝ) (hw:SuccessorSequenceWeightConditions P π b D τ A B w):</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ W:MarkedWheel (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd m π b</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (fun (_:V) (_:U)=&gt;True) (fun _ _=&gt;True),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     0≤w W.1.val/(D*p^m*k*(s W.2.val)^m) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       w W.1.val/(D*p^m*k*(s W.2.val)^m)≤</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         (2*B/pstar^(2*m+1))/(Fintype.card V:ℝ)^m :=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   intro W</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hnR:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hexp:m+1-2=m-1:=by omega</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hupper:w W.1.val≤B/(Fintype.card V:ℝ)^(m-1):=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     simpa only [hexp] using hw.upper W.1.val</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hnonneg:=hw.nonneg W.1.val</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hlo:(0:ℝ)/(Fintype.card V:ℝ)^(m-1)≤w W.1.val:=by simpa using hnonneg</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hh:=marked_seed_coefficient_bounds m hm (Fintype.card V) D p k (s W.2.val) 0 B (w W.1.val) pstar</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     hnR hDlo hDhi hpstar hp hk (hs W.2.val) hp1 hk1 (hs1 W.2.val) (by norm_num) hB hlo hupper</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   refine ⟨?_,hh.2⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hD:0&lt;D:=(half_pos hnR).trans_le hDlo</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hp0:0&lt;p:=hpstar.trans_le hp</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hk0:0&lt;k:=hpstar.trans_le hk</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hs0:0&lt;s W.2.val:=hpstar.trans_le (hs W.2.val)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   exact div_nonneg hnonneg (by positivity)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

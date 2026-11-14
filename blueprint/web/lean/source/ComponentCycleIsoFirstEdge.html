@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ComponentCycleIsoFirstEdge.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ComponentCycleIsoFirstEdge.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrderedCycleFirstEdgeExists</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RegularCycleIsomorphism</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A two-factor component admits a cyclic ordering starting with either</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> chosen direction of any of its edges. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 16000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> private theorem cycle_iso_first_edges_transport</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {A:Type} (G:SimpleGraph A) (n m:ℕ) (hn:1&lt;n) (hm:1&lt;m) (h:n=m)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (e:SimpleGraph.cycleGraph m ≃g G) (a b:A)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (he0:e ⟨0,by omega⟩=a) (he1:e ⟨1,by omega⟩=b):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃e&#x27;:SimpleGraph.cycleGraph n ≃g G,e&#x27; ⟨0,by omega⟩=a ∧ e&#x27; ⟨1,by omega⟩=b:=by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   subst m</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   exact ⟨e,he0,he1⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> </span>
+<span id="L20"><a href="#L20" class="ln">  20</a> theorem component_cycle_iso_with_first_edge</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     {X:Type} [Fintype X] [DecidableEq X] (G:SimpleGraph X) (hG:G.IsRegularOfDegree 2)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (C:G.ConnectedComponent) (a b:C) (hab:G.Adj a.val b.val):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ e:SimpleGraph.cycleGraph (Fintype.card C) ≃g C.toSimpleGraph,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       e ⟨0,by have h:3≤Fintype.card C:=(component_regular_two_cycle_iso G hG C).1;omega⟩=a ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       e ⟨1,by have h:3≤Fintype.card C:=(component_regular_two_cycle_iso G hG C).1;omega⟩=b:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   classical</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have h3:3≤Fintype.card C:=(component_regular_two_cycle_iso G hG C).1</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   let m:=Fintype.card C-2</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hN:Fintype.card C=m+2:=by dsimp [m];omega</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   obtain ⟨e₀⟩:Nonempty (SimpleGraph.cycleGraph (m+2) ≃g C.toSimpleGraph):=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hh:=(component_regular_two_cycle_iso G hG C).2</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     rw [hN] at hh</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     exact hh</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let f:Fin (m+2)↪C:=e₀.toEquiv.toEmbedding</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hmap:(SimpleGraph.cycleGraph (m+2)).map f=C.toSimpleGraph:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ext x y</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     obtain ⟨x,rfl⟩:=e₀.surjective x</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     obtain ⟨y,rfl⟩:=e₀.surjective y</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     change ((SimpleGraph.cycleGraph (m+2)).map f).Adj (f x) (f y) ↔ C.toSimpleGraph.Adj (e₀ x) (e₀ y)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rw [SimpleGraph.map_adj_apply]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     exact (e₀.map_adj_iff (v:=x) (w:=y)).symm</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hab&#x27;:((SimpleGraph.cycleGraph (m+2)).map f).Adj a b:=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     rw [hmap]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     exact hab</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨g,hgmap,hg0,hg1⟩:=ordered_cycle_representation_first_edge_exists m f a b hab&#x27;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   rw [hmap] at hgmap</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hcard:Fintype.card (Fin (m+2))=Fintype.card C:=by simp [hN]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hbij:Function.Bijective g:=(Fintype.bijective_iff_injective_and_card g).2 ⟨g.injective,hcard⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   let E:Fin (m+2)≃C:=Equiv.ofBijective g hbij</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   let e:SimpleGraph.cycleGraph (m+2) ≃g C.toSimpleGraph:={</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     toEquiv:=E</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     map_rel_iff&#x27;:=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       intro x y</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       rw [←hgmap]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       exact SimpleGraph.map_adj_apply }</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have he0:e 0=a:=hg0</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have he1:e 1=b:=hg1</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   exact cycle_iso_first_edges_transport C.toSimpleGraph (Fintype.card C) (m+2) (by omega) (by omega) hN e a b</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (by simpa using he0) (by simpa using he1)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a> end Oberwolfach</span></pre></html>

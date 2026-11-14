@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongAssignedShortClassZero.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongAssignedShortClassZero.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongAssignedSeedTargets</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A 2-factor has no cycles of length one or two. The corresponding</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> frequency and its retained contribution therefore vanish identically. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> open scoped BigOperators</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {n:ℕ} {U:Type} [Fintype U]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem long_assigned_fraction_below_three_zero</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (K:ℕ) (i:Fin K) (hi:i.val+1&lt;3) (u:U):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ordinaryAssignedFraction F hF K u (some i)=0 := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hnone:∀v,longPreparationCycleClass (F u) (hF u) K v≠some i := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     intro v h</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     have hc:3≤Fintype.card ((F u).connectedComponentMk v):=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (component_regular_two_cycle_iso (F u) (hF u) ((F u).connectedComponentMk v)).1</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have he:=((long_preparation_cycle_class (F u) (hF u) K v).2 i).mp h</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     omega</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   unfold ordinaryAssignedFraction</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   simp [hnone]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem long_assigned_kept_below_three_zero</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (K:ℕ) (i:Fin K) (hi:i.val+1&lt;3) (θ:ℝ) (u:U):</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     longAssignedKeptFraction F hF K θ i u=0 ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       longAssignedKeptOrdinaryContribution F hF K θ i u=0 := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hh:=long_assigned_fraction_below_three_zero F hF K i hi u</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   constructor</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · unfold longAssignedKeptFraction</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     simp [hh]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   · rw [long_assigned_kept_fraction_contribution]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     unfold longAssignedKeptFraction</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     simp [hh]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CapacityPositionSplitting.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CapacityPositionSplitting.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CapacityPositionCorrections</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SignedDegreeCorrection</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Actual ordinary-edge capacities can be split into the prescribed cyclic</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> positions. Both endpoint demands are imposed, and the final share is proved</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> positive using its explicit accumulated error. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> set_option maxHeartbeats 1200000 in</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem capacity_position_splitting</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {V E : Type*} [Fintype V] [Fintype E] [DecidableEq V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (tail head : E → V) (k : ℕ) (hk : 0&lt;k) (w : E → ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (p q O I : V → ℝ) (M z err : ℝ) (herr : 0≤err)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hrow : ∀ v,(∑ e,if tail e=v then w e else 0)=O v)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hcol : ∀ v,(∑ e,if head e=v then w e else 0)=I v)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hbalance : ∀ v,O v-I v=p v-q v)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hp : ∑ v,p v=M) (hq : ∑ v,q v=M) (hO : ∑ v,O v=(k+1)*M)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hpclose : ∀ v,|p v-z|≤err) (hqclose : ∀ v,|q v-z|≤err)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hOclose : ∀ v,|O v-(k+1)*z|≤err) (hIclose : ∀ v,|I v-(k+1)*z|≤err)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (κ s B δ ε h : ℝ) (hw : ∀ e,|w e-1|≤κ) (hs : 0&lt;s) (hB : 1≤B)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hn : 0&lt;Fintype.card V) (hδ : 0≤δ) (hδsmall : δ&lt;1/4)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hdegp : ∀ v,|occurrenceDegree tail v-(Fintype.card E : ℝ)/Fintype.card V|≤ε)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hdegm : ∀ v,|occurrenceDegree head v-(Fintype.card E : ℝ)/Fintype.card V|≤ε)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hsmall : s*ε+3*err ≤ δ*s*((Fintype.card E : ℝ)/Fintype.card V))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hMC : (Fintype.card E : ℝ)/B ≤ h*Fintype.card V*Fintype.card V/2)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hlarge : ∀ (S T : Finset V),</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       1-2*δ &lt; (S.card : ℝ)/Fintype.card V+(T.card : ℝ)/Fintype.card V →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       h*Fintype.card V*Fintype.card V*</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         min ((S.card : ℝ)/Fintype.card V) ((T.card : ℝ)/Fintype.card V) ≤</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         ((Finset.univ.filter (fun e =&gt; tail e∈S ∧ head e∈T)).card : ℝ))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hbudget : κ/(k+1:ℝ)+k*(B*s) ≤ 1/(2*(k+1:ℝ))) :</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     ∃ f : Fin (k+1) → E → ℝ,</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ e,(∑ j,f j e)=w e) ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (∀ j v,(∑ e,if tail e=v then f j e else 0)=capacityPositionDemands k (p v) (q v) (O v) j.castSucc) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀ j v,(∑ e,if head e=v then f j e else 0)=capacityPositionDemands k (p v) (q v) (O v) j.succ) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (∀ j e,1/(2*(k+1:ℝ)) ≤ f j e ∧ f j e ≤ 2/(k+1:ℝ)) := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   classical</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let d (j : Fin (k+2)) (v : V) := capacityPositionDemands k (p v) (q v) (O v) j</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hdtotal (j : Fin (k+2)) : (∑ v,d j v)=M := capacityPositionDemands_total k hk p q O M hp hq hO j</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hI : (∑ v,I v)=(k+1)*M := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have he (v : V) : I v=O v-p v+q v := by linarith [hbalance v]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     simp only [he,Finset.sum_add_distrib,Finset.sum_sub_distrib,hO,hp,hq]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     ring</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hderror (j : Fin (k+2)) (v : V) : |d j v-z|≤2*err :=</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     capacityPositionDemands_error k hk (p v) (q v) (O v) z err herr (hpclose v) (hqclose v) (hOclose v) j</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   let Δp (j : Fin k) (v : V) := d j.castSucc.castSucc v-O v/(k+1:ℝ)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let Δm (j : Fin k) (v : V) := d j.castSucc.succ v-I v/(k+1:ℝ)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hΔp (j : Fin k) : (∑ v,Δp j v)=0 := equal_share_correction_total k _ O M (hdtotal _) hO</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hΔm (j : Fin k) : (∑ v,Δm j v)=0 := equal_share_correction_total k _ I M (hdtotal _) hI</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hΔpb (j : Fin k) (v : V) : |Δp j v|≤3*err := equal_share_correction_bound k _ (O v) z err herr (hderror _ v) (hOclose v)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hΔmb (j : Fin k) (v : V) : |Δm j v|≤3*err := equal_share_correction_bound k _ (I v) z err herr (hderror _ v) (hIclose v)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hex (j : Fin k) := bounded_signed_degree_correction tail head (Δp j) (Δm j)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (hΔp j) (hΔm j) s B δ ε (3*err) h hs hB hn hδ hδsmall hdegp hdegm (hΔpb j) (hΔmb j) hsmall hMC hlarge</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   choose u hu hut huh using hex</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   let f := capacityPositionWeights k w u</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hfrow : ∀ j v,(∑ e,if tail e=v then f j e else 0)=d j.castSucc v := by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     apply capacityPositionWeights_occurrence_marginals tail k w u (fun j =&gt; d j.castSucc)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     · intro v</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       rw [hrow]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       exact capacityPositionDemands_outgoing k hk (p v) (q v) (O v)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     · intro j v</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       simpa only [hrow] using hut j v</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hfcol : ∀ j v,(∑ e,if head e=v then f j e else 0)=d j.succ v := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     apply capacityPositionWeights_occurrence_marginals head k w u (fun j =&gt; d j.succ)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · intro v</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       rw [hcol]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       exact capacityPositionDemands_incoming k hk (p v) (q v) (O v) (I v) (hbalance v)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     · intro j v</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       simpa only [hcol] using huh j v</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   refine ⟨f,?_,hfrow,hfcol,?_⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · intro e</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     simpa only [Finset.sum_apply] using congrFun (capacityPositionWeights_total k w u) e</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   · intro j e</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hBs : 0≤B*s := mul_nonneg (by linarith) hs.le</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     have hh := (capacityPositionWeights_bounds k hk w u κ (B*s) hBs hw hu j e).trans hbudget</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     obtain ⟨hlo,hup⟩ := abs_le.mp hh</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     have hid : 1/(k+1:ℝ)=2*(1/(2*(k+1:ℝ))) := by field_simp</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     have hpos : 0≤1/(k+1:ℝ) := by positivity</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     have hi2 : 2/(k+1:ℝ)=2*(1/(k+1:ℝ)) := by ring</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     dsimp only [f]</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     constructor &lt;;&gt; linarith</span>
+<span id="L86"><a href="#L86" class="ln">  86</a> </span>
+<span id="L87"><a href="#L87" class="ln">  87</a> end Oberwolfach</span></pre></html>

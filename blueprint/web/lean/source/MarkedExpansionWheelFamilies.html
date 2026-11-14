@@ -1,0 +1,96 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedExpansionWheelFamilies.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedExpansionWheelFamilies.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedRimExpansionWheel</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedSpokeExpansionWheel</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.FiniteSeparatedRowHubChoices</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Construct all private wheels and crossed incidences of an expansion in</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> one host, retaining row separation and distinct new hubs across both rim</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> and spoke occurrences. Formal old arcs and spokes need not exist. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 24000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E K A S:Type} [Fintype V] [Fintype U] [Fintype A] [Fintype S]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [DecidableEq V] [DecidableEq U] [DecidableEq A] [DecidableEq S]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b l:ℕ} {c ch:ℝ}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> def MarkedExpansionWheelConditions (src dst:A→V) (row:S→V) (hub:S→U) (jr:A→Bool) (js:S→Bool)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (i:A⊕S) (C:MarkedWheel tail head ktail khead (l+4) π b H₀ HK):Prop:=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   match i with</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   | .inl a=&gt;markedArcPresent tail head ktail khead (jr a) (src a)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (C.1.val (finRotate (l+5) (markedExpansionRimPosition (l+4) (by omega) (jr a))))∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       markedArcPresent tail head ktail khead (jr a)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (C.1.val (markedExpansionRimPosition (l+4) (by omega) (jr a))) (dst a)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   | .inr s=&gt;(if js s then HK (row s) C.2.val else H₀ (row s) C.2.val)∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (if js s then HK (C.1.val (markedExpansionSpokePosition (l+4) (by omega) (js s))) (hub s)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         else H₀ (C.1.val (markedExpansionSpokePosition (l+4) (by omega) (js s))) (hub s))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem marked_expansion_wheel_families</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (Q:MarkedHostExtensionCounts tail head ktail khead H₀ HK π b l c ch)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hl:2≤l) (src dst:A→V) (row:S→V) (hub:S→U) (jr:A→Bool) (js:S→Bool)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (W Z:Finset V) (B:Finset U) (hr:∀ a,src a∈Z∧dst a∈Z) (hs:∀ s,row s∈Z)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hbudget:(W.card:ℝ)+(Z.card+Fintype.card (A⊕S)*(l+5)+l+16)*(2*b+1)&lt;c)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hB:(B.card:ℝ)+Fintype.card (A⊕S)&lt;ch):</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∃ C:(A⊕S)→MarkedWheel tail head ktail khead (l+4) π b H₀ HK,</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ i,MarkedExpansionWheelConditions src dst row hub jr js i (C i))∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ i,(C i).2.val∉B)∧Function.Injective (fun i=&gt;(C i).2.val)∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (∀ i k,(C i).1.val k∉W∧(C i).1.val k∉Z∧∀ z∈Z,¬PermutationClose π b ((C i).1.val k) z)∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀ i j,i≠j→Disjoint (Finset.univ.image (C i).1.val) (Finset.univ.image (C j).1.val))∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       ∀ i j k k&#x27;,((i,k):(A⊕S)×Fin (l+5))≠(j,k&#x27;)→¬PermutationClose π b ((C i).1.val k) ((C j).1.val k&#x27;):=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let rows:(A⊕S)→MarkedWheel tail head ktail khead (l+4) π b H₀ HK→Finset V:=fun _ C=&gt;Finset.univ.image C.1.val</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let hubs:(A⊕S)→MarkedWheel tail head ktail khead (l+4) π b H₀ HK→Finset U:=fun _ C=&gt;{C.2.val}</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let Good:(A⊕S)→MarkedWheel tail head ktail khead (l+4) π b H₀ HK→Prop:=fun i C=&gt;MarkedExpansionWheelConditions src dst row hub jr js i C∧∀ k,C.1.val k∉W</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hchoose:∀ Z&#x27;:Finset V,∀ B&#x27;:Finset U,Z⊆Z&#x27;→B⊆B&#x27;→</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       Z&#x27;.card≤Z.card+Fintype.card (A⊕S)*(l+5)→B&#x27;.card≤B.card+Fintype.card (A⊕S)*1→∀ i:A⊕S,</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       ∃ C,Good i C∧(rows i C).card≤l+5∧(hubs i C).card≤1∧Disjoint (rows i C) Z&#x27;∧Disjoint (hubs i C) B&#x27;∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         ∀ v∈rows i C,∀ w∈Z&#x27;,¬PermutationClose π b v w:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     intro Z&#x27; B&#x27; hZZ hBB hZc hBc i</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hbrow:(W.card:ℝ)+(Z&#x27;.card+l+16)*(2*b+1)&lt;c:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       have hz:(Z&#x27;.card:ℝ)≤Z.card+Fintype.card (A⊕S)*(l+5):=by exact_mod_cast hZc</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       have hh:=mul_le_mul_of_nonneg_right (show (Z&#x27;.card:ℝ)+l+16≤Z.card+Fintype.card (A⊕S)*(l+5)+l+16 by linarith only [hz])</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         (show 0≤(2*b+1:ℝ) by positivity)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       linarith only [hh,hbudget]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hbhub:(B&#x27;.card:ℝ)&lt;ch:=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       have hb:(B&#x27;.card:ℝ)≤B.card+Fintype.card (A⊕S):=by exact_mod_cast (by simpa using hBc)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       exact hb.trans_lt hB</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hex:∃ C:MarkedWheel tail head ktail khead (l+4) π b H₀ HK,</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         MarkedExpansionWheelConditions src dst row hub jr js i C∧C.2.val∉B&#x27;∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         ∀ k,C.1.val k∉W∧C.1.val k∉Z&#x27;∧∀ z∈Z&#x27;,¬PermutationClose π b (C.1.val k) z:=by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       cases i with</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       | inl a=&gt;</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>         obtain ⟨C,hC,hx,hy,hav⟩:=marked_rim_expansion_wheel Q hl (jr a) W Z&#x27; B&#x27; (src a) (dst a)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>           (hZZ (hr a).1) (hZZ (hr a).2) hbrow hbhub</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         exact ⟨C,⟨hx,hy⟩,hC,hav⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       | inr s=&gt;</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         obtain ⟨C,hC,hx,hy,hav⟩:=marked_spoke_expansion_wheel Q hl (js s) W Z&#x27; B&#x27; (row s) (hub s)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>           (hZZ (hs s)) hbrow hbhub</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         exact ⟨C,⟨hx,hy⟩,hC,hav⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     obtain ⟨C,hC,hCB,hav⟩:=hex</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     refine ⟨C,⟨hC,fun k=&gt;(hav k).1⟩,?_,by simp [hubs],?_,by simpa only [hubs,Finset.disjoint_singleton_left] using hCB,?_⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     · simpa only [rows,Finset.card_univ,Fintype.card_fin] using Finset.card_image_le (s:=Finset.univ) (f:=C.1.val)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     · apply Finset.disjoint_left.mpr</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       intro v hv hz</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       obtain ⟨k,_,rfl⟩:=Finset.mem_image.mp hv</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       exact (hav k).2.1 hz</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     · intro v hv z hz</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       obtain ⟨k,_,rfl⟩:=Finset.mem_image.mp hv</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       exact (hav k).2.2 z hz</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   obtain ⟨C,hC,hd⟩:=finite_separated_row_hub_choices π b rows hubs Good Z B (l+5) 1 hchoose</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   refine ⟨C,fun i=&gt;(hC i).1.1,?_,?_,?_,fun i j hij=&gt;(hd i j hij).1,?_⟩</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   · intro i;exact Finset.disjoint_left.mp (hC i).2.2.2.2.1 (Finset.mem_singleton_self _)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   · intro i j he;by_contra hij</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     exact Finset.disjoint_left.mp (hd i j hij).2.1 (Finset.mem_singleton_self _) (by simp [hubs,he])</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   · intro i k</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     have hk:(C i).1.val k∈rows i (C i):=Finset.mem_image.mpr ⟨k,Finset.mem_univ _,rfl⟩</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     exact ⟨(hC i).1.2 k,Finset.disjoint_left.mp (hC i).2.2.2.1 hk,(hC i).2.2.2.2.2 _ hk⟩</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   · intro i j k k&#x27; hne</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     by_cases hij:i=j</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     · subst j;exact (C i).1.property.1 k k&#x27; (fun he=&gt;hne (congrArg (fun k=&gt;(i,k)) he))</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     · exact (hd i j hij).2.2 _ (Finset.mem_image.mpr ⟨k,Finset.mem_univ _,rfl⟩)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>         _ (Finset.mem_image.mpr ⟨k&#x27;,Finset.mem_univ _,rfl⟩)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a> </span>
+<span id="L93"><a href="#L93" class="ln">  93</a> end Oberwolfach</span></pre></html>

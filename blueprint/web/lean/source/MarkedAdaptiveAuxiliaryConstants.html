@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedAdaptiveAuxiliaryConstants.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedAdaptiveAuxiliaryConstants.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Auxiliary positive reference scales can be chosen from the original</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> index-density lower bound and the fixed wheel length. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem marked_adaptive_auxiliary_constants</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (m:ℕ) (hm:1≤m) (ρ₀:ℝ) (hρ₀:0&lt;ρ₀):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     ∃ω pstar kstar tstar:ℝ,</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>       0&lt;ω ∧ 0&lt;pstar ∧ 0&lt;kstar ∧ 0&lt;tstar ∧ tstar≤1/100 ∧ tstar≤1 ∧</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>       4*ω≤ρ₀ ∧ 4*(m:ℝ)*pstar≤ρ₀*(1/100) ∧ tstar≤(1/100)/(m:ℝ) ∧</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       ∀ρ:ℝ,ρ₀≤ρ→kstar≤ρ*(1/100)/2 ∧ kstar≤ρ*((1/100)/(m:ℝ))/2 := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hm1:(1:ℝ)≤m:=by exact_mod_cast hm</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hm0:0&lt;(m:ℝ):=by positivity</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   let ω:=ρ₀/8</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   let pstar:=ρ₀/(800*(m:ℝ))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   let kstar:=ρ₀/(400*(m:ℝ))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   let tstar:=(1/100:ℝ)/(m:ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hω:0&lt;ω:=by dsimp [ω];positivity</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hp:0&lt;pstar:=by dsimp [pstar];positivity</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hk:0&lt;kstar:=by dsimp [kstar];positivity</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have ht:0&lt;tstar:=by dsimp [tstar];positivity</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have ht100:tstar≤1/100:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     dsimp [tstar]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     apply (div_le_iff₀ hm0).2</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     nlinarith</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hpbound:4*(m:ℝ)*pstar≤ρ₀*(1/100):=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     dsimp [pstar]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     field_simp</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     linarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   refine ⟨ω,pstar,kstar,tstar,hω,hp,hk,ht,ht100,(by linarith),?_,hpbound,le_rfl,?_⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   · dsimp [ω];linarith</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   · intro ρ hρ</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hρpos:0&lt;ρ:=hρ₀.trans_le hρ</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     constructor</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     · dsimp [kstar]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       apply (div_le_iff₀ (show 0&lt;400*(m:ℝ) by positivity)).2</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       nlinarith</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · dsimp [kstar]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       have hmne:(m:ℝ)≠0:=ne_of_gt hm0</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       field_simp</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       nlinarith</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> end Oberwolfach</span></pre></html>

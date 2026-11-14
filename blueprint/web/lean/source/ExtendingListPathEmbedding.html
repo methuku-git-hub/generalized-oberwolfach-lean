@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExtendingListPathEmbedding.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExtendingListPathEmbedding.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ExtendingListGreedyOneChoice</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Embed a whole path between two prescribed distinct endpoints, avoiding</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> used labels and forbidden physical edges. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> variable {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> def DirectedPathThrough (D:V→V→Prop) (F:SimpleGraph V) (x y:V):List V→Prop</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   | []=&gt;D x y ∧ ¬F.Adj x y</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   | z::zs=&gt;D x z ∧ ¬F.Adj x z ∧ DirectedPathThrough D F z y zs</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem extending_list_embed_internal_path (D:V→V→Prop) (L:Finset V) (β:ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hext:IsExtendingList D L β) (F:SimpleGraph V) (M:ℝ) (hM:0≤M)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hdeg:∀ v,(F.degree v:ℝ)≤M) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ k:ℕ,∀ (B:Finset V) (x y:V),x≠y→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (B.card:ℝ)+(k+1:ℕ)+2+2*M&lt;β*Fintype.card V→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ∃ xs:List V,xs.length=k+1 ∧ xs.Nodup ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         (∀ z∈xs,z∈L ∧ z∉B ∧ z≠x ∧ z≠y) ∧ DirectedPathThrough D F x y xs := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   intro k</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   induction k with</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   | zero =&gt;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     intro B x y hxy hbudget</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let B₀:=insert x (insert y B)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have hB₀:(B₀.card:ℝ)≤B.card+2:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       have h₁:=Finset.card_insert_le x (insert y B)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       have h₂:=Finset.card_insert_le y B</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       have hh:B₀.card≤B.card+2:=by dsimp [B₀];omega</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       exact_mod_cast hh</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hchoice:(B₀.card:ℝ)+F.degree x+F.degree y&lt;β*Fintype.card V:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       have hx:=hdeg x;have hy:=hdeg y</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       norm_num at hbudget ⊢</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       linarith</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     obtain ⟨z,hzL,hzB,hxz,hzy,hFx,hFy⟩:=extending_list_two_arc_choice D L B₀ β hext F x y hxy hchoice</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hzB&#x27;:z∉B:=fun h=&gt;hzB (by simp [B₀,h])</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hzx:z≠x:=by intro h;subst z;apply hzB;simp [B₀]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hzy&#x27;:z≠y:=by intro h;subst z;apply hzB;simp [B₀]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     refine ⟨[z],by simp,by simp,?_,?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     · intro z&#x27; hz&#x27;</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       simp only [List.mem_singleton] at hz&#x27;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       subst z&#x27;</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       exact ⟨hzL,hzB&#x27;,hzx,hzy&#x27;⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     · exact ⟨hxz,hFx,hzy,fun h=&gt;hFy h.symm⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   | succ k ih =&gt;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     intro B x y hxy hbudget</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let B₀:=insert x (insert y B)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hB₀:(B₀.card:ℝ)≤B.card+2:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       have h₁:=Finset.card_insert_le x (insert y B)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       have h₂:=Finset.card_insert_le y B</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       have hh:B₀.card≤B.card+2:=by dsimp [B₀];omega</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       exact_mod_cast hh</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hchoice:(B₀.card:ℝ)+F.degree x&lt;β*Fintype.card V:=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       have hx:=hdeg x</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       push_cast at hbudget</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       nlinarith</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     obtain ⟨z,hzL,hzB,hxz,hFx⟩:=extending_list_one_arc_choice D L B₀ β hext F x true hchoice</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hzB&#x27;:z∉B:=fun h=&gt;hzB (by simp [B₀,h])</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hzx:z≠x:=by intro h;subst z;apply hzB;simp [B₀]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hzy:z≠y:=by intro h;subst z;apply hzB;simp [B₀]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     let B&#x27;:=insert x B</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     have hB&#x27;:(B&#x27;.card:ℝ)≤B.card+1:=by exact_mod_cast Finset.card_insert_le x B</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     have hbudget&#x27;:(B&#x27;.card:ℝ)+(k+1:ℕ)+2+2*M&lt;β*Fintype.card V:=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       push_cast at hbudget ⊢</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       nlinarith</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     obtain ⟨xs,hxslen,hxsnodup,hxs,hchain⟩:=ih B&#x27; z y hzy hbudget&#x27;</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     have hzn:z∉xs:=by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       intro hz</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       exact (hxs z hz).2.2.1 rfl</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     refine ⟨z::xs,?_,List.nodup_cons.mpr ⟨hzn,hxsnodup⟩,?_,?_⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     · simp only [List.length_cons,hxslen]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     · intro w hw</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       rcases List.mem_cons.mp hw with hw | hw</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       · subst w;exact ⟨hzL,hzB&#x27;,hzx,hzy⟩</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       · obtain ⟨hwL,hwB&#x27;,hwz,hwy⟩:=hxs w hw</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>         have hwx:w≠x:=by intro he;subst w;apply hwB&#x27;;simp [B&#x27;]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>         have hwB:w∉B:=fun he=&gt;hwB&#x27; (by simp [B&#x27;,he])</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>         exact ⟨hwL,hwB,hwx,hwy⟩</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     · exact ⟨hxz,hFx,hchain⟩</span>
+<span id="L81"><a href="#L81" class="ln">  81</a> end Oberwolfach</span></pre></html>

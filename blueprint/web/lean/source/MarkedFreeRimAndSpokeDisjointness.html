@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedFreeRimAndSpokeDisjointness.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedFreeRimAndSpokeDisjointness.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFreeRimDisjointness</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The rim-disjointness argument also permits repeated hubs when the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> actual spoke pairs have been kept disjoint. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 4000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U E K I:Type} [Fintype V] [Fintype U] [Fintype I] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b m:ℕ}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem marked_free_rim_and_spoke_extension_disjoint (hm:1≤m) (hb:1≤b)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (C:I→MarkedWheel tail head ktail khead m π b H₀ HK)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (W:MarkedWheel tail head ktail khead m π b H₀ HK)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (X:Finset V) (T:I→Finset (Finset V)) (T&#x27;:Finset (Finset V))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hold:∀ i e,e∈markedCyclePhysicalEdges tail head ktail khead m π b (C i).1→e⊆X∨e∈T i)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hnew:∀ e,e∈markedCyclePhysicalEdges tail head ktail khead m π b W.1→e⊆X∨e∈T&#x27;)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (houtside:∀ i e,e∈T i→¬e⊆X) (hroots:∀ i,Disjoint (T i) T&#x27;)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hspokes:∀ i,(C i).2.val=W.2.val→Disjoint (markedWheelRows (C i)) (markedWheelRows W))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hD:Disjoint (markedWheelRimGraph W) (spanningRestriction (markedFamilyRim C) X)):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ i,Disjoint (markedWheelPhysicalResources (C i)) (markedWheelPhysicalResources W) := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro i</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   intro e he hw</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   cases e with</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   | inr e=&gt;</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hc:=(markedWheelPhysicalResources_spoke (C i) e.1 e.2).mp he</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have hn:=(markedWheelPhysicalResources_spoke W e.1 e.2).mp hw</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     exact Finset.disjoint_left.mp (hspokes i (hc.1.trans hn.1.symm)) hc.2 hn.2</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   | inl e=&gt;</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     rw [markedWheelPhysicalResources_rim] at he hw</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     rcases hold i e he with hx|ht</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     · have hcard:e.card=2:=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         obtain ⟨a,ha,h⟩:=Finset.mem_image.mp he</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         rw [←h]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         exact markedCycle_physical_edge_card tail head ktail khead m π b hm hb (C i).1 a</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       obtain ⟨x,y,hxy,rfl⟩:=Finset.card_eq_two.mp hcard</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       have hd:(spanningRestriction (markedFamilyRim C) X).Adj x y:=</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         (spanningRestriction_adj _ _ _ _).mpr</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>           ⟨SimpleGraph.iSup_adj.mpr ⟨i,hxy,he⟩,hx (by simp),hx (by simp)⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       exact disjoint_graphs_no_common_edge _ _ hD x y ⟨hxy,hw⟩ hd</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     · rcases hnew e hw with hx|ht&#x27;</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       · exact houtside i e ht hx</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       · exact Finset.disjoint_left.mp (hroots i) ht ht&#x27;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> end Oberwolfach</span></pre></html>

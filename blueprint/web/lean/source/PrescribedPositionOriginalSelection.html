@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedPositionOriginalSelection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedPositionOriginalSelection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedPositionOriginalBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedPositionSelectionNodup</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Apply the source-position selection with the original numerical bounds. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {X:Type} [Fintype X] [DecidableEq X]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem prescribed_outside_closed_neighbourhood (Q:SimpleGraph X) (A:Finset X) (v:X)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (h:v∉prescribedClosedNeighbourhoods Q A):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     v∉A ∧ ∀ a∈A,¬Q.Adj a v := by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   constructor</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   · intro hv</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     apply h</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     exact Finset.mem_biUnion.mpr ⟨v,hv,by simp [prescribedClosedNeighbourhood]⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   · intro a ha hav</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     apply h</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     apply Finset.mem_biUnion.mpr</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     refine ⟨a,ha,?_⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     simp [prescribedClosedNeighbourhood,hav]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> theorem prescribed_position_selection_original (Q:SimpleGraph X) (D:X→X→Prop)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hdeg:∀ x,Q.degree x≤2) (hrep:∀x y,Q.Adj x y→D x y ∨ D y x)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (A:Finset X) (m z:ℕ) (hedges:Fintype.card X≤Q.edgeFinset.card+A.card)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hsize:8*A.card+8*m+4*z+10≤Fintype.card X):</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∃ (es:List (X×X)) (vs:List X),es.length=m ∧ vs.length=z ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ e∈es,D e.1 e.2 ∧ Q.Adj e.1 e.2 ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         e.1∉prescribedClosedNeighbourhoods Q A ∧ e.2∉prescribedClosedNeighbourhoods Q A) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       es.Pairwise (prescribedPairsApart Q) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ v∈vs,v∉prescribedClosedNeighbourhoods Q A) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ e∈es,∀ v∈vs,v∉prescribedPairClosed Q e) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       vs.Pairwise (prescribedSinglesApart Q) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (es.flatMap prescribedPairVertices++vs).Nodup := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hb:=prescribed_position_original_budgets Q hdeg A m z hedges hsize</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨es,vs,helen,hvlen,he,hpair,hv,hcross,hvs⟩:=</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     prescribed_position_greedy_selection Q D hdeg hrep (prescribedClosedNeighbourhoods Q A) m z hb.1 hb.2</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   refine ⟨es,vs,helen,hvlen,he,hpair,hv,hcross,hvs,?_⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   exact prescribed_selected_vertices_nodup Q es vs (fun e he&#x27; =&gt; (he e he&#x27;).2.1) hpair hvs hcross</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

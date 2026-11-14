@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHubFactorTrade.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHubFactorTrade.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFactorResourceDecomposition</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The two-factor hub trade on actual marked cycles. It uses the same</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> physical rim factors on both sides and changes exactly the spokes on Z. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 9000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U E K:Type} [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {tail head:E→V} {ktail khead:K→V} {m:ℕ} {π:Equiv.Perm V} {b:ℕ}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a>  theorem marked_factor_hubs_disjoint</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (M N:Finset (MarkedCycleTuple tail head ktail khead m π b)) (u u&#x27;:U) (hu:u≠u&#x27;)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hr:Disjoint (M.biUnion (markedCyclePhysicalEdges tail head ktail khead m π b))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (N.biUnion (markedCyclePhysicalEdges tail head ktail khead m π b))):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     Disjoint (M.biUnion (fun C=&gt;markedCycleResourcesAtHub C u))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (N.biUnion (fun C=&gt;markedCycleResourcesAtHub C u&#x27;)):=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   intro e he hf</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   cases e with</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   | inl e=&gt;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     exact Finset.disjoint_left.mp hr ((marked_factor_at_hub_rim M u e).mp he) ((marked_factor_at_hub_rim N u&#x27; e).mp hf)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   | inr vz=&gt;</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     exact hu (((marked_factor_at_hub_spoke M u vz.1 vz.2).mp he).1.symm.trans</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       ((marked_factor_at_hub_spoke N u&#x27; vz.1 vz.2).mp hf).1)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a>  theorem marked_hub_factor_trade (H₀ HK:V→U→Prop)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (A Z:Finset V) (hAZ:Disjoint A Z) (u u&#x27;:U) (hu:u≠u&#x27;)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (M₀ M₁:Finset (MarkedCycleTuple tail head ktail khead m π b))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (h₀:(∀ C∈M₀,∀ D∈M₀,C≠D→Disjoint (Finset.univ.image C.val) (Finset.univ.image D.val))∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       M₀.biUnion (fun C=&gt;Finset.univ.image C.val)=A)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (h₁:(∀ C∈M₁,∀ D∈M₁,C≠D→Disjoint (Finset.univ.image C.val) (Finset.univ.image D.val))∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       M₁.biUnion (fun C=&gt;Finset.univ.image C.val)=A∪Z)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hdis:Disjoint (M₀.biUnion (markedCyclePhysicalEdges tail head ktail khead m π b))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (M₁.biUnion (markedCyclePhysicalEdges tail head ktail khead m π b)))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hH:∀ C∈M₀∪M₁,MarkedHubCompatible H₀ HK C.val u∧MarkedHubCompatible H₀ HK C.val u&#x27;):</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let P:=M₁.biUnion (fun C=&gt;markedCycleResourcesAtHub C u)∪M₀.biUnion (fun C=&gt;markedCycleResourcesAtHub C u&#x27;)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let N:=M₁.biUnion (fun C=&gt;markedCycleResourcesAtHub C u&#x27;)∪M₀.biUnion (fun C=&gt;markedCycleResourcesAtHub C u)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     HasResourceDecomposition (markedWheelPhysicalResources (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead) (m:=m) (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=HK)) P∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     HasResourceDecomposition (markedWheelPhysicalResources (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead) (m:=m) (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=HK)) N∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∀ e:Finset V⊕(V×U),(if e∈P then (1:ℤ) else 0)-(if e∈N then 1 else 0)=</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (if e∈Z.image (fun v=&gt;Sum.inr (v,u)) then 1 else 0)-</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (if e∈Z.image (fun v=&gt;Sum.inr (v,u&#x27;)) then 1 else 0):=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   dsimp only</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have h0u:=marked_factor_at_hub_decomposition H₀ HK hp M₀ u h₀.1</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (fun C hC=&gt;(hH C (Finset.mem_union_left _ hC)).1)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have h0u&#x27;:=marked_factor_at_hub_decomposition H₀ HK hp M₀ u&#x27; h₀.1</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (fun C hC=&gt;(hH C (Finset.mem_union_left _ hC)).2)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have h1u:=marked_factor_at_hub_decomposition H₀ HK hp M₁ u h₁.1</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (fun C hC=&gt;(hH C (Finset.mem_union_right _ hC)).1)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have h1u&#x27;:=marked_factor_at_hub_decomposition H₀ HK hp M₁ u&#x27; h₁.1</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (fun C hC=&gt;(hH C (Finset.mem_union_right _ hC)).2)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   refine ⟨resource_decomposition_union _ _ _ h1u h0u&#x27; (marked_factor_hubs_disjoint M₁ M₀ u u&#x27; hu hdis.symm),</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     resource_decomposition_union _ _ _ h1u&#x27; h0u (marked_factor_hubs_disjoint M₁ M₀ u&#x27; u hu.symm hdis.symm),?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   intro e</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   cases e with</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   | inl e=&gt;</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     simp only [Finset.mem_union,marked_factor_at_hub_rim,Finset.mem_image,Sum.inr_ne_inl,and_false,exists_false,ite_false,sub_self]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   | inr vz=&gt;</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     rcases vz with ⟨v,z⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     have hmem (a:U):(Sum.inr (v,z):Finset V⊕(V×U))∈Z.image (fun v=&gt;Sum.inr (v,a))↔v∈Z∧z=a:=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       simp only [Finset.mem_image,Sum.inr.injEq,Prod.mk.injEq]</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       constructor</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       · rintro ⟨v&#x27;,hv&#x27;,rfl,hz⟩;exact ⟨hv&#x27;,hz.symm⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       · rintro ⟨hv,hz⟩;exact ⟨v,hv,rfl,hz.symm⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     simp only [Finset.mem_union,marked_factor_at_hub_spoke,h₀.2,h₁.2,Finset.mem_union,hmem]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     have hvdis:¬(v∈A∧v∈Z):=fun h=&gt;Finset.disjoint_left.mp hAZ h.1 h.2</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have hzdis:¬(z=u∧z=u&#x27;):=fun h=&gt;hu (h.1.symm.trans h.2)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     by_cases ha:v∈A &lt;;&gt; by_cases hz:v∈Z &lt;;&gt; by_cases hu0:z=u &lt;;&gt; by_cases hu1:z=u&#x27; &lt;;&gt;</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       simp_all only [true_or,or_true,false_or,or_false,true_and,and_true,false_and,and_false,</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         not_true_eq_false,not_false_eq_true,ite_true,ite_false] &lt;;&gt; omega</span>
+<span id="L75"><a href="#L75" class="ln">  75</a> </span>
+<span id="L76"><a href="#L76" class="ln">  76</a> end Oberwolfach</span></pre></html>

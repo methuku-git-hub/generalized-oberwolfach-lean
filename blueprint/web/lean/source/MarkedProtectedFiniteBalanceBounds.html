@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedProtectedFiniteBalanceBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedProtectedFiniteBalanceBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFiniteActiveRemainderBalance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedFiniteCorrectedDomainBound</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedFiniteSupportedBalance</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! All active roots satisfy the quantitative full and inner balance</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> bounds after the actual sparse correction and two subsequent packings.</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> The deep packing is charged zero inner loss because it avoids the whole</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> active inner star; no global small-degree bound for it is used. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 10000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U E K:Type} [DecidableEq V] [DecidableEq U] [DecidableEq E] [DecidableEq K]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_protected_finite_balance_bounds</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (tail head:E→V) (ktail khead:K→V) (HK:V→U→Prop)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (A C₀ EA DA:Finset (E⊕K)) (S CS₀ ES DS:Finset (V×U)) (m:ℕ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (I T:Finset V) (J W:Finset U) (hT:T⊆I) (hW:W⊆J)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hC₀:C₀⊆A.filter (fun a=&gt;Sum.elim tail ktail a∈I∧Sum.elim head khead a∈I))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hCS₀:CS₀⊆S.filter (fun s=&gt;s.1∈I∧s.2∈J))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hdiv:MarkedRemainderDivisible tail head ktail khead HK A S m)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hE:MarkedRemainderDivisible tail head ktail khead HK EA ES m)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hD:MarkedRemainderDivisible tail head ktail khead HK DA DS m)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hDA:∀ a∈DA,Sum.elim tail ktail a∉I\T∧Sum.elim head khead a∉I\T)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hDS:∀ s∈DS,s.1∉I\T∧s.2∉J\W)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (εI εT δ₀ δE:ℝ) (hεT:0≤εT) (hδ₀:0≤δ₀) (hδE:0≤δE)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hAI:∀ z i,|markedFiniteDomainBalance tail head ktail khead HK A S m I J z i|≤εI)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hAT:∀ z i,|markedFiniteDomainBalance tail head ktail khead HK A S m T W z i|≤εT)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hC₀A:∀ v,((C₀.filter (fun a=&gt;Sum.elim tail ktail a=v∨Sum.elim head khead a=v)).card:ℝ)≤δ₀)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hC₀R:∀ v,((CS₀.filter (fun s=&gt;s.1=v)).card:ℝ)≤δ₀)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hC₀C:∀ u,((CS₀.filter (fun s=&gt;s.2=u)).card:ℝ)≤δ₀)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hEA:∀ v,((EA.filter (fun a=&gt;Sum.elim tail ktail a=v∨Sum.elim head khead a=v)).card:ℝ)≤δE)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hER:∀ v,((ES.filter (fun s=&gt;s.1=v)).card:ℝ)≤δE)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hEC:∀ u,((ES.filter (fun s=&gt;s.2=u)).card:ℝ)≤δE):</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let C:=(A.filter (fun a=&gt;Sum.elim tail ktail a∈I∧Sum.elim head khead a∈I))\C₀</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let CS:=(S.filter (fun s=&gt;s.1∈I∧s.2∈J))\CS₀</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let KA:=C.filter (fun a=&gt;Sum.elim tail ktail a∈T∨Sum.elim head khead a∈T)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let KS:=CS.filter (fun s=&gt;s.1∈T∨s.2∈W);</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     EA⊆A\KA→ES⊆S\KS→DA⊆(A\KA)\EA→DS⊆(S\KS)\ES→</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     ∀ (z:V⊕U),Sum.elim (fun v=&gt;v∉T) (fun u=&gt;u∉W) z→∀ i:Fin 4,</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     |markedFiniteBalance tail head ktail khead HK (((A\KA)\EA)\DA) (((S\KS)\ES)\DS) m z i|</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       ≤εT+(m+2)*δ₀ ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     |markedFiniteDomainBalance tail head ktail khead HK (((A\KA)\EA)\DA) (((S\KS)\ES)\DS) m (I\T) (J\W) z i|</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       ≤εI+εT+(m+2)*δE:=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro C CS KA KS hEAsub hESsub hDAsub hDSsub z hz i</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hC:C⊆A:=(Finset.sdiff_subset).trans (Finset.filter_subset _ _)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hCS:CS⊆S:=(Finset.sdiff_subset).trans (Finset.filter_subset _ _)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   obtain ⟨hfull,hinner⟩:=marked_finite_active_remainder_balances tail head ktail khead HK A C EA DA S CS ES DS m</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     I T J W hT hW hC hCS hdiv hE hD hDA hDS hEAsub hESsub hDAsub hDSsub z hz i</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   constructor</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   · rw [hfull,abs_neg]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     by_cases hinside:Sum.elim (fun v=&gt;v∈I) (fun u=&gt;u∈J) z</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     · exact marked_finite_corrected_inner_domain_bound tail head ktail khead HK A C₀ S CS₀ m</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         I T J W hT hW hC₀ hCS₀ εT δ₀ hδ₀ hC₀A hC₀R hC₀C z hinside i (hAT z i)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     · have hout:Sum.elim (fun v=&gt;v∉I) (fun u=&gt;u∉J) z:=by cases z &lt;;&gt; exact hinside</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       rw [markedFiniteDomainBalance_zero_of_support tail head ktail khead HK C CS m I J</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         (fun a ha=&gt;(Finset.mem_filter.mp (Finset.mem_sdiff.mp ha).1).2)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (fun s hs=&gt;(Finset.mem_filter.mp (Finset.mem_sdiff.mp hs).1).2) T W z hout i,abs_zero]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       positivity</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   · exact marked_finite_active_inner_error tail head ktail khead HK A EA _ S ES _ m I T J W z i</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       hinner εI εT δE hδE (hAI z i) (hAT z i) hEA hER hEC</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

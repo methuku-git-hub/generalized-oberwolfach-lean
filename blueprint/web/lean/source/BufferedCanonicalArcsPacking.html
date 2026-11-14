@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BufferedCanonicalArcsPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BufferedCanonicalArcsPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BufferedCanonicalArcsFromRemainingEdges</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.DirectedArcsFromPhysicalPacking</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Packed remaining factor-edge images give disjoint canonical directed arcs. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 16000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem buffered_canonical_arcs_disjoint_of_remaining_edge_packing</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     {U V:Type*} [Fintype U] [DecidableEq V]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {X I:U→Type*} [∀w,Fintype (X w)] [∀w,DecidableEq (X w)] [∀w,Fintype (I w)]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (G:∀w,SimpleGraph (X w)) (hG:∀w,(G w).IsRegularOfDegree 2)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (e:∀w (C:(G w).ConnectedComponent),SimpleGraph.cycleGraph (Fintype.card C) ≃g C.toSimpleGraph)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (n:∀w,I w→ℕ) (ext:∀w i,Fin (n w i+5)↪X w) (inner:∀w i,Fin (n w i+1)↪X w)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hinner:∀w i p,inner w i p=ext w i ⟨p.val+2,by omega⟩)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hdis:∀w i j,i≠j→Disjoint (Finset.univ.image (ext w i)) (Finset.univ.image (ext w j)))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hstep:∀w i (p:Fin (n w i)),factorCycleOrientation (G w) (e w) (inner w i p.castSucc)=inner w i p.succ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (p:∀w i,(G w).Walk (inner w i 0) (inner w i (Fin.last (n w i))))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hlen:∀w i,(p w i).length=n w i) (hsupp:∀w i,(p w i).support=List.ofFn (inner w i))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hσ:∀w,(complementTailDomain (bufferedPathFullDomain (n w) (inner w)) (bufferedFinalEndpoints (n w) (inner w))).image</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (factorCycleOrientation (G w) (e w))=complementTailDomain (bufferedPathFullDomain (n w) (inner w)) (bufferedInitialEndpoints (n w) (inner w)))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (fC:∀w,{x // x∉bufferedPathStrictInterior (n w) (inner w)}↪V):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let tail:=fun w=&gt;bufferedOrientedTailEmbedding (n w) (ext w) (inner w) (hinner w) (hdis w) (fC w)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let head:=fun w=&gt;bufferedOrientedHeadEmbedding (n w) (ext w) (inner w) (hinner w) (hdis w) (factorCycleOrientation (G w) (e w)) (hσ w) (fC w)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let remaining:=fun w=&gt;(((G w).deleteEdges (↑(Finset.univ.biUnion (fun i=&gt;(p w i).edges.toFinset)):Set (Sym2 (X w)))).induce</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       {x | x∉bufferedPathStrictInterior (n w) (inner w)}).edgeFinset.image (Sym2.map (fC w))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀w z,w≠z→Disjoint (remaining w) (remaining z))→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀w z,w≠z→Disjoint (Finset.univ.image (fun x=&gt;(tail w x,head w x)))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (Finset.univ.image (fun x=&gt;(tail z x,head z x))):=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   classical</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   intro tail head remaining hpack</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   apply directed_arcs_disjoint_of_physical_packing (fun w=&gt;Finset.univ.image (fun x=&gt;(tail w x,head w x))) remaining</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · intro w</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     rw [Finset.image_image]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact buffered_canonical_arcs_in_remaining_edge_image (G w) (hG w) (e w) (n w) (ext w) (inner w)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (hinner w) (hdis w) (hstep w) (p w) (hlen w) (hsupp w) (hσ w) (fC w)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   · exact hpack</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

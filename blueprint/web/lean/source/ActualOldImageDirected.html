@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualOldImageDirected.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualOldImageDirected.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ActualMatchedPieceDirectedArcs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Directed-image property of the actual selected source cycles and runs. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> def ActualOldImageDirected</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     {X V K J:Type} [Fintype X] [DecidableEq X] [DecidableEq K] [DecidableEq J]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     {G:SimpleGraph X} (data:ActualResidualData (K:=K) (J:=J) G) (ψ:X→V) (R:V→V→Prop):Prop:=</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>   (∀j∈data.t,∀k&lt;(data.C j).length,R (ψ ((data.C j).getVert k)) (ψ ((data.C j).getVert (k+1)))) ∧</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   (∀r:SelectedRunIndex data.s₂ data.d data.T,∀k&lt;(data.path (.inr r)).length,</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     R (ψ ((data.path (.inr r)).getVert k)) (ψ ((data.path (.inr r)).getVert (k+1))))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> end Oberwolfach</span></pre></html>

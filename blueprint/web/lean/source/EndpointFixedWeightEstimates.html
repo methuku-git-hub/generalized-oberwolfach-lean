@@ -1,0 +1,93 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EndpointFixedWeightEstimates.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EndpointFixedWeightEstimates.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointPotentialLoads</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.EndpointWeightNormalization</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The actual triangle weights, with the fixed parent matching and the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> root-omitted potentials of the manuscript. All losses use the original</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> row-domain cardinality. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 4500000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem endpoint_fixed_weight_estimates</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (P R H F : SimpleGraph V) (A B : Finset V) (x : V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hAB : Disjoint A B) (hR : R≤P\F)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hFB : ∀ u∈B,∀ w,¬F.Adj u w)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (κ p q s c C L δ ξ : ℝ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (ha : 0&lt;(A.card:ℝ)) (hκ : 0&lt;κ) (hp : 0&lt;p)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hc : 0≤c) (hC : 0≤C) (hL : 0≤L) (hδ : 0≤δ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hb : κ*A.card≤(B.card:ℝ)) (hba : B.card≤A.card)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hq : p≤q) (hq1 : q≤1) (hs : p≤s) (hs1 : s≤1)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hF : ∀ u,(F.degree u:ℝ)≤L)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (weight : Sym2 V→ℝ)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hweight : ∀ v∈A∩P.neighborFinset x,∀ w∈A∩P.neighborFinset x,</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       0≤weight s(v,w) ∧ weight s(v,w)≤C/A.card)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hsum : ∀ v∈A∩P.neighborFinset x,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ∑ w∈A∩P.neighborFinset x,weight s(v,w)=1)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hzero : ∀ v∈A∩P.neighborFinset x,∀ w∈A∩P.neighborFinset x,</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ¬P.Adj v w → weight s(v,w)=0)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hpositive : ∀ e∈(endpointEligibleGraph P F (A∩P.neighborFinset x) x).edgeSet,</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       c/A.card≤weight e ∧ weight e≤C/A.card)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hbalance : |q*(A∩P.neighborFinset x).card/(2*B.card*s)-1|≤δ)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hrow : ∀ v∈common A {x} (fun y=&gt;(P\F).neighborFinset y),</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       |endpointRowPotential P R H F A B x v weight (B.card*q^2*s^3)-</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         endpointEligibleRowWeight F (A∩P.neighborFinset x) x v (fun v w=&gt;weight s(v,w))|≤ξ)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hindex : ∀ u∈B,</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       |endpointIndexPotential P R H F A x u weight (B.card*q^2*s^3)-</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         q/(B.card*s)*(∑ e∈(endpointEligibleGraph P F (A∩P.neighborFinset x) x).edgeFinset,weight e)|≤ξ) :</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let S:=common A {x} (fun y=&gt;R.neighborFinset y)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let T:=common B {x} (fun y=&gt;H.neighborFinset y)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let wt:=fun D : EndpointTriangle (endpointHostGraph R H A B) F S T=&gt;</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       weight (endpointTriangleRowEdge D)/(B.card*q^2*s^3)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (∀ D,c/(A.card:ℝ)^2≤wt D ∧ wt D≤(C/(κ*p^5))/(A.card:ℝ)^2) ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (∀ v∈S∪T,|1-hypergraphWeightedDegree endpointTriangleVertices wt v|≤</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       δ+(2*C+(1+2*C)/(2*κ*p))*L/A.card+ξ) := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   dsimp only</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   let Px:=A∩P.neighborFinset x</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hPa : (Px.card:ℝ)≤A.card := by exact_mod_cast Finset.card_le_card Finset.inter_subset_left</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hmass:=endpoint_unordered_matching_mass_error P F Px x weight A.card C L ha hC hPa hF hweight hsum hzero</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hindexTarget:=endpoint_index_target_error (A.card:ℝ) B.card κ p q s C L Px.card</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (∑ e∈(endpointEligibleGraph P F Px x).edgeFinset,weight e) δ</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     ha hκ hp hC hL hb (hp.le.trans hq) hq1 hs hmass hbalance</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hrowLoss : 2*C*L/A.card≤(2*C+(1+2*C)/(2*κ*p))*L/A.card := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     apply div_le_div_of_nonneg_right _ ha.le</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     apply mul_le_mul_of_nonneg_right _ hL</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have : 0≤(1+2*C)/(2*κ*p) := by positivity</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     linarith</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hindexLoss : ((1+2*C)/(2*κ*p))*L/A.card≤(2*C+(1+2*C)/(2*κ*p))*L/A.card := by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     apply div_le_div_of_nonneg_right _ ha.le</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     apply mul_le_mul_of_nonneg_right _ hL</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     linarith</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   constructor</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   · intro D</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     exact endpoint_triangle_coefficient_bounds A.card B.card κ p q s c C _ ha hκ hp hc hC hb</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (by exact_mod_cast hba) hq hq1 hs hs1</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (hpositive _ (endpoint_triangle_parent_edge P R H F A B x hAB hR hFB D))</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · intro v hv</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     rcases Finset.mem_union.mp hv with hv|hv</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     · have hv&#x27; := (mem_singleton_common_graph R A x v).mp hv</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       have hvP : v∈Px := Finset.mem_inter.mpr ⟨hv&#x27;.1,by simpa using (hR hv&#x27;.2).1⟩</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       have hvE:= (mem_singleton_common_graph (P\F) A x v).mpr ⟨hv&#x27;.1,hR hv&#x27;.2⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       have htarget:=endpoint_matching_row_target F Px x v (fun v w=&gt;weight s(v,w)) A.card C L</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>         ha hC hF (hweight v hvP) (hsum v hvP)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       rw [endpoint_row_potential_present P R H F A B x v hAB hR hFB hv weight _]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       rw [abs_sub_comm]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       have hh:=abs_sub_le (endpointRowPotential P R H F A B x v weight (B.card*q^2*s^3))</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>         (endpointEligibleRowWeight F Px x v (fun v w=&gt;weight s(v,w))) 1</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       have hrow&#x27; := hrow v (by convert hvE using 1 &lt;;&gt; congr!)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       linarith only [hh,hrow&#x27;,htarget,hrowLoss,hδ]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     · have hvB := ((mem_singleton_common_graph H B x v).mp hv).1</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       rw [endpoint_index_potential_present P R H F A B x v hAB hR hFB hv weight _]</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       rw [abs_sub_comm]</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       have hh:=abs_sub_le (endpointIndexPotential P R H F A x v weight (B.card*q^2*s^3))</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>         (q/(B.card*s)*(∑ e∈(endpointEligibleGraph P F Px x).edgeFinset,weight e)) 1</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       linarith only [hh,hindex v hvB,hindexTarget,hindexLoss]</span>
+<span id="L89"><a href="#L89" class="ln">  89</a> </span>
+<span id="L90"><a href="#L90" class="ln">  90</a> end Oberwolfach</span></pre></html>

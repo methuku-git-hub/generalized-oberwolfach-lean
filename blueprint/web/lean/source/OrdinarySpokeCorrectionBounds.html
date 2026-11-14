@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinarySpokeCorrectionBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinarySpokeCorrectionBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryNeighbourTransfer</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PairTransferCoefficientBound</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The coefficient cost of row corrections and their sum over rim vertices. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1200000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem ordinaryRowCorrection_bound {V U : Type*} [Fintype U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {Q F : SimpleGraph V} {H : V → U → Prop} {r : ℕ} (v : V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (z : U → ℝ) (T : {u // H v u} → {u // H v u} → OrdinaryWheel Q F H r → ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (D : OrdinaryWheel Q F H r) (η B : ℝ) (hη : 0≤η) (hB : 0≤B)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hz : ∀ u,|z u|≤η) (hT : ∀ i j,|T i j D|≤B)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hs : ∀ i j,ordinaryWheelHub D≠i.val → ordinaryWheelHub D≠j.val → T i j D=0) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     |ordinaryRowCorrection v z T D|≤2*η*B := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let g : {u // H v u} ↪ U := ⟨Subtype.val,Subtype.val_injective⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hh := normalized_pair_transfer_bound g (ordinaryWheelHub D)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (fun i =&gt; z i.val) (fun i j =&gt; T i j D) η B hη hB (fun i =&gt; hz i.val) hT hs</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   convert hh using 1</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   congr 1</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   unfold ordinaryRowCorrection</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   rw [Finset.sum_div]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   apply Finset.sum_congr rfl</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   intro p _</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   ring</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> </span>
+<span id="L31"><a href="#L31" class="ln">  31</a> theorem finite_vertex_coefficient_sum {V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (S : Finset V) {r : ℕ} (hr : 1≤r) (hS : S.card=r)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (K : ℝ) (hK : 0≤K) (hn : 0&lt;Fintype.card V) :</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∑ v : V,if v∈S then K/(Fintype.card V:ℝ)^(r-1)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       else K/(Fintype.card V:ℝ)^r)≤K*(r+1)/(Fintype.card V:ℝ)^(r-1) := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hn&#x27; : (0:ℝ)&lt;Fintype.card V := Nat.cast_pos.mpr hn</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hfirst : (∑ v : V,if v∈S then K/(Fintype.card V:ℝ)^(r-1) else 0)=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (r:ℝ)*(K/(Fintype.card V:ℝ)^(r-1)) := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     rw [← Finset.sum_filter]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hf : Finset.univ.filter (fun v =&gt; v∈S)=S := by ext;simp</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     rw [hf,Finset.sum_const,hS,nsmul_eq_mul]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hp : (Fintype.card V:ℝ)^r=(Fintype.card V:ℝ)^(r-1)*(Fintype.card V:ℝ) := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     rw [← pow_succ,show r-1+1=r by omega]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   calc</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     _ ≤ ∑ v : V,((if v∈S then K/(Fintype.card V:ℝ)^(r-1) else 0)+</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         K/(Fintype.card V:ℝ)^r) := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       apply Finset.sum_le_sum</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       intro v _</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       split_ifs</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       · exact le_add_of_nonneg_right (by positivity)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       · simp only [zero_add,le_refl]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     _ = (r:ℝ)*(K/(Fintype.card V:ℝ)^(r-1))+</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         (Fintype.card V:ℝ)*(K/(Fintype.card V:ℝ)^r) := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       rw [Finset.sum_add_distrib,hfirst,Finset.sum_const,Finset.card_univ,nsmul_eq_mul]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     _ = _ := by rw [hp];field_simp</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> </span>
+<span id="L57"><a href="#L57" class="ln">  57</a> end Oberwolfach</span></pre></html>

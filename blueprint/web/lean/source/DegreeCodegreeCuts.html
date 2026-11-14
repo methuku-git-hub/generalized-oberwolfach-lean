@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>DegreeCodegreeCuts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>DegreeCodegreeCuts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.DegreeCodegreeVariance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The large-cut lower bound used in the ordinary endpoint assignment,</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> with the exceptional-pair contribution retained explicitly. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 2000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem codegree_cut_numeric (p ε D b s t v η:ℝ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hp:0&lt;p) (hb:0&lt;b) (hη:0&lt;η) (hs:η*b≤s) (ht:η*b≤t)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hε:ε≤p^2*η/24) (hD:D≤p^2*η^2*b/8)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hq:(v-p*s*t)^2≤t*(3*ε*s^2*b+D*s*b)) : p/2*s*t≤v := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hspos:0&lt;s:=(mul_pos hη hb).trans_le hs</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have htpos:0&lt;t:=(mul_pos hη hb).trans_le ht</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hεb:3*ε*b≤p^2*t/8:=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     have hh:=mul_le_mul_of_nonneg_right hε hb.le</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have hh&#x27;:=mul_le_mul_of_nonneg_left ht (sq_nonneg p)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     nlinarith only [hh,hh&#x27;]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hproduct:η^2*b^2≤s*t:=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     have hh:=mul_le_mul hs ht (mul_pos hη hb).le hspos.le</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     nlinarith only [hh]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hDb:D*b≤p^2*s*t/8:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have hh:=mul_le_mul_of_nonneg_right hD hb.le</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hh&#x27;:=mul_le_mul_of_nonneg_left hproduct (sq_nonneg p)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     nlinarith only [hh,hh&#x27;]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hterms:3*ε*s^2*b+D*s*b≤p^2*s^2*t/4:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hh:=mul_le_mul_of_nonneg_right hεb (sq_nonneg s)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have hh&#x27;:=mul_le_mul_of_nonneg_right hDb hspos.le</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     nlinarith only [hh,hh&#x27;]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hu:=mul_le_mul_of_nonneg_left hterms htpos.le</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hu&#x27;:(v-p*s*t)^2≤(p*s*t/2)^2:=by nlinarith only [hq,hu]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   by_contra hv</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hv&#x27;:v&lt;p*s*t/2:=by linarith only [lt_of_not_ge hv]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hpos:0&lt;p*s*t/2:=by positivity</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hsq:(p*s*t/2)^2&lt;(p*s*t-v)^2:=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (sq_lt_sq₀ hpos.le (by linarith only [hv&#x27;,hpos])).mpr (by linarith only [hv&#x27;])</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   nlinarith only [hsq,hu&#x27;]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem bipartite_cuts_from_degrees_and_codegrees {X Y:Type} [Fintype X] [Fintype Y]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     [DecidableEq X] [DecidableEq Y] (H:X→Y→Prop) (p ε D η:ℝ)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hp:0&lt;p) (hp1:p≤1) (hε:0≤ε) (hη:0&lt;η) (hb:0&lt;Fintype.card Y)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (E:X→Finset X) (hE:∀ x,((E x).card:ℝ)≤D)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hrow:∀ x,(p-ε)*Fintype.card Y≤∑ u,bipAdj H x u)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hcodeg:∀ x y,y∉E x → ∑ u,bipAdj H x u*bipAdj H y u≤(p^2+ε)*Fintype.card Y)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hsmall:ε≤p^2*η/24) (hlarge:D≤p^2*η^2*Fintype.card Y/8)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (S:Finset X) (T:Finset Y)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hS:η*Fintype.card Y≤(S.card:ℝ)) (hT:η*Fintype.card Y≤(T.card:ℝ)) :</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     p/2*S.card*T.card≤(bipartiteMatrixCut (fun x u=&gt;if H x u then 1 else 0) S T:ℝ) := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   exact codegree_cut_numeric p ε D (Fintype.card Y) S.card T.card</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (bipartiteMatrixCut (fun x u=&gt;if H x u then 1 else 0) S T) η</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     hp (Nat.cast_pos.mpr hb) hη hS hT hsmall hlarge</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (degree_codegree_cut_square H p ε D hp.le hp1 hε E hE hrow hcodeg S T)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> </span>
+<span id="L56"><a href="#L56" class="ln">  56</a> end Oberwolfach</span></pre></html>

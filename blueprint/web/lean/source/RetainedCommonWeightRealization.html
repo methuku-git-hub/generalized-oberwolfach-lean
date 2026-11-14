@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RetainedCommonWeightRealization.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RetainedCommonWeightRealization.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RetainedCommonWeightWitness</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SuccessorWeightFamilies</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Construct the shared parent weighting before sampling and choose a</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> uniform order threshold for its common-witness loads after retention.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> This proves the weighted component of the common-witness input; it does</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> not assert the additional thinned cycle/path counts needed for absorption. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 3200000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem retainedMarked_common_weight_realization</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (k₀ m : ℕ) (hlen : m+1=(k₀+2)*2) (β τ pstar ε pret ζ ω : ℝ) (Q : ℕ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hβ : 0&lt;β) (hτ : 0&lt;τ) (hpstar : 0&lt;pstar) (hε : 0&lt;ε)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hpret : 0&lt;pret) (hζ : 0&lt;ζ) (hω : 0&lt;ω) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃ δ : ℝ,0&lt;δ ∧ ∀ d : ℕ,∀ hd : 2≤d,∃ N : ℕ,1≤N ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ (V U Γ Color : Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       [LinearOrder V] [Nonempty V] [DecidableEq U],</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     N≤Fintype.card V → ω*Fintype.card V≤(Fintype.card U:ℝ) → Fintype.card U≤Fintype.card V →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∀ (P : SimpleGraph V) (π : Equiv.Perm V),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ D : ℝ,(Fintype.card V:ℝ)/2≤D → D≤2*Fintype.card V →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ v,|(P.degree v:ℝ)-D|≤δ*Fintype.card V) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ v,(successorCycleRatio k₀+β)*Fintype.card V≤(P.degree v:ℝ)) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∃ weight : (Fin (m+1)→V)→ℝ,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       SuccessorSequenceWeightConditions P π (3*d) D τ</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (successorWeightLower k₀ β) (successorWeightUpper k₀ β) weight ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∀ (p k s₀ : ℝ) (hp : 0&lt;p) (hk : 0&lt;k) (hphys : 2*p+2*k≤1),</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       0&lt;s₀ → pstar≤p → pstar≤k → pstar≤s₀*s₀/m → p≤1 → k≤1 → s₀*s₀/m≤1 →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀ (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (g : Γ) (j : Color),(∀ u,q u g=s₀/m) → (∀ u,s u j=s₀) →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       pret*Fintype.card V≤(s₀/m)*Fintype.card U →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     1-2/(Fintype.card V:ℝ)^Q≤</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (rawMarkedRetentionLaw π d hd g p k hp.le hk.le hphys q hq hQ s hs hS).probability</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (fun z=&gt;∀ u u&#x27;,u≠u&#x27; → ∃ κ,CommonPotentialSpokeLoads P π d m D p k (s₀*s₀/m) weight</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (τ+ε+10*((m:ℝ)+1)^4*(2*successorWeightUpper k₀ β/pstar^(2*m+1))*ζ) z.1</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         (retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) g</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) g)) z.2 g j) κ u u&#x27;) := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hm : 3≤m := by omega</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   obtain ⟨hA,hB⟩ := successorWeightConstants_pos k₀ β hβ</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨δ,hδ,hweights⟩ := successor_sequence_weight_existence k₀ β hβ τ hτ</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   refine ⟨δ,hδ,?_⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   intro d hd</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   obtain ⟨NW,hNW⟩ := hweights (3*d)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   obtain ⟨M,NR,hM1,hNR1,hret⟩ := retainedMarked_common_weight_event m d hm hd</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (successorWeightUpper k₀ β) pstar ε Q pret ζ hB hpstar hε hpret hζ</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   let c := commonWeightLoadExponent m d (2*successorWeightUpper k₀ β/pstar^(2*m+1)) ε</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hc : 0&lt;c := commonWeightLoadExponent_pos m d _ ε (by positivity) hε</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   obtain ⟨NE,hNE⟩ := eventually_stretchedExp_le_inv_pow 8 4 hc (p:=1) (by norm_num) Q</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   let N := max 1 (max NW (max NR (max M (max NE (Nat.ceil ((M:ℝ)/ω))))))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   refine ⟨N,le_max_left _ _,?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   intro V U Γ Color _ _ _ _ _ _ _ hn huLo hu P π hnoshort D hDlo hDhi hnear hmin</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hNW&#x27; : NW≤Fintype.card V := by dsimp [N] at hn;omega</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hNR&#x27; : NR≤Fintype.card V := by dsimp [N] at hn;omega</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hMV : M≤Fintype.card V := by dsimp [N] at hn;omega</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hNE&#x27; : NE≤Fintype.card V := by dsimp [N] at hn;omega</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hceil : Nat.ceil ((M:ℝ)/ω)≤Fintype.card V := by dsimp [N] at hn;omega</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hMU : M≤Fintype.card U := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have hh : (M:ℝ)/ω≤(Fintype.card V:ℝ) := (Nat.le_ceil _).trans (by exact_mod_cast hceil)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hh&#x27; := (div_le_iff₀ hω).mp hh</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     have hh&#x27;&#x27; : (M:ℝ)≤Fintype.card U := by nlinarith only [hh&#x27;,huLo]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     exact_mod_cast hh&#x27;&#x27;</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hex := hNW V hNW&#x27; P π D hDlo hDhi hnear hmin</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   rw [← hlen] at hex</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨weight,hw⟩ := hex</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   refine ⟨weight,hw,?_⟩</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   intro p k s₀ hp hk hphys hs₀ hpmin hkmin hsmin hp1 hk1 hs1 q hq hQ s hs hS g j hq₀ hs₀&#x27; hmass</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hh := hret V U Γ Color hNR&#x27; hMV hMU hu P π hnoshort D τ (successorWeightLower k₀ β)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     weight hw hDlo hDhi p k s₀ hp hk hphys hs₀ hpmin hkmin hsmin hp1 hk1 hs1</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     q hq hQ s hs hS g j hq₀ hs₀&#x27; hmass</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have htail := hNE (Fintype.card V) hNE&#x27;</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   norm_num only [Real.rpow_ofNat,Real.rpow_one] at htail</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   have hpow : (Fintype.card V:ℝ)^(-(Q:ℝ))=1/(Fintype.card V:ℝ)^Q := by</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     rw [Real.rpow_neg (Nat.cast_nonneg _),Real.rpow_natCast,inv_eq_one_div]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   rw [hpow] at hh</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   change 8*(Fintype.card V:ℝ)^4*Real.exp (-c*Fintype.card V)≤1/(Fintype.card V:ℝ)^Q at htail</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   change 1-8*(Fintype.card V:ℝ)^4*Real.exp (-c*Fintype.card V)-1/(Fintype.card V:ℝ)^Q≤_ at hh</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   calc</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     1-2/(Fintype.card V:ℝ)^Q = 1-1/(Fintype.card V:ℝ)^Q-1/(Fintype.card V:ℝ)^Q := by ring</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     _ ≤ _ := (sub_le_sub_right (sub_le_sub_left htail 1) _).trans hh</span>
+<span id="L87"><a href="#L87" class="ln">  87</a> </span>
+<span id="L88"><a href="#L88" class="ln">  88</a> end Oberwolfach</span></pre></html>

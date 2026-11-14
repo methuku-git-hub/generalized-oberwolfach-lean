@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ClassSimultaneousEvents200.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ClassSimultaneousEvents200.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ClassCommonEventUnion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ClassCommonFailureBudget200</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PartitionFailureBudget</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Choose one positive failure tolerance from the fixed upper bound on the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> number of classes and obtain a common positive-mass outcome. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem class_simultaneous_events_200 (K:ℕ):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ χ:ℝ,0&lt;χ ∧ ∃ N:ℕ,∀ k n:ℕ,k≤K+1→N≤n→</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∀ (Ω C:Type) [Fintype Ω] [Fintype C] (A:Fin k→Type) [∀ i,Fintype (A i)]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (global:FiniteLaw Ω) (colour:Ω→C) (colourLaw:FiniteLaw C)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (view:∀ i,Ω→A i) (classLaw:∀ i,FiniteLaw (A i))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (hcolour:global.map colour=colourLaw) (hview:∀ i,global.map (view i)=classLaw i)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (Partition:C→Prop) (Good:∀ i,A i→Prop),</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       1-1/(n:ℝ)^10≤colourLaw.probability Partition→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (∀ i,1-(100*χ+200/(n:ℝ))≤(classLaw i).probability (Good i))→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       ∃ ω,0&lt;global.mass ω ∧ Partition (colour ω) ∧ ∀ i,Good i (view i ω):=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   obtain ⟨χ,hχ,N,hN⟩:=class_common_failure_budget_200 K</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   refine ⟨χ,hχ,max N 2,?_⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro k n hk hn Ω C _ _ A _ global colour colourLaw view classLaw hcolour hview Partition Good hpart hgood</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hnN:N≤n:=(le_max_left _ _).trans hn</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hn2:2≤n:=(le_max_right _ _).trans hn</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hbudget0:=hN k n hk hnN</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hpart0:=partition_failure_at_most_half n hn2</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hbudget:1/(n:ℝ)^10+(∑ _i:Fin k,(100*χ+200/(n:ℝ)))&lt;1:=by linarith</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   exact class_common_event_union global colour colourLaw view classLaw hcolour hview Partition Good</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (1/(n:ℝ)^10) (fun _=&gt;100*χ+200/(n:ℝ)) hpart hgood hbudget</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> end Oberwolfach</span></pre></html>

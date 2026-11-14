@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongRawSurvivingMatchingLift.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongRawSurvivingMatchingLift.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongRawSurvivingResourceState</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongRawFamilyFintype</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Preserve the same candidate identifiers and hub/length counts when the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> matching selected after physical edge deletion is viewed in the raw sample. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem long_raw_surviving_matching_lift</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d m:ℕ) (ℓ:Fin K→ℕ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool) (F:Finset (Sym2 (Fin n))):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     let R:=mixedCandidateResources (longRawSeedResources (U:=U) π d m ℓ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     let T:=bernoulliVertexSet (longRawHubState P π d raw g j)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     let S:=longRawSurvivingResources P π d raw g j F</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let q:=survivingCandidateEmbedding R S T (long_raw_surviving_resources_subset P π d raw g j F)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀M:Finset (RestrictedResource R (Function.Embedding.subtype (·∈S))),</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (∀a∈M,∀b∈M,a≠b→Disjoint</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (restrictedResourceSet R (Function.Embedding.subtype (·∈S)) a)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (restrictedResourceSet R (Function.Embedding.subtype (·∈S)) b)) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀a∈M.map q,∀b∈M.map q,a≠b→Disjoint</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (restrictedResourceSet R (Function.Embedding.subtype (·∈T)) a)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (restrictedResourceSet R (Function.Embedding.subtype (·∈T)) b)) ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀(i:Option (Fin K)) (u:U),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       ((M.map q).filter (fun c=&gt;c.val.1=i ∧ longRawSeedHub π d m ℓ c.val.1 c.val.2=u)).card =</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (M.filter (fun c=&gt;c.val.1=i ∧ longRawSeedHub π d m ℓ c.val.1 c.val.2=u)).card) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀a∈M,∀z∈R a.val,∀edge,</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       typedResourcePhysical π ((markedResourceTypeEquiv (V:=Fin n) (U:=U)) z)=Sum.inl edge→edge∉F) :=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro R T S q M hmatch</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   refine ⟨?_,?_,?_⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   · exact surviving_candidate_matching_lift R S T (long_raw_surviving_resources_subset P π d raw g j F) M hmatch</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   · intro i u</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     exact surviving_candidate_count_lift R S T (long_raw_surviving_resources_subset P π d raw g j F) M</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (fun c=&gt;c.1=i ∧ longRawSeedHub π d m ℓ c.1 c.2=u)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · intro a ha z hz edge he</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     obtain ⟨v,hv⟩:=a.property z hz</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hzS:z∈S:=by rw [←hv];exact v.property</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     exact long_raw_surviving_resource_not_deleted P π d raw g j F z hzS edge he</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> theorem long_raw_lifted_matching_avoids_deleted_rims</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d m:ℕ) (ℓ:Fin K→ℕ)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool) (F:Finset (Sym2 (Fin n))):</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let R:=mixedCandidateResources (longRawSeedResources (U:=U) π d m ℓ)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     let T:=bernoulliVertexSet (longRawHubState P π d raw g j)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     let S:=longRawSurvivingResources P π d raw g j F</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let q:=survivingCandidateEmbedding R S T (long_raw_surviving_resources_subset P π d raw g j F)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     ∀M:Finset (RestrictedResource R (Function.Embedding.subtype (·∈S))),</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     ∀a∈M.map q,∀z∈R a.val,∀edge,</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       typedResourcePhysical π ((markedResourceTypeEquiv (V:=Fin n) (U:=U)) z)=Sum.inl edge→edge∉F :=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   intro R T S q M a ha z hz edge he</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   obtain ⟨b,hb,hba⟩:=Finset.mem_map.mp ha</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   subst a</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   obtain ⟨v,hv⟩:=b.property z hz</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hzS:z∈S:=by rw [←hv];exact v.property</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   exact long_raw_surviving_resource_not_deleted P π d raw g j F z hzS edge he</span>
+<span id="L58"><a href="#L58" class="ln">  58</a> end Oberwolfach</span></pre></html>

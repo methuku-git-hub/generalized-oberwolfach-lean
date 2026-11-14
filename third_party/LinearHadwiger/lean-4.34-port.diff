@@ -1,0 +1,35 @@
+--- upstream/HadwigerLean/Hypergraph/AlmostPerfectMatching.lean
++++ local/HadwigerLean/Hypergraph/AlmostPerfectMatching.lean
+@@ -12,6 +12,8 @@
+ vertices and its accepted disjoint edge copies, and the lemmas track the
+ vertices that were deleted without being covered.
+ -/
++
++set_option backward.isDefEq.respectTransparency false
+ 
+ namespace HadwigerLean
+ 
+--- upstream/HadwigerLean/Hypergraph/Indexed.lean
++++ local/HadwigerLean/Hypergraph/Indexed.lean
+@@ -361,7 +361,9 @@
+       by_cases hcap : ∀ v ∈ K.vertices, K.degree v ≤ D
+       · refine ⟨K.edges, Finset.Subset.rfl, ?_, ?_⟩
+         · intro v hv
+-          simpa [degree, restrictEdges] using hcap v hv
++          convert hcap v hv using 1
++          unfold degree restrictEdges
++          congr 1
+         · simp
+       · push Not at hcap
+         obtain ⟨v, hv, hover⟩ := hcap
+--- upstream/HadwigerLean/Probability/FiniteBernoulli.lean
++++ local/HadwigerLean/Probability/FiniteBernoulli.lean
+@@ -257,7 +257,7 @@
+       intro i hi
+       ring
+     _ ≤ ∏ i ∈ S, Real.exp (p i * (Real.exp t - 1)) := by
+-      apply Finset.prod_le_prod
++      apply Finset.prod_le_prod₀
+       · intro i hi
+         have h₁ : 0 ≤ 1 - p i := by linarith [(hp i).2]
+         have h₂ : 0 ≤ p i * Real.exp t :=

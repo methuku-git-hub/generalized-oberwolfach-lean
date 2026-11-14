@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHubRowFullFreeDegrees.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHubRowFullFreeDegrees.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedHubRowProtectedBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPhysicalRimDeletionDegrees</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Recover full physical degrees at free vertices from the induced-free</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> bound and the explicit root support. Edges joining a free vertex to an old</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> root are counted; they are not discarded by the restriction to F. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 14000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U E K:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   {tail head:E→V} {ktail khead:K→V} {π:Equiv.Perm V} {m b n:ℕ} {H₀ HK:V→U→Prop}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem supported_graph_full_free_degree (G:SimpleGraph V) (F R:Finset V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hs:GraphSupportedOn (F∪R) G) (x:V) (hx:x∈F):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     G.degree x≤(spanningRestriction G F).degree x+R.card:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hsub:G.neighborFinset x⊆(spanningRestriction G F).neighborFinset x∪R:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     intro y hy</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     have hxy:=(G.mem_neighborFinset x y).mp hy</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     rcases Finset.mem_union.mp (hs x y hxy).2 with hyF|hyR</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     · exact Finset.mem_union_left _ ((spanningRestriction G F).mem_neighborFinset x y |&gt;.mpr</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         ((spanningRestriction_adj G F x y).mpr ⟨hxy,hx,hyF⟩))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     · exact Finset.mem_union_right _ hyR</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hc:=(Finset.card_le_card hsub).trans (Finset.card_union_le _ _)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   simpa only [SimpleGraph.card_neighborFinset_eq_degree] using hc</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem marked_packing_supported_on_rows_and_images</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ HK)) (F R:Finset V)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hF:∀ x,π x∈F↔x∈F) (hrows:∀ W∈M,markedWheelRows W⊆F∪R):</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     GraphSupportedOn (F∪(R∪R.image π)) (markedPackingRimGraph M):=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   intro x y hxy</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   obtain ⟨W,hW,he⟩:=Finset.mem_biUnion.mp hxy.2</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hs:=markedWheelRimGraph_supported W x y ⟨hxy.1,he⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hsub:markedWheelRows W∪(markedWheelRows W).image π⊆F∪(R∪R.image π):=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     intro z hz</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     rcases Finset.mem_union.mp hz with hz|hz</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · rcases Finset.mem_union.mp (hrows W hW hz) with hz|hz</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       · exact Finset.mem_union_left _ hz</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       · exact Finset.mem_union_right _ (Finset.mem_union_left _ hz)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     · obtain ⟨a,ha,rfl⟩:=Finset.mem_image.mp hz</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       rcases Finset.mem_union.mp (hrows W hW ha) with ha|ha</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       · exact Finset.mem_union_left _ ((hF a).mpr ha)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       · exact Finset.mem_union_right _ (Finset.mem_union_right _ (Finset.mem_image.mpr ⟨a,ha,rfl⟩))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   exact ⟨hsub hs.1,hsub hs.2⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> theorem marked_hub_row_full_free_rim_degree</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ HK))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (v:Fin n→V) (F:Finset V) (hF:∀ x,π x∈F↔x∈F)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hrows:∀ W∈M,markedWheelRows W⊆F∪Finset.univ.image v)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (D:ℕ) (hdeg:∀ x,(spanningRestriction (markedPackingRimGraph M) F).degree x≤D):</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     ∀ x∈F,(markedPackingRimGraph M).degree x≤D+2*n:=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   let R:=Finset.univ.image v</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hc:R.card≤n:=by exact (Finset.card_image_le).trans_eq (by simp)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hci:(R.image π).card≤n:=Finset.card_image_le.trans hc</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have htot:(R∪R.image π).card≤2*n:=by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hh:=(Finset.card_union_le R (R.image π)).trans (Nat.add_le_add hc hci)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     omega</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   intro x hx</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hh:=supported_graph_full_free_degree (markedPackingRimGraph M) F (R∪R.image π)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (marked_packing_supported_on_rows_and_images M F R hF hrows) x hx</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   exact hh.trans (Nat.add_le_add (hdeg x) htot)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

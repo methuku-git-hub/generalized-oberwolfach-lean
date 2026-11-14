@@ -1,0 +1,169 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>BernoulliProfileFactor.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>BernoulliProfileFactor.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BernoulliFactorCommonEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ProfileFactorAfterChanges</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.FreshFactorScaleComparison</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Factor extraction on one independent vertex-retention event, uniformly</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> for every later small alteration and sparse pair deletion. The tolerances</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> precede the retention probability; only the order threshold depends on it. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option synthInstance.maxSize 256</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 10000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> variable {I T:Type} [Fintype I] [DecidableEq I] [Nonempty I] [Fintype T] [DecidableEq T]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem bernoulli_profile_factor_common_event (a:I→ℕ) (c J:ℕ) (hc:3≤c)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (ha:∀ i,1≤a i) (hs:∑ i,a i=c) (S:T→VertexAbsorberTemplate c)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (α b B:ℝ) (hα:0&lt;α) (hb:0&lt;b) (hB:0≤B):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ η ζ:ℝ,0&lt;η ∧ 0&lt;ζ ∧ ∀ (p:ℝ) (hp:0&lt;p) (hp1:p≤1) (q:ℕ),∃ N:ℕ,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ∀ (V:I→Type) [∀ i,Fintype (V i)] [∀ i,DecidableEq (V i)]</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         (C:Type) [Fintype C] [DecidableEq C],</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       N≤Fintype.card (Σ i,V i)→∀ (R:C→Finset (Σ i,V i)) (w:C→ℝ),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ C₀ i,(Finset.univ.filter (fun v:V i=&gt;(⟨i,v⟩:Σ i,V i)∈R C₀)).card=a i)→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ U:Finset (Σ i,V i),Fintype.card {C₀:C // R C₀=U}≤J)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ C₀,b/(Fintype.card (Σ i,V i):ℝ)^(c-1)≤w C₀ ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         w C₀≤B/(Fintype.card (Σ i,V i):ℝ)^(c-1))→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ v,|1-hypergraphWeightedDegree R w v|≤η)→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ σ:∀ i,FixedSubset (V i) (a i),</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         α*(Fintype.card (Σ i,V i):ℝ)^(c*c)≤Fintype.card (LabelledAbsorberFamily R S (profileRootSet σ)))→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       1-1/(Fintype.card (Σ i,V i):ℝ)^q≤</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (FiniteLaw.pi (fun _:Σ i,V i=&gt;FiniteLaw.retentionCoin p hp.le hp1)).probability</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>           (fun σ=&gt; |((bernoulliVertexSet σ).card:ℝ)-p*Fintype.card (Σ i,V i)|≤</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>             p*Fintype.card (Σ i,V i)/4 ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>             ∀ (Y:Finset (Σ i,V i)) (k:ℕ),</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>             (∀ i,(Finset.univ.filter (fun v:V i=&gt;(⟨i,v⟩:Σ i,V i)∈Y)).card=a i*k)→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>             (((bernoulliVertexSet σ\Y).card+(Y\bernoulliVertexSet σ).card:ℕ):ℝ)≤</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>               ζ*(p*Fintype.card (Σ i,V i))→</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>             ∀ E:Finset ((Σ i,V i)×(Σ i,V i)),(∀ e∈E,e.1≠e.2)→</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>             (E.card:ℝ)≤ζ*(p*Fintype.card (Σ i,V i))^2→</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>             (∀ v,((E.filter (fun e=&gt;v=e.1 ∨ v=e.2)).card:ℝ)≤ζ*(p*Fintype.card (Σ i,V i)))→</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>             ∃ D:Finset C,((∀ x∈D,∀ y∈D,x≠y→Disjoint (R x) (R y)) ∧ D.biUnion R=Y) ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>               ∀ C₀∈D,∀ e∈E,¬(e.1∈R C₀ ∧ e.2∈R C₀)):=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let M:ℝ:=2*c</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hcR:(1:ℝ)≤c:=by exact_mod_cast (show 1≤c by omega)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hM:0&lt;M:=by dsimp [M];positivity</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hM1:1≤M:=by dsimp [M];linarith</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   let αf:=α/(4*(2:ℝ)^(c*c))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   let bf:=b/M^(c-1)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let Bf:=(2:ℝ)^(c-1)*B</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   obtain ⟨ηf,ζf,hηf,hζf,kf,hfactor⟩:=profile_factor_after_local_changes a c J hc ha hs S αf bf Bf</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (by dsimp [αf];positivity) (by dsimp [bf];positivity) (by dsimp [Bf];positivity)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   let ζ:=min (1/4:ℝ) (min (ζf/M^2) (1/M^2))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hζ:0&lt;ζ:=by dsimp [ζ];positivity</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hζ4:ζ≤1/4:=min_le_left _ _</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hζM2:ζ*M^2≤ζf:=by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hh:ζ≤ζf/M^2:=(min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact (le_div_iff₀ (sq_pos_of_pos hM)).mp hh</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hζM21:ζ*M^2≤1:=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hh:ζ≤1/M^2:=(min_le_right _ _).trans (min_le_right _ _)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     exact (le_div_iff₀ (sq_pos_of_pos hM)).mp hh</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hζM:ζ*M≤ζf:=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     have hh:=mul_le_mul_of_nonneg_left (show M≤M^2 by nlinarith only [hM1]) hζ.le</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     exact hh.trans hζM2</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hζM1:ζ*M≤1:=by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     have hh:=mul_le_mul_of_nonneg_left (show M≤M^2 by nlinarith only [hM1]) hζ.le</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     exact hh.trans hζM21</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   refine ⟨ηf/2,ζ,by positivity,hζ,?_⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   intro p hp hp1 q</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   obtain ⟨Ne,hNe⟩:=bernoulli_factor_counts_common_event c J (by omega) S B</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     ((ηf/2)*p^(c-1)) ((α/2)*p^(c*c)) (p/4) hB (by positivity) (by positivity) (by positivity) q</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   obtain ⟨Nb,hNb⟩:=exists_nat_ge (M*kf/p)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   refine ⟨max 1 (max Ne Nb),?_⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   intro V _ _ C _ _ hn R w hR hJ hw herr habs</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   let n:ℝ:=Fintype.card (Σ i,V i)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have hnpos:0&lt;n:=by dsimp [n];exact_mod_cast (show 0&lt;Fintype.card (Σ i,V i) by omega)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hRC (C₀:C):(R C₀).card=c:=by rw [sigma_finset_card];simp only [hR];exact hs</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   have hw0 (C₀:C):0≤w C₀:=(by positivity : (0:ℝ)≤b/n^(c-1)).trans (hw C₀).1</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   have hevent:=hNe (Σ i,V i) C (by omega) R w hRC hJ</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (fun C₀=&gt;⟨hw0 C₀,(hw C₀).2⟩) 1 (by omega) (fun _=&gt;Finset.univ) p hp.le hp1</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   apply hevent.trans</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   apply finiteLaw_probability_mono</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   intro σ hσ</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   refine ⟨?_,?_⟩</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   · have hh:=(hσ.2.2 0).le</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     simp only [Finset.univ_inter,Finset.card_univ] at hh</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     convert hh using 1 &lt;;&gt; ring</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   · intro Y k hY hchange E hE hEsize hEd</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     let A:=bernoulliVertexSet σ</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     let s:=p*n</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     have hsp:0&lt;s:=mul_pos hp hnpos</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     have hYcard:Y.card=c*k:=by rw [sigma_finset_card];simp only [hY,←Finset.sum_mul,hs]</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     have hAc:|(A.card:ℝ)-s|≤s/4:=by</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>       have hh:=(hσ.2.2 0).le</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       simp only [Finset.univ_inter,Finset.card_univ] at hh</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>       convert hh using 1 &lt;;&gt; dsimp [A,s,n] &lt;;&gt; ring</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     obtain ⟨hsk,hks,hkp⟩:=altered_profile_scale_bounds c (by omega) A Y k s ζ hsp hζ.le hζ4 hAc hchange hYcard</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     change s≤M*k at hsk</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     have hk:kf≤k:=by</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       have hN:(Nb:ℝ)≤n:=by dsimp [n];exact_mod_cast (show Nb≤Fintype.card (Σ i,V i) by omega)</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       have hh:=(div_le_iff₀ hp).mp (hNb.trans hN)</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>       have hkR:(kf:ℝ)≤k:=by dsimp [s] at hsk;nlinarith only [hh,hsk,hM]</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>       exact_mod_cast hkR</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     have hΔ:(((A\Y).card+(Y\A).card:ℕ):ℝ)≤ζf*k:=by</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       calc</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>         _≤ζ*s:=hchange</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>         _≤ζ*(M*k):=mul_le_mul_of_nonneg_left hsk hζ.le</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>         _≤ζf*k:=by nlinarith only [mul_le_mul_of_nonneg_right hζM hkp.le]</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     have hΔ1:(((A\Y).card+(Y\A).card:ℕ):ℝ)≤(k:ℝ):=by</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       calc</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>         _≤ζ*s:=hchange</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>         _≤ζ*(M*k):=mul_le_mul_of_nonneg_left hsk hζ.le</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>         _≤k:=by nlinarith only [mul_le_mul_of_nonneg_right hζM1 hkp.le]</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     have hA:(A.card:ℝ)≤2*c*k:=by</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>       have hh:(A.card:ℝ)≤(Y.card:ℝ)+((A\Y).card:ℝ):=by</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>         have ht:A.card≤Y.card+(A\Y).card:=by</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>           simpa only [Nat.add_comm] using (Finset.card_le_card_sdiff_add_card (s:=A) (t:=Y))</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>         exact_mod_cast ht</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>       have hYc:(Y.card:ℝ)=(c:ℝ)*k:=by exact_mod_cast hYcard</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>       have hd:((A\Y).card:ℝ)≤((A\Y).card+(Y\A).card:ℕ):=by exact_mod_cast Nat.le_add_right (A\Y).card (Y\A).card</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>       rw [hYc] at hh</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>       nlinarith only [hh,hd,hΔ1,mul_le_mul_of_nonneg_right hcR hkp.le]</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     let w&#x27;:C→ℝ:=fun C₀=&gt;w C₀/p^(c-1)</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     have hw&#x27; (C₀:C):bf/(k:ℝ)^(c-1)≤w&#x27; C₀ ∧ w&#x27; C₀≤Bf/(k:ℝ)^(c-1):=by</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>       have hws:b/s^(c-1)≤w&#x27; C₀ ∧ w&#x27; C₀≤B/s^(c-1):=by</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>         constructor</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>         · have hh:=div_le_div_of_nonneg_right (hw C₀).1 (pow_nonneg hp.le (c-1))</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>           convert hh using 1 &lt;;&gt; dsimp [s,w&#x27;,n] &lt;;&gt; rw [mul_pow] &lt;;&gt; field_simp</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>         · have hh:=div_le_div_of_nonneg_right (hw C₀).2 (pow_nonneg hp.le (c-1))</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>           convert hh using 1 &lt;;&gt; dsimp [s,w&#x27;,n] &lt;;&gt; rw [mul_pow] &lt;;&gt; field_simp</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>       exact fresh_weight_scale_bounds (c-1) c k s b B (w&#x27; C₀) (by positivity) hkp hsp hb.le hB hsk hks hws</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     have herr&#x27; (v:Σ i,V i) (_hv:v∈Y):</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>         |1-resourceRootOmittedLoad R w&#x27; (fun x=&gt;x∈A) v|≤ηf:=by</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>       rw [resourceRootOmittedLoad_div]</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>       have hh:=omitted_load_rescaling_error</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>         (resourceRootOmittedLoad R w (fun x=&gt;x∈A) v) (hypergraphWeightedDegree R w v)</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>         (p^(c-1)) (ηf/2) (ηf/2) (pow_pos hp _) (hσ.1 v).le (herr v)</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>       convert hh using 1 &lt;;&gt; ring</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>     have habs&#x27; (ρ:∀ i,FixedSubset (V i) (a i)) (_hρ:profileRootSet ρ⊆Y):</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>         2*αf*(k:ℝ)^(c*c)≤absorberGroundCount R S (profileRootSet ρ) A:=by</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>       have hX:(profileRootSet ρ).card=c:=(profileRootSet_card ρ).trans hs</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>       have hh:=(abs_le.mp (hσ.2.1 (profileRootSet ρ) hX).le).1</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>       have hl:=mul_le_mul_of_nonneg_left (habs ρ) (pow_nonneg hp.le (c*c))</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>       have hlow:(α/2)*s^(c*c)≤absorberGroundCount R S (profileRootSet ρ) A:=by</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>         dsimp [s]</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>         rw [mul_pow]</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>         nlinarith only [hh,hl]</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>       apply le_trans _ hlow</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>       calc</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>         _≤2*αf*(2*s)^(c*c):=mul_le_mul_of_nonneg_left</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>           (pow_le_pow_left₀ hkp.le hks _) (by dsimp [αf];positivity)</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>         _=(α/2)*s^(c*c):=by dsimp [αf];rw [mul_pow];field_simp;norm_num</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>     have hEs:(E.card:ℝ)≤ζf*(k:ℝ)^2:=by</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>       calc</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>         _≤ζ*s^2:=hEsize</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>         _≤ζ*(M*k)^2:=mul_le_mul_of_nonneg_left (pow_le_pow_left₀ hsp.le hsk 2) hζ.le</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>         _≤ζf*(k:ℝ)^2:=by nlinarith only [mul_le_mul_of_nonneg_right hζM2 (sq_nonneg (k:ℝ))]</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>     have hEd&#x27; (v:Σ i,V i):((E.filter (fun e=&gt;v=e.1 ∨ v=e.2)).card:ℝ)≤ζf*k:=by</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>       calc</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>         _≤ζ*s:=hEd v</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>         _≤ζ*(M*k):=mul_le_mul_of_nonneg_left hsk hζ.le</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>         _≤ζf*k:=by nlinarith only [mul_le_mul_of_nonneg_right hζM hkp.le]</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>     exact hfactor k hk V C R w&#x27; A Y hY hR hJ hw&#x27; hA hΔ herr&#x27; habs&#x27; E hE hEs hEd&#x27;</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a> </span>
+<span id="L166"><a href="#L166" class="ln"> 166</a> end Oberwolfach</span></pre></html>

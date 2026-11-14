@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FactorPrunedFamilyParameters.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FactorPrunedFamilyParameters.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FactorClassDensitySum</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FactorRemainingClasses</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.FactorRemovalPositiveDegree</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The sizes and density profile passed to the class-partition theorem are</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> those of the actual remaining family after the small classes are deleted. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem factor_pruned_family_parameters {W:Type} [Fintype W] {n:ℕ} (hn:0&lt;n)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (K:ℕ) (hK:0&lt;K) (classify:W→Option (Fin K))</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (D:ℕ) (hEven:Even D) (hsize:Fintype.card W=D/2) (hDn:D≤n)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (δ α κL κS:ℝ) (hδ:0≤δ) (hα:0&lt;α)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hL0:0≤κL) (hS0:0≤κS) (hL:κL≤α/1000) (hS:κS≤α/(1000*(K:ℝ)))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hdegree:(δ+α)*(n:ℝ)≤D):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let fibres:=fun j:Option (Fin K)=&gt;Finset.univ.filter (fun w=&gt;classify w=j)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let cutoff:=fun j:Option (Fin K)=&gt;if j=none then κL else κS</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let small:=fun j:Option (Fin K)=&gt;((fibres j).card:ℝ)&lt;cutoff j*n</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let removed:=Finset.univ.filter (fun w=&gt;small (classify w))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let remaining:={w:W // w∉removed}</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let classifyRemaining:=fun w:remaining=&gt;classify w.val</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let D0:=D-2*removed.card;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     0&lt;D0 ∧ Fintype.card remaining=D0/2 ∧ Even D0 ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∑ j:Option (Fin K),2*((Finset.univ.filter (fun w=&gt;classifyRemaining w=j)).card:ℝ)/D0)=1 ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ j,(∃ w:remaining,classifyRemaining w=j)→2*cutoff j≤</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       2*((Finset.univ.filter (fun w:remaining=&gt;classifyRemaining w=j)).card:ℝ)/D0):=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   intro fibres cutoff small removed remaining classifyRemaining D0</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hb:=factor_small_class_budget K hK classify (n:ℝ) α κL κS (by positivity) hα hL0 hS0 hL hS</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hsmall:(removed.card:ℝ)≤α*n/500:=by simpa [fibres,cutoff,small,removed,ite_mul] using hb</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hpositive:2*removed.card&lt;D:=factor_small_removal_positive_degree D removed.card n hn δ α hδ hα hdegree hsmall</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hD0:0&lt;D0:=by dsimp [D0];omega</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hsize0:=factor_remaining_family_size D hEven hsize removed hpositive.le</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hsum:=factor_remaining_class_density_sum D hEven hsize removed hpositive K classifyRemaining</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hD0R:(0:ℝ)&lt;D0:=by exact_mod_cast hD0</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hD0n:(D0:ℝ)≤n:=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hd:D0≤n:=by dsimp [D0];omega</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact_mod_cast hd</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨hD0,hsize0.1,hsize0.2,hsum,?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   intro j hj</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hnot:=factor_remaining_class_not_small K classify (n:ℝ) κL κS j hj</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hh:=factor_retained_class_actual_density K classify (n:ℝ) (D0:ℝ) κL κS</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (by positivity) hD0R hD0n hL0 hS0 j hnot</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   simpa [cutoff,classifyRemaining,mul_ite] using hh</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> end Oberwolfach</span></pre></html>

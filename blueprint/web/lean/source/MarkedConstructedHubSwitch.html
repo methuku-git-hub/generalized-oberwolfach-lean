@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedConstructedHubSwitch.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedConstructedHubSwitch.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedCommonHubSwitch</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedHubSwitchResources</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Actual marked hub-switch resources constructed from the original common</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> cycle estimates. The output records the support needed for subsequent</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> packing, without assuming the existence of factors or absorber records. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 1024</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 24000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a>  theorem marked_common_hub_switch_resources (m:ℕ) (hm:3&lt;m+1)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (q₀ β blo bhi:ℝ) (hq₀:0&lt;q₀) (hβ:0&lt;β) (hblo:0&lt;blo) (hbhi:0&lt;bhi):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∃ ε:ℝ,0&lt;ε∧∀ qroot:ℕ,∃ t:ℕ,1≤t∧∀ F₀ D:ℝ,0≤F₀→0≤D→∃ N:ℕ,</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ (V U E K:Type) [Fintype V] [DecidableEq V] [DecidableEq U],N≤Fintype.card V→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ (tail head:E→V) (ktail khead:K→V) (π:Equiv.Perm V) (b:ℕ),1≤b→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ (H₀ HK:V→U→Prop) (F:SimpleGraph V) (u u&#x27;:U) (A₀ B₀ I ZK ZO:Finset V) (q:ℝ),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     u≠u&#x27;→q₀≤q→(∀ v,HK v u→¬H₀ v u)→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ v∈A₀,HK v u∧HK v u&#x27;)→(∀ v∈B₀,H₀ v u∧H₀ v u&#x27;)→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀ v∈ZO,H₀ v u∧H₀ v u&#x27;)→ZK⊆A₀→Disjoint (ZK∪ZO) I→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀ x∈ZK∪ZO,∀ y∈ZK∪ZO,x≠y→¬PermutationClose π b x y)→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ZO.card=m*ZK.card→ZK.card≤qroot→(I.card:ℝ)≤ε*Fintype.card V+F₀→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     |(A₀.card:ℝ)-q*Fintype.card V|≤ε*Fintype.card V→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     |(B₀.card:ℝ)-m*q*Fintype.card V|≤ε*Fintype.card V→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ((B₀∩A₀.image π).card:ℝ)≤ε*Fintype.card V→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     Function.Injective (markedPhysicalEdge tail head ktail khead π)→(∀ v,(F.degree v:ℝ)≤D)→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     β*(Fintype.card V:ℝ)^(m+1)≤Fintype.card (ClassMarkedCycle tail head ktail khead m π b A₀ B₀)→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ j:Bool,∀ v v&#x27;:V,v≠v&#x27;→β*(Fintype.card V:ℝ)^m≤</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m π b</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (fun x (_:Unit)=&gt;x∈B₀) (fun x (_:Unit)=&gt;x∈A₀) j v v&#x27; () ()))→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀ w:MarkedCycleTuple tail head ktail khead m π b→ℝ,</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (∀ C,blo/(Fintype.card V:ℝ)^m≤w C∧w C≤bhi/(Fintype.card V:ℝ)^m)→</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∀ j:Bool,∀ v:V,|1-resourceRootOmittedLoad typedMarkedCycleVertices w</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (fun x=&gt;x∈typedClassSet A₀ B₀) (j,v)|≤ε)→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ∃ Y:Finset V,∃ P N:Finset (Finset V⊕(V×U)),</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       Disjoint Y ((ZK∪ZO)∪I)∧Y.card=(m+1)*t∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (∀ x∈Y,∀ y∈Y,¬F.Adj x y)∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       HasResourceDecomposition (markedWheelPhysicalResources (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead) (m:=m) (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=HK)) P∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       HasResourceDecomposition (markedWheelPhysicalResources (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead) (m:=m) (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=HK)) N∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (∀ e∈P∪N,MarkedSwitchResource tail head ktail khead π Y (ZK∪ZO) u u&#x27; e)∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       ∀ e:Finset V⊕(V×U),(if e∈P then (1:ℤ) else 0)-(if e∈N then 1 else 0)=</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         (if e∈(ZK∪ZO).image (fun v=&gt;Sum.inr (v,u)) then 1 else 0)-</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         (if e∈(ZK∪ZO).image (fun v=&gt;Sum.inr (v,u&#x27;)) then 1 else 0):=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨ε,hε,hchoose⟩:=marked_common_hub_switch m hm q₀ β blo bhi hq₀ hβ hblo hbhi</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   refine ⟨ε,hε,?_⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   intro qroot</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   obtain ⟨t,ht,hchoose⟩:=hchoose qroot</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   refine ⟨t,ht,?_⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   intro F₀ D hF₀ hD</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   obtain ⟨N,hchoose⟩:=hchoose F₀ D hF₀ hD</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   refine ⟨N,?_⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   intro V U E K _ _ _ hn tail head ktail khead π b hb H₀ HK F u u&#x27; A₀ B₀ I ZK ZO q hu hq htypes hAK hBO hZO hZA hZI hZsep hZc hz hIc hAc hBc hOc hp hF hbase hpath w hw hroot</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   obtain ⟨A,B,Y,M₀,M₁,hZKA,hZOB,hAA,hBB,hdis,hπ,hY,hYI,hYc,hYA,hYB,hYF,hM₀,hM₁,hcover₀,hcover₁,hcap,htrade⟩:=</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     hchoose V U E K hn tail head ktail khead π b hb H₀ HK F u u&#x27; A₀ B₀ I ZK ZO q hu hq htypes hAK hBO hZO hZA hZI hZsep hZc hz hIc hAc hBc hOc hp hF hbase hpath w hw hroot</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   let P:=M₁.biUnion (fun C=&gt;markedCycleResourcesAtHub (classMarkedCycleAsMarked C) u)∪</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     M₀.biUnion (fun C=&gt;markedCycleResourcesAtHub (classMarkedCycleAsMarked C) u&#x27;)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   let N&#x27;:=M₁.biUnion (fun C=&gt;markedCycleResourcesAtHub (classMarkedCycleAsMarked C) u&#x27;)∪</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     M₀.biUnion (fun C=&gt;markedCycleResourcesAtHub (classMarkedCycleAsMarked C) u)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hs:=marked_two_factor_switch_resources (by omega : 1≤m) A B Y (ZK∪ZO)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (hYI.mono_right Finset.subset_union_left) u u&#x27; M₀ M₁ hcover₀ hcover₁ hcap</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   exact ⟨Y,P,N&#x27;,hYI,hYc,hYF,htrade.1,htrade.2.1,hs,htrade.2.2⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a> </span>
+<span id="L66"><a href="#L66" class="ln">  66</a> end Oberwolfach</span></pre></html>

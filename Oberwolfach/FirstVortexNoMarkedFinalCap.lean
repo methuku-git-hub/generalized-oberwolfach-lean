@@ -1,0 +1,35 @@
+module
+
+public import Oberwolfach.LongReservedContinuationCappedFinal
+public import Oberwolfach.FirstVortexNoMarkedCappedParameterChoices
+
+@[expose] public section
+/-! The list and global-load scales are fixed first; the remaining positive
+matching parameters can then be chosen for any later admissible inputs. -/
+set_option autoImplicit false
+noncomputable section
+namespace Oberwolfach
+
+theorem first_vortex_no_marked_ordered_choices_final_cap
+    (γList pstar βFinalCap:ℝ) (hγ:0<γList) (hp:0<pstar) (hCap:0<βFinalCap):
+    ∃βlist lamList ζList βfinal δglobal:ℝ,
+      0<βlist ∧ βlist≤1 ∧ 0<lamList ∧ lamList≤1/100 ∧ 0<ζList ∧
+      0<βfinal ∧ βfinal≤lamList/4 ∧ βfinal≤1 ∧ βfinal≤βFinalCap ∧
+      0<δglobal ∧ δglobal≤(βfinal/100)^2 ∧ δglobal≤1/100 ∧
+      (∃dMin:ℕ,∀d:ℕ,dMin≤d→2≤d→∃N:ℕ,∀n≥N,
+        (n:ℝ)^(3/4:ℝ)+2*(2*((3*d:ℕ):ℝ)+1)≤γList*pstar^2*n ∧
+        βlist*n+(n:ℝ)^(3/4:ℝ)≤γList*pstar^2*n*(1/100:ℝ) ∧
+        (lamList+2*ζList)*n≤βlist*n) ∧
+    ∀b ρ₀ θ δold C₀ εcap:ℝ,0<b→0<ρ₀→0<θ→0<δold→1≤C₀→0<εcap→
+    ∃αMatch εQ lam lamAssign:ℝ,
+      0<αMatch ∧ (2*αMatch)/16≤b ∧
+      (2*αMatch)/16≤((ρ₀/4)/40000)*θ/1024 ∧ 2*αMatch≤4*δglobal ∧
+      0<εQ ∧ εQ≤εcap ∧ εQ≤δglobal ∧ βfinal+εQ≤lamList ∧
+      εQ≤αMatch/(1000*C₀) ∧ εQ≤(ρ₀/4)/80000 ∧
+      0<lam ∧ lam≤θ ∧ lam≤αMatch/128 ∧ lam≤δold*εQ/32 ∧ lam<lamAssign :=by
+  obtain ⟨βlist,lamList,ζList,βfinal,δglobal,hβ,hβ1,hlamList,hlamList1,hζ,hβfinal,hβbound,hβfinal1,hβcap,hδglobal,hδbound,hδ1,htrim,dMin,hList⟩:=
+    long_reserved_continuation_capped_final γList pstar βFinalCap hγ hp hCap
+  refine ⟨βlist,lamList,ζList,βfinal,δglobal,hβ,hβ1,hlamList,hlamList1,hζ,hβfinal,hβbound,hβfinal1,hβcap,hδglobal,hδbound,hδ1,⟨dMin,hList⟩,?_⟩
+  intro b ρ₀ θ δold C₀ εcap hb hρ hθ hδold hC hcap
+  exact first_vortex_no_marked_parameter_choices_capped b ρ₀ θ δold δglobal lamList βfinal C₀ εcap hb hρ hθ hδold hδglobal hcap hlamList hβfinal.le hβbound hC
+end Oberwolfach

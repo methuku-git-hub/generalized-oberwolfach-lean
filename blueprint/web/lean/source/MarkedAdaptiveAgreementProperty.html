@@ -1,0 +1,141 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedAdaptiveAgreementProperty.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedAdaptiveAgreementProperty.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceAdaptiveAbsorberAgreementSeparate</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A named predicate for the full agreement-inclusive retained event. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 30000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V U Γ Color:Type} {W Z Hdom:ℕ→Type}</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [LinearOrder V] [Nonempty V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   [∀ i,Fintype (W i)] [∀ i,Fintype (Z i)] [∀ i,LinearOrder (W i)] [∀ i,DecidableEq (Z i)]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [∀ i,Fintype (Hdom i)] [∀ i,DecidableEq (Hdom i)]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable (r d size a₀ b₀ e₀ aRob bRob eRob f₀ L hNbr:ℕ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable (β βCommon εAbs εRob ζRob εRef δRef γ p k s₀ tstar ζ εBal Kbal ζBal εNbr ζNbr Bload εLoad Kload ζLoad ζLocal ζConfig ρstar sstar kstar τ:ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> variable (P:SimpleGraph V) (π:Equiv.Perm V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> variable (f:∀ i,W i↪oV) (g:∀ i,Z i↪U) (ρi:∀ i,Equiv.Perm (W i))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> variable (A:∀ i,Finset (W i)) (Bset:∀ i,Finset (Z i))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> variable (Scale:ℕ→ℕ) (D Dbal Dload:ℕ→ℝ) (b:∀ i,Hdom i↪Z i)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> variable (weight:∀ i,(Fin ((r+4)+1)→W i)→ℝ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> variable (q:U→Γ→ℝ) (s:U→Color→ℝ) (a:Γ) (j:Color)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> def MarkedAdaptiveAgreementProperty : RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a → Prop :=</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> (fun z=&gt;(((((((((∀ i≤L,</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         MarkedReferenceConfigurations r (P.comap (f i)) (ρi i) d a j β</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>           (rawMarkedRestrictPair (f i) (g i) z.1) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         ∀ ζ:ℝ,0≤ζ → 2*ζ≤(3/4)*γ*p^2 → ζ≤γ*min p k/8 →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         ∀ DR:SimpleGraph (W i),(∀ x,(DR.degree x:ℝ)≤ζ*Fintype.card (W i)) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         MarkedReferenceStatistics (P.comap (f i)) (ρi i) d a j (D i) (εRef+ζ) δRef (γ/2) p k s₀</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>           (s₀/((r+4:ℕ):ℝ)) (rawMarkedDeleteRims (rawMarkedRestrictPair (f i) (g i) z.1) DR.edgeFinset) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         MarkedReferenceCutFamilies (P.comap (f i)) (ρi i) d a j (γ/2) p k tstar</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>           (rawMarkedDeleteRims (rawMarkedRestrictPair (f i) (g i) z.1) DR.edgeFinset)) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         let H:Bool→V→U→Prop:=retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j;</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         MarkedReservedTerminalAbsorberProperty</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>           (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;z.1 (Sum.inl e)) false=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>           (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;z.1 (Sum.inl e)) true=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>           (H false) (H true) π (3*d) r size a₀ b₀ e₀ f₀ εAbs) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (∀ i≤L,∀ δ:ℝ,0≤δ →</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>           ∀ (DR:SimpleGraph (W i)) (DS:SimpleGraph (W i⊕Z i)),</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>           (∀ x,(DR.degree x:ℝ)≤δ) → (∀ x,(DS.degree x:ℝ)≤δ) →</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>           MarkedCommonConfigurationsWithSpokes r (P.comap (f i)) (ρi i) d βCommon (ζ+4*δ/Fintype.card (W i))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>             (rawMarkedDeleteRims (rawMarkedRestrictPair (f i) (g i) z.1) DR.edgeFinset)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>             (markedDeletePhysicalSpokes</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>               (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>                 (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f i x) (g i u)) DS))) ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         (∀ i≤L,</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           let σi := rawMarkedRestrictPair (f i) (g i) z.1</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           let Hi := fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>             (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f i x) (g i u)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>           let E := MarkedSampleArc (P.comap (f i)) (ρi i) (3*d) (fun e=&gt;σi (Sum.inl e)) false</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>           let KArc := MarkedSampleArc (P.comap (f i)) (ρi i) (3*d) (fun e=&gt;σi (Sum.inl e)) true</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>           let S := Finset.univ.filter (fun s:W i×Z i=&gt;Hi false s.1 s.2∨Hi true s.1 s.2)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>           let err := (εBal+((r+4)+2:ℕ)*ζBal)*Scale i;</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>           (∀ v j,|markedFiniteDomainBalance (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>             (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (Hi true) Finset.univ S (r+4) (A i) (Bset i) v j|≤err) ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>           ∀ (KA : Finset (E⊕KArc)) (KS : Finset (W i×Z i)),KS⊆S→</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>           let R := markedFiniteResources (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>             (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (ρi i) KA KS;</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>           R.filter (markedInnerResource (A i) (Bset i))=∅→</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>           ∀ δ:ℝ,0≤δ→</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>           (∀ physical v,(((markedIncidentEdges (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>             (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (ρi i) (Hi false) (Hi true) physical v).filter</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>             (fun e=&gt;markedActivePhysical (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>               (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (ρi i) (Hi false) (Hi true) e∈</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>                 R.filter (markedStarResource (A i) (Bset i)))).card:ℝ)≤δ)→</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>           let σ&#x27; := rawMarkedDeleteRims σi (markedSampleArcSetGraph (P.comap (f i)) (ρi i) d σi KA).edgeFinset</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>           let H&#x27; := markedDeletePhysicalSpokes Hi (markedFiniteSpokeGraph KS)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>           let E&#x27; := MarkedSampleArc (P.comap (f i)) (ρi i) (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>           let K&#x27; := MarkedSampleArc (P.comap (f i)) (ρi i) (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>           let S&#x27; := Finset.univ.filter (fun s:W i×Z i=&gt;H&#x27; false s.1 s.2∨H&#x27; true s.1 s.2);</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>           (∀ v j,|markedFiniteDomainBalance (fun e:E&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>             (fun e:K&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2) (H&#x27; true) Finset.univ S&#x27; (r+4) (A i) (Bset i) v j|≤err+((r+4)+2)*δ) ∧</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>           (∀ v,Sum.elim (fun x=&gt;x∈A i) (fun u=&gt;u∈Bset i) v→∀ j,</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>             markedFiniteDomainBalance (fun e:E&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>               (fun e:K&#x27;=&gt;e.val.1) (fun e=&gt;e.val.2) (H&#x27; true) Finset.univ S&#x27; (r+4) (A i) (Bset i) v j=</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>             markedFiniteDomainBalance (fun e:E=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>               (fun e:KArc=&gt;e.val.1) (fun e=&gt;e.val.2) (Hi true) Finset.univ S (r+4) (A i) (Bset i) v j))) ∧</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>         (∀ i≤L,</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>           let ω := rawMarkedRestrictPair (f i) (g i) z.1</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>           let H := fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>             (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f i x) (g i u);</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>           ∀ deltaR deltaV deltaU : ℝ,0≤deltaR→0≤deltaV→0≤deltaU→</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>           ∀ (DR : SimpleGraph (W i)) (DS : SimpleGraph (W i⊕Z i)),</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>             (∀ x,((DR.neighborFinset x∩A i).card:ℝ)≤deltaR)→</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>             (∀ x,(((Bset i).filter (fun u=&gt;DS.Adj (Sum.inl x) (Sum.inr u))).card:ℝ)≤deltaV)→</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>             (∀ u,(((A i).filter (fun x=&gt;DS.Adj (Sum.inl x) (Sum.inr u))).card:ℝ)≤deltaU)→</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>           MarkedRowsWithSpokes (P.comap (f i)) (ρi i) d hNbr (A i) p k</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>             (fun u=&gt;q (g i u)) (fun u=&gt;s (g i u)) a j</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>             ((εNbr+hNbr*ζNbr)*(A i).card+hNbr*(deltaR+deltaU))</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>             (rawMarkedDeleteRims ω DR.edgeFinset) (markedDeletePhysicalSpokes H DS) ∧</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>           MarkedIndicesWithSpokes (ρi i) d hNbr (Bset i)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>             (fun u=&gt;q (g i u)) (fun u=&gt;s (g i u)) a j</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>             ((εNbr+hNbr*ζNbr)*(Bset i).card+hNbr*deltaV)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>             (rawMarkedDeleteRims ω DR.edgeFinset) (markedDeletePhysicalSpokes H DS))) ∧</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>         (∀ i≤L,∀ δ : ℝ,0≤δ→</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>           ∀ (DR : SimpleGraph (W i)) (DS : SimpleGraph (W i⊕Z i)),</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>           (∀ x,(DR.degree x:ℝ)≤δ)→(∀ x,(DS.degree x:ℝ)≤δ)→</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>           MarkedPackingLoadsWithSpokes (P.comap (f i)) (ρi i) d (r+4) (Dload i) p k s₀ (weight i) a j</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>             (b i) (fun z=&gt;q (g i z)) (fun z=&gt;s (g i z))</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>             (τ+εLoad+11*(((r+4):ℝ)+1)^4*(2*Bload/(ρstar*sstar/(2*((r+4:ℕ):ℝ)))^(2*(r+4)+1))*Kload*ζLoad+</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>               33*(((r+4):ℝ)+1)^4*(2*Bload/(ρstar*sstar/(2*((r+4:ℕ):ℝ)))^(2*(r+4)+1))*δ/Fintype.card (W i))</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>             (rawMarkedDeleteRims (rawMarkedRestrictPair (f i) (g i) z.1) DR.edgeFinset)</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>             (markedDeletePhysicalSpokes</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>               (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>                 (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a))</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>                   z.2 a j b (f i x) (g i u)) DS))) ∧</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>         (∀ i≤L,MarkedLocalSpokeLoadsWithSpokes (P.comap (f i)) (ρi i) d (r+4) (Dload i) p k s₀ (weight i)</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>           (τ+εLoad+5*(((r+4):ℝ)+1)^4*(2*Bload/(ρstar*sstar/(2*((r+4:ℕ):ℝ)))^(2*(r+4)+1))*Kload*ζLocal)</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>           (rawMarkedRestrictPair (f i) (g i) z.1)</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>           (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>             (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f i x) (g i u)))) ∧</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>         (∀ i≤L,MarkedLocalConfigurationsWithSpokes r (P.comap (f i)) (ρi i) d (A i)</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>           (markedLocalCycleCoefficient r γ (tstar/2) kstar-(r+5:ℕ)*ζConfig)</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>           (markedLocalPathCoefficient r γ (tstar/2) kstar-(r+4:ℕ)*ζConfig)</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>           (rawMarkedRestrictPair (f i) (g i) z.1)</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>           (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>             (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j b (f i x) (g i u)))) ∧</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>         (let H:Bool→V→U→Prop := retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>           ∀ (DR:SimpleGraph V) (DS:SimpleGraph (V⊕U)),</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>             (∀ x,(DR.degree x:ℝ)≤ζRob*Fintype.card V) →</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>             (∀ x,(DS.degree x:ℝ)≤ζRob*Fintype.card V) →</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>           let σ&#x27;:=rawMarkedDeleteRims z.1 DR.edgeFinset</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>           let H&#x27;:=markedDeletePhysicalSpokes H DS</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>           MarkedReservedTerminalAbsorberProperty</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>             (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>             (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>             (H&#x27; false) (H&#x27; true) π (3*d) r size aRob bRob eRob f₀ εRob)) ∧</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>         (let H:Bool→V→U→Prop:=retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>          MarkedRowsWithSpokes P π d hNbr Finset.univ p k q s a j (εNbr*Fintype.card V) z.1 H ∧</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>          MarkedIndicesWithSpokes π d hNbr Finset.univ q s a j (εNbr*Fintype.card U) z.1 H ∧</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>          (∀ b x,(∑ u,if ¬(rawMarkedPairSpokes π d z.1 a j b x u↔H b x u) then (1:ℝ) else 0)≤(εNbr/(2*((hNbr:ℝ)+1)))*Fintype.card U) ∧</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>          (∀ b u,(∑ x,if ¬(rawMarkedPairSpokes π d z.1 a j b x u↔H b x u) then (1:ℝ) else 0)≤(εNbr/(2*((hNbr:ℝ)+1)))*Fintype.card V) ∧</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>          (∀ (DR:SimpleGraph V) (DS:SimpleGraph (V⊕U)) (δ:ℝ),(∀ z,(DS.degree z:ℝ)≤δ) →</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>             (∀ b x,(∑ u,if ¬(rawMarkedPairSpokes π d (rawMarkedDeleteRims z.1 DR.edgeFinset) a j b x u↔markedDeletePhysicalSpokes H DS b x u) then (1:ℝ) else 0)≤(εNbr/(2*((hNbr:ℝ)+1)))*Fintype.card U+δ) ∧</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>             (∀ b u,(∑ x,if ¬(rawMarkedPairSpokes π d (rawMarkedDeleteRims z.1 DR.edgeFinset) a j b x u↔markedDeletePhysicalSpokes H DS b x u) then (1:ℝ) else 0)≤(εNbr/(2*((hNbr:ℝ)+1)))*Fintype.card V+δ))))</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a> end Oberwolfach</span></pre></html>

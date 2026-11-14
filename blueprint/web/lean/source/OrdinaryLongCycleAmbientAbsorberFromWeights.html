@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryLongCycleAmbientAbsorberFromWeights.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryLongCycleAmbientAbsorberFromWeights.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryRelativeAmbientAbsorber</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryPairProfilesForLargeOrder</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The longer-cycle relative ambient absorber from concrete two-neighbourhood</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> and fixed cycle-weight hypotheses. The paired-absorber profile is derived. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 30000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem ordinary_long_cycle_ambient_absorber_from_weights (mcycle:ℕ) (hmcycle:3≤mcycle) (β b B:ℝ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hβ:0&lt;β) (hb:0&lt;b) (hB:0&lt;B):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃ η ε:ℝ,0&lt;η∧0&lt;ε∧ε≤β/4∧∀ m:ℕ,∃ a₀ b₀:ℕ,∀ f:ℕ,∀ d:ℝ,0≤d→∃ n₀:ℕ,</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∀ (V U:Type) [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U],</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       n₀≤Fintype.card V→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       ∀ (G:SimpleGraph V) (Hs:V→U→Prop) (Q F:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (A Z W:Finset V) (B₀:Finset U),</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (ordinaryPhysicalGraph G Hs).support.toFinset.card≤m→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (∀ v,G.degree v=2*(Finset.univ.filter (Hs v)).card)→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀ u,mcycle+1∣(Finset.univ.filter (fun v=&gt;Hs v u)).card)→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       G≤Q→(∀ v u,Hs v u→H v u)→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ u,(∃ v,Hs v u)→u∈B₀)→(∀ v w,Q.Adj v w→¬F.Adj v w)→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       A=Finset.univ\Z→(Z.card:ℝ)≤ε*Fintype.card V→W.card≤f→(B₀.card:ℝ)≤ε*Fintype.card V+f→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ v,(F.degree v:ℝ)≤d)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ v w,β*Fintype.card V≤((Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ u u&#x27; v w,β*Fintype.card V≤(((Finset.univ.filter (fun a=&gt;H a u∧H a u&#x27;))∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (mcycle+1=4→∀ v w x,β*Fintype.card V≤((Q.neighborFinset v∩Q.neighborFinset w∩Q.neighborFinset x).card:ℝ))→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ T:Finset V,T.card≤mcycle+1+6→(∀ v∈T,∀ w∈T,¬F.Adj v w)→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         β*Fintype.card V≤((common Finset.univ T (fun v=&gt;Finset.univ.filter (H v))).card:ℝ))→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ∀ weight:∀ u u&#x27;:U,u≠u&#x27;→LocalOrdinaryCycle Q F (Finset.univ.filter (fun v=&gt;H v u∧H v u&#x27;)) (mcycle+1)→ℝ,</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ u u&#x27; (hne:u≠u&#x27;) C,b/(Fintype.card V:ℝ)^mcycle≤weight u u&#x27; hne C∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         weight u u&#x27; hne C≤B/(Fintype.card V:ℝ)^mcycle)→</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ u u&#x27; (hne:u≠u&#x27;),∀ v∈Finset.univ.filter (fun v=&gt;H v u∧H v u&#x27;),</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         |1-hypergraphWeightedDegree localOrdinaryVertices (weight u u&#x27; hne) v|≤η)→</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       ∃ C:Finset (Sym2 V⊕(V×U)),</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         IsResourceAbsorber (ordinaryWheelResources (P:=Q) (F:=F) (Hbase:=H) (r:=mcycle+1))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>           (ordinaryHostResources G Hs) C∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         C⊆ordinaryHostResources Q H∧(ordinaryResourceRows C).card≤a₀∧(ordinaryResourceHubs C).card≤b₀∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         ordinaryResourceRows C⊆G.support.toFinset∪A∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (∀ v∈ordinaryResourceRows C,v∈W→v∈G.support.toFinset)∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         (∀ u∈ordinaryResourceHubs C,u∈B₀→u∈Finset.univ.filter (fun u=&gt;∃ v,Hs v u))∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         Disjoint C (ordinaryRootResources W B₀) := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let a:ℝ:=(ordinaryLocalCountCoeff mcycle β/2)^(mcycle+2)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have ha:0&lt;a:=by dsimp [a];have hh:=ordinaryLocalCountCoeff_pos mcycle β hβ;positivity</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨η,ε,hη,hε,hεβ,hbase⟩:=ordinary_relative_ambient_absorber (mcycle+1) (by omega)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (fun (_:Unit)=&gt;pairedAbsorberTemplate (mcycle+1)) β a b B hβ ha hb hB</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   refine ⟨η,ε,hη,hε,hεβ,?_⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro m</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   obtain ⟨a₀,b₀,hbase⟩:=hbase m</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   refine ⟨a₀,b₀,?_⟩</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   intro f d hd</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   obtain ⟨N₀,hbase⟩:=hbase f d hd</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   obtain ⟨N₁,hprofile⟩:=ordinary_pair_profiles_for_large_order mcycle hmcycle β b B η d hβ hd</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   refine ⟨max N₀ N₁,?_⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   intro V U _ _ _ _ hn G Hs Q F H A Z W B₀ hm hbal hdiv hG hH hB₀ hQF</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     hA hZ hW hBsize hF hpair hspair hthree hhub weight hw hdeg</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   obtain ⟨P⟩:=hprofile V U (by omega) Q F H hF hspair weight hw hdeg</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   exact hbase V U (by omega) G Hs Q F H A Z W B₀ hm hbal hdiv hG hH hB₀ hQF</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     hA hZ hW hBsize hF hpair hspair hthree (by intro h;omega) (by intro h;omega)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     hhub P</span>
+<span id="L63"><a href="#L63" class="ln">  63</a> end Oberwolfach</span></pre></html>

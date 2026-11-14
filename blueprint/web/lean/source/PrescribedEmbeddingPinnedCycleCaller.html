@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedEmbeddingPinnedCycleCaller.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedEmbeddingPinnedCycleCaller.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ExtendingListPinnedCycle</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedEmbeddingCycleSlack</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PrescribedEmbeddingLabelBudget</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.PrescribedEmbeddingSourceBudget</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The one-prescribed-vertex cycle construction under the original</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> square-root, source-size, saturation and forbidden-degree budgets. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem prescribed_embedding_pinned_cycle_of_source_budgets</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {X V:Type} [DecidableEq X] [Fintype V] [DecidableEq V]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (Q A C:Finset X) (φ:X→V) (hAC:Disjoint A C)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hsub:A∪C⊆Q) (hinj:Set.InjOn φ A) (S L:Finset V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (β δ:ℝ) (hβ:0&lt;β) (hβ1:β≤1) (hδ:0&lt;δ) (hδbound:δ≤(β/100)^2)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hnβ:100/β≤(Fintype.card V:ℝ))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hQ:(Q.card:ℝ)≤δ*Fintype.card V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hS:(S.card:ℝ)≤Real.sqrt δ*Fintype.card V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (D:V→V→Prop) (hext:IsExtendingList D L β) (F:SimpleGraph V)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hF:∀ v,(F.degree v:ℝ)≤8*Real.sqrt δ*Fintype.card V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (x:V) (ℓ:ℕ) (hℓ:3≤ℓ) (hC:C.card+1=ℓ):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ xs:List V,xs.length=ℓ-1 ∧ xs.Nodup ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ z∈xs,z∈L ∧ z∉(A.image φ∪S) ∧ z≠x) ∧ DirectedPathThrough D F x x xs := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   let n:ℝ:=Fintype.card V</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let M:ℝ:=8*Real.sqrt δ*n</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hsrcNat:=prescribed_embedding_assigned_and_unembedded_budget Q A C φ hAC hsub hinj</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hsrc:(A.image φ).card+C.card≤δ*n:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hh:(((A.image φ).card+C.card:ℕ):ℝ)≤(Q.card:ℝ):=by exact_mod_cast hsrcNat</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     dsimp [n] at *</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     push_cast at hh</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     linarith</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hlabel:=prescribed_embedding_label_budget (A.image φ) S C.card (Real.sqrt δ*n) δ n hsrc (by simpa [n] using hS)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hlabel&#x27;:(((A.image φ∪S).card:ℕ):ℝ)+ℓ≤Real.sqrt δ*n+δ*n+1:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     rw [←hC]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     exact hlabel</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hbud:=prescribed_embedding_cycle_budget β δ n M (((A.image φ∪S).card:ℕ):ℝ) ℓ hβ hβ1 hδ hδbound (by simpa [n] using hnβ) hlabel&#x27; (by simp [M])</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hM:0≤M:=by dsimp [M,n];positivity</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hF&#x27;:∀ v,(F.degree v:ℝ)≤M:=by simpa [M,n] using hF</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   exact extending_list_embed_pinned_cycle D L β hext F M hM hF&#x27; (A.image φ∪S) x ℓ hℓ (by simpa [n] using hbud)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

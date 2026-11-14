@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SampledInducedFractional.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SampledInducedFractional.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SampledInducedDensity</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The successful sample supplies a genuine fractional cycle decomposition</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> by the proved ordinary threshold, before any averaging of coefficients. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem sampled_induced_fractional (r : ℕ) (hr : 3≤r) (α : ℝ) (hα : 0&lt;α) :</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ N : ℕ,∀ (V : Type) [Fintype V] [DecidableEq V],∀ m≥N,</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       ∀ (G : SimpleGraph V) (z : FixedSubset V m × (Sym2 V → Bool)),</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       sampledInducedDense G (cycleThreshold r) α z →</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       HasFractionalDecomposition (sampledInducedGraph G z) (fun C =&gt; IsEmbeddedCycle C r) := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   obtain ⟨N,hN⟩ := cycle_fractional_on_subset r hr (α/4) (by positivity)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   refine ⟨N,?_⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   intro V _ _ m hm G z hz</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   apply hN V (retainedGraph G z.2) z.1.val (by simpa only [z.1.property] using hm)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   intro v hv</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hh := (hz v hv).le</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   rw [retainedNeighbourCount_eq] at hh</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   simpa only [z.1.property] using hh</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedRestrictedSampleArcRange.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedRestrictedSampleArcRange.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSampleArcEmbedding</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawMarkedPairRestriction</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The active sample has exactly the original typed arcs with both</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> auxiliary endpoints in the embedded row domain. No physical edge receives</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> a new orientation or mark under restriction. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 5000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V A U B Gamma Color:Type} [Fintype V] [Fintype A] [Fintype U] [Fintype B]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [Fintype Gamma] [Fintype Color] [LinearOrder V] [LinearOrder A] [DecidableEq U] [DecidableEq B]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> def markedRestrictedSampleArcEmbedding</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (f:A↪oV) (g:B↪U) (π:Equiv.Perm V) (ρ:Equiv.Perm A)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hf:∀ x,f (ρ x)=π (f x)) (P:SimpleGraph V) (d:ℕ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (σ:RawMarkedOutcome V U Gamma Color) (j:Bool):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     MarkedSampleArc (P.comap f) ρ (3*d) (fun e=&gt;rawMarkedRestrictPair f g σ (Sum.inl e)) j↪</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) j:=</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   markedSampleArcEmbedding f π ρ hf P (3*d) (rawMarkedRestrictHubs g σ) j</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem markedRestrictedSampleArcEmbedding_range</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (f:A↪oV) (g:B↪U) (π:Equiv.Perm V) (ρ:Equiv.Perm A)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hf:∀ x,f (ρ x)=π (f x)) (P:SimpleGraph V) (d:ℕ)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (σ:RawMarkedOutcome V U Gamma Color) (j:Bool):</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     Finset.univ.image (markedRestrictedSampleArcEmbedding f g π ρ hf P d σ j)=</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       Finset.univ.filter (fun e:MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) j=&gt;</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         e.val.1∈Finset.univ.image f∧e.val.2∈Finset.univ.image f):=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   ext e</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   simp only [Finset.mem_image,Finset.mem_filter,Finset.mem_univ,true_and]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   constructor</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   · rintro ⟨a,rfl⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     exact ⟨⟨a.val.1,rfl⟩,⟨a.val.2,rfl⟩⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · rintro ⟨⟨x,hx⟩,⟨y,hy⟩⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have he:markedPhysicalRim (P.comap f) ρ (3*d)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         (fun e=&gt;rawMarkedRestrictPair f g σ (Sum.inl e)) j x y=1:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       apply (markedPhysicalRim_orderEmbedding f π ρ hf P (3*d) (fun e=&gt;σ (Sum.inl e)) j x y).mpr</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       simpa only [hx,hy] using e.property</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     refine ⟨⟨(x,y),he⟩,?_⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     exact Subtype.ext (Prod.ext hx hy)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> </span>
+<span id="L44"><a href="#L44" class="ln">  44</a> end Oberwolfach</span></pre></html>

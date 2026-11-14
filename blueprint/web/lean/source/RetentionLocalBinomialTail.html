@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RetentionLocalBinomialTail.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RetentionLocalBinomialTail.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.BinomialRestrictionMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem retention_binomial_tail_at_local_scale</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (K a b:ℝ) (hK:0≤K) (ha:0&lt;a) (hb:0&lt;b) (L:ℕ):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     ∃N:ℕ,1≤N ∧ ∀M n:ℕ,N≤M→M≤n→∀p:ℝ,0≤p→p≤K*(n:ℝ)^(-b)→</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>       (M.choose (Nat.ceil (a*M)):ℝ)*p^(Nat.ceil (a*M))≤1/(M:ℝ)^L:=by</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   obtain ⟨m,N,hm,hN,h⟩:=uniform_binomial_restriction_tail K a b hK ha hb L</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   refine ⟨max m N,?_ ,?_⟩</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   · exact le_trans hm (le_max_left m N)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   intro M n hM hMn p hp hrate</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hM₁:m≤M:=le_trans (le_max_left m N) hM</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hM₂:N≤M:=le_trans (le_max_right m N) hM</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hMp:(0:ℝ)&lt;M:=by exact_mod_cast (show 0&lt;M by omega)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hMnR:(M:ℝ)≤n:=by exact_mod_cast hMn</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hmono:(n:ℝ)^(-b)≤(M:ℝ)^(-b):=Real.rpow_le_rpow_of_nonpos hMp hMnR (by linarith)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hrate&#x27;:p≤K*(M:ℝ)^(-b):=hrate.trans (mul_le_mul_of_nonneg_left hmono hK)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   exact h M hM₂ M hM₁ p hp hrate&#x27;</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> end Oberwolfach</span></pre></html>

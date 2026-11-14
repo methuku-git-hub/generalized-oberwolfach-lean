@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHostRimEncoding.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHostRimEncoding.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawMarkedResourceCoordinates</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A physically injective typed host can be represented by categorical</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> rim coordinates. This is deterministic encoding of a given host, not a</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> claim that it has the distribution of a fresh random sample. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 10000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V E K : Type} [LinearOrder V]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def markedHostPhysicalCoordinate (tail head:E → V) (ktail khead:K → V) (π:Equiv.Perm V) : E⊕K → Sym2 V :=</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   Sum.elim (fun e=&gt;s(tail e,head e)) (fun e=&gt;s(ktail e,π (khead e)))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem markedHostPhysicalCoordinate_injective</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (tail head:E → V) (ktail khead:K → V) (π:Equiv.Perm V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π)) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     Function.Injective (markedHostPhysicalCoordinate tail head ktail khead π) := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   intro a b hab</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   apply hp</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hh:=congrArg Sym2.toFinset hab</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   cases a &lt;;&gt; cases b &lt;;&gt;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     simpa only [markedHostPhysicalCoordinate,Sum.elim_inl,Sum.elim_inr,Sym2.toFinset_mk_eq,markedPhysicalEdge] using hh</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> def markedHostRimState (tail head:E → V) (ktail khead:K → V) (π:Equiv.Perm V) : E⊕K → Bool×Bool :=</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   Sum.elim (fun e=&gt;(false,orientationBit (tail e) (head e)))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (fun e=&gt;(true,orientationBit (ktail e) (π (khead e))))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> </span>
+<span id="L31"><a href="#L31" class="ln">  31</a> def markedHostRimEncoding (tail head:E → V) (ktail khead:K → V) (π:Equiv.Perm V)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (e:Sym2 V) : Option (Bool×Bool) :=</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   if h:∃ a:E⊕K,markedHostPhysicalCoordinate tail head ktail khead π a=e then</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     some (markedHostRimState tail head ktail khead π (Classical.choose h)) else none</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> </span>
+<span id="L36"><a href="#L36" class="ln">  36</a> theorem markedHostRimEncoding_at</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (tail head:E → V) (ktail khead:K → V) (π:Equiv.Perm V)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π)) (a:E⊕K) :</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     markedHostRimEncoding tail head ktail khead π (markedHostPhysicalCoordinate tail head ktail khead π a)=</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       some (markedHostRimState tail head ktail khead π a) := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hh:∃ b,markedHostPhysicalCoordinate tail head ktail khead π b=</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       markedHostPhysicalCoordinate tail head ktail khead π a:=⟨a,rfl⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   rw [markedHostRimEncoding,dite_eq_left hh]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   rw [markedHostPhysicalCoordinate_injective tail head ktail khead π hp (Classical.choose_spec hh)]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> </span>
+<span id="L46"><a href="#L46" class="ln">  46</a> theorem markedHostRimEncoding_exists_of_some</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (tail head:E → V) (ktail khead:K → V) (π:Equiv.Perm V)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (e:Sym2 V) (state:Bool×Bool)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (he:markedHostRimEncoding tail head ktail khead π e=some state) :</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     ∃ a,markedHostPhysicalCoordinate tail head ktail khead π a=e := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   by_contra hh</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   simp only [markedHostRimEncoding,dite_eq_right hh] at he</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   cases he</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> </span>
+<span id="L55"><a href="#L55" class="ln">  55</a> theorem markedHostRimEncoding_arcs</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (b:ℕ)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (tail head:E → V) (ktail khead:K → V)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (hp:Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (hE:∀ e,¬PermutationClose π b (tail e) (head e)∧P.Adj (tail e) (head e))</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (hK:∀ e,¬PermutationClose π b (ktail e) (khead e)∧P.Adj (ktail e) (π (khead e)))</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (mark:Bool) (x y:V) :</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     markedPhysicalRim P π b (markedHostRimEncoding tail head ktail khead π) mark x y=1 ↔</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (if mark then ∃ e:K,ktail e=x∧khead e=y else ∃ e:E,tail e=x∧head e=y) := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   let σ:=markedHostRimEncoding tail head ktail khead π</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have he (e:E):markedPhysicalRim P π b σ false (tail e) (head e)=1 := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     apply (markedPhysicalRim_eq_one_iff _ _ _ _ _ _ _).mpr</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     refine ⟨(hE e).1,(hE e).2,?_⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     exact markedHostRimEncoding_at tail head ktail khead π hp (Sum.inl e)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hk (e:K):markedPhysicalRim P π b σ true (ktail e) (khead e)=1 := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     apply (markedPhysicalRim_eq_one_iff _ _ _ _ _ _ _).mpr</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     refine ⟨(hK e).1,(hK e).2,?_⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     exact markedHostRimEncoding_at tail head ktail khead π hp (Sum.inr e)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   constructor</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   · intro h</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     have hs:=(markedPhysicalRim_eq_one_iff P π b σ mark x y).mp h</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     obtain ⟨a,ha⟩:=markedHostRimEncoding_exists_of_some tail head ktail khead π _ _ hs.2.2</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     cases a with</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     | inl a=&gt;</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       have hh:=markedPhysicalRim_physical_unique P π b σ mark false x y (tail a) (head a) h (he a) ha.symm</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       cases mark</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       · exact ⟨a,hh.2.1.symm,hh.2.2.symm⟩</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       · cases hh.1</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     | inr a=&gt;</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       have hh:=markedPhysicalRim_physical_unique P π b σ mark true x y (ktail a) (khead a) h (hk a) ha.symm</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       cases mark</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       · cases hh.1</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       · exact ⟨a,hh.2.1.symm,hh.2.2.symm⟩</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   · cases mark</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     · rintro ⟨a,rfl,rfl⟩;exact he a</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     · rintro ⟨a,rfl,rfl⟩;exact hk a</span>
+<span id="L91"><a href="#L91" class="ln">  91</a> </span>
+<span id="L92"><a href="#L92" class="ln">  92</a> end Oberwolfach</span></pre></html>

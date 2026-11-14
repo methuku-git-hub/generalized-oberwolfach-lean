@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ClassRoutingFitsDeletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ClassRoutingFitsDeletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ClassRoutingChooseScalesBounded</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Routing and discrepancy scales can be chosen before the order so the</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> class correction fits an independently fixed deletion budget. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem class_routing_fits_deletion (β δ:ℝ) (hβ:0&lt;β) (hδ:0&lt;δ):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     ∃q c:ℝ,0&lt;q ∧ 0&lt;c ∧ ∃N:ℕ,1≤N ∧ ∀n:ℕ,N≤n→∀a f b ζ:ℝ,</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>       0≤a→a≤c*n→f≤ζ*n→ζ≤β/16→b≤(δ/16)*n→</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>       ∃L:ℕ,0&lt;L ∧ (n:ℝ)*a/L+2*a+4*L+2*f&lt;β*n ∧ b+a+2*L≤δ*n:=by</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   obtain ⟨q,c,hq,hc,hqδ,hcδ,hgap⟩:=class_routing_choose_scales_bounded β δ hβ hδ</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hζgap:=hgap (β/16) (le_refl _)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   obtain ⟨N,hNpos,hN⟩:=class_routing_linear_margins c q (β/16) β hc.le hq hζgap</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   refine ⟨q,c,hq,hc,max N ⌈4/δ⌉₊,le_trans hNpos (le_max_left _ _),?_⟩</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   intro n hn a f b ζ ha hac hf hζ hb</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hn0:0≤(n:ℝ):=Nat.cast_nonneg n</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hnN:N≤n:=(le_max_left _ _).trans hn</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hζn:=mul_le_mul_of_nonneg_right hζ hn0</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hf&#x27;:f≤(β/16)*n:=by linarith</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   obtain ⟨hLpos,hrout,hL⟩:=hN n hnN a f ha hac hf&#x27;</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   refine ⟨Nat.ceil (q*n),hLpos,hrout,?_⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hceil:(4/δ:ℝ)≤n:=(Nat.le_ceil _).trans (by exact_mod_cast ((le_max_right _ _).trans hn : ⌈4/δ⌉₊≤n))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hnlarge:4≤δ*n:=by exact (div_le_iff₀ hδ).mp hceil |&gt;.trans_eq (mul_comm _ _)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hcN:=mul_le_mul_of_nonneg_right hcδ hn0</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hqN:=mul_le_mul_of_nonneg_right hqδ hn0</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   nlinarith</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> end Oberwolfach</span></pre></html>

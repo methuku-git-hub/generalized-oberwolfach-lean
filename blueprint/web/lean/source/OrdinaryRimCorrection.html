@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryRimCorrection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryRimCorrection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryAveragedIsolatorExistence</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryRimCorrectionBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The complete rim correction, obtained from actual admissible induced</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> subgraphs. Both its wheel coefficients and its new spoke errors are bounded. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 1800000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem ordinary_rim_correction (r : ℕ) (hr : 3≤r) (α : ℝ) (hα : 0&lt;α) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃ N : ℕ,∀ (V U : Type) [Fintype V] [DecidableEq V] [Fintype U] [DecidableEq U],</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ∀ (P Q F : SimpleGraph V) (H : V → U → Prop) (k : ℕ),N≤k →</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       ∀ θ : ℝ,cycleThreshold r≤θ → ∀ γ η : ℝ,0&lt;γ → 0≤η →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       0&lt;Fintype.card V → Q≤P →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∀ x y,Q.Adj x y → γ*(Fintype.card V:ℝ)^(k-1)≤</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         (Fintype.card (OrdinaryIsolatorConfiguration P Q F H k θ α x y):ℝ)) →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       ∀ ψ : OrdinaryWheel Q F H r → ℝ,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀ x y,|ordinaryRimResidual ψ x y|≤η) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ∃ Φ : OrdinaryWheel Q F H r → ℝ,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         (∀ x y,ordinaryRimLoad Φ x y=ordinaryRimResidual ψ x y) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (∀ D,|Φ D|≤η*(r+1)^2/(γ*(Fintype.card V:ℝ)^(r-1))) ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         (∀ v u,|ordinarySpokeLoad Φ v u|≤η/γ) := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨N,hN⟩ := ordinary_averaged_isolator_exists r hr α hα</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   refine ⟨N,?_⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   intro V U _ _ _ _ P Q F H k hk θ hθ γ η hγ hη hn hQP hcount ψ herr</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hex (x y : V) : ∃ I : OrdinaryWheel Q F H r → ℝ,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (¬Q.Adj x y → ∀ D,I D=0) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (Q.Adj x y → ∀ a b,ordinaryRimLoad I a b=</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         if (SimpleGraph.edge x y).Adj a b then 1 else 0) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ D,|I D|≤1/(γ*(Fintype.card V:ℝ)^</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         (((ordinaryWheelRim D).support.toFinset∪{x,y}).card-1))) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ v u,|ordinarySpokeLoad I v u|≤</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (if v=x ∨ v=y then (1:ℝ) else 0)/(2*γ*Fintype.card V)) := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     by_cases hxy : Q.Adj x y</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     · obtain ⟨I,hR,hb,hs⟩ := hN V U P Q F H k hk θ hθ γ hγ hn x y (hQP hxy) (hcount x y hxy)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       exact ⟨I,(fun hn =&gt; False.elim (hn hxy)),(fun _ =&gt; hR),hb,hs⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     · refine ⟨fun _ =&gt; 0,(fun _ _ =&gt; rfl),(fun h =&gt; False.elim (hxy h)),?_,?_⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       · intro D;rw [abs_zero];positivity</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       · intro v u</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         simp only [ordinarySpokeLoad,ite_self,Finset.sum_const_zero,abs_zero]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         positivity</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   choose I hzero hload hbound hspoke using hex</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let Φ (D : OrdinaryWheel Q F H r) : ℝ :=</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     ∑ p : V×V,(ordinaryRimResidual ψ p.1 p.2/2)*I p.1 p.2 D</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hb := ordinary_rim_correction_bounds hr ψ I γ η hγ hη hn herr</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (fun x D =&gt; hzero x x Q.irrefl D)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (fun x y _ =&gt; hbound x y) hspoke</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   exact ⟨Φ,ordinary_rim_correction_loads ψ I hload,hb.1,hb.2⟩</span>
+<span id="L53"><a href="#L53" class="ln">  53</a> </span>
+<span id="L54"><a href="#L54" class="ln">  54</a> end Oberwolfach</span></pre></html>

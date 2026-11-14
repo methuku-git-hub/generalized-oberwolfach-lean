@@ -1,0 +1,356 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongAssignedAdaptiveVortexFixedOrdered.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongAssignedAdaptiveVortexFixedOrdered.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongAssignedAdaptiveManuscriptFixedCanonicalOrdered</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedVortexNeighbourhoodConstant</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedVortexNeighbourhoodSizeInputs</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedVortexAdaptiveDegreeInputs</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedFixedVortexSuccessorWeights</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.VortexSamplingDomainSizes</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 30000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] referenceWitnessFinDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem long_assigned_adaptive_supplied_vortex_fixed_ordered</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (r k₀ Qpow:ℕ) (hr:2≤r) (hQpow:0&lt;Qpow) (hlen:r+4+1=(k₀+2)*2)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (αRef sstar ω γRich tstar kstar:ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hαRef:0&lt;αRef) (hsstar:0&lt;sstar) (hsstar1:sstar≤1/100) (hω:0&lt;ω)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hmargin:successorCycleRatio k₀+αRef/2≤1/2+αRef)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hγRich:0&lt;γRich) (hγRich1:γRich≤1/2) (hγcap:γRich≤αRef)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (htstar:0&lt;tstar) (htstar1:tstar≤1) (horder:tstar≤sstar) (hkstar:0&lt;kstar)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (K:ℕ) (hK3:3≤K) (hm:7≤(r+4))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (θ ρ₀:ℝ) (hθpos:0&lt;θ) (hθ:θ≤1/100) (hρ₀:0&lt;ρ₀) (hωBound:4*ω≤ρ₀)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (ε₀ lam:ℝ) (hε₀:ε₀&lt;1) (hlam:0&lt;lam) (hlamθ:lam≤θ):</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∃eps:ℝ,0&lt;eps ∧ eps≤1 ∧ 3*eps≤lam*(θ/(100*(K:ℝ)^2)) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∃d:ℕ,∃hd:2≤d,∃hcut:(1/((((r+4):ℕ):ℝ)+1))/(d:ℝ)≤θ,</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let alpha:=min (lam/(10*(d:ℝ))) (θ/(200*(K:ℝ)^2))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let γ:=min (1/2:ℝ) (min (lam/(10*(d:ℝ))) (lam/10))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     0&lt;alpha ∧ alpha≤θ/(200*(K:ℝ)^2) ∧ 0&lt;γ ∧ γ≤eps ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∀(BM:ℝ) (hBM:0&lt;BM) (BO:Fin K→ℝ) (hBO:∀i,0&lt;BO i),</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let ni:=@longPaddedSeedExponent K</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let hni:=@long_padded_seed_exponent_positive K</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let hpadded:=@long_padded_seed_length_eq_exponent K</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let pstar₀:=min (1/4:ℝ) (min (ρ₀/8) (ρ₀/(6*((((r+4):ℕ):ℝ)+1))))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let BMseed₀:=2*BM/pstar₀^(2*(r+4)+1)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let BOseed₀:=fun i=&gt;2*BO i/pstar₀^(2*(ni i+2))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let Kpair₀:=1+((((r+4):ℕ):ℝ)+1)^4*BMseed₀+∑i:Fin K,((ni i:ℝ)+2)^3*BOseed₀ i</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let C₀:=10*(((((r+4):ℕ):ℝ)+1)^4*BMseed₀+∑i:Fin K,((ni i:ℝ)+2)^4*BOseed₀ i)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     ∃ β βCommon εAbs εRob ζRob δAbs:ℝ,0&lt;β∧0&lt;βCommon∧0&lt;εAbs∧0&lt;εRob∧0&lt;ζRob∧0&lt;δAbs ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     ∀ (εRef δRef εQ χ χCommon Qreal pstarRef ζ εBal ζBal χBal εNbr ζNbr χNbr εLoad ζLoad χLoad ζLocal χLocal ζConfig χConfig τLevel:ℝ)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hεRef:0&lt;εRef) (hδRef:0&lt;δRef) (hεQ:0&lt;εQ) (hεQ1:εQ&lt;1/4) (hεQAbs:εQ≤εAbs) (hχ:0&lt;χ)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hχCommon:0&lt;χCommon) (hpstarRef:0&lt;pstarRef) (hζ:0&lt;ζ) (hεBal:0&lt;εBal) (hζBal:0&lt;ζBal) (hχBal:0&lt;χBal)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (hεNbr:0&lt;εNbr) (hζNbr:0&lt;ζNbr) (hχNbr:0&lt;χNbr) (hεLoad:0&lt;εLoad)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hζLoad:0&lt;ζLoad) (hχLoad:0&lt;χLoad) (hζLocal:0&lt;ζLocal) (hχLocal:0&lt;χLocal) (hζConfig:0&lt;ζConfig) (hχConfig:0&lt;χConfig) (hτLevel:0&lt;τLevel)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hQreal:0&lt;Qreal) (hNbr:ℕ) (hpstarBound:4*(((r+4):ℕ):ℝ)*pstarRef≤ρ₀*(1/100))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hgap:χ+χCommon+χBal+2*χNbr+χLoad+χLocal+χConfig&lt;ε₀),</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     ∃βmax:ℝ,0&lt;βmax ∧ ∀βQ:ℝ,0≤βQ→βQ≤1/4→βQ≤αRef/4→βQ≤βmax→βQ≤εBal/4→βQ≤εRef/4→</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     ∃MLevel:ℕ,1≤MLevel ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     ∃mLevel:ℕ,1≤mLevel ∧ ∃η:ℝ,0&lt;η ∧ ∃t₀ τ₀ Δ ξ:ℝ,0&lt;t₀ ∧ 0&lt;τ₀ ∧ τ₀≤1/16 ∧ 0&lt;Δ ∧ 0&lt;ξ ∧ 4*ξ≤eps/2 ∧ ∃N:ℕ,</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     ∀size:ℕ,∃a₀ b₀ e₀ aRob bRob eRob:ℕ,∀f₀:ℕ,∃NHost:ℕ,</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     ∀n:ℕ,∀hn:max (max N NHost) 1≤n,∀(U:Type) [Fintype U] [DecidableEq U],</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     ∀(F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (Allowed:Set ℕ) (hAllowed:∀u,AllowedCycleLengths (F u) Allowed)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (ρ D:ℝ) (hρlo:ρ₀≤ρ) (hρ1:ρ≤1) (hD:0&lt;D)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (hsize:ρ*D=2*Fintype.card U)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (hclass:∀u,factorPreparationClass (F u) K=none)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n))</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (τ A:ℝ) (weight:(Fin ((r+4)+1)→Fin n)→ℝ)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (hw:SuccessorSequenceWeightConditions P π (3*d) D τ A BM weight)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (hDlo:(n:ℝ)/2≤D) (hDhi:D≤2*n)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (w:∀i,OrdinaryCycle P (ni i+2)→ℝ) (hw0:∀i C,0≤w i C)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (hwupper:∀i C,w i C≤BO i/(n:ℝ)^(ni i))</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (huv:Fintype.card U≤n)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (εHost:ℝ)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (he:∀i∈longRetainedSeedIndices F hF K θ,∀x y,</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (∑C:OrdinaryCycle P (ni i+2),if C.val.val.Adj x y then w i C else 0)=if P.Adj x y then 1 else 0)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (hdeg:∀x,|(P.degree x:ℝ)-D|≤εHost*n)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (hbudgetV:∀i∈longRetainedSeedIndices F hF K θ,</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       6*((ni i+2:ℕ):ℝ)^4*BO i*(2*(3*d))+εHost*n≤τ*D)</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (hbudgetE:∀i∈longRetainedSeedIndices F hF K θ,</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       5*((ni i+2:ℕ):ℝ)^4*BO i*(2*(3*d))/n≤τ)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (hτnonneg:0≤τ) (hτbound:τ≤τ₀),</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     εHost≤δAbs →</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     ∀ (Dnat vsize:ℕ), (Dnat:ℝ)=D → ρ=initialIndexDensity U Dnat →</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       P.IsRegularOfDegree Dnat → (1/2+2*αRef)*n≤D → mLevel≤vsize →</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     ∀ (Q:Vortex U P Dnat βQ εQ vsize)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       (hpres:∀i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       (L:ℕ),L&lt;Q.length →</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     kstar≤ρ*(1/100)/2 → kstar≤ρ*((1/100)/(((r+4):ℕ):ℝ))/2 → tstar≤(1/100)/(((r+4):ℕ):ℝ) →</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     let W:=markedVortexVertexType Q</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     let Z:=markedVortexHubType Q</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     let Hdom:=Z</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     let fV:=markedVortexVertexEmbedding Q</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     let gV:=markedVortexHubEmbedding Q</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     let ρi:=markedVortexPermutation Q π hpres</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     let Aset:=markedVortexInnerVertices Q</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     let Bset:=markedVortexInnerHubs Q</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     let Scale:=fun i=&gt;Fintype.card (W i)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     let Dbal:=fun i=&gt;2*((Bset i).card:ℝ)/ρ</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     let Dlevel:=fun i=&gt;2*(Fintype.card (Z i):ℝ)/ρ</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     let bdom:=fun i=&gt;Function.Embedding.refl (Z i)</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     let Dload:=Dlevel</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     let Aload:=successorWeightLower k₀ ((2*αRef)/4)</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     let Bload:=successorWeightUpper k₀ ((2*αRef)/4)</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     ∃levelWeight:∀i,(Fin ((r+4)+1)→W i)→ℝ,</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     let t:=t₀</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     let tHub:=ξ*(n:ℝ)</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     let b:=longAssignedApproxOrdinaryWeight F hF K (r+4) θ</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     let a:=longAssignedApproxMarkedWeight F hF K (r+4) θ</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     let p₁:=ρ*(1/100)/2</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     let k₁:=ρ*((1/100)/(((r+4):ℕ):ℝ))/2</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     let p₂:=(∑u,b u)/D</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     let k₂:=(∑u,a u)/D</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     let udens:=2*(∑u,(1-1/100-(1/100)/(((r+4):ℕ):ℝ)-a u-b u))/D</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     let q:=longAssignedIntervalProbability F hF K (r+4) θ</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     let s:=longAssignedSpokeProbability F hF K (r+4) θ</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     let hLaw:=long_assigned_actual_raw_law_parameters (by omega) F hF Allowed hAllowed K (by omega) (r+4) d hm hd θ ρ₀ ρ D</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       hθpos.le hθ hρ₀ hρlo hρ1 hD hsize hcut hclass</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=Fin n) p₁ k₁ p₂ k₂ udens</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>       hLaw.1 hLaw.2.1 hLaw.2.2.1 hLaw.2.2.2.1 hLaw.2.2.2.2.1 hLaw.2.2.2.2.2.1</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>       d hd q hLaw.2.2.2.2.2.2.1 hLaw.2.2.2.2.2.2.2.1 s</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>       hLaw.2.2.2.2.2.2.2.2.1 hLaw.2.2.2.2.2.2.2.2.2)</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     let f:=fun (ω:∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Bool Bool e) e=&gt;</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>       rawExpandedMarkedCollapse e (ω e)</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     let pstar:=min (1/4:ℝ) (min (ρ₀/8) (ρ₀/(6*((((r+4):ℕ):ℝ)+1))))</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     let BMseed:=2*BM/pstar^(2*(r+4)+1)</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     let BOseed:=fun i=&gt;2*BO i/pstar^(2*(ni i+2))</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     let Wm:=longAssignedMarkedSeed F hF K (r+4) d θ D π weight</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     let Wo:=longAssignedOrdinarySeed F hF K (r+4) d θ D P π ni hni w</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     let C:=10*(((((r+4):ℕ):ℝ)+1)^4*BMseed+∑i:Fin K,((ni i:ℝ)+2)^4*BOseed i)</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     let ℓ:=fun i=&gt;ni i+2</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     let Wmix:=longMixedSeedWeight Wm Wo</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     let R:=longRawHubResources (U:=U) π d (r+4) ℓ</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     let Pair:Option (Fin K)→ℝ:=fun i=&gt;match i with</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>       | none=&gt;((((r+4):ℕ):ℝ)+1)^4*BMseed</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>       | some i=&gt;((ni i:ℝ)+2)^3*BOseed i</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     let Kpair:=1+((((r+4):ℕ):ℝ)+1)^4*BMseed+∑i:Fin K,((ni i:ℝ)+2)^3*BOseed i</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     let failure:=4*(Fintype.card U:ℝ)*Real.exp (-2*tHub^2/((4*(d:ℝ)+3)^2*(n:ℝ)))</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     letI : Nonempty (Fin n):=⟨⟨0,by omega⟩⟩</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     let Ret:=fun raw:RawMarkedOutcome (Fin n) U Bool Bool=&gt;</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>       StartRetentionOutcome (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) false)</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>         (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) false))</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     let ν:=fun raw:RawMarkedOutcome (Fin n) U Bool Bool=&gt;</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>       startRetentionLaw (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) false)</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>         (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) false)) (startRetentionMinimum_le _)</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     let Prior:=MarkedAdaptiveAgreementProperty r d size a₀ b₀ e₀ aRob bRob eRob f₀ L hNbr</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>       β βCommon εAbs εRob ζRob εRef δRef γRich p₁ k₁ (1/100) tstar ζ εBal ζBal εNbr ζNbr Bload εLoad 1 ζLoad ζLocal ζConfig ρ₀ sstar kstar τLevel</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>       P π fV gV ρi Aset Bset Scale Dlevel Dload bdom levelWeight q s false false</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     ∃z:(Σω:∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Bool Bool e,Ret (f ω)),</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>       0&lt;(μ.sigma (fun ω=&gt;ν (f ω))).mass z ∧ Prior ⟨f z.1,z.2⟩ ∧</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>         MarkedRetainedReservoirSelection r d size a₀ b₀ e₀ f₀ εAbs P π false false ⟨f z.1,z.2⟩ ∧</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>         MarkedVortexFixedSelection r d size a₀ b₀ e₀ f₀ εAbs P π false false ⟨f z.1,z.2⟩ ∧</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>         (∀b u,|rawMarkedRestrictedSpokeCol π d (fun e=&gt;z.1 (Sum.inr e)) true true b u Finset.univ-</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>           (if b then q u true else s u true)*(n:ℝ)|&lt;tHub) ∧</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>         (∀u,|(((ordinaryCommonHubSpokeRoots u).filter (fun root=&gt;</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>           longRawHubState P π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) true true root=true)).card:ℝ)-</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>           longAssignedApproxOrdinaryWeight F hF K (r+4) θ u*n|≤tHub) ∧</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>         rawMarkedSeedConcentrated P π d (r+4) p₂ k₂ q s true true t Wm</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>           (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) ∧</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>         (∀i,rawOrdinarySeedConcentrated P π d (ni i+2) p₂ k₂ q s true true t (Wo i)</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>           (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e))) ∧</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>         (∀i root,longRawHubState P π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) true true root=true→</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>           |resourcePatternLoad (longRawHubResources (U:=U) π d (r+4) (fun i=&gt;ni i+2) i)</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>             (longMixedSeedWeight Wm Wo i) (fun _ _=&gt;true) root</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>             (longRawHubState P π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) true true)-</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>             longAssignedMixedTarget F hF K (r+4) θ D p₂ k₂ i root|≤</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>           t+τ*longAssignedMixedTarget F hF K (r+4) θ D p₂ k₂ i root) ∧</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>         (∀(Del:SimpleGraph (Fin n)) (δ:ℝ), (∀x,(Del.degree x:ℝ)≤δ)→</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>           δ≤Δ*n→</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>           let raw:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>           let hub:=longRawHubNames (U:=U) π d (r+4) ℓ</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>           let S:=longRawSurvivingResources P π d raw true true Del.edgeFinset</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>           let e:{v // v∈S}↪_:=Function.Embedding.subtype _</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>           ∀ztest:LongRetainedHubTest F hF K θ,</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>             θ*(n:ℝ)/(200*(K:ℝ)*(K:ℝ))≤</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>               ∑c:RestrictedResource (mixedCandidateResources R) e,</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>                 longRetainedHubIndicator F hF θ hub ztest c.val*mixedCandidateWeight Wmix c.val) ∧</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>         (∀(Del:SimpleGraph (Fin n)) (δ:ℝ), (∀x,(Del.degree x:ℝ)≤δ)→</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>           δ≤Δ*n→0≤t+C*(δ/(n:ℝ))+4*τ ∧ t+C*(δ/(n:ℝ))+4*τ≤eps/2) ∧</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>         (∀(Del:SimpleGraph (Fin n)) (δ:ℝ), (∀x,(Del.degree x:ℝ)≤δ)→</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>           δ≤Δ*n→</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a>           let raw:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>           let S:=longRawSurvivingResources P π d raw true true Del.edgeFinset</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>           let T:=bernoulliVertexSet (longRawHubState P π d raw true true)</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>           let e:S↪LongRawHubResource n U:=Function.Embedding.subtype _</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>           let Cand:=RestrictedResource (mixedCandidateResources R) e</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>           let Q:=restrictedResourceSet (mixedCandidateResources R) e</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>           let fS:=survivingResourceEmbedding S T (long_raw_surviving_resources_subset P π d raw true true Del.edgeFinset)</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>           let φ:=fS.trans (markedRawSampledPhysicalEmbedding P π d raw true true)</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>           let hub:=longRawHubNames (U:=U) π d (r+4) ℓ</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>           let test:=fun (j:LongRetainedHubTest F hF K θ) (c:Cand)=&gt;longRetainedHubIndicator F hF θ hub j c.val</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a>           ∃M:Finset Cand,(∀c∈M,0&lt;mixedCandidateWeight Wmix c.val) ∧</span>
+<span id="L185"><a href="#L185" class="ln"> 185</a>             (∀c∈M,∀c&#x27;∈M,c≠c&#x27;→Disjoint (Q c) (Q c&#x27;)) ∧</span>
+<span id="L186"><a href="#L186" class="ln"> 186</a>             (∀x,alpha*n≤(rimIncidentResources φ x).card →</span>
+<span id="L187"><a href="#L187" class="ln"> 187</a>               ((rimIncidentResources φ x\M.biUnion Q).card:ℝ)≤γ*(rimIncidentResources φ x).card) ∧</span>
+<span id="L188"><a href="#L188" class="ln"> 188</a>             (∀i,((longRawIncidenceSet S i\M.biUnion Q).card:ℝ)≤max (alpha*n) (γ*(longRawIncidenceSet S i).card)) ∧</span>
+<span id="L189"><a href="#L189" class="ln"> 189</a>             (∀i,alpha*n≤(longRawIncidenceSet S i).card →</span>
+<span id="L190"><a href="#L190" class="ln"> 190</a>               ((longRawIncidenceSet S i\M.biUnion Q).card:ℝ)≤γ*(longRawIncidenceSet S i).card) ∧</span>
+<span id="L191"><a href="#L191" class="ln"> 191</a>             (∀j,(1-γ)*(∑c,test j c*mixedCandidateWeight Wmix c.val)≤∑c∈M,test j c) ∧</span>
+<span id="L192"><a href="#L192" class="ln"> 192</a>             (∀j,(∑c∈M,test j c)≤(1+γ)*(∑c,test j c*mixedCandidateWeight Wmix c.val)) ∧</span>
+<span id="L193"><a href="#L193" class="ln"> 193</a>             (∀x,((physicalRimResidualGraph (markedRawSampledPhysicalEmbedding P π d raw true true)</span>
+<span id="L194"><a href="#L194" class="ln"> 194</a>               ((M.map (survivingCandidateEmbedding (mixedCandidateResources R) S T</span>
+<span id="L195"><a href="#L195" class="ln"> 195</a>                 (long_raw_surviving_resources_subset P π d raw true true Del.edgeFinset))).biUnion</span>
+<span id="L196"><a href="#L196" class="ln"> 196</a>                 (restrictedResourceSet (mixedCandidateResources R) (Function.Embedding.subtype (·∈T))))).degree x:ℝ)≤max alpha γ*n+δ) ∧</span>
+<span id="L197"><a href="#L197" class="ln"> 197</a>             let selected:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=&gt;rawExpandedMarkedCollapse e (z.1 e)</span>
+<span id="L198"><a href="#L198" class="ln"> 198</a>             let H:=retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) false</span>
+<span id="L199"><a href="#L199" class="ln"> 199</a>               (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) false)) z.2 false false</span>
+<span id="L200"><a href="#L200" class="ln"> 200</a>             ∀(Reserve:Finset (Finset (Fin n)⊕(Fin n×U))) (X:Finset (Fin n)) (Z:Finset U),</span>
+<span id="L201"><a href="#L201" class="ln"> 201</a>             MarkedFixedTerminalAbsorber P π d (r+4) selected H Reserve X Z →</span>
+<span id="L202"><a href="#L202" class="ln"> 202</a>             let state:=longRawHubState P π d raw true true</span>
+<span id="L203"><a href="#L203" class="ln"> 203</a>     let T:=bernoulliVertexSet state</span>
+<span id="L204"><a href="#L204" class="ln"> 204</a>     let eraw:{z // z∈T}↪_:=Function.Embedding.subtype _</span>
+<span id="L205"><a href="#L205" class="ln"> 205</a>     let q:=survivingCandidateEmbedding (mixedCandidateResources R) S T (long_raw_surviving_resources_subset P π d raw true true Del.edgeFinset)</span>
+<span id="L206"><a href="#L206" class="ln"> 206</a>     let N:=M.map q</span>
+<span id="L207"><a href="#L207" class="ln"> 207</a>     let A:=LongRawSelectedOrdinary π d (r+4) ℓ eraw N</span>
+<span id="L208"><a href="#L208" class="ln"> 208</a>     let Q:=longRawSelectedOrdinaryWheel π d (r+4) ℓ eraw N</span>
+<span id="L209"><a href="#L209" class="ln"> 209</a>     ∃assign:A↪(Σu,(F u).ConnectedComponent),</span>
+<span id="L210"><a href="#L210" class="ln"> 210</a>     ∃C:∀a:A,(F (Q a).val.2).ConnectedComponent,</span>
+<span id="L211"><a href="#L211" class="ln"> 211</a>       (∀a,(⟨(Q a).val.2,C a⟩:Σu,(F u).ConnectedComponent)=assign a) ∧</span>
+<span id="L212"><a href="#L212" class="ln"> 212</a>     (∀u,Fintype.card (longRawSourceDomain F π d (r+4) ℓ eraw N C u) =</span>
+<span id="L213"><a href="#L213" class="ln"> 213</a>       ∑i:Fin K,(N.filter (fun c=&gt;c.val.1=some i ∧</span>
+<span id="L214"><a href="#L214" class="ln"> 214</a>         longRawSeedHub π d (r+4) ℓ c.val.1 c.val.2=u)).card * ℓ i) ∧</span>
+<span id="L215"><a href="#L215" class="ln"> 215</a>     (∀u,Fintype.card {v:Fin n // v∉longRawSourceDomain F π d (r+4) ℓ eraw N C u} =</span>
+<span id="L216"><a href="#L216" class="ln"> 216</a>       n - ∑i:Fin K,(N.filter (fun c=&gt;c.val.1=some i ∧</span>
+<span id="L217"><a href="#L217" class="ln"> 217</a>         longRawSeedHub π d (r+4) ℓ c.val.1 c.val.2=u)).card * ℓ i) ∧</span>
+<span id="L218"><a href="#L218" class="ln"> 218</a>     (∀u,|((Fintype.card (longRawSourceDomain F π d (r+4) ℓ eraw N C u):ℕ):ℝ) -</span>
+<span id="L219"><a href="#L219" class="ln"> 219</a>       (1-θ)*(n:ℝ)*(∑i:Fin K,longAssignedKeptFraction F hF K θ i u)| ≤</span>
+<span id="L220"><a href="#L220" class="ln"> 220</a>       ((max (3*eps) 0)*(n:ℝ))*(∑i:Fin K,((ℓ i:ℕ):ℝ))) ∧</span>
+<span id="L221"><a href="#L221" class="ln"> 221</a>     (∀u,|((Fintype.card {v:Fin n // v∉longRawSourceDomain F π d (r+4) ℓ eraw N C u}:ℕ):ℝ) -</span>
+<span id="L222"><a href="#L222" class="ln"> 222</a>       ((n:ℝ)-(1-θ)*(n:ℝ)*(∑i:Fin K,longAssignedKeptFraction F hF K θ i u))| ≤</span>
+<span id="L223"><a href="#L223" class="ln"> 223</a>       ((max (3*eps) 0)*(n:ℝ))*(∑i:Fin K,((ℓ i:ℕ):ℝ))) ∧</span>
+<span id="L224"><a href="#L224" class="ln"> 224</a>     (∀u, (n:ℝ)*ordinaryAssignedFraction F hF K u none -</span>
+<span id="L225"><a href="#L225" class="ln"> 225</a>       ((max (3*eps) 0)*(n:ℝ))*(∑i:Fin K,((ℓ i:ℕ):ℝ)) ≤</span>
+<span id="L226"><a href="#L226" class="ln"> 226</a>         ((Fintype.card {v:Fin n // v∉longRawSourceDomain F π d (r+4) ℓ eraw N C u}:ℕ):ℝ) ∧</span>
+<span id="L227"><a href="#L227" class="ln"> 227</a>       ((Fintype.card {v:Fin n // v∉longRawSourceDomain F π d (r+4) ℓ eraw N C u}:ℕ):ℝ) ≤</span>
+<span id="L228"><a href="#L228" class="ln"> 228</a>         (n:ℝ)*(ordinaryAssignedFraction F hF K u none+(101/100:ℝ)*θ) +</span>
+<span id="L229"><a href="#L229" class="ln"> 229</a>           ((max (3*eps) 0)*(n:ℝ))*(∑i:Fin K,((ℓ i:ℕ):ℝ))) ∧</span>
+<span id="L230"><a href="#L230" class="ln"> 230</a>     (∀u v,K&lt;Fintype.card ((F u).connectedComponentMk v)→</span>
+<span id="L231"><a href="#L231" class="ln"> 231</a>       v∉longRawSourceDomain F π d (r+4) ℓ eraw N C u) ∧</span>
+<span id="L232"><a href="#L232" class="ln"> 232</a>     let T:=longRawSourceDomain F π d (r+4) ℓ eraw N C</span>
+<span id="L233"><a href="#L233" class="ln"> 233</a>     ∃ψ:∀u,(T u)↪Fin n,</span>
+<span id="L234"><a href="#L234" class="ln"> 234</a>       (∀u x y,(F u).Adj x.val y.val→</span>
+<span id="L235"><a href="#L235" class="ln"> 235</a>         rawMarkedPairRims P π d raw (Sum.inl (ψ u x,ψ u y)) ∨</span>
+<span id="L236"><a href="#L236" class="ln"> 236</a>         rawMarkedPairRims P π d raw (Sum.inl (ψ u y,ψ u x))) ∧</span>
+<span id="L237"><a href="#L237" class="ln"> 237</a>       (∀u v,u≠v→Disjoint</span>
+<span id="L238"><a href="#L238" class="ln"> 238</a>         (partialFactorPhysicalEdges (T u) ((F u).induce (T u)) (ψ u))</span>
+<span id="L239"><a href="#L239" class="ln"> 239</a>         (partialFactorPhysicalEdges (T v) ((F v).induce (T v)) (ψ v))) ∧</span>
+<span id="L240"><a href="#L240" class="ln"> 240</a>       (∀u x y,(F u).Adj x.val y.val→Sum.inl ({ψ u x,ψ u y}:Finset (Fin n))∉Reserve) ∧</span>
+<span id="L241"><a href="#L241" class="ln"> 241</a>       (∀u x y,(F u).Adj x.val y.val→s(ψ u x,ψ u y)∉Del.edgeFinset)) :=by</span>
+<span id="L242"><a href="#L242" class="ln"> 242</a>   obtain ⟨eps,heps,heps1,hepsAssign,d,hd,hcut,halpha,halphaMass,hγ,hγε,hOuter⟩:=</span>
+<span id="L243"><a href="#L243" class="ln"> 243</a>     long_assigned_adaptive_manuscript_fixed_canonical_ordered r k₀ Qpow hr hQpow hlen αRef sstar ω γRich tstar kstar (ρ₀/8)</span>
+<span id="L244"><a href="#L244" class="ln"> 244</a>       hαRef hsstar hsstar1 hω hmargin hγRich hγRich1 htstar htstar1 horder hkstar (by positivity)</span>
+<span id="L245"><a href="#L245" class="ln"> 245</a>       K hK3 hm θ ρ₀ hθpos hθ hρ₀ hωBound ε₀ lam hε₀ hlam hlamθ</span>
+<span id="L246"><a href="#L246" class="ln"> 246</a>   refine ⟨eps,heps,heps1,hepsAssign,d,hd,hcut,halpha,halphaMass,hγ,hγε,?_⟩</span>
+<span id="L247"><a href="#L247" class="ln"> 247</a>   intro BM hBM BO hBO ni hni hpadded pstar₀ BMseed₀ BOseed₀ Kpair₀ C₀</span>
+<span id="L248"><a href="#L248" class="ln"> 248</a>   obtain ⟨β,βCommon,εAbs,εRob,ζRob,δAbs,hβ,hβCommon,hεAbs,hεRob,hζRob,hδAbs,hLate⟩:=hOuter BM hBM BO hBO</span>
+<span id="L249"><a href="#L249" class="ln"> 249</a>   refine ⟨β,βCommon,εAbs,εRob,ζRob,δAbs,hβ,hβCommon,hεAbs,hεRob,hζRob,hδAbs,?_⟩</span>
+<span id="L250"><a href="#L250" class="ln"> 250</a>   intro εRef δRef εQ χ χCommon Qreal pstarRef ζ εBal ζBal χBal εNbr ζNbr χNbr εLoad ζLoad χLoad ζLocal χLocal ζConfig χConfig τLevel</span>
+<span id="L251"><a href="#L251" class="ln"> 251</a>     hεRef hδRef hεQ hεQ1 hεQAbs hχ hχCommon hpstarRef hζ hεBal hζBal hχBal hεNbr hζNbr hχNbr hεLoad hζLoad hχLoad hζLocal hχLocal hζConfig hχConfig hτLevel hQreal hNbr hpstarBound hgap</span>
+<span id="L252"><a href="#L252" class="ln"> 252</a>   obtain ⟨Knbr,hKnbr,hKI,hKJ⟩:=marked_vortex_neighbourhood_constant_exists εQ ρ₀ hεQ hρ₀</span>
+<span id="L253"><a href="#L253" class="ln"> 253</a>   have hα:0&lt;2*αRef:=by positivity</span>
+<span id="L254"><a href="#L254" class="ln"> 254</a>   have hmargin&#x27;:successorCycleRatio k₀+(2*αRef)/4≤1/2+(2*αRef)/2:=by linarith only [hmargin]</span>
+<span id="L255"><a href="#L255" class="ln"> 255</a>   obtain ⟨βmax,hβmax,hweights⟩:=marked_fixed_vortex_successor_weight_families k₀ (r+4) hlen (2*αRef) τLevel hα hτLevel hmargin&#x27;</span>
+<span id="L256"><a href="#L256" class="ln"> 256</a>   refine ⟨βmax,hβmax,?_⟩</span>
+<span id="L257"><a href="#L257" class="ln"> 257</a>   intro βQ hβQ hβQ1 hβQα hβQmax hβQbal hβQref</span>
+<span id="L258"><a href="#L258" class="ln"> 258</a>   let Bload:=successorWeightUpper k₀ ((2*αRef)/4)</span>
+<span id="L259"><a href="#L259" class="ln"> 259</a>   have hBload:0&lt;Bload:=(successorWeightConstants_pos k₀ ((2*αRef)/4) (by positivity)).2</span>
+<span id="L260"><a href="#L260" class="ln"> 260</a>   obtain ⟨MLevel,hMLevel,η,hη,t₀,τ₀,Δ,ξ,ht₀,hτ₀,hτhalf,hΔ,hξ,hξeps,N,hAll⟩:=</span>
+<span id="L261"><a href="#L261" class="ln"> 261</a>     hLate εRef δRef εQ χ χCommon 1 Qreal pstarRef ζ εBal 1 ζBal χBal εNbr Knbr ζNbr χNbr Bload εLoad 1 ζLoad χLoad ζLocal χLocal ζConfig χConfig</span>
+<span id="L262"><a href="#L262" class="ln"> 262</a>       hεRef hδRef hεQ (by linarith) hχ hχCommon hpstarRef hζ hεBal (by norm_num) hζBal hχBal hεNbr hKnbr hζNbr hχNbr hBload hεLoad (by norm_num) hζLoad hχLoad hζLocal hχLocal hζConfig hχConfig hQreal hNbr hpstarBound hgap</span>
+<span id="L263"><a href="#L263" class="ln"> 263</a>   obtain ⟨mGeom,hmGeom,hGeom⟩:=marked_fixed_vortex_baseline_geometry βQ εQ ρ₀ hβQ hβQ1 hεQ hεQ1 hρ₀ MLevel</span>
+<span id="L264"><a href="#L264" class="ln"> 264</a>   obtain ⟨Nw,hNw,hweights⟩:=hweights (3*d)</span>
+<span id="L265"><a href="#L265" class="ln"> 265</a>   let mLevel:=max mGeom ⌈2*(Nw:ℝ)/εQ⌉₊</span>
+<span id="L266"><a href="#L266" class="ln"> 266</a>   refine ⟨MLevel,hMLevel,mLevel,by dsimp [mLevel];omega,η,hη,t₀,τ₀,Δ,ξ,ht₀,hτ₀,hτhalf,hΔ,hξ,hξeps,N,?_⟩</span>
+<span id="L267"><a href="#L267" class="ln"> 267</a>   intro size</span>
+<span id="L268"><a href="#L268" class="ln"> 268</a>   obtain ⟨a₀,b₀,e₀,aRob,bRob,eRob,hAll⟩:=hAll size</span>
+<span id="L269"><a href="#L269" class="ln"> 269</a>   refine ⟨a₀,b₀,e₀,aRob,bRob,eRob,?_⟩</span>
+<span id="L270"><a href="#L270" class="ln"> 270</a>   intro f₀</span>
+<span id="L271"><a href="#L271" class="ln"> 271</a>   obtain ⟨NHost,hAll⟩:=hAll f₀</span>
+<span id="L272"><a href="#L272" class="ln"> 272</a>   refine ⟨NHost,?_⟩</span>
+<span id="L273"><a href="#L273" class="ln"> 273</a>   intro n hn U _ _ F hF Allowed hAllowed ρ D hρlo hρ1 hD hsize hclass P π τ A weight hw hDlo hDhi w hw0 hwupper huv hnoshort εHost he hdeg hbudgetV hbudgetE hτnonneg hτbound hεHostAbs</span>
+<span id="L274"><a href="#L274" class="ln"> 274</a>   intro Dnat vsize hDeq hρeq hreg hDmin hmLevel Q hpres L hL hpstar0 hkstar0 htstar0 W Z Hdom fV gV ρi Aset Bset Scale Dbal Dlevel bdom Dload Aload Bload&#x27;</span>
+<span id="L275"><a href="#L275" class="ln"> 275</a>   have hnpos:0&lt;n:=by omega</span>
+<span id="L276"><a href="#L276" class="ln"> 276</a>   letI : Nonempty (Fin n):=⟨⟨0,hnpos⟩⟩</span>
+<span id="L277"><a href="#L277" class="ln"> 277</a>   have hDmin&#x27;:(1/2+2*αRef)*Fintype.card (Fin n)≤(Dnat:ℝ):=by simpa [hDeq] using hDmin</span>
+<span id="L278"><a href="#L278" class="ln"> 278</a>   have hDhalf:(Fintype.card (Fin n):ℝ)/2≤(Dnat:ℝ):=by</span>
+<span id="L279"><a href="#L279" class="ln"> 279</a>     have hn0:(0:ℝ)≤Fintype.card (Fin n):=Nat.cast_nonneg _</span>
+<span id="L280"><a href="#L280" class="ln"> 280</a>     nlinarith [mul_nonneg hαRef.le hn0]</span>
+<span id="L281"><a href="#L281" class="ln"> 281</a>   have hρlo&#x27;:ρ₀ ≤ initialIndexDensity U Dnat:=by simpa [hρeq] using hρlo</span>
+<span id="L282"><a href="#L282" class="ln"> 282</a>   have hρhi&#x27;:initialIndexDensity U Dnat≤1:=by simpa [hρeq] using hρ1</span>
+<span id="L283"><a href="#L283" class="ln"> 283</a>   have hρpos:0 &lt; initialIndexDensity U Dnat:=hρ₀.trans_le hρlo&#x27;</span>
+<span id="L284"><a href="#L284" class="ln"> 284</a>   have hmGeom&#x27;:mGeom≤vsize:=(le_max_left _ _).trans hmLevel</span>
+<span id="L285"><a href="#L285" class="ln"> 285</a>   have hmpos:0&lt;vsize:=by omega</span>
+<span id="L286"><a href="#L286" class="ln"> 286</a>   have hceil:2*(Nw:ℝ)/εQ≤vsize:=(Nat.le_ceil _).trans (by exact_mod_cast (show ⌈2*(Nw:ℝ)/εQ⌉₊≤vsize from (le_max_right _ _).trans hmLevel))</span>
+<span id="L287"><a href="#L287" class="ln"> 287</a>   have hweightSize:(Nw:ℝ)≤εQ*vsize/2:=by</span>
+<span id="L288"><a href="#L288" class="ln"> 288</a>     have hh:2*(Nw:ℝ)≤(vsize:ℝ)*εQ:=(div_le_iff₀ hεQ).mp hceil</span>
+<span id="L289"><a href="#L289" class="ln"> 289</a>     nlinarith</span>
+<span id="L290"><a href="#L290" class="ln"> 290</a>   obtain ⟨levelWeight,hWeight⟩:=hweights (Fin n) U P Dnat vsize βQ εQ Q hreg (by simpa using hnpos) hDmin&#x27; hρpos hβQ hβQmax hεQ hweightSize π hpres L hL</span>
+<span id="L291"><a href="#L291" class="ln"> 291</a>   have hGeometry:=hGeom (Fin n) U P Dnat vsize hreg (by simpa using hnpos) hDhalf hρlo&#x27; hρhi&#x27; hmGeom&#x27; Q π hpres L hL</span>
+<span id="L292"><a href="#L292" class="ln"> 292</a>   have hSizes:=marked_vortex_neighbourhood_size_inputs Q hreg (by simpa using hnpos) hDhalf hρ₀ hρlo&#x27; hρhi&#x27; hβQ hβQ1 hεQ (by linarith) hmpos Knbr (by linarith) hKI hKJ L hL</span>
+<span id="L293"><a href="#L293" class="ln"> 293</a>   have hDegrees:=marked_vortex_adaptive_degree_inputs Q hreg (by simpa using hnpos) hDmin&#x27; hα hρpos hβQ (by linarith) hβQ1 hεQ hmpos γRich βQ βQ hγRich.le (by linarith) le_rfl le_rfl L hL</span>
+<span id="L294"><a href="#L294" class="ln"> 294</a>   have hLength:=Q.number_of_levels_le_order hεQ (by linarith) hmpos</span>
+<span id="L295"><a href="#L295" class="ln"> 295</a>   have hLsize:(L+1:ℝ)≤(Fintype.card (Fin n):ℝ)^((1:ℝ)):=by</span>
+<span id="L296"><a href="#L296" class="ln"> 296</a>     rw [Real.rpow_one]</span>
+<span id="L297"><a href="#L297" class="ln"> 297</a>     exact_mod_cast (show L+1≤Fintype.card (Fin n) by omega)</span>
+<span id="L298"><a href="#L298" class="ln"> 298</a>   have hmind:∀v,(1/2+αRef)*n≤(P.degree v:ℝ):=by</span>
+<span id="L299"><a href="#L299" class="ln"> 299</a>     intro v</span>
+<span id="L300"><a href="#L300" class="ln"> 300</a>     rw [hreg v]</span>
+<span id="L301"><a href="#L301" class="ln"> 301</a>     have hn0:(0:ℝ)≤n:=Nat.cast_nonneg _</span>
+<span id="L302"><a href="#L302" class="ln"> 302</a>     nlinarith [mul_nonneg hαRef.le hn0]</span>
+<span id="L303"><a href="#L303" class="ln"> 303</a>   have hWsize:∀i≤L,MLevel≤Fintype.card (W i):=fun i hi=&gt;(hGeometry.2 i hi).2.2.1</span>
+<span id="L304"><a href="#L304" class="ln"> 304</a>   have hZsize:∀i≤L,MLevel≤Fintype.card (Z i):=fun i hi=&gt;(hGeometry.2 i hi).2.2.2.1</span>
+<span id="L305"><a href="#L305" class="ln"> 305</a>   have hWstep:∀i&lt;L,(Fintype.card (W (i+1)):ℝ)≤εQ*Fintype.card (W i):=fun i hi=&gt;(hGeometry.2 i (by omega)).2.2.2.2.2.2.2.2.1</span>
+<span id="L306"><a href="#L306" class="ln"> 306</a>   have hZlo:∀i≤L,(ρ₀/8)*(Fintype.card (W i):ℝ)≤Fintype.card (Z i):=fun i hi=&gt;(hGeometry.2 i hi).2.2.2.2.1</span>
+<span id="L307"><a href="#L307" class="ln"> 307</a>   have hZhi:∀i≤L,Fintype.card (Z i)≤Fintype.card (W i):=fun i hi=&gt;(hGeometry.2 i hi).2.2.2.2.2.1</span>
+<span id="L308"><a href="#L308" class="ln"> 308</a>   have hZW:∀i≤L,(Fintype.card (Z i):ℝ)≤(1:ℝ)*Fintype.card (W i):=by</span>
+<span id="L309"><a href="#L309" class="ln"> 309</a>     intro i hi</span>
+<span id="L310"><a href="#L310" class="ln"> 310</a>     have hh:(Fintype.card (Z i):ℝ)≤Fintype.card (W i):=by exact_mod_cast hZhi i hi</span>
+<span id="L311"><a href="#L311" class="ln"> 311</a>     simpa using hh</span>
+<span id="L312"><a href="#L312" class="ln"> 312</a>   have hIsize:∀i≤L,MLevel≤(Aset i).card:=fun i hi=&gt;(hGeometry.2 i hi).1</span>
+<span id="L313"><a href="#L313" class="ln"> 313</a>   have hJsize:∀i≤L,MLevel≤(Bset i).card:=fun i hi=&gt;(hGeometry.2 i hi).2.1</span>
+<span id="L314"><a href="#L314" class="ln"> 314</a>   have hScale:∀i&lt;L,(Scale (i+1):ℝ)≤εQ*Scale i:=by simpa [Scale] using hWstep</span>
+<span id="L315"><a href="#L315" class="ln"> 315</a>   have hAS:∀i≤L,(Aset i).card≤Scale i:=fun i hi=&gt;(hGeometry.2 i hi).2.2.2.2.2.2.1</span>
+<span id="L316"><a href="#L316" class="ln"> 316</a>   have hBS:∀i≤L,(Bset i).card≤Scale i:=fun i hi=&gt;(hGeometry.2 i hi).2.2.2.2.2.2.2.1</span>
+<span id="L317"><a href="#L317" class="ln"> 317</a>   have hInv:∀i≤L,∀x,ρi i x∈Aset i↔x∈Aset i:=fun i hi=&gt;(hGeometry.2 i hi).2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.1</span>
+<span id="L318"><a href="#L318" class="ln"> 318</a>   have hWS:∀i≤L,(Fintype.card (W i):ℝ)≤(1:ℝ)*Scale i:=by intro i hi; simp [Scale]</span>
+<span id="L319"><a href="#L319" class="ln"> 319</a>   have hZS:∀i≤L,(Fintype.card (Z i):ℝ)≤(1:ℝ)*Scale i:=by simpa [Scale] using hZW</span>
+<span id="L320"><a href="#L320" class="ln"> 320</a>   have hIstep:∀i&lt;L,((Aset (i+1)).card:ℝ)≤εQ*(Aset i).card:=fun i hi=&gt;(hGeometry.2 i (by omega)).2.2.2.2.2.2.2.2.2.2.2.2.2.1</span>
+<span id="L321"><a href="#L321" class="ln"> 321</a>   have hJstep:∀i&lt;L,((Bset (i+1)).card:ℝ)≤εQ*(Bset i).card:=fun i hi=&gt;(hGeometry.2 i (by omega)).2.2.2.2.2.2.2.2.2.2.2.2.2.2.1</span>
+<span id="L322"><a href="#L322" class="ln"> 322</a>   have hWI:∀i≤L,(Fintype.card (W i):ℝ)≤Knbr*(Aset i).card:=fun i hi=&gt;(hSizes i hi).1</span>
+<span id="L323"><a href="#L323" class="ln"> 323</a>   have hZI:∀i≤L,(Fintype.card (Z i):ℝ)≤Knbr*(Aset i).card:=fun i hi=&gt;(hSizes i hi).2.1</span>
+<span id="L324"><a href="#L324" class="ln"> 324</a>   have hWJ:∀i≤L,(Fintype.card (W i):ℝ)≤Knbr*(Bset i).card:=fun i hi=&gt;(hSizes i hi).2.2</span>
+<span id="L325"><a href="#L325" class="ln"> 325</a>   have hPdomain:∀i≤L,∀x:W i,(1/2+γRich)*(Aset i).card≤(((P.comap (fV i)).neighborFinset x∩Aset i).card:ℝ):=fun i hi=&gt;(hDegrees i hi).2.1</span>
+<span id="L326"><a href="#L326" class="ln"> 326</a>   have hPbal:∀i≤L,∀x:W i,|(((P.comap (fV i)).neighborFinset x∩Aset i).card:ℝ)-Dbal i|≤βQ*Scale i:=by</span>
+<span id="L327"><a href="#L327" class="ln"> 327</a>     intro i hi x</span>
+<span id="L328"><a href="#L328" class="ln"> 328</a>     simpa only [Scale,Dbal,hρeq] using (hDegrees i hi).1 x</span>
+<span id="L329"><a href="#L329" class="ln"> 329</a>   have hPreg:∀i≤L,∀x:W i,|((P.comap (fV i)).degree x:ℝ)-Dlevel i|≤βQ*Fintype.card (W i):=by</span>
+<span id="L330"><a href="#L330" class="ln"> 330</a>     intro i hi x</span>
+<span id="L331"><a href="#L331" class="ln"> 331</a>     simpa only [Dlevel,hρeq] using (hDegrees i hi).2.2.1 x</span>
+<span id="L332"><a href="#L332" class="ln"> 332</a>   have hPmin:∀i≤L,∀x:W i,(1/2+γRich)*Fintype.card (W i)≤((P.comap (fV i)).degree x:ℝ):=fun i hi=&gt;(hDegrees i hi).2.2.2.1</span>
+<span id="L333"><a href="#L333" class="ln"> 333</a>   have hDL:∀i≤L,(Fintype.card (W i):ℝ)/2≤Dload i:=by</span>
+<span id="L334"><a href="#L334" class="ln"> 334</a>     intro i hi</span>
+<span id="L335"><a href="#L335" class="ln"> 335</a>     simpa only [Dload,Dlevel,hρeq] using (hDegrees i hi).2.2.2.2.1</span>
+<span id="L336"><a href="#L336" class="ln"> 336</a>   have hDU:∀i≤L,Dload i≤2*Fintype.card (W i):=by</span>
+<span id="L337"><a href="#L337" class="ln"> 337</a>     intro i hi</span>
+<span id="L338"><a href="#L338" class="ln"> 338</a>     simpa only [Dload,Dlevel,hρeq] using (hDegrees i hi).2.2.2.2.2</span>
+<span id="L339"><a href="#L339" class="ln"> 339</a>   have hwlevel:∀i≤L,SuccessorSequenceWeightConditions (P.comap (fV i)) (ρi i) (3*d) (Dload i) τLevel Aload Bload&#x27; (levelWeight i):=by</span>
+<span id="L340"><a href="#L340" class="ln"> 340</a>     simpa only [Dload,Dlevel,Aload,Bload&#x27;,hρeq] using hWeight</span>
+<span id="L341"><a href="#L341" class="ln"> 341</a>   refine ⟨levelWeight,?_⟩</span>
+<span id="L342"><a href="#L342" class="ln"> 342</a>   exact hAll n hn U F hF Allowed hAllowed ρ D hρlo hρ1 hD hsize hclass P π τ A weight hw hDlo hDhi w hw0 hwupper huv hnoshort εHost he hdeg hbudgetV hbudgetE hτnonneg hτbound</span>
+<span id="L343"><a href="#L343" class="ln"> 343</a>     W Z Hdom hεHostAbs hmind fV gV ρi hGeometry.1 L hLsize hWsize hZsize hWstep hZlo hZhi hZW hZhi</span>
+<span id="L344"><a href="#L344" class="ln"> 344</a>     Aset Bset Scale hIsize hJsize hScale hAS hBS hInv hWS hZS hIstep hJstep hWI hZI hWJ (by</span>
+<span id="L345"><a href="#L345" class="ln"> 345</a>       intro i hi x</span>
+<span id="L346"><a href="#L346" class="ln"> 346</a>       convert hPdomain i hi x using 1 &lt;;&gt; congr 5 &lt;;&gt; exact Subsingleton.elim _ _)</span>
+<span id="L347"><a href="#L347" class="ln"> 347</a>     βQ hβQ hβQbal (by</span>
+<span id="L348"><a href="#L348" class="ln"> 348</a>       intro i hi x</span>
+<span id="L349"><a href="#L349" class="ln"> 349</a>       have hx:=hPbal i hi x</span>
+<span id="L350"><a href="#L350" class="ln"> 350</a>       have hdec:(Subtype.instDecidableEq : DecidableEq (W i))=(fun a b=&gt;Classical.propDecidable (a=b)):=Subsingleton.elim _ _</span>
+<span id="L351"><a href="#L351" class="ln"> 351</a>       rw [hdec] at hx</span>
+<span id="L352"><a href="#L352" class="ln"> 352</a>       exact hx) Dlevel βQ hβQ hβQref hPreg hPmin bdom τLevel Aload levelWeight hDL hDU hwlevel hpstar0 hkstar0 htstar0</span>
+<span id="L353"><a href="#L353" class="ln"> 353</a> end Oberwolfach</span></pre></html>

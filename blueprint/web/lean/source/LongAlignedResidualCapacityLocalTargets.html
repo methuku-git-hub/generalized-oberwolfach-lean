@@ -1,0 +1,78 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongAlignedResidualCapacityLocalTargets.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongAlignedResidualCapacityLocalTargets.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongAlignedResidualCapacityOriginalParameters</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FirstVortexResidualTargetSize</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 1000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem long_aligned_residual_capacity_from_local_target_rows</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (m d:ℕ) (hm:0&lt;m) (hd:0&lt;d) (θ:ℝ) (hθ:0&lt;θ):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃N:ℕ,∀(n K:ℕ) (hnN:N≤n) (hn:0&lt;n) (U:Type) [Fintype U] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (F:U→SimpleGraph (Fin n)) (hF:∀w,(F w).IsRegularOfDegree 2)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (ℓ:Fin K→ℕ) (raw:RawMarkedOutcome (Fin n) U Bool Bool)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (t:ℕ) (Jret:StartRetentionOutcome (rawStartHubSet π d (fun e=&gt;raw (Sum.inr e)) false) t)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (Del:Finset (Sym2 (Fin n))),</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let S:=longRawSurvivingResources P π d raw true true Del</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let T:=bernoulliVertexSet (longRawHubState P π d raw true true)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let hST:=long_raw_surviving_resources_subset P π d raw true true Del</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀(M:Finset (RestrictedResource (mixedCandidateResources (longRawSeedResources (U:=U) π d m ℓ))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (Function.Embedding.subtype (·∈S)))),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let e:=Function.Embedding.subtype (·∈T)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let q:=survivingCandidateEmbedding (mixedCandidateResources (longRawSeedResources (U:=U) π d m ℓ)) S T hST</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let Nraw:=M.map q</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀(w:U),</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let L:=retainedAndRawIntervalIndex π d (fun e=&gt;raw (Sum.inr e)) false true t Jret w</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     letI : DecidableEq L := Classical.decEq _</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀(hmaps:LongRawOrdinaryComponentMapsProperty F π d m ℓ e Nraw)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (assign:LongRawSelectedOrdinary π d m ℓ e Nraw↪(Σu,(F u).ConnectedComponent))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hhub:∀a,(assign a).1=(longRawSelectedOrdinaryWheel π d m ℓ e Nraw a).val.2)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (data:ActualResidualData</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (K:=L)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (J:={a:LongRawSelectedOrdinary π d m ℓ e Nraw // (assign a).1=w}) (F w))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hc:data.c=m+1) (hd&#x27;:data.d=d)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hs1:data.s₁=firstSumIndices) (hs2:data.s₂=secondSumIndices)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (err:ℝ) (hθ1:θ≤1) (herr:err≤(θ/100)*n)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hcounts:∀g,|rawIntervalHubStartCount π d g (fun e=&gt;raw (Sum.inr e)) w-</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (n:ℝ)*longAssignedIntervalProbability F hF K m θ w g/(d:ℝ)|&lt;(n:ℝ)^(3/4:ℝ)/(d:ℝ))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (ht:data.t=Finset.univ)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hEmbed:data.Cembed=data.t.biUnion (fun j=&gt;(data.C j).support.toFinset))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hlen:∀j,(data.C j).length=ℓ (longRawSelectedOrdinaryPayload π d m ℓ e Nraw j.val).1)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (sourceCard:ℕ)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hcount:sourceCard=∑i:Fin K,(Nraw.filter (fun c=&gt;c.val.1=some i ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       longRawSeedHub π d m ℓ c.val.1 c.val.2=w)).card*ℓ i)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hsource:|((sourceCard:ℝ)-(n:ℝ)*((1-θ)*(∑i:Fin K,longAssignedKeptFraction F hF K θ i w)))|≤err),</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     ∀(a γ ρ₀ α lam ε η ζ:ℝ) (hγ:0≤γ) (hρ₀:0&lt;ρ₀) (hα:0&lt;α) (hlam:0≤lam) (hlamθ:lam≤θ)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hinv:1/(d:ℝ)≤θ/1024) (ha:a≤lam/(10*(d:ℝ))) (hγcap:γ≤lam/(10*(d:ℝ)))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hαsmall:α/16≤((ρ₀/4)/40000)*θ/1024)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hρhi:ρ₀≤1) (hεsmall:ε≤(ρ₀/4)/80000) (hη:η≤θ/4096) (hζ:ζ≤θ/4096) (hζ0:0≤ζ)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hmatch:∀i,((longRawIncidenceSet S i\M.biUnion</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (restrictedResourceSet (mixedCandidateResources (longRawSeedResources (U:=U) π d m ℓ)) (Function.Embedding.subtype (·∈S)))).card:ℝ)≤</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       max (a*n) (γ*(longRawIncidenceSet S i).card))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (G:SimpleGraph (Fin n)) (inner:Finset U) (A:Finset (Fin n))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (reserved selected absorber occupied:U→Finset (Fin n))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (hdegree:∀v,(G.degree v:ℝ)≤(α/16)*n)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (hI:(A.card:ℝ)≤ε*n) (hsub:(A.card:ℝ)^(3/4:ℝ)≤η*n)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (hrow:∀u∈inner,((innerRequiredTargets inner A reserved selected absorber occupied u).card:ℝ)≤</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       2*θ*A.card+(A.card:ℝ)^(3/4:ℝ)+ζ*A.card+max a γ*n)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (hpositions:∀x:{x:Fin n // rawIntervalColouredStart π d (fun e=&gt;raw (Sum.inr (w,e))) x true},</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       data.T (.inr x)=packedPhysicalSpokePositions _ _ _ _ m (3*d) d π</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         (rawMarkedPairSpokes π d raw true true false) (rawMarkedPairSpokes π d raw true true true)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         (longRawMarkedWheelsAtHub P π d m ℓ raw true true Nraw w) w x.val),</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     8*(residualSubtypeSet data.remaining data.prescribed).card+</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       8*⌈4*(G.edgeFinset.card:ℝ)/(((ρ₀/4)/40000)*Fintype.card (Fin n))⌉₊+4*(innerRequiredTargets inner A reserved selected absorber occupied w).card+10≤</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       Fintype.card {x // x∈data.remaining}:=by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   obtain ⟨N,hN⟩:=long_aligned_residual_capacity_from_original_parameters m d hm hd θ hθ</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   refine ⟨N,?_⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   intro n K hnN hn U _ _ F hF P π ℓ raw hnoshort t Jret Del S T hST M e q Nraw w L hmaps assign hhub data hc hd&#x27; hs1 hs2 err hθ1 herr hcounts ht hEmbed hlen sourceCard hcount hsource a γ ρ₀ α lam ε η ζ hγ hρ₀ hα hlam hlamθ hinv ha hγcap hαsmall hρhi hεsmall hη hζ hζ0 hmatch G inner A reserved selected absorber occupied hdegree hI hsub hrow hpositions</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   letI : DecidableEq L := Classical.decEq _</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hlam1:lam≤1:=le_trans hlamθ hθ1</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have htarget:=first_vortex_residual_target_size_from_local_rows inner A reserved selected absorber occupied d hd θ ρ₀ ε η ζ lam a γ hθ hρhi hεsmall hI hsub hη hζ hζ0 hlam hlam1 hinv ha hγcap hrow w</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   exact hN n K hnN hn U F hF P π ℓ raw hnoshort t Jret Del M w hmaps assign hhub data hc hd&#x27; hs1 hs2 err hθ1 herr hcounts ht hEmbed hlen sourceCard hcount hsource a γ ρ₀ α lam (θ/1024) hγ hρ₀ hα hlam hlamθ hinv ha hγcap hαsmall (le_refl _) hmatch G (innerRequiredTargets inner A reserved selected absorber occupied w) hdegree htarget hpositions</span>
+<span id="L75"><a href="#L75" class="ln">  75</a> end Oberwolfach</span></pre></html>

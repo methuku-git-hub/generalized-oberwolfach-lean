@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPackingAdaptiveVortexEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPackingAdaptiveVortexEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedRetainedPackingLoadVortex</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPackingLoadsAfterPhysicalDeletion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! On one event for the original retained sampling experiment, the fixed</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> packing weights control every later physical deletion on every supplied</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> domain. All potential roots and the original normalizations are retained. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 7000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_packing_adaptive_vortex_event</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (m d : ℕ) (hm : 3≤m) (hd : 2≤d) (B pstar ε K η χ C Q pret ζ : ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hB : 0&lt;B) (hpstar : 0&lt;pstar) (hε : 0&lt;ε) (hK : 1≤K)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hη : 0&lt;η) (hη1 : η&lt;1) (hχ : 0&lt;χ) (hpret : 0&lt;pret) (hζ : 0&lt;ζ) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ M₀ N : ℕ,1≤M₀ ∧ 1≤N ∧ ∀ (V U Γ Color : Type) (W Z H : ℕ→Type)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [LinearOrder V] [Nonempty V] [DecidableEq U]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       [∀ i,Fintype (W i)] [∀ i,Fintype (Z i)] [∀ i,Fintype (H i)]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       [∀ i,LinearOrder (W i)] [∀ i,DecidableEq (Z i)] [∀ i,DecidableEq (H i)],</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     N≤Fintype.card V → Fintype.card U≤Fintype.card V →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∀ (P : SimpleGraph V) (π : Equiv.Perm V),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ (f : ∀ i,W i↪oV) (g : ∀ i,Z i↪U) (b : ∀ i,H i↪Z i) (ρ : ∀ i,Equiv.Perm (W i)),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ i x,f i (ρ i x)=π (f i x)) →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀ L : ℕ,(L+1:ℝ)≤(Fintype.card V:ℝ)^C →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ i≤L,M₀≤Fintype.card (W i)) → (∀ i≤L,M₀≤Fintype.card (Z i)) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ i&lt;L,(Fintype.card (W (i+1)):ℝ)≤η*Fintype.card (W i)) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ i≤L,(Fintype.card (Z i):ℝ)≤K*Fintype.card (W i)) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i≤L,Fintype.card (H i)≤Fintype.card (W i)) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∀ (D : ℕ→ℝ) (τ A : ℝ),</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ i≤L,(Fintype.card (W i):ℝ)/2≤D i) → (∀ i≤L,D i≤2*Fintype.card (W i)) →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∀ weight : ∀ i,(Fin (m+1)→W i)→ℝ,</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ i≤L,SuccessorSequenceWeightConditions (P.comap (f i)) (ρ i) (3*d) (D i) τ A B (weight i)) →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∀ (p k s₀ : ℝ) (hp : 0&lt;p) (hk : 0&lt;k) (hphys : 2*p+2*k≤1),</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       pstar≤p → pstar≤k → pstar≤s₀ → p≤1 → k≤1 → s₀≤1 →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀ i≤L,(Fintype.card (H i):ℝ)*(s₀/m)=D i*k) →</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (∀ i≤L,(Fintype.card (H i):ℝ)*(s₀/m)*m=D i*p) →</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     ∀ (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a)) (a : Γ) (j : Color),</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∀ u,q u a=s₀/m) → (∀ u,s u j=s₀) → pret*Fintype.card V≤(s₀/m)*Fintype.card U →</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     1-χ-(Fintype.card V:ℝ)^(-Q)≤</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (rawMarkedRetentionLaw π d hd a p k hp.le hk.le hphys q hq hQ s hs hS).probability</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         (fun z=&gt;∀ i≤L,∀ δ : ℝ,0≤δ→</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           ∀ (DR : SimpleGraph (W i)) (DS : SimpleGraph (W i⊕Z i)),</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>           (∀ x,(DR.degree x:ℝ)≤δ)→(∀ x,(DS.degree x:ℝ)≤δ)→</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>           MarkedPackingLoadsWithSpokes (P.comap (f i)) (ρ i) d m (D i) p k s₀ (weight i) a j</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>             (b i) (fun z=&gt;q (g i z)) (fun z=&gt;s (g i z))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>             (τ+ε+11*((m:ℝ)+1)^4*(2*B/pstar^(2*m+1))*K*ζ+</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>               33*((m:ℝ)+1)^4*(2*B/pstar^(2*m+1))*δ/Fintype.card (W i))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>             (rawMarkedDeleteRims (rawMarkedRestrictPair (f i) (g i) z.1) DR.edgeFinset)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>             (markedDeletePhysicalSpokes</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>               (fun b x u=&gt;retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>                 (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a))</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>                   z.2 a j b (f i x) (g i u)) DS)) := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   obtain ⟨M,N,hM,hN,hbase⟩ := marked_retained_packing_load_vortex_event m d hm hd B pstar ε K η χ C Q pret ζ</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     hB hpstar hε hK hη hη1 hχ hpret hζ</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   refine ⟨M,N,hM,hN,?_⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   intro V U Γ Color W Z H _ _ _ _ _ _ _ _ _ _ _ _ _ hn hu P π hπ f g b ρ hcomm L hL hW hZ hstep hZW hHW D τ A hDlo hDhi weight hw p k s₀ hp hk hphys hpp hpk hps hp1 hk1 hs1 hmarked hord q hq hQ s hs hS a j ha hj hmass</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have he := hbase V U Γ Color W Z H hn hu P π hπ f g b ρ hcomm L hL hW hZ hstep hZW hHW D τ A hDlo hDhi weight hw p k s₀ hp hk hphys hpp hpk hps hp1 hk1 hs1 hmarked hord q hq hQ s hs hS a j ha hj hmass</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   apply he.trans</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   apply finiteLaw_probability_mono</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   intro z hz i hi δ hδ DR DS hDR hDS</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   exact marked_packing_loads_after_physical_deletion (P.comap (f i)) (ρ i) d m hm</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (lt_of_lt_of_le (by omega) (hW i hi)) (D i) τ A B (hDlo i hi) (hDhi i hi)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     p k s₀ pstar hpstar hpp hpk hps hp1 hk1 hs1 hB.le (weight i) (hw i hi)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     a j (b i) (hHW i hi) (fun z=&gt;q (g i z)) (fun z=&gt;s (g i z)) _ δ hδ _ _ (hz i hi) DR DS hDR hDS</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

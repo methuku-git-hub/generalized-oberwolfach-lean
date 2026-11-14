@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedActiveSeedMass.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedActiveSeedMass.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.Vortex</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The prescribed seed density supplies enough total mass for retention. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> theorem marked_active_seed_mass_bound</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     {V U:Type} [Fintype V] [Fintype U] (D:ℕ)</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (ρ₀ tstar t pret:ℝ) (hρ:0&lt;ρ₀) (ht:0&lt;tstar) (hn:0&lt;Fintype.card V)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hD:(Fintype.card V:ℝ)/2≤D) (hρlo:ρ₀≤ initialIndexDensity U D)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (htlo:tstar≤t) (hpret:pret≤ρ₀*tstar/4):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     pret*Fintype.card V≤t*Fintype.card U:=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hn&#x27;:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hD&#x27;:(0:ℝ)&lt;D:=lt_of_lt_of_le (by linarith:(0:ℝ)&lt;(Fintype.card V:ℝ)/2) hD</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hρD:ρ₀*D≤2*(Fintype.card U:ℝ):=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     have hh:=(le_div_iff₀ hD&#x27;).mp hρlo</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     simpa [initialIndexDensity] using hh</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hcard:(ρ₀/4)*(Fintype.card V:ℝ)≤Fintype.card U:=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have hh:=mul_le_mul_of_nonneg_left hD hρ.le</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     nlinarith</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hU:(0:ℝ)≤Fintype.card U:=Nat.cast_nonneg _</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hmass:=mul_le_mul_of_nonneg_right htlo hU</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hh:=mul_le_mul_of_nonneg_left hcard ht.le</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hp:=mul_le_mul_of_nonneg_right hpret hn&#x27;.le</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   nlinarith</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> end Oberwolfach</span></pre></html>

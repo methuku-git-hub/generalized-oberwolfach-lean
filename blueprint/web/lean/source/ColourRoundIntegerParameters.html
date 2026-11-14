@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ColourRoundIntegerParameters.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ColourRoundIntegerParameters.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ColourRoundProgress</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Floors and ceilings for the next colouring round. The integer choices</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> retain a uniform lower list-size bound and strict ratio progress. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 2200000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem colouring_round_integer_parameters</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {k l s : ℕ} (hk : 0&lt;k) (hl : 0&lt;l) (hs : 0&lt;s)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {ρ a b ε η M r : ℝ}</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (ha : 0&lt;a) (ha1 : a≤1) (hb : 0&lt;b) (hε : 0&lt;ε) (hε1 : ε≤1)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hη : 0&lt;η) (hρ : a≤ρ ∧ ρ≤1) (hr : 1+ε≤r) (hrM : r≤M)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hratio : r*s≤l) (hlarge : (l : ℝ)≤M*s)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hκ : b≤1-(s : ℝ)*ρ/(l : ℝ)) (hκ1 : 1-(s : ℝ)*ρ/(l : ℝ)≤1)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (herror : η*M*(M+2)≤(a*ε/4)*b^(k-1))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hηsmall : η≤b^k/2) (hηl : 4≤η*l) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     let κ := 1-(s : ℝ)*ρ/(l : ℝ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let X := (l : ℝ)*κ^k-η*l/2</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let Y := (s : ℝ)*(1-ρ)*κ^(k-1)+η*l/2</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ l&#x27; s&#x27; : ℕ, 0&lt;l&#x27; ∧ 0&lt;s&#x27; ∧ l&#x27;≤l ∧ s&#x27;≤l&#x27; ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (l&#x27; : ℝ)≤X ∧ Y≤(s&#x27; : ℝ) ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (b^k/2)*(l : ℝ)≤l&#x27; ∧ (r+a*ε/4)*(s&#x27; : ℝ)≤l&#x27; := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   dsimp only</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   let κ := 1-(s : ℝ)*ρ/(l : ℝ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let X := (l : ℝ)*κ^k-η*l/2</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let Y := (s : ℝ)*(1-ρ)*κ^(k-1)+η*l/2</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hlR : (0 : ℝ)&lt;l := Nat.cast_pos.mpr hl</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hsR : (0 : ℝ)&lt;s := Nat.cast_pos.mpr hs</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hκ0 : 0≤κ := hb.le.trans hκ</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hpow := pow_le_pow_left₀ hb.le hκ k</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hpow1 : κ^k≤1 := pow_le_one₀ hκ0 hκ1</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hX : 0≤X := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hh := mul_le_mul_of_nonneg_right hηsmall hlR.le</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hh&#x27; := mul_le_mul_of_nonneg_left hpow hlR.le</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hp : 0≤(b^k)*(l : ℝ) := by positivity</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     dsimp [X];nlinarith</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hXl : X≤(l : ℝ) := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hh := mul_le_mul_of_nonneg_left hpow1 hlR.le</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     dsimp [X];nlinarith [mul_pos hη hlR]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hY : 0≤Y := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     dsimp [Y]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     exact add_nonneg (mul_nonneg (mul_nonneg hsR.le (by linarith [hρ.2])) (pow_nonneg hκ0 _))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (by positivity)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hYpos : 0&lt;Y := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hh : 0≤(s : ℝ)*(1-ρ)*κ^(k-1) :=</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       mul_nonneg (mul_nonneg hsR.le (by linarith [hρ.2])) (pow_nonneg hκ0 _)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     dsimp [Y];nlinarith</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   let l&#x27; := ⌊X⌋₊</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   let s&#x27; := ⌈Y⌉₊</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hfloor : (l&#x27; : ℝ)≤X := Nat.floor_le hX</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hceil : Y≤(s&#x27; : ℝ) := Nat.le_ceil _</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hlow : (l : ℝ)*κ^k-η*l≤(l&#x27; : ℝ) := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hh := Nat.lt_floor_add_one X</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     change X&lt;(l&#x27; : ℝ)+1 at hh</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     dsimp [X] at hh</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     linarith</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hupp : (s&#x27; : ℝ)≤(s : ℝ)*(1-ρ)*κ^(k-1)+η*l := by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hh := Nat.ceil_lt_add_one hY</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     change (s&#x27; : ℝ)&lt;Y+1 at hh</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     dsimp [Y] at hh</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     linarith</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hratio&#x27; := colouring_round_ratio_progress hk hsR ha ha1 hb hε hε1 hη.le</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     hρ hr hrM hratio hlarge hκ herror hlow hupp</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hlow&#x27; := colouring_round_list_lower hlR.le hb.le hκ hηsmall hlow</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hlpos : 0&lt;l&#x27; := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     have hh : (0 : ℝ)&lt;l&#x27; := (by positivity : 0&lt;(b^k/2)*(l : ℝ)).trans_le hlow&#x27;</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     exact_mod_cast hh</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hspos : 0&lt;s&#x27; := Nat.cast_pos.mp (hYpos.trans_le hceil)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hll : l&#x27;≤l := by exact_mod_cast hfloor.trans hXl</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hsl : s&#x27;≤l&#x27; := by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     have hc : 0&lt;a*ε/4 := by positivity</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have h₁ : 1≤r+a*ε/4 := by linarith</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     have hh := mul_le_mul_of_nonneg_right h₁ (Nat.cast_nonneg s&#x27;)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     have hh&#x27; : (s&#x27; : ℝ)≤l&#x27; := by linarith</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     exact_mod_cast hh&#x27;</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   exact ⟨l&#x27;,s&#x27;,hlpos,hspos,hll,hsl,hfloor,hceil,hlow&#x27;,hratio&#x27;⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> </span>
+<span id="L79"><a href="#L79" class="ln">  79</a> end Oberwolfach</span></pre></html>

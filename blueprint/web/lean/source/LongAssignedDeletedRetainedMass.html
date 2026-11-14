@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongAssignedDeletedRetainedMass.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongAssignedDeletedRetainedMass.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongAssignedRawDeletedEventLoads</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongAssignedSeedFunctionBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.LongAssignedMixedPhysicalDeletion</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.LongMixedDeletionUniformConstant</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.LongAssignedCommonEventDeletionLoads</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.LongRawDeletedStateBool</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> import Oberwolfach.LongRawDeletedHubSpokeCounts</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> import Oberwolfach.LongRetainedHubTestsFromTargets</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> /-! Uniform positive constants for the named actual seed functions. -/</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option autoImplicit false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option maxHeartbeats 10000000</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> open scoped BigOperators</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> noncomputable section</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> namespace Oberwolfach</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> variable {n:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem long_assigned_retained_test_mass_after_every_deletion</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hn:0&lt;n) (hu:Fintype.card U≤n) (F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (Allowed:Set ℕ) (hAllowed:∀u,AllowedCycleLengths (F u) Allowed)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (K:ℕ) (hK:0&lt;K) (m d:ℕ) (hm:7≤m) (hd:2≤d) (θ ρ₀ ρ D:ℝ)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hθ0:0≤θ) (hθ:θ≤1/100) (hρ₀:0&lt;ρ₀) (hρlo:ρ₀≤ρ) (hρ1:ρ≤1) (hD:0&lt;D)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hsize:ρ*D=2*Fintype.card U) (hcut:(1/((m:ℝ)+1))/(d:ℝ)≤θ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hclass:∀u,factorPreparationClass (F u) K=none)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (ni:Fin K→ℕ) (hni:∀i,1≤ni i)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (τ A BM:ℝ) (hBM:0&lt;BM) (weight:(Fin (m+1)→Fin n)→ℝ)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hw:SuccessorSequenceWeightConditions P π (3*d) D τ A BM weight)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hDlo:(n:ℝ)/2≤D) (hDhi:D≤2*n)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (BO:Fin K→ℝ) (hBO:∀i,0&lt;BO i)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (w:∀i,OrdinaryCycle P (ni i+2)→ℝ) (hw0:∀i C,0≤w i C)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hwupper:∀i C,w i C≤BO i/(n:ℝ)^(ni i))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hK3:3≤K) (hθpos:0&lt;θ)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hpadded:∀i,ni i+2=longAssignedPaddedLength i)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (p k τerr t countErr pmin:ℝ) (hτerr:τerr≤1/2)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (b:U→ℝ) (hbdef:∀u,b u=longAssignedApproxOrdinaryWeight F hF K m θ u)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hb:∀u,0&lt;b u ∧ b u≤1) (hpmin:0&lt;pmin) (hbmin:∀u,pmin≤b u)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hcountErr:countErr≤pmin*n/2):</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let pstar:=min (1/4:ℝ) (min (ρ₀/8) (ρ₀/(6*((m:ℝ)+1))))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let BMseed:=2*BM/pstar^(2*m+1)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let BOseed:=fun i=&gt;2*BO i/pstar^(2*(ni i+2))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let C:=10*(((m:ℝ)+1)^4*BMseed+∑i:Fin K,((ni i:ℝ)+2)^4*BOseed i)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let ℓ:=fun i=&gt;ni i+2</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let Wm:=longAssignedMarkedSeed F hF K m d θ D π weight</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     let Wo:=longAssignedOrdinarySeed F hF K m d θ D P π ni hni w</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     let W:=longMixedSeedWeight Wm Wo</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     let R:=longRawHubResources (U:=U) π d m ℓ</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     let state:=longRawHubState P π d raw g j</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (∀(i:Option (Fin K)) (root:LongRawHubResource n U),state root=true→</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       |resourcePatternLoad (R i) (W i) (fun _ _=&gt;true) root state-</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         longAssignedMixedTarget F hF K m θ D p k i root|≤</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         t+τerr*longAssignedMixedTarget F hF K m θ D p k i root)→</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (∀u,|(((ordinaryCommonHubSpokeRoots u).filter (fun v=&gt;state v=true)).card:ℝ)-b u*n|≤countErr)→</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     ∀(Del:SimpleGraph (Fin n)) (δ:ℝ), (∀x,(Del.degree x:ℝ)≤δ)→</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (t+C*(δ/(n:ℝ))≤θ/(800*(K:ℝ)))→</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     let rawDeleted:=rawMarkedDeleteRims raw Del.edgeFinset</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     let newState:=longRawHubState P π d rawDeleted g j</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     let hub:=longRawHubNames (U:=U) π d m ℓ</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     let e:{v // v∈bernoulliVertexSet newState}↪_:=Function.Embedding.subtype _</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     ∀z:LongRetainedHubTest F hF K θ,</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       θ*(n:ℝ)/(1600*(K:ℝ)*(K:ℝ))≤</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         ∑c:RestrictedResource (mixedCandidateResources R) e,</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>           longRetainedHubIndicator F hF θ hub z c.val*mixedCandidateWeight W c.val :=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   intro pstar BMseed BOseed C ℓ Wm Wo W R state hload hcount Del δ hDel ht rawDeleted newState hub e</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hpost:=long_assigned_common_event_raw_deleted_loads hn hu F hF Allowed hAllowed K hK m d hm hd θ ρ₀ ρ D</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     hθ0 hθ hρ₀ hρlo hρ1 hD hsize hcut hclass P π ni hni τ A BM hBM weight hw hDlo hDhi BO hBO w hw0 hwupper raw g j</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (longAssignedMixedTarget F hF K m θ D p k) (fun i root=&gt;t+τerr*longAssignedMixedTarget F hF K m θ D p k i root)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     hload Del δ hDel</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hc:∀u,|(((ordinaryCommonHubSpokeRoots u).filter (fun v=&gt;newState v=true)).card:ℝ)-b u*n|≤countErr:=by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     intro u</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     rw [long_raw_ordinary_hub_spoke_count_after_rim_deletion P π d raw g j Del.edgeFinset u]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     exact hcount u</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hS:∀i u c,(R (some i) c∩ordinaryCommonHubSpokeRoots u).card=</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       if hub (some i) c=u then longAssignedPaddedLength i else 0:=by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     intro i u c</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     have hh:=long_raw_hub_context_spokes π d m ℓ i u c</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hp:ℓ i=longAssignedPaddedLength i:=hpadded i</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     rw [hp] at hh</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     convert hh using 1 &lt;;&gt; congr 3 &lt;;&gt; exact Subsingleton.elim _ _</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   have htarget:∀i v,v∈bernoulliVertexSet newState→</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       |resourcePatternLoad (R i) (W i) (fun _ _=&gt;true) v newState-</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>         longAssignedMixedTarget F hF K m θ D p k i v|≤</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>         (t+C*(δ/(n:ℝ)))+τerr*longAssignedMixedTarget F hF K m θ D p k i v:=by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     intro i v hv</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     have hh:=hpost i v ((mem_bernoulliVertexSet newState v).mp hv)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     linarith</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hθhalf:θ≤1/2:=by linarith</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   exact long_retained_hub_tests_mass_from_mixed_targets hn F hF m hK hK3 θ D p k hθpos hθhalf</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     b hbdef hb pmin hpmin hbmin R newState W hub hS τerr (t+C*(δ/(n:ℝ))) countErr hτerr ht htarget hc hcountErr</span>
+<span id="L91"><a href="#L91" class="ln">  91</a> end Oberwolfach</span></pre></html>

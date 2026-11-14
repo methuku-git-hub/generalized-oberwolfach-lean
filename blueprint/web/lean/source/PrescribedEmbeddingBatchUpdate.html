@@ -1,0 +1,85 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedEmbeddingBatchUpdate.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedEmbeddingBatchUpdate.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedEmbeddingInjectiveUpdate</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedEmbeddingUpdatePreserves</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Extend a partial injection by a finite list of distinct source-target</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> pairs while keeping every earlier image fixed. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {X V:Type} [DecidableEq X] [DecidableEq V]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> def updatePairedImages (f:X→V):List (X×V)→(X→V)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   | []=&gt;f</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   | (x,z)::ps=&gt;updatePairedImages (Function.update f x z) ps</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem prescribed_embedding_batch_update (ps:List (X×V)):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ (A:Finset X) (f:X→V),</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (ps.map Prod.fst).Nodup→(ps.map Prod.snd).Nodup→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ p∈ps,p.1∉A)→(∀ p∈ps,p.2∉A.image f)→Set.InjOn f A→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     Set.InjOn (updatePairedImages f ps) (↑(A∪(ps.map Prod.fst).toFinset):Set X) ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∀ a∈A,updatePairedImages f ps a=f a) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ p∈ps,updatePairedImages f ps p.1=p.2) := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   induction ps with</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   | nil =&gt;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     intro A f ha hb hdom himg hinj</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     refine ⟨?_,?_,?_⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     · simpa [updatePairedImages] using hinj</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     · intro a ha; rfl</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     · simp</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   | cons p ps ih =&gt;</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     rcases p with ⟨x,z⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     intro A f hsrc htgt hdom himg hinj</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hsrc&#x27;:(ps.map Prod.fst).Nodup:=by simpa using (List.nodup_cons.mp (by simpa using hsrc)).2</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have htgt&#x27;:(ps.map Prod.snd).Nodup:=by simpa using (List.nodup_cons.mp (by simpa using htgt)).2</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hxnot:x∉ps.map Prod.fst:=(List.nodup_cons.mp (by simpa using hsrc)).1</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hznot:z∉ps.map Prod.snd:=(List.nodup_cons.mp (by simpa using htgt)).1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hxA:x∉A:=hdom (x,z) (by simp)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hzA:z∉A.image f:=himg (x,z) (by simp)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let f&#x27;:=Function.update f x z</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let A&#x27;:=insert x A</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hinj&#x27;:Set.InjOn f&#x27; A&#x27;:=prescribed_embedding_injective_update A f x z hinj hzA</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hp:=prescribed_embedding_update_preserves A f x z hxA</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hdom&#x27;:∀ q∈ps,q.1∉A&#x27;:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       intro q hq</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       have hqA:=hdom q (by simp [hq])</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       have hqx:q.1≠x:=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         intro he</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         apply hxnot</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         exact List.mem_map.mpr ⟨q,hq,he⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       simpa [A&#x27;,hqA,hqx] </span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have himg&#x27;:∀ q∈ps,q.2∉A&#x27;.image f&#x27;:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       intro q hq</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       have hqA:=himg q (by simp [hq])</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       have hqz:q.2≠z:=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         intro he</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         apply hznot</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         exact List.mem_map.mpr ⟨q,hq,he⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       rw [show A&#x27;.image f&#x27;=insert z (A.image f) from hp.2]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       simp [hqA,hqz]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     obtain ⟨hinj&#x27;&#x27;,hold,hnew⟩:=ih A&#x27; f&#x27; hsrc&#x27; htgt&#x27; hdom&#x27; himg&#x27; hinj&#x27;</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hsets:A&#x27;∪(ps.map Prod.fst).toFinset=A∪(((x,z)::ps).map Prod.fst).toFinset:=by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       ext a</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       simp [A&#x27;,or_assoc,or_left_comm,or_comm]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     constructor</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     · change Set.InjOn (updatePairedImages f&#x27; ps) (↑(A∪(((x,z)::ps).map Prod.fst).toFinset):Set X)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       rw [←hsets]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       exact hinj&#x27;&#x27;</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     constructor</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · intro a ha</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       change updatePairedImages f&#x27; ps a=f a</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       have ha&#x27;:a∈A&#x27;:=by simp [A&#x27;,ha]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       rw [hold a ha&#x27;]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       exact hp.1 a ha</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     · intro q hq</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       change updatePairedImages f&#x27; ps q.1=q.2</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       simp only [List.mem_cons] at hq</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       rcases hq with rfl|hq</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       · have hx&#x27;:x∈A&#x27;:=by simp [A&#x27;]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>         rw [hold x hx&#x27;]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>         simp [f&#x27;]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       · exact hnew q hq</span>
+<span id="L82"><a href="#L82" class="ln">  82</a> end Oberwolfach</span></pre></html>

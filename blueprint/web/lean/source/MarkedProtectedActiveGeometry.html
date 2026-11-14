@@ -1,0 +1,87 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedProtectedActiveGeometry.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedProtectedActiveGeometry.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedActiveInnerParentDegrees</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.InvariantPermutation</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Actual inner and ambient orders after removing the protected rows and</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> hubs. Both lower bounds refer to the same active ambient order. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 10000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V A W U B:Type} [Fintype V] [Fintype A] [Fintype W] [Fintype U] [Fintype B]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   [DecidableEq V] [DecidableEq A] [DecidableEq U] [DecidableEq B]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem marked_protected_active_geometry</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (f:A↪V) (g:B↪U) (i:W↪A) (I T:Finset V) (J Z:Finset U) (XA:Finset A) (ZA:Finset B)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hf:Finset.univ.image f=Finset.univ\T) (hg:Finset.univ.image g=Finset.univ\Z)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hi:Finset.univ.image i=XA) (hXA:XA.image f=I\T) (hZA:ZA.image g=J\Z)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hU:Fintype.card U≤Fintype.card V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (iota omegaI xi:ℝ) (hiota:0&lt; iota) (hOmega:0&lt;omegaI) (hOmega1:omegaI≤1) (hxi:0≤xi)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hIlow:iota*Fintype.card V≤(I.card:ℝ)) (hJlow:omegaI*I.card≤(J.card:ℝ))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hIup:(I.card:ℝ)≤(xi/4)*Fintype.card V) (hJup:J.card≤I.card)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hTsize:(T.card:ℝ)≤(iota/2)*Fintype.card V)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hZsize:(Z.card:ℝ)≤(omegaI*iota/2)*Fintype.card V)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hThalf:(T.card:ℝ)≤(Fintype.card V:ℝ)/2):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (Fintype.card V:ℝ)/2≤Fintype.card A∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (Fintype.card (A⊕B):ℝ)≤2*Fintype.card V∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (iota/2)*Fintype.card V≤(Fintype.card W:ℝ)∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (omegaI*iota/2)*Fintype.card V≤(ZA.card:ℝ)∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (omegaI*iota/4)*Fintype.card (A⊕B)≤(Fintype.card W:ℝ)∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (omegaI*iota/4)*Fintype.card (A⊕B)≤(ZA.card:ℝ)∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ((ordinaryInnerVertices XA ZA).card:ℝ)≤xi*Fintype.card A:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hcA:Fintype.card A=(Finset.univ\T).card:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     rw [←hf,Finset.card_image_of_injective _ f.injective,Finset.card_univ]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hcW:Fintype.card W=(I\T).card:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     rw [←hXA,Finset.card_image_of_injective _ f.injective,←hi,Finset.card_image_of_injective _ i.injective,Finset.card_univ]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hcZ:ZA.card=(J\Z).card:=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     rw [←hZA,Finset.card_image_of_injective _ g.injective]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hAlow:(Fintype.card V:ℝ)/2≤Fintype.card A:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hh:=Finset.card_sdiff_add_card_eq_card (Finset.subset_univ T)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rw [Finset.card_univ,←hcA] at hh</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hh&#x27;:(Fintype.card A:ℝ)+T.card=Fintype.card V:=by exact_mod_cast hh</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     linarith only [hh&#x27;,hThalf]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hAmbient:(Fintype.card (A⊕B):ℝ)≤2*Fintype.card V:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have ha:=Fintype.card_le_of_injective f f.injective</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have hb:=Fintype.card_le_of_injective g g.injective</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     simp only [Fintype.card_sum,Nat.cast_add]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     exact_mod_cast (show Fintype.card A+Fintype.card B≤2*Fintype.card V by omega)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hsplitI:(I.card:ℝ)≤Fintype.card W+T.card:=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have h:=Finset.card_sdiff_add_card_inter I T</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have hle: (I∩T).card≤T.card:=Finset.card_le_card Finset.inter_subset_right</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     rw [←hcW] at h</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact_mod_cast (show I.card≤Fintype.card W+T.card by omega)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hsplitJ:(J.card:ℝ)≤ZA.card+Z.card:=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have h:=Finset.card_sdiff_add_card_inter J Z</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hle:(J∩Z).card≤Z.card:=Finset.card_le_card Finset.inter_subset_right</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     rw [←hcZ] at h</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     exact_mod_cast (show J.card≤ZA.card+Z.card by omega)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hW:(iota/2)*Fintype.card V≤(Fintype.card W:ℝ):=by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     linarith only [hIlow,hsplitI,hTsize]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hZ:(omegaI*iota/2)*Fintype.card V≤(ZA.card:ℝ):=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hh:=mul_le_mul_of_nonneg_left hIlow hOmega.le</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     nlinarith only [hh,hJlow,hsplitJ,hZsize]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hscale:=mul_le_mul_of_nonneg_left hAmbient (show 0≤omegaI*iota/4 by positivity)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hOm:=mul_le_mul_of_nonneg_right hOmega1 (show 0≤ iota*Fintype.card V by positivity)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   refine ⟨hAlow,hAmbient,hW,hZ,by nlinarith only [hscale,hW,hOm],by nlinarith only [hscale,hZ],?_⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hXAcard:XA.card=(I\T).card:=by rw [←hXA,Finset.card_image_of_injective _ f.injective]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hXAup:(XA.card:ℝ)≤I.card:=by rw [hXAcard];exact_mod_cast Finset.card_le_card (Finset.sdiff_subset : I\T⊆I)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hZAup:(ZA.card:ℝ)≤I.card:=by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     rw [hcZ];exact_mod_cast (Finset.card_le_card (Finset.sdiff_subset : J\Z⊆J)).trans hJup</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hInner:((ordinaryInnerVertices XA ZA).card:ℝ)=XA.card+ZA.card:=by</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have hd:Disjoint (XA.image (Sum.inl:A→A⊕B)) (ZA.image Sum.inr):=by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       apply Finset.disjoint_left.mpr</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       intro z hz hz&#x27;</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       obtain ⟨x,_,rfl⟩:=Finset.mem_image.mp hz</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       obtain ⟨y,_,he⟩:=Finset.mem_image.mp hz&#x27;</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       exact Sum.inr_ne_inl he</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     rw [ordinaryInnerVertices,Finset.card_union_of_disjoint hd,</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       Finset.card_image_of_injective _ Sum.inl_injective,</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       Finset.card_image_of_injective _ Sum.inr_injective,Nat.cast_add]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   have hscale&#x27;:=mul_le_mul_of_nonneg_left hAlow hxi</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   rw [hInner]</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   nlinarith only [hXAup,hZAup,hIup,hscale&#x27;]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a> </span>
+<span id="L84"><a href="#L84" class="ln">  84</a> end Oberwolfach</span></pre></html>

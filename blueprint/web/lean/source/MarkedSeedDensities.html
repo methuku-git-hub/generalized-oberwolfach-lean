@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSeedDensities.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSeedDensities.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Tactic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The actual density identities used by the marked completion sample.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> All constants here depend on the supplied lower density bounds and cycle length. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 1000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem marked_seed_density_bounds (m : ℕ) (hm : 1≤m)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (ρ s ρstar sstar : ℝ) (hρstar : 0&lt;ρstar) (hsstar : 0&lt;sstar)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hρlo : ρstar≤ρ) (hρhi : ρ≤1) (hslo : sstar≤s) (hshi : s≤1/100) :</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     let p := ρ*s/2</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     let k := p/m</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     let t := s/m</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     let pstar := ρstar*sstar/(2*m)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     0&lt;pstar ∧ pstar≤p ∧ pstar≤k ∧ pstar≤s ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       p≤1 ∧ k≤1 ∧ s≤1 ∧ 0&lt;t ∧ 2*p+2*k≤1 := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   intro p k t pstar</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hm&#x27; : (1:ℝ)≤m := by exact_mod_cast hm</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hm0 : (0:ℝ)&lt;m := by linarith</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hρ : 0&lt;ρ := hρstar.trans_le hρlo</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hs : 0&lt;s := hsstar.trans_le hslo</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hp0 : 0&lt;p := by dsimp [p];positivity</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hprod : ρstar*sstar≤ρ*s := mul_le_mul hρlo hslo hsstar.le hρ.le</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hklo : pstar≤k := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     dsimp [pstar,k,p]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     rw [div_div]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     exact div_le_div_of_nonneg_right hprod (by positivity)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hkp : k≤p := by dsimp [k];apply (div_le_iff₀ hm0).mpr;nlinarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hps : p≤s := by dsimp [p];nlinarith [mul_le_mul_of_nonneg_right hρhi hs.le]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hpp : 0&lt;pstar := by dsimp [pstar];positivity</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   refine ⟨hpp,hklo.trans hkp,hklo,(hklo.trans hkp).trans hps,?_,?_,?_,?_,?_⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   · linarith</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · linarith</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · linarith</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · dsimp [t];positivity</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · linarith</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem marked_seed_density_balance (m : ℕ) (hm : 0&lt;m) (ρ s b : ℝ) (hρ : ρ≠0) :</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     b*(s/m)=(2*b/ρ)*((ρ*s/2)/m) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       b*(s/m)*m=(2*b/ρ)*(ρ*s/2) := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hm&#x27; : (m:ℝ)≠0 := by exact_mod_cast (Nat.ne_of_gt hm)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   constructor &lt;;&gt; field_simp &lt;;&gt; ring</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> </span>
+<span id="L46"><a href="#L46" class="ln">  46</a> end Oberwolfach</span></pre></html>

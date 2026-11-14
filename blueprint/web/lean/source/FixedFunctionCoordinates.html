@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FixedFunctionCoordinates.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FixedFunctionCoordinates.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteFibreCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Specifying one value of a finite function leaves exactly one fewer</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> free coordinate. This is an exact count, including empty codomains. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1800000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem finite_function_fixed_value_card {I V : Type*} [Fintype I] [DecidableEq I] [Fintype V]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (i : I) (v : V) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     Fintype.card {f : I → V // f i=v}=Fintype.card V^(Fintype.card I-1) := by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   let e : {f : I → V // f i=v} ≃ ({j : I // j≠i} → V) := {</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     toFun f := fun j =&gt; f.val j.val</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     invFun g := ⟨fun j =&gt; if h : j=i then v else g ⟨j,h⟩,by simp⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     left_inv := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       intro f</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       apply Subtype.ext</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       funext j</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       by_cases h : j=i</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       · subst j;simp [f.property]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       · simp [h]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     right_inv := by intro g;funext j;simp [j.property] }</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   simpa only [Fintype.card_fun,Fintype.card_subtype_compl,Fintype.card_unique] using Fintype.card_congr e</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> end Oberwolfach</span></pre></html>

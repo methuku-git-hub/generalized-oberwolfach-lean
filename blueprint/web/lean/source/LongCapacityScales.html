@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongCapacityScales.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongCapacityScales.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CapacityPathProducts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.BalancedCapacityTransitions</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Explicit powers of the common class size in the long-capacity construction. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem capacity_mass_bounds {X : Type*} [Fintype X]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (d : X → ℝ) (n M d₀ d₁ : ℝ) (hn : (Fintype.card X : ℝ)=n)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hm : ∑ x, d x=M) (hd : ∀ x, d₀*n ≤ d x ∧ d x ≤ d₁*n) :</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     d₀*n^2 ≤ M ∧ M ≤ d₁*n^2 := by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hlo := Finset.sum_le_sum (fun x (_ : x ∈ Finset.univ) =&gt; (hd x).1)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hup := Finset.sum_le_sum (fun x (_ : x ∈ Finset.univ) =&gt; (hd x).2)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   simp only [Finset.sum_const,Finset.card_univ,nsmul_eq_mul,hn,hm] at hlo hup</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   constructor &lt;;&gt; nlinarith</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem capacity_profile_scale {X : Type*} [Fintype X]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (d : X → ℝ) (n M d₀ d₁ : ℝ) (hn : (Fintype.card X : ℝ)=n)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hnpos : 0 &lt; n) (hd₀ : 0 &lt; d₀) (hd₁ : 0 &lt; d₁)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hm : ∑ x, d x=M) (hd : ∀ x, d₀*n ≤ d x ∧ d x ≤ d₁*n) (x : X) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (d₀/d₁)/n ≤ d x/M ∧ d x/M ≤ (d₁/d₀)/n := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   obtain ⟨hMlo,hMup⟩ := capacity_mass_bounds d n M d₀ d₁ hn hm hd</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hM : 0 &lt; M := (mul_pos hd₀ (sq_pos_of_pos hnpos)).trans_le hMlo</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hlo := div_le_div₀ ((mul_pos hd₀ hnpos).le.trans (hd x).1) (hd x).1 hM hMup</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hup := div_le_div₀ (mul_pos hd₁ hnpos).le (hd x).2</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (mul_pos hd₀ (sq_pos_of_pos hnpos)) hMlo</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   constructor</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · convert hlo using 1; field_simp [hd₁.ne&#x27;,hnpos.ne&#x27;]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · convert hup using 1; field_simp [hd₀.ne&#x27;,hnpos.ne&#x27;]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> </span>
+<span id="L33"><a href="#L33" class="ln">  33</a> theorem path_probability_bounds {X : Type*}</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (R : ℕ → X → X → ℝ) (i k : ℕ) (p : Fin (k+1) → X)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (a b : ℝ) (ha : 0 ≤ a)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hR : ∀ j : Fin k, a ≤ R (i+j.val) (p j.castSucc) (p j.succ) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       R (i+j.val) (p j.castSucc) (p j.succ) ≤ b) :</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     a^k ≤ transitionPathWeight R i k p ∧ transitionPathWeight R i k p ≤ b^k := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   rw [transitionPathWeight_product]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   constructor</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   · simpa only [Finset.prod_const,Finset.card_univ,Fintype.card_fin] using</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       Finset.prod_le_prod₀ (s := Finset.univ) (fun _ _ =&gt; ha) (fun j _ =&gt; (hR j).1)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   · simpa only [Finset.prod_const,Finset.card_univ,Fintype.card_fin] using</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       Finset.prod_le_prod₀ (s := Finset.univ) (fun j _ =&gt; ha.trans (hR j).1) (fun j _ =&gt; (hR j).2)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> </span>
+<span id="L46"><a href="#L46" class="ln">  46</a> theorem normalized_path_scale (a b c n : ℝ) (hn : 0 &lt; n) (k : ℕ) (hk : 0 &lt; k) :</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (a/(b*n))^k/(c/n)=((a/b)^k/c)/n^(k-1) := by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨j,rfl⟩ := Nat.exists_eq_succ_of_ne_zero hk.ne&#x27;</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   simp only [Nat.add_sub_cancel,Nat.succ_eq_add_one,div_pow,mul_pow,pow_succ]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   field_simp [hn.ne&#x27;]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a> </span>
+<span id="L52"><a href="#L52" class="ln">  52</a> theorem degree_times_path_scale (a b d n : ℝ) (hn : 0 &lt; n) (k : ℕ) (hk : 0 &lt; k) :</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (d*n)*(a/(b*n))^k=(d*(a/b)^k)/n^(k-1) := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   obtain ⟨j,rfl⟩ := Nat.exists_eq_succ_of_ne_zero hk.ne&#x27;</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   simp only [Nat.add_sub_cancel,Nat.succ_eq_add_one,div_pow,mul_pow,pow_succ]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   field_simp [hn.ne&#x27;]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a> </span>
+<span id="L58"><a href="#L58" class="ln">  58</a> end Oberwolfach</span></pre></html>

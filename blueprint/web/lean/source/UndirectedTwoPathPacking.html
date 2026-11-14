@@ -1,0 +1,148 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>UndirectedTwoPathPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>UndirectedTwoPathPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TwoPathPacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Data.Sym.Sym2</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Packing paths for parity switches. Both orientations of every previously</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> used edge are excluded; directed arc-disjointness alone would not suffice. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> def twoPathEdges {V : Type*} [DecidableEq V] (x y z : V) : Finset (Sym2 V) :=</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   {s(x,z),s(z,y)}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem undirectedTwoPathPacking_next {I V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (S : Finset I) (x y z : I → V) (u v : V) (C : Finset V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (L : ℕ) (hL : 0&lt;L) {a : ℝ}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hx : ∀ w,((S.filter (fun i =&gt; x i=w)).card:ℝ)≤a)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hy : ∀ w,((S.filter (fun i =&gt; y i=w)).card:ℝ)≤a)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hm : ∀ w,middleCount S z w≤L)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hlarge : (S.card:ℝ)/L+4*a+4*L&lt;C.card) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ w∈C,middleCount S z w&lt;L ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (u,w)∉packedArcs S x y z ∧ (w,v)∉packedArcs S x y z ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (w,u)∉packedArcs S x y z ∧ (v,w)∉packedArcs S x y z := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   classical</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   let Fu := Finset.univ.filter (fun w =&gt; (w,u)∈packedArcs S x y z)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let Fv := Finset.univ.filter (fun w =&gt; (v,w)∈packedArcs S x y z)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hFu : (Fu.card:ℝ)≤a+L := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     have hh := packedArcs_in_bound S x y z u</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hr : (Fu.card:ℝ)≤((S.filter (fun i =&gt; y i=u)).card:ℝ)+middleCount S z u := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       exact_mod_cast hh</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hm&#x27; : (middleCount S z u:ℝ)≤L := by exact_mod_cast hm u</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     linarith [hy u]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hFv : (Fv.card:ℝ)≤a+L := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hh := packedArcs_out_bound S x y z v</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hr : (Fv.card:ℝ)≤((S.filter (fun i =&gt; x i=v)).card:ℝ)+middleCount S z v := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       exact_mod_cast hh</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hm&#x27; : (middleCount S z v:ℝ)≤L := by exact_mod_cast hm v</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     linarith [hx v]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨w,hw,hmw,hu,hv,hwu,hvw⟩ := twoPathPacking_next S x y z u v C Fu Fv L hL</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hx u) (hy v) hm hFu hFv (by linarith)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   exact ⟨w,hw,hmw,hu,hv,by simpa [Fu] using hwu,by simpa [Fv] using hvw⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> </span>
+<span id="L43"><a href="#L43" class="ln">  43</a> theorem twoPathEdges_disjoint_of_unused {I V : Type*} [DecidableEq V]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (S : Finset I) (x y z : I → V) (u v w : V)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (huw : (u,w)∉packedArcs S x y z) (hwv : (w,v)∉packedArcs S x y z)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hwu : (w,u)∉packedArcs S x y z) (hvw : (v,w)∉packedArcs S x y z)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (j : I) (hj : j∈S) :</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     Disjoint (twoPathEdges u v w) (twoPathEdges (x j) (y j) (z j)) := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   classical</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have h1 : (x j,z j)∈packedArcs S x y z := Finset.mem_biUnion.mpr ⟨j,hj,by simp [twoPathArcs]⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have h2 : (z j,y j)∈packedArcs S x y z := Finset.mem_biUnion.mpr ⟨j,hj,by simp [twoPathArcs]⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   apply Finset.disjoint_left.mpr</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   intro e he hej</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   simp only [twoPathEdges,Finset.mem_insert,Finset.mem_singleton] at he hej</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   rcases he with rfl | rfl &lt;;&gt; rcases hej with he | he &lt;;&gt;</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     rw [Sym2.eq_iff] at he &lt;;&gt; rcases he with ⟨ha,hb⟩ | ⟨ha,hb⟩ &lt;;&gt;</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     simp_all</span>
+<span id="L58"><a href="#L58" class="ln">  58</a> </span>
+<span id="L59"><a href="#L59" class="ln">  59</a> theorem undirectedTwoPathPacking_exists</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     {I V : Type*} [Fintype I] [DecidableEq I]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     [Fintype V] [DecidableEq V] [Nonempty V]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (x y : I → V) (C : I → Finset V)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (L : ℕ) (hL : 0 &lt; L) {a : ℝ}</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (hx : ∀ v, ((Finset.univ.filter (fun i =&gt; x i = v)).card : ℝ) ≤ a)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (hy : ∀ v, ((Finset.univ.filter (fun i =&gt; y i = v)).card : ℝ) ≤ a)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (hlarge : ∀ i, (Fintype.card I : ℝ) / L + 4 * a + 4 * L &lt; (C i).card) :</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     ∃ z : I → V,</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (∀ i, z i ∈ C i) ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       (∀ i j, i ≠ j → Disjoint (twoPathEdges (x i) (y i) (z i))</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         (twoPathEdges (x j) (y j) (z j))) ∧</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       ∀ v, middleCount Finset.univ z v ≤ L := by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   classical</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hall (S : Finset I) : ∃ z : I → V,</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       (∀ i ∈ S, z i ∈ C i) ∧</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       (∀ i ∈ S, ∀ j ∈ S, i ≠ j → Disjoint (twoPathEdges (x i) (y i) (z i))</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>         (twoPathEdges (x j) (y j) (z j))) ∧</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       ∀ v, middleCount S z v ≤ L := by</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     induction S using Finset.induction_on with</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     | empty =&gt;</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       exact ⟨fun _ =&gt; Classical.choice inferInstance, by simp, by simp,</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>         fun v =&gt; by simp [middleCount]⟩</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     | @insert i S hi ih =&gt;</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       obtain ⟨z, hz, hdisj, hmiddle⟩ := ih</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       have hxp (v : V) : ((S.filter (fun j =&gt; x j = v)).card : ℝ) ≤ a := by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>         apply le_trans _ (hx v)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>         exact_mod_cast Finset.card_le_card</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>           (Finset.filter_subset_filter _ (Finset.subset_univ S))</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       have hyp (v : V) : ((S.filter (fun j =&gt; y j = v)).card : ℝ) ≤ a := by</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>         apply le_trans _ (hy v)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>         exact_mod_cast Finset.card_le_card</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>           (Finset.filter_subset_filter _ (Finset.subset_univ S))</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>       have hcp : (S.card : ℝ) / L + 4 * a + 4 * L &lt; (C i).card := by</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>         have hc : (S.card : ℝ) ≤ Fintype.card I := by exact_mod_cast Finset.card_le_univ S</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>         have hd := div_le_div_of_nonneg_right hc (Nat.cast_nonneg L)</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>         linarith [hlarge i]</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       obtain ⟨w,hw,hsat,hout,hin,hinrev,houtrev⟩ :=</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>         undirectedTwoPathPacking_next S x y z (x i) (y i) (C i) L hL hxp hyp hmiddle hcp</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>       let z&#x27; := Function.update z i w</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>       have heq (j : I) (hj : j ∈ S) : z&#x27; j = z j := by</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>         exact Function.update_of_ne (by intro hji; subst j; exact hi hj) _ _</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>       have hnew : z&#x27; i = w := Function.update_self _ _ _</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       have hn (j : I) (hj : j ∈ S) :</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>           Disjoint (twoPathEdges (x i) (y i) w) (twoPathEdges (x j) (y j) (z j)) := by</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>         exact twoPathEdges_disjoint_of_unused S x y z (x i) (y i) w hout hin hinrev houtrev j hj</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>       have hcount (v : V) : middleCount (insert i S) z&#x27; v =</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>           (if w = v then 1 else 0) + middleCount S z v := by</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>         have hfilter : S.filter (fun j =&gt; z&#x27; j = v) = S.filter (fun j =&gt; z j = v) := by</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>           apply Finset.filter_congr</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>           intro j hj</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>           rw [heq j hj]</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>         unfold middleCount</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>         rw [Finset.filter_insert, hfilter, hnew]</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>         by_cases hwv : w = v &lt;;&gt; simp [hwv, hi, Nat.add_comm]</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>       refine ⟨z&#x27;, ?_, ?_, ?_⟩</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>       · intro j hj</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>         rcases Finset.mem_insert.mp hj with rfl | hj</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>         · simpa only [hnew] using hw</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>         · simpa only [heq j hj] using hz j hj</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>       · intro j hj k hk hjk</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>         by_cases hji : j = i</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>         · subst j</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>           have hkS : k ∈ S := (Finset.mem_insert.mp hk).resolve_left (Ne.symm hjk)</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>           rw [hnew, heq k hkS]</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>           exact hn k hkS</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>         · have hjS : j ∈ S := (Finset.mem_insert.mp hj).resolve_left hji</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>           by_cases hki : k = i</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>           · subst k</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>             rw [heq j hjS, hnew]</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>             exact (hn j hjS).symm</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>           · have hkS : k ∈ S := (Finset.mem_insert.mp hk).resolve_left hki</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>             rw [heq j hjS, heq k hkS]</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>             exact hdisj j hjS k hkS hjk</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>       · intro v</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>         rw [hcount]</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>         by_cases hwv : w = v</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>         · subst v</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>           simp only [ite_true]</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>           omega</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>         · simp only [hwv, ite_false, zero_add]</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>           exact hmiddle v</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>   obtain ⟨z, hz, hdisj, hmiddle⟩ := hall Finset.univ</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>   exact ⟨z, fun i =&gt; hz i (Finset.mem_univ i),</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>     fun i j h =&gt; hdisj i (Finset.mem_univ i) j (Finset.mem_univ j) h, hmiddle⟩</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a> </span>
+<span id="L145"><a href="#L145" class="ln"> 145</a> end Oberwolfach</span></pre></html>

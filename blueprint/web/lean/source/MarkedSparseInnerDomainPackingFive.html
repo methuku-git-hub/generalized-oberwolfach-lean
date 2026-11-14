@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSparseInnerDomainPackingFive.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSparseInnerDomainPackingFive.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSparseInnerDomainEdgePackingFive</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPrescribedPackingUnion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedSparseInnerDomainEdgePacking</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The sparse inner-edge packing with the tolerance chosen before the</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> permutation separation radius. The actual free-use cap is ceil(eta*n);</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> all numerical conditions of both successive constructions are proved. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 24000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_sparse_inner_domain_packing_five (β:ℝ) (hβ:0&lt;β)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (η:ℝ) (hη:0&lt;η) (hη1:η≤1) (hscale:100*(((1:ℕ):ℝ)+20)*η≤β):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ b:ℕ,1≤b→∃ n₀:ℕ,</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ (V U E T:Type) [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U],</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ (tail head:E→V) (ktail khead:T→V) (H₀ HK:V→U→Prop) (π:Equiv.Perm V),n₀≤Fintype.card V→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     Function.Injective (markedPhysicalEdge tail head ktail khead π)→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ (X:Finset V) (Z:Finset U),(∀ v,π v∈X↔v∈X)→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀ u,∀ t x,β*Fintype.card V≤((X.filter (fun z=&gt;markedArcPresent tail head ktail khead t x z∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (if t then HK z u else H₀ z u))).card:ℝ))→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀ u,∀ t x y,x≠(if t then π y else y)→β*Fintype.card V≤((X.filter (fun z=&gt;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       markedArcPresent tail head ktail khead false x z∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       markedArcPresent tail head ktail khead t z y∧H₀ z u)).card:ℝ))→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀ Nr Ns:ℕ,(Nr:ℝ)≤η^2*(Fintype.card V:ℝ)^2→(Ns:ℝ)≤η^2*(Fintype.card V:ℝ)^2→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀ (x y:Fin Nr→V) (tr:Fin Nr→Bool),(∀ i,x i∉X)→(∀ i,y i∉X)→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (∀ i,¬PermutationClose π b (x i) (y i))→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ i,markedArcPresent tail head ktail khead (tr i) (x i) (y i))→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     Function.Injective (fun i=&gt;if tr i then ({x i,π (y i)}:Finset V) else {x i,y i})→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∀ a,((Finset.univ.filter (fun i=&gt;a=x i∨a=y i)).card:ℝ)≤η^2*Fintype.card V)→</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (∀ i,β*Fintype.card V≤((Z.filter (fun v=&gt;H₀ (x i) v∧(if tr i then HK (y i) v else H₀ (y i) v))).card:ℝ))→</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀ (z:Fin Ns→V) (u:Fin Ns→U) (ts:Fin Ns→Bool),(∀ i,z i∉X)→(∀ i,u i∉Z)→</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (∀ i,if ts i then HK (z i) (u i) else H₀ (z i) (u i))→</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     Function.Injective (fun i=&gt;(z i,u i))→</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (∀ a,((Finset.univ.filter (fun i=&gt;a=z i)).card:ℝ)≤η^2*Fintype.card V)→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∀ v,((Finset.univ.filter (fun i=&gt;u i=v)).card:ℝ)≤η^2*Fintype.card V)→</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     ∃ M:Finset (MarkedWheel tail head ktail khead ((1:ℕ)+4) π b H₀ HK),</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (∀ W∈M,∀ Z∈M,W≠Z→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources Z))∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (M.biUnion markedWheelPhysicalResources).filter (markedInnerResource (Xᶜ) (Zᶜ))=</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         Finset.univ.image (fun i=&gt;Sum.inl (if tr i then ({x i,π (y i)}:Finset V) else {x i,y i}))∪</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         Finset.univ.image (fun i=&gt;Sum.inr (z i,u i))∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∀ a,((markedPackingRimGraph M).degree a:ℝ)≤24*η*Fintype.card V)∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (∀ a,((Finset.univ.filter (markedPackingSpokes M a)).card:ℝ)≤6*η*Fintype.card V)∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (∀ v,((Finset.univ.filter (fun a=&gt;markedPackingSpokes M a v)).card:ℝ)≤3*((1:ℕ)+5)*η*Fintype.card V):=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro b hb</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨n₀,hbase⟩:=marked_sparse_inner_domain_edge_packing_five β hβ η hη hη1 hscale b hb</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   refine ⟨n₀,?_⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro V U E T _ _ _ _ tail head ktail khead H₀ HK π hn hphys X Z hX hstep hjoin Nr Ns hNr hNs</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     x y tr hx hy hsep hroot hedge hend hhubs z u ts hz hu hspoke hspinj hsrow hscol</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   obtain ⟨R,S,hRI,hSI,hRR,hSS,hRS,hRdeg,hSdeg,hRrow,hSrow,hRcol,hScol⟩:=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     hbase V U E T tail head ktail khead H₀ HK π hn hphys X Z hX hstep hjoin Nr Ns hNr hNs</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       x y tr hx hy hsep hroot hedge hend hhubs z u ts hz hu hspoke hspinj hsrow hscol</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   let M:=Finset.univ.image R∪Finset.univ.image S</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   obtain ⟨hr,hs,hc⟩:=marked_two_families_degree_bounds R S</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (12*η*Fintype.card V) (12*η*Fintype.card V)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (3*η*Fintype.card V) (3*η*Fintype.card V)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (2*((1:ℕ)+5)*η*Fintype.card V) (((1:ℕ)+5)*η*Fintype.card V)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     hRdeg hSdeg hRrow hSrow hRcol hScol</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   refine ⟨M,marked_two_families_packing R S hRR hSS hRS,</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     marked_two_families_inner_intersection R S (Xᶜ) (Zᶜ) _ _ hRI hSI,?_,?_,?_⟩</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   · intro a;have h:=hr a;linarith only [h]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   · intro a;have h:=hs a;linarith only [h]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   · intro v;have h:=hc v;linarith only [h]</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a> end Oberwolfach</span></pre></html>

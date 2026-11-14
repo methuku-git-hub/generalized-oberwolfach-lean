@@ -1,0 +1,188 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrientationRouting.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrientationRouting.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TwoPathPacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.DegreeRequests</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Mathlib.Combinatorics.SimpleGraph.DegreeSum</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-!</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> Degree correction by reversing edge-disjoint directed two-edge paths.</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> An orientation is encoded by its zero-one directed incidence matrix.</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> The underlying physical graph is preserved pointwise.</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> -/</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option autoImplicit false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> def reversedMultiplicity {V : Type*} (M T : V → V → ℕ) (x y : V) : ℕ :=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   M x y - T x y + T y x</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem reversedMultiplicity_underlying</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     {V : Type*} (M T : V → V → ℕ) (hT : ∀ x y, T x y ≤ M x y) (x y : V) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     reversedMultiplicity M T x y + reversedMultiplicity M T y x = M x y + M y x := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hxy := hT x y</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hyx := hT y x</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   unfold reversedMultiplicity</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   omega</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem reversedMultiplicity_outdegree</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     {V : Type*} [Fintype V] (M T : V → V → ℕ)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hT : ∀ x y, T x y ≤ M x y) (x : V) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∑ y, reversedMultiplicity M T x y) + (∑ y, T x y) =</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∑ y, M x y) + (∑ y, T y x) := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   simp only [reversedMultiplicity, Finset.sum_add_distrib]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   rw [Finset.sum_tsub_distrib Finset.univ (fun y _ =&gt; hT x y)]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hh : ∑ y, T x y ≤ ∑ y, M x y := Finset.sum_le_sum (fun y _ =&gt; hT x y)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   omega</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a> theorem reversedMultiplicity_changed_degree</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     {V : Type*} [Fintype V] (M T : V → V → ℕ) (x : V) :</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (Finset.univ.filter (fun y =&gt; reversedMultiplicity M T x y ≠ M x y ∨</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       reversedMultiplicity M T y x ≠ M y x)).card ≤</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (∑ y, T x y) + (∑ y, T y x) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   classical</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   rw [Finset.card_filter, ← Finset.sum_add_distrib]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   apply Finset.sum_le_sum</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro y _</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   split_ifs with h</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   · by_contra hn</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have ht : T x y = 0 ∧ T y x = 0 := by omega</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     simp [reversedMultiplicity, ht.1, ht.2] at h</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   · exact Nat.zero_le _</span>
+<span id="L51"><a href="#L51" class="ln">  51</a> </span>
+<span id="L52"><a href="#L52" class="ln">  52</a> theorem orientationMatrix_total</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     {V : Type*} [Fintype V] (G : SimpleGraph V) (M : V → V → ℕ)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hphysical : ∀ x y, M x y + M y x = if G.Adj x y then 1 else 0) :</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     ∑ x, ∑ y, M x y = G.edgeFinset.card := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   classical</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hdegree (x : V) : G.degree x = ∑ y, (M x y + M y x) := by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     rw [SimpleGraph.degree]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have heq : G.neighborFinset x = Finset.univ.filter (G.Adj x) := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       ext y</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       simp</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     rw [heq, Finset.card_filter]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     simp only [hphysical]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hh := G.sum_degrees_eq_twice_card_edges</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   simp only [hdegree, Finset.sum_add_distrib] at hh</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hswap : (∑ x, ∑ y, M y x) = ∑ x, ∑ y, M x y := Finset.sum_comm</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   rw [hswap] at hh</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   omega</span>
+<span id="L69"><a href="#L69" class="ln">  69</a> </span>
+<span id="L70"><a href="#L70" class="ln">  70</a> /-- The orientation-routing lemma, retaining its real error parameters,</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> the forbidden graph and the original eligible two-step paths. The output</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> matrix represents an orientation because the physical-edge equality is</span>
+<span id="L73"><a href="#L73" class="ln">  73</a> preserved. Its changed-edge degree is measured on the physical vertices. -/</span>
+<span id="L74"><a href="#L74" class="ln">  74</a> theorem orientationRouting</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     {V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     (G E F : SimpleGraph V) (M : V → V → ℕ) (t : V → ℕ)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     (L : ℕ) (hL : 0 &lt; L) (hn : 0 &lt; Fintype.card V)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     {a f β : ℝ} (ha : 0 ≤ a) (_hf : 0 ≤ f) (_hβ : 0 &lt; β)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     (hphysical : ∀ x y, M x y + M y x = if G.Adj x y then 1 else 0)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     (htotal : ∑ v, t v = G.edgeFinset.card)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (herr : ∀ v, |((∑ w, M v w : ℕ) : ℝ) - t v| ≤ a)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     (hforbid : ∀ v, (F.degree v : ℝ) ≤ f)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     (hpaths : ∀ x y, x ≠ y →</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       β * Fintype.card V ≤</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>         ((Finset.univ.filter (fun z =&gt; 0 &lt; M x z ∧ 0 &lt; M z y ∧</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>           E.Adj x z ∧ E.Adj z y)).card : ℝ))</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (hmargin : (Fintype.card V : ℝ) * a / L + 2 * a + 4 * L + 2 * f &lt;</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       β * Fintype.card V) :</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     ∃ N : V → V → ℕ,</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>       (∀ x y, N x y + N y x = if G.Adj x y then 1 else 0) ∧</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>       (∀ v, ∑ w, N v w = t v) ∧</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>       (∀ x y, N x y ≠ M x y ∨ N y x ≠ M y x → E.Adj x y ∧ ¬ F.Adj x y) ∧</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       ∀ x, ((Finset.univ.filter (fun y =&gt; N x y ≠ M x y ∨ N y x ≠ M y x)).card : ℝ) ≤</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>         a + 2 * L := by</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   classical</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   have : Nonempty V := Fintype.card_pos_iff.mp hn</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   let d (v : V) := ∑ w, M v w</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have hdtotal : ∑ v, d v = ∑ v, t v :=</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     (orientationMatrix_total G M hphysical).trans htotal.symm</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   obtain ⟨m, x, y, hm, hx, hy, hends, hxy⟩ :=</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     degreeDiscrepancy_requests d t hdtotal ha herr</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>   let C (i : Fin m) := Finset.univ.filter (fun z =&gt; 0 &lt; M (x i) z ∧</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     0 &lt; M z (y i) ∧ E.Adj (x i) z ∧ E.Adj z (y i))</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   let B (v : V) := F.neighborFinset v</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have hxb (v : V) : ((Finset.univ.filter (fun i =&gt; x i = v)).card : ℝ) ≤ a := by</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     have hh := hends v</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     have hz : (0 : ℝ) ≤ (Finset.univ.filter (fun i =&gt; y i = v)).card := Nat.cast_nonneg _</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     linarith</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   have hyb (v : V) : ((Finset.univ.filter (fun i =&gt; y i = v)).card : ℝ) ≤ a := by</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     have hh := hends v</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     have hz : (0 : ℝ) ≤ (Finset.univ.filter (fun i =&gt; x i = v)).card := Nat.cast_nonneg _</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     linarith</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>   have hB (v : V) : ((B v).card : ℝ) ≤ f := hforbid v</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   have hC (i : Fin m) :</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>       (Fintype.card (Fin m) : ℝ) / L + 2 * a + 2 * L + 2 * f &lt; (C i).card := by</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     have hh := hpaths (x i) (y i) (hxy i i)</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     have hd := div_le_div_of_nonneg_right hm (Nat.cast_nonneg L)</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     simp only [Fintype.card_fin] at *</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     change β * Fintype.card V ≤ (C i).card at hh</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     have hLn : (0 : ℝ) ≤ L := Nat.cast_nonneg L</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     linarith</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>   obtain ⟨z, hz, hdisj, hmiddle⟩ := twoPathPacking_exists x y C B L hL hxb hyb hB hC</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>   have hpath (i : Fin m) : 0 &lt; M (x i) (z i) ∧ 0 &lt; M (z i) (y i) :=</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     ⟨(Finset.mem_filter.mp (hz i).1).2.1, (Finset.mem_filter.mp (hz i).1).2.2.1⟩</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>   have hloop (v : V) : M v v = 0 := by</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     have hh := hphysical v v</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     simp only [SimpleGraph.irrefl, ite_false] at hh</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     omega</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>   have hxz (i : Fin m) : x i ≠ z i := by</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     intro h</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     have hh := (hpath i).1</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     rw [h, hloop] at hh</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     omega</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>   have hzy (i : Fin m) : z i ≠ y i := by</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     intro h</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     have hh := (hpath i).2</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     rw [h, hloop] at hh</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     omega</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>   let T := twoPathMultiplicity x y z</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>   have hT : ∀ u v, T u v ≤ M u v := twoPathMultiplicity_supported x y z M hdisj hpath</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>   obtain ⟨hTout, hTin⟩ := twoPathMultiplicity_degrees x y z hxz hzy</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>   let N := reversedMultiplicity M T</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>   have hNs (u v : V) : N u v + N v u = if G.Adj u v then 1 else 0 := by</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>     rw [reversedMultiplicity_underlying M T hT, hphysical]</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>   have hallowed (u v : V) (ht : 0 &lt; T u v) : E.Adj u v ∧ ¬ F.Adj u v := by</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     obtain ⟨i, hi⟩ := Finset.card_pos.mp ht</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>     have hp := (Finset.mem_filter.mp hi).2</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>     simp only [twoPathArcs, Finset.mem_insert, Finset.mem_singleton, Prod.mk.injEq] at hp</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>     have he := (Finset.mem_filter.mp (hz i).1).2.2.2</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>     rcases hp with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>     · exact ⟨he.1, by simpa [B] using (hz i).2.1⟩</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>     · refine ⟨he.2, ?_⟩</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>       have hh : ¬ F.Adj (y i) (z i) := by simpa [B] using (hz i).2.2</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>       exact fun h =&gt; hh h.symm</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>   refine ⟨N, hNs, ?_, ?_, ?_⟩</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>   · intro v</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>     have hh := reversedMultiplicity_outdegree M T hT v</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>     change (∑ w, N v w) + (∑ w, twoPathMultiplicity x y z v w) =</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>       d v + (∑ w, twoPathMultiplicity x y z w v) at hh</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>     rw [hTout, hTin, hx, hy] at hh</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>     omega</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>   · intro u v hchange</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>     by_cases ht : 0 &lt; T u v</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>     · exact hallowed u v ht</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>     · by_cases ht&#x27; : 0 &lt; T v u</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>       · obtain ⟨he, hf⟩ := hallowed v u ht&#x27;</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>         exact ⟨he.symm, fun h =&gt; hf h.symm⟩</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>       · have hzero : T u v = 0 ∧ T v u = 0 := by omega</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>         simp [N, reversedMultiplicity, hzero.1, hzero.2] at hchange</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>   · intro v</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>     have hh := reversedMultiplicity_changed_degree M T v</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>     change (Finset.univ.filter (fun w =&gt; N v w ≠ M v w ∨ N w v ≠ M w v)).card ≤</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>       (∑ w, twoPathMultiplicity x y z v w) +</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a>       (∑ w, twoPathMultiplicity x y z w v) at hh</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>     rw [hTout, hTin] at hh</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>     have hr : ((Finset.univ.filter (fun w =&gt; N v w ≠ M v w ∨ N w v ≠ M w v)).card : ℝ) ≤</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>         ((Finset.univ.filter (fun i =&gt; x i = v)).card : ℝ) +</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>         middleCount Finset.univ z v +</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>         ((Finset.univ.filter (fun i =&gt; y i = v)).card : ℝ) +</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>         middleCount Finset.univ z v := by</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>       exact_mod_cast (by simpa only [Nat.add_assoc] using hh)</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>     have hm : (middleCount Finset.univ z v : ℝ) ≤ L := by exact_mod_cast hmiddle v</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>     linarith [hends v]</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a> </span>
+<span id="L185"><a href="#L185" class="ln"> 185</a> end Oberwolfach</span></pre></html>

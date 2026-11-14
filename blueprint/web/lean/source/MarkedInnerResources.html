@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedInnerResources.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedInnerResources.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPrescribedRimGeometry</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPaddedArcSeparation</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Exact intersections with an inner pair of vertex sets. Invariance of</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> I under the physical successor permutation is needed when a marked head</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> is tested for membership in I. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 14000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U E K:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b m:ℕ}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> def markedInnerResource (I:Finset V) (J:Finset U):Finset V⊕(V×U)→Prop:=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   Sum.elim (fun e=&gt;e⊆I) (fun p=&gt;p.1∈I∧p.2∈J)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem marked_cycle_edge_inside_iff (I:Finset V) (hI:∀ v,π v∈I↔v∈I)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (C:MarkedCycleTuple tail head ktail khead m π b) (a:Fin (m+1)):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     markedPhysicalEdge tail head ktail khead π (markedCycleTypedEdge tail head ktail khead m π b C a)⊆I↔</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       C.val a∈I∧C.val (finRotate (m+1) a)∈I:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   rw [markedCycle_physical_pair]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   refine Fin.lastCases ?_ (fun a=&gt;?_) a</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   · simp only [twistedTupleHead,Fin.snoc_last,finRotate_last,Finset.insert_subset_iff,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       Finset.singleton_subset_iff,hI]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   · simp only [twistedTupleHead,Fin.snoc_castSucc,finRotate_castSucc_eq_succ,</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       Finset.insert_subset_iff,Finset.singleton_subset_iff]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem marked_one_root_inner_resources (hm:0&lt;m) (I:Finset V) (J:Finset U)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hI:∀ v,π v∈I↔v∈I) (C:MarkedWheel tail head ktail khead m π b H₀ HK)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (x:V) (hx:x∈I) (hCx:x∈markedWheelRows C) (hCu:C.2.val∈J)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hrows:∀ a∈markedWheelRows C,a∈I→a=x):</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (markedWheelPhysicalResources C).filter (markedInnerResource I J)={Sum.inr (x,C.2.val)}:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   ext e</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   cases e with</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   | inl e=&gt;</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     simp only [Finset.mem_filter,markedInnerResource,Sum.elim_inl,Finset.mem_singleton,Sum.inl_ne_inr,iff_false]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     rintro ⟨he,hsub⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rw [markedWheelPhysicalResources_rim] at he</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     obtain ⟨a,_,ha⟩:=Finset.mem_image.mp he</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hinside:markedPhysicalEdge tail head ktail khead π</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         (markedCycleTypedEdge tail head ktail khead m π b C.1 a)⊆I:=by rw [←ha] at hsub;exact hsub</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hh:=(marked_cycle_edge_inside_iff I hI C.1 a).mp hinside</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have h1:=hrows (C.1.val a) (Finset.mem_image.mpr ⟨a,Finset.mem_univ _,rfl⟩) hh.1</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have h2:=hrows (C.1.val (finRotate (m+1) a))</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (Finset.mem_image.mpr ⟨_,Finset.mem_univ _,rfl⟩) hh.2</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact finRotate_ne_self_of_pos hm a (permutationSeparated_injective π b C.1.val C.1.property.1 (h1.trans h2.symm))</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   | inr p=&gt;</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     rcases p with ⟨v,u⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     simp only [Finset.mem_filter,markedInnerResource,Sum.elim_inr,markedWheelPhysicalResources_spoke,</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       Finset.mem_singleton,Sum.inr.injEq,Prod.mk.injEq]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     constructor</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     · rintro ⟨⟨hu,hv⟩,hvI,huJ⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       exact ⟨hrows v hv hvI,hu.symm⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     · rintro ⟨rfl,rfl⟩;exact ⟨⟨rfl,hCx⟩,hx,hCu⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a> </span>
+<span id="L58"><a href="#L58" class="ln">  58</a> theorem marked_rim_root_inner_resources (I:Finset V) (J:Finset U)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (hI:∀ v,π v∈I↔v∈I) (C:MarkedWheel tail head ktail khead m π b H₀ HK)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (e₀:Finset V) (he₀:e₀⊆I) (hCe:Sum.inl e₀∈markedWheelPhysicalResources C) (hCu:C.2.val∉J)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (hroot:∀ a,C.1.val a∈I→C.1.val (finRotate (m+1) a)∈I→</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       markedPhysicalEdge tail head ktail khead π (markedCycleTypedEdge tail head ktail khead m π b C.1 a)=e₀):</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (markedWheelPhysicalResources C).filter (markedInnerResource I J)={Sum.inl e₀}:=by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   ext e</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   cases e with</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   | inl e=&gt;</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     simp only [Finset.mem_filter,markedInnerResource,Sum.elim_inl,Finset.mem_singleton,Sum.inl.injEq]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     constructor</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · rintro ⟨he,hsub⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       rw [markedWheelPhysicalResources_rim] at he</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       obtain ⟨a,_,ha⟩:=Finset.mem_image.mp he</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       have hinside:markedPhysicalEdge tail head ktail khead π</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>           (markedCycleTypedEdge tail head ktail khead m π b C.1 a)⊆I:=by rw [←ha] at hsub;exact hsub</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       have hh:=(marked_cycle_edge_inside_iff I hI C.1 a).mp hinside</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       exact ha.symm.trans (hroot a hh.1 hh.2)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     · rintro rfl;exact ⟨hCe,he₀⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   | inr p=&gt;</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     simp only [Finset.mem_filter,markedInnerResource,Sum.elim_inr,Finset.mem_singleton,Sum.inr_ne_inl,iff_false]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     rintro ⟨he,hv,hu⟩</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     have hh:=(markedWheelPhysicalResources_spoke C p.1 p.2).mp he</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     exact hCu (hh.1 ▸ hu)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a> </span>
+<span id="L83"><a href="#L83" class="ln">  83</a> end Oberwolfach</span></pre></html>

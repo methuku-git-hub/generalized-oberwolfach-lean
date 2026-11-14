@@ -1,0 +1,87 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinarySequentialResourceSelection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinarySequentialResourceSelection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryResourceEndpointSets</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.GreedyGraphCandidates</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Successive physical-edge selection from a bounded avoidance theorem.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The row and hub costs are charged separately. All original forbidden edges</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> and all previously selected edges are included in the next forbidden set. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 6000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem ordinary_sequential_resource_selection (l f a b:ℕ) (γ:ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (W:Finset V) (B:Finset U) (L:Finset (Sym2 V⊕(V×U)))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hW:W.card≤f) (hB:(B.card:ℝ)≤γ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hrows:ordinaryResourceRows L⊆W) (hhubs:ordinaryResourceHubs L⊆B)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (P:Fin l→Finset (Sym2 V⊕(V×U))→Prop)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hchoose:∀ (W&#x27;:Finset V) (B&#x27;:Finset U) (L&#x27;:Finset (Sym2 V⊕(V×U))),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       W⊆W&#x27;→B⊆B&#x27;→W&#x27;.card≤f+l*a→(B&#x27;.card:ℝ)≤γ+l*b→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       ordinaryResourceRows L&#x27;⊆W&#x27;→ ordinaryResourceHubs L&#x27;⊆B&#x27;→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ∀ i:Fin l,∃ K,P i K∧(ordinaryResourceRows K).card≤a∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         (ordinaryResourceHubs K).card≤b∧Disjoint K L&#x27;) :</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ K:Fin l→Finset (Sym2 V⊕(V×U)),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ i,P i (K i)∧(ordinaryResourceRows (K i)).card≤a∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         (ordinaryResourceHubs (K i)).card≤b∧Disjoint (K i) L)∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ i j,i≠j→Disjoint (K i) (K j))∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (ordinaryResourceRows (Finset.univ.biUnion K)).card≤l*a∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (ordinaryResourceHubs (Finset.univ.biUnion K)).card≤l*b := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let allowed:=fun i K=&gt;P i K∧(ordinaryResourceRows K).card≤a∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (ordinaryResourceHubs K).card≤b∧Disjoint K L</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   obtain ⟨K,hK,hdis⟩:=sequential_select_prefix l allowed Disjoint ∅ (by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     intro i K hK</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let s:=Finset.univ.filter (fun j:Fin l=&gt;j.val &lt; i.val)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let used:=s.biUnion K</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let W&#x27;:=W∪ordinaryResourceRows used</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let B&#x27;:=B∪ordinaryResourceHubs used</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hsc:s.card≤l:=by simpa using Finset.card_le_univ s</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hrow:(ordinaryResourceRows used).card≤l*a:=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       rw [ordinaryResourceRows_biUnion]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       apply Finset.card_biUnion_le.trans</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       calc</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         _ ≤ ∑ _j∈s,a := Finset.sum_le_sum (fun j hj=&gt;(hK.2.1 j (Finset.mem_filter.mp hj).2).2.1)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         _ = s.card*a := by simp</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         _ ≤ l*a := Nat.mul_le_mul_right _ hsc</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hhub:(ordinaryResourceHubs used).card≤l*b:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       rw [ordinaryResourceHubs_biUnion]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       apply Finset.card_biUnion_le.trans</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       calc</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         _ ≤ ∑ _j∈s,b := Finset.sum_le_sum (fun j hj=&gt;(hK.2.1 j (Finset.mem_filter.mp hj).2).2.2.1)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         _ = s.card*b := by simp</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         _ ≤ l*b := Nat.mul_le_mul_right _ hsc</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hWc:W&#x27;.card≤f+l*a:=</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (Finset.card_union_le _ _).trans (Nat.add_le_add hW hrow)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hBc:(B&#x27;.card:ℝ)≤γ+l*b:=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       have hc:(B&#x27;.card:ℝ)≤B.card+(ordinaryResourceHubs used).card:=by exact_mod_cast Finset.card_union_le B (ordinaryResourceHubs used)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       have hb&#x27;:((ordinaryResourceHubs used).card:ℝ)≤l*b:=by exact_mod_cast hhub</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       linarith only [hc,hb&#x27;,hB]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     obtain ⟨C,hC,hCr,hCh,hCd⟩:=hchoose W&#x27; B&#x27; (L∪used)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       Finset.subset_union_left Finset.subset_union_left hWc hBc</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (by rw [ordinaryResourceRows_union];exact Finset.union_subset_union hrows (fun _ h=&gt;h))</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (by rw [ordinaryResourceHubs_union];exact Finset.union_subset_union hhubs (fun _ h=&gt;h)) i</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     refine ⟨C,⟨hC,hCr,hCh,(Finset.disjoint_union_right.mp hCd).1⟩,?_⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     intro j hj</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     exact ((Finset.disjoint_union_right.mp hCd).2.mono_right</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (Finset.subset_biUnion_of_mem K (Finset.mem_filter.mpr ⟨Finset.mem_univ _,hj⟩))).symm)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   refine ⟨K,hK,?_,?_,?_⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   · intro i j hij</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     rcases lt_or_gt_of_ne hij with h|h</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     · exact hdis i j h</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     · exact (hdis j i h).symm</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   · rw [ordinaryResourceRows_biUnion]</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     apply Finset.card_biUnion_le.trans</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     calc</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       _ ≤ ∑ _i:Fin l,a := Finset.sum_le_sum (fun i _=&gt;(hK i).2.1)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       _ = l*a := by simp</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   · rw [ordinaryResourceHubs_biUnion]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     apply Finset.card_biUnion_le.trans</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     calc</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       _ ≤ ∑ _i:Fin l,b := Finset.sum_le_sum (fun i _=&gt;(hK i).2.2.1)</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       _ = l*b := by simp</span>
+<span id="L83"><a href="#L83" class="ln">  83</a> </span>
+<span id="L84"><a href="#L84" class="ln">  84</a> end Oberwolfach</span></pre></html>

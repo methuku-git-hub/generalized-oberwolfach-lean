@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExpandedPreparationSelectedFamiliesReference.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExpandedPreparationSelectedFamiliesReference.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ExpandedPreparationFamiliesReference</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Data.Fintype.Powerset</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The retained reference and all root families share one enriched outcome,</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> with the bounded set of ordinary lengths selected after the order threshold. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 20000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem raw_expanded_selected_families_with_reference</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (K:ℕ) (J:Type) [Fintype J] (d:ℕ) (hd:2≤d) (m:Fin K→ℕ) (hm:∀ i,2≤m i)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (B t:Fin K→ℝ) (hB:∀ i,0&lt;B i) (ht:∀ i,0&lt;t i)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (mK:ℕ) (hmK:3≤mK) (BK tK:ℝ) (hBK:0&lt;BK) (htK:0&lt;tK):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∃ N:ℕ,∀ (V U Γ Color:Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [LinearOrder V] [DecidableEq U],</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     N≤Fintype.card V→Fintype.card U≤Fintype.card V→Fintype.card Γ≤2→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ (P Z T:SimpleGraph V) (hTP:T≤P) (π:Equiv.Perm V) (Vset:Finset V) (Uset:Finset U) (hUset:Uset.Nonempty)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (p k p₂ k₂ u:ℝ) (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (s:U→Color→ℝ) (hs:∀ u j,0≤s u j) (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hnoshort:∀ x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (S:Finset (Fin K))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (w:∀ i:{i:Fin K // i∈S},OrderedOrdinaryWheel (U:=U) π (3*d) (m i.val+1)→ℝ)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hw:∀ i W,0≤w i W ∧ w i W≤B i.val/(Fintype.card V:ℝ)^(m i.val))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (g:{i:Fin K // i∈S}→Γ) (j:{i:Fin K // i∈S}→Color) (H₀ Hₖ:V→U→Prop)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (wK:∀ k:J,MarkedWheel (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd mK π (3*d) H₀ Hₖ→ℝ)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hwK:∀ k W,0≤wK k W ∧ wK k W≤BK/(Fintype.card V:ℝ)^mK) (gK:J→Γ) (jK:J→Color)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (F:RawMarkedOutcome V U Γ Color→Type) [∀ a,Fintype (F a)] (ν:∀ a,FiniteLaw (F a)) (Ref:(Σ a,F a)→Prop),</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ E:(Σ a,F a)→Prop,(99:ℝ)/100≤((FiniteLaw.pi (rawMarkedWheelLaw (V:=V) p k hp hk (by linarith) d hd q hq hQ s hs hS)).sigma ν).probability E→∃ y,Ref y ∧ E y)→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let f:=fun (ω:∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e) e=&gt;rawExpandedMarkedCollapse e (ω e)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let O:=fun z:(Σ ω:(∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e),F (f ω))=&gt;∀ i root,</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       |resourcePatternLoad orderedOrdinaryResources (w i) (fun _ _=&gt;true) root</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         (orderedOrdinaryResourceState P π d (g i) (j i) (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))-</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         ∑ W,(if root∈orderedOrdinaryResources W then w i W else 0)*</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>           ∏ a∈orderedOrdinaryResources W\{root},rawMarkedWheelMarginal P π d p₂ k₂ q s (g i) (j i) (orderedOrdinaryResourceEmbedding a)|&lt;t i.val</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let K:=fun z:(Σ ω:(∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e),F (f ω))=&gt;∀ k root,</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       |typedMarkedPotentialLoad (wK k) (rawMarkedPairRims P π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         (rawMarkedPairSpokes π d (fun e=&gt;rawExpandedApproximateCollapse e (z.1 e)) (gK k) (jK k)) root-</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         ∑ W,(if root∈typedMarkedOccurrenceResources W then wK k W else 0)*</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>           ∏ a∈typedMarkedOccurrenceResources W\{root},rawMarkedWheelMarginal P π d p₂ k₂ q s (gK k) (jK k) a|&lt;tK</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let ρ:=markedExpandedPhysicalProbability p k p₂ k₂ u</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     let Good:=fun z:(Σ ω:(∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e),F (f ω))=&gt;</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       expandedPhysicalDegreeGood P Z ρ (fun e=&gt;z.1 (Sum.inl e)) ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (∀ x y,x≠y→|(eligibleTwoPathCount T (sampledColourOrientation P (fun e=&gt;markedExpandedClass (z.1 (Sum.inl e))) 0) x y:ℝ)-</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         ((T.neighborFinset x∩T.neighborFinset y).card:ℝ)*((2*p+2*k+2*p₂+2*k₂+u)/2)^2|&lt;(Fintype.card V:ℝ)^(3/5:ℝ)) ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀ g a,|((rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) g a).card:ℝ)-(∑ u,q u g/(d:ℝ))|&lt;(Fintype.card V:ℝ)^(3/5:ℝ)) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (∀ u g,|rawIntervalHubStartCount π d g (fun e=&gt;z.1 (Sum.inr e)) u-(Fintype.card V:ℝ)*q u g/d|&lt;</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         (Fintype.card V:ℝ)^(3/4:ℝ)/d) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       ((∀ w,|rawIntervalUnassignedHubCountOn π d (fun e=&gt;z.1 (Sum.inr e)) w Vset-(Vset.card:ℝ)*(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)) ∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>        (∀ v,|rawIntervalUnassignedColumnCount π d (fun e=&gt;z.1 (Sum.inr e)) v Uset-∑ w∈Uset,(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ))) ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       ((∀ w,|rawIntervalUnassignedHubCountOn π d (fun e=&gt;z.1 (Sum.inr e)) w Finset.univ-(Fintype.card V:ℝ)*(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)) ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>        (∀ v,|rawIntervalUnassignedColumnCount π d (fun e=&gt;z.1 (Sum.inr e)) v Finset.univ-∑ w,(1-(∑ g,q w g)-(∑ j,s w j))|&lt;(Fintype.card V:ℝ)^(3/4:ℝ))) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (∀ x,|(((P.neighborFinset x∩Vset).filter (fun y=&gt;(z.1 (Sum.inl s(x,y))).1=4)).card:ℝ)-u*(P.neighborFinset x∩Vset).card|&lt;(Fintype.card V:ℝ)^(3/4:ℝ)) ∧ O z ∧ K z;</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     ∃ z,0&lt;(μ.sigma (fun ω=&gt;ν (f ω))).mass z ∧ Ref ⟨f z.1,z.2⟩ ∧ Good z:=by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   classical</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hex (S:Finset (Fin K)):=raw_expanded_families_with_reference</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     {i:Fin K // i∈S} J d hd (fun i=&gt;m i.val) (fun i=&gt;hm i.val)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (fun i=&gt;B i.val) (fun i=&gt;t i.val) (fun i=&gt;hB i.val) (fun i=&gt;ht i.val)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     mK hmK BK tK hBK htK</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   choose NS hNS using hex</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   refine ⟨Finset.univ.sup NS,?_⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   intro V U Γ Color _ _ _ _ _ _ hn hUV hΓ P Z T hTP π Vset Uset hUset p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum q hq hQ s hs hS hnoshort S</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   exact hNS S V U Γ Color ((Finset.le_sup (Finset.mem_univ S)).trans hn) hUV hΓ P Z T hTP π Vset Uset hUset p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum q hq hQ s hs hS hnoshort</span>
+<span id="L67"><a href="#L67" class="ln">  67</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedEmbeddingPhysicalStep.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedEmbeddingPhysicalStep.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedEmbeddingDisjointUpdate</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.Definitions</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A new physical edge set avoiding the full forbidden graph preserves</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> cross-factor disjointness and avoids the separately reserved graph. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {V I:Type} [Fintype V] [DecidableEq V] [DecidableEq I]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem prescribed_embedding_physical_step (E:I→Finset (Sym2 V)) (k:I)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (added:Finset (Sym2 V)) (F J:SimpleGraph V)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hpair:PairwisePhysicalDisjoint E) (hcover:∀ j,E j⊆F.edgeFinset)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hJ:J.edgeFinset⊆F.edgeFinset) (havoid:Disjoint added F.edgeFinset):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     PairwisePhysicalDisjoint (Function.update E k (E k∪added)) ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       Disjoint added J.edgeFinset := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   constructor</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   · apply prescribed_embedding_disjoint_update E k added hpair</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     intro j hj</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     exact havoid.mono_right (hcover j)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · exact havoid.mono_right hJ</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> end Oberwolfach</span></pre></html>

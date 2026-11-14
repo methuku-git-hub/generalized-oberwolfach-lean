@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedApproximatePackingExclusions.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedApproximatePackingExclusions.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedCoverPackingAvoidance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPackingResourceDetermination</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrdinaryBoundaryGraph</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! An actual earlier wheel packing outside the reserved inner pair and</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> sampled boundary satisfies the exclusions used by the outside cover.</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> Its global maximum degree is unrestricted. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 6000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U E K:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {m b:ℕ}</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_packing_rim_pair_adj (hm:1≤m) (hb:1≤b)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ HK)) (x y:V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (he:Sum.inl ({x,y}:Finset V)∈M.biUnion markedWheelPhysicalResources):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (markedPackingRimGraph M).Adj x y:=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hpair:({x,y}:Finset V)∈markedPackingRims M:=(markedPackingResources_rim M _).mp he</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hcard:({x,y}:Finset V).card=2:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     obtain ⟨W,hW,hWe⟩:=Finset.mem_biUnion.mp hpair</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     obtain ⟨a,_,ha⟩:=Finset.mem_image.mp hWe</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     rw [←ha]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     exact markedCycle_physical_edge_card tail head ktail khead m π b hm hb W.1 a</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   exact ⟨by intro h;subst y;simp at hcard,hpair⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem marked_approximate_packing_reservation_exclusions</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hm:1≤m) (hb:1≤b) (X:Finset V) (Z:Finset U) (hX:∀ x,π x∈X↔x∈X)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (σ:Sym2 (V⊕U)→Bool) (Q:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (M:Finset (MarkedWheel tail head ktail khead m π b H₀ HK))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hhost:ordinaryPhysicalGraph (markedPackingRimGraph M) (markedPackingSpokes M)≤ordinaryPhysicalGraph Q H)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hinner:∀ e∈M.biUnion markedWheelPhysicalResources,¬markedInnerResource X Z e)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hreserved:Disjoint (ordinaryPhysicalGraph (markedPackingRimGraph M) (markedPackingSpokes M))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (retainedGraph (ordinaryBoundaryGraph Q H X Z) σ)):</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (∀ j x y,markedBoundaryRimAllowed π X σ j x y→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       Sum.inl (if j then ({x,π y}:Finset V) else {x,y})∉M.biUnion markedWheelPhysicalResources)∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (∀ x u,markedBoundarySpokeAllowed X Z σ x u→Sum.inr (x,u)∉M.biUnion markedWheelPhysicalResources):=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let D:=ordinaryPhysicalGraph (markedPackingRimGraph M) (markedPackingSpokes M)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hcross (a c:V⊕U) (ha:a∈ordinaryInnerVertices X Z∨c∈ordinaryInnerVertices X Z)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (hn:¬(a∈ordinaryInnerVertices X Z∧c∈ordinaryInnerVertices X Z))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (hcoin:σ s(a,c)=true) (hadj:D.Adj a c):False:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hB:(ordinaryBoundaryGraph Q H X Z).Adj a c:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       rw [ordinaryBoundaryGraph_adj]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       exact ⟨hhost hadj,by tauto⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     exact disjoint_graphs_no_common_edge _ _ hreserved a c hadj ⟨hB,hcoin⟩</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   constructor</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   · intro j x y hallow he</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     let y&#x27;:=if j then π y else y</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have hy:y&#x27;∈X↔y∈X:=by cases j &lt;;&gt; simp only [y&#x27;,Bool.false_eq_true,ite_false,ite_true];exact hX y</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have he&#x27;:Sum.inl ({x,y&#x27;}:Finset V)∈M.biUnion markedWheelPhysicalResources:=by cases j &lt;;&gt; exact he</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hnot:¬(x∈X∧y&#x27;∈X):=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       intro hi</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       apply hinner _ he&#x27;</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       change ({x,y&#x27;}:Finset V)⊆X</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       simpa only [Finset.insert_subset_iff,Finset.singleton_subset_iff] using hi</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hadj:D.Adj (Sum.inl x) (Sum.inl y&#x27;):=marked_packing_rim_pair_adj hm hb M x y&#x27; he&#x27;</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     rcases hallow with hi|⟨hi,hcoin⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     · exact hnot ⟨hi.1,hy.mpr hi.2⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     · apply hcross (Sum.inl x) (Sum.inl y&#x27;) _ _ hcoin hadj</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       · simpa only [ordinaryInnerVertices_left] using hi.imp id hy.mpr</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       · simpa only [ordinaryInnerVertices_left] using hnot</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   · intro x u hallow he</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     have hadj:D.Adj (Sum.inl x) (Sum.inr u):=(markedPackingResources_spoke M x u).mp he</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hnot:¬(x∈X∧u∈Z):=fun hi=&gt;hinner _ he hi</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     rcases hallow with hi|⟨hi,hcoin⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     · exact hnot hi</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · apply hcross (Sum.inl x) (Sum.inr u) _ _ hcoin hadj</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       · simpa only [ordinaryInnerVertices_left,ordinaryInnerVertices_right] using hi</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       · simpa only [ordinaryInnerVertices_left,ordinaryInnerVertices_right] using hnot</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

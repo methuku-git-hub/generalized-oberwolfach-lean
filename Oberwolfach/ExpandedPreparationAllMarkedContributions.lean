@@ -1,0 +1,129 @@
+module
+
+public import Oberwolfach.RawMarkedOrdinaryArcConcentration
+public import Oberwolfach.RawMarkedClosingArcConcentration
+public import Oberwolfach.RawMarkedOrdinarySpokeConcentration
+public import Oberwolfach.ExpandedPreparationApproximateCommon
+public import Oberwolfach.MarkedVariableHubSeedBound
+public import Oberwolfach.RawMarkedVariableSpokeConcentrationTarget
+public import Oberwolfach.MarkedExpandedApproximatePotentialHigh
+public import Oberwolfach.RawIntervalUnassignedHighProbability
+public import Oberwolfach.ExpandedUnassignedRimHighProbability
+public import Oberwolfach.RawIntervalHubStartHighProbability
+public import Oberwolfach.MarkedExpandedStartHighProbability
+public import Oberwolfach.MarkedExpandedDegreeStrong
+public import Oberwolfach.MarkedExpandedTwoPathEvent
+public import Oberwolfach.MarkedExpandedRawCommonEvent
+
+@[expose] public section
+/-! The colour-degree event is available simultaneously with any selected
+retained event of probability at least 7/10, without assuming the former. -/
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 12000000
+open scoped BigOperators
+noncomputable section
+namespace Oberwolfach
+attribute [local instance] Classical.propDecidable
+variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]
+  [LinearOrder V] [DecidableEq U]
+
+theorem raw_expanded_selected_preparation_with_all_marked_contributions (d m:ℕ) (hd:2≤d) (hm:3≤m) (B t pstar:ℝ) (hB:0<B) (ht:0<t) (hpstar:0<pstar) :
+    ∃ N:ℕ,∀ (V:Type) [Fintype V] [LinearOrder V],
+    N≤Fintype.card V→∀ (U Γ Color:Type) [Fintype U] [Fintype Γ] [Fintype Color] [DecidableEq U]
+    (hm:0<Fintype.card U) (hmn:Fintype.card U≤Fintype.card V) (hΓ:Fintype.card Γ≤2)
+    (G Z T:SimpleGraph V) (hTG:T≤G) (π:Equiv.Perm V) (I:Finset V) (J:Finset U) (hJ:J.Nonempty)
+    (p k p₂ k₂ u:ℝ) (hp:0≤p) (hk:0≤k) (hp₂:0≤p₂) (hk₂:0≤k₂) (hu:0≤u)
+    (hsum:2*p+2*k+2*p₂+2*k₂+u≤1)
+    (hnoshort:∀ x l,0<l→l<2*d+1→(π^l) x≠x) (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)
+    (s:U→Color→ℝ) (hs:∀ u j,0≤s u j) (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))
+    (g:Γ) (j:Color) (D τ Aweight:ℝ)
+    (hDlo:(Fintype.card V:ℝ)/2≤D) (hDhi:D≤2*Fintype.card V)
+    (hp₂lo:pstar≤p₂) (hk₂lo:pstar≤k₂) (hslo:∀ v,pstar≤s v j) (hbalance:∑ v,q v g=D*k₂)
+    (weight:(Fin (m+1)→V)→ℝ)
+    (hw:SuccessorSequenceWeightConditions G π (3*d) D τ Aweight B weight)
+    (F:RawMarkedOutcome V U Γ Color→Type) [∀ a,Fintype (F a)] (ν:∀ a,FiniteLaw (F a)) (E:(Σ a,F a)→Prop),
+    (7:ℝ)/10≤((FiniteLaw.pi (rawMarkedWheelLaw (V:=V) p k hp hk (by linarith) d hd q hq hQ s hs hS)).sigma ν).probability E→
+    let ρ:=markedExpandedPhysicalProbability p k p₂ k₂ u
+    let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=V) p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum d hd q hq hQ s hs hS)
+    let f:=fun (ω:∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e) e=>rawExpandedMarkedCollapse e (ω e)
+    let H₀:=fun (_:V) (_:U)=>True
+    let Hₖ:=fun (_:V) (_:U)=>True
+    let w:=fun W:MarkedWheel (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd m π (3*d) H₀ Hₖ=>
+      weight W.1.val/(D*p₂^m*k₂*(s W.2.val j)^m)
+    let Extra:=fun z:(Σ ω:(∀ e:RawWheelCoordinate V U,RawExpandedMarkedCoordinateState Γ Color e),F (f ω))=>∀ root,
+      |typedMarkedPotentialLoad w (rawMarkedPairRims G π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)))
+        (rawMarkedPairSpokes π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) g j) root-
+        ∑ W,(if root∈typedMarkedOccurrenceResources W then w W else 0)*
+          ∏ a∈typedMarkedOccurrenceResources W\{root},rawMarkedWheelMarginal G π d p₂ k₂ q s g j a|<t;
+    ∃ z,0<(μ.sigma (fun ω=>ν (f ω))).mass z ∧ E ⟨f z.1,z.2⟩ ∧
+      expandedPhysicalDegreeGood G Z ρ (fun e=>z.1 (Sum.inl e)) ∧
+      (∀ x y,x≠y→|(eligibleTwoPathCount T (sampledColourOrientation G (fun e=>markedExpandedClass (z.1 (Sum.inl e))) 0) x y:ℝ)-
+        ((T.neighborFinset x∩T.neighborFinset y).card:ℝ)*((2*p+2*k+2*p₂+2*k₂+u)/2)^2|<(Fintype.card V:ℝ)^(3/5:ℝ)) ∧
+      (∀ g a,|((rawStartHubSet π d (fun e=>z.1 (Sum.inr e)) g a).card:ℝ)-(∑ u,q u g/(d:ℝ))|<(Fintype.card V:ℝ)^(3/5:ℝ)) ∧
+      (∀ u g,|rawIntervalHubStartCount π d g (fun e=>z.1 (Sum.inr e)) u-(Fintype.card V:ℝ)*q u g/d|<
+        (Fintype.card V:ℝ)^(3/4:ℝ)/d) ∧
+      ((∀ w,|rawIntervalUnassignedHubCountOn π d (fun e=>z.1 (Sum.inr e)) w I-(I.card:ℝ)*(1-(∑ g,q w g)-(∑ j,s w j))|<(Fintype.card V:ℝ)^(3/4:ℝ)) ∧
+       (∀ v,|rawIntervalUnassignedColumnCount π d (fun e=>z.1 (Sum.inr e)) v J-∑ w∈J,(1-(∑ g,q w g)-(∑ j,s w j))|<(Fintype.card V:ℝ)^(3/4:ℝ))) ∧
+      ((∀ w,|rawIntervalUnassignedHubCountOn π d (fun e=>z.1 (Sum.inr e)) w Finset.univ-(Fintype.card V:ℝ)*(1-(∑ g,q w g)-(∑ j,s w j))|<(Fintype.card V:ℝ)^(3/4:ℝ)) ∧
+       (∀ v,|rawIntervalUnassignedColumnCount π d (fun e=>z.1 (Sum.inr e)) v Finset.univ-∑ w,(1-(∑ g,q w g)-(∑ j,s w j))|<(Fintype.card V:ℝ)^(3/4:ℝ))) ∧
+      (∀ x,|(((G.neighborFinset x∩I).filter (fun y=>(z.1 (Sum.inl s(x,y))).1=4)).card:ℝ)-u*(G.neighborFinset x∩I).card|<(Fintype.card V:ℝ)^(3/4:ℝ)) ∧ Extra z ∧
+      (∀ x v,q v g≠0→|typedMarkedPotentialLoad w
+        (rawMarkedPairRims G π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)))
+        (rawMarkedPairSpokes π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inr (true,x,v))-1|<t+τ) ∧
+      (∀ x v,|typedMarkedPotentialLoad w
+        (rawMarkedPairRims G π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)))
+        (rawMarkedPairSpokes π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inr (false,x,v))-(m:ℝ)*q v g/s v j|<t+τ*((m:ℝ)*q v g/s v j)) ∧
+      (∀ x y,¬PermutationClose π (3*d) x y→G.Adj x (π y)→|typedMarkedPotentialLoad w
+        (rawMarkedPairRims G π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)))
+        (rawMarkedPairSpokes π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inl (Sum.inr (x,y)))-1|<t+τ) ∧
+      (∀ x y,¬PermutationClose π (3*d) x y→G.Adj x y→|typedMarkedPotentialLoad w
+        (rawMarkedPairRims G π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)))
+        (rawMarkedPairSpokes π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inl (Sum.inl (x,y)))-(m:ℝ)*k₂/p₂|<t+τ*((m:ℝ)*k₂/p₂)) := by
+  let Bseed:ℝ:=2*B/pstar^(2*m+1)
+  have hBseed:0<Bseed:=by dsimp [Bseed];positivity
+  obtain ⟨N₀,hBase⟩:=raw_expanded_selected_preparation_with_approx_potentials d m hd hm Bseed t hBseed ht
+  refine ⟨max N₀ 1,?_⟩
+  intro V _ _ hn U Γ Color _ _ _ _ hmU hmn hΓ G Z T hTG π I J hJ p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum hnoshort q hq hQ s hs hS g j D τ Aweight hDlo hDhi hp₂lo hk₂lo hslo hbalance weight hw F _ ν E hE ρ μ f H₀ Hₖ w Extra
+  have hnV:0<Fintype.card V:=by omega
+  have hnR:(0:ℝ)<Fintype.card V:=by exact_mod_cast hnV
+  have hD:0<D:=(half_pos hnR).trans_le hDlo
+  have hp₂pos:0<p₂:=hpstar.trans_le hp₂lo
+  have hk₂pos:0<k₂:=hpstar.trans_le hk₂lo
+  have hp₂one:p₂≤1:=by linarith
+  have hk₂one:k₂≤1:=by linarith
+  have hsone:∀ v,s v j≤1:=by
+    intro v
+    have hsingle:s v j≤∑ j,s v j:=Finset.single_le_sum (fun i _=>hs v i) (Finset.mem_univ j)
+    have hQ0:0≤∑ g,q v g:=Finset.sum_nonneg (fun i _=>hq v i)
+    have hfactor:0≤(1+1/(d:ℝ))*(∑ g,q v g):=mul_nonneg (by positivity) hQ0
+    have hh:=hS v
+    unfold intervalUncoveredProbability at hh
+    linarith
+  have hseed:∀ W,0≤w W ∧ w W≤Bseed/(Fintype.card V:ℝ)^m:=by
+    exact marked_variable_hub_seed_upper G π m (3*d) (by omega) D τ Aweight B p₂ k₂ pstar hnV hDlo hDhi hpstar hp₂lo hk₂lo hp₂one hk₂one
+      (fun v=>s v j) hslo hsone hB.le weight hw
+  obtain ⟨z,hz,hEz,hDeg,hPath,hStart,hHub,hRest,hAll,hRim,hExtra⟩:=
+    hBase V (le_trans (le_max_left _ _) hn) U Γ Color hmU hmn hΓ G Z T hTG π I J hJ p k p₂ k₂ u hp hk hp₂ hk₂ hu hsum hnoshort q hq hQ s hs hS H₀ Hₖ w hseed g j F ν E hE
+  have hTarget:∀ x v,q v g≠0→|typedMarkedPotentialLoad w
+        (rawMarkedPairRims G π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)))
+        (rawMarkedPairSpokes π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inr (true,x,v))-1|<t+τ:=by
+    exact rawMarked_variable_marked_spoke_concentration_target G π p₂ k₂ hp₂pos hk₂pos (by linarith) d hd q hq hQ s hs hS hnoshort m (by omega) g j D τ Aweight B t hD
+      (fun v=>hpstar.trans_le (hslo v)) weight hw (fun e=>rawExpandedApproximateCollapse e (z.1 e)) hExtra
+  have hOrdinary:∀ x v,|typedMarkedPotentialLoad w
+        (rawMarkedPairRims G π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)))
+        (rawMarkedPairSpokes π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inr (false,x,v))-(m:ℝ)*q v g/s v j|<t+τ*((m:ℝ)*q v g/s v j):=by
+    exact rawMarked_variable_ordinary_spoke_concentration_target G π p₂ k₂ hp₂pos hk₂pos (by linarith) d hd q hq hQ s hs hS hnoshort m (by omega) g j D τ Aweight B t hD
+      (fun v=>hpstar.trans_le (hslo v)) weight hw (fun e=>rawExpandedApproximateCollapse e (z.1 e)) hExtra
+  have hMarkedRim:∀ x y,¬PermutationClose π (3*d) x y→G.Adj x (π y)→|typedMarkedPotentialLoad w
+        (rawMarkedPairRims G π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)))
+        (rawMarkedPairSpokes π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inl (Sum.inr (x,y)))-1|<t+τ:=by
+    exact rawMarked_closing_arc_concentration_target G π p₂ k₂ hp₂pos hk₂pos (by linarith) d hd q hq hQ s hs hS hnoshort m (by omega) g j D τ Aweight B t hD
+      (fun v=>hpstar.trans_le (hslo v)) hbalance weight hw (fun e=>rawExpandedApproximateCollapse e (z.1 e)) hExtra
+  have hOrdinaryRim:∀ x y,¬PermutationClose π (3*d) x y→G.Adj x y→|typedMarkedPotentialLoad w
+        (rawMarkedPairRims G π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)))
+        (rawMarkedPairSpokes π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) g j) (Sum.inl (Sum.inl (x,y)))-(m:ℝ)*k₂/p₂|<t+τ*((m:ℝ)*k₂/p₂):=by
+    exact rawMarked_ordinary_arc_concentration_target G π p₂ k₂ hp₂pos hk₂pos (by linarith) d hd q hq hQ s hs hS hnoshort m (by omega) g j D τ Aweight B t hD
+      (fun v=>hpstar.trans_le (hslo v)) hbalance weight hw (fun e=>rawExpandedApproximateCollapse e (z.1 e)) hExtra
+  exact ⟨z,hz,hEz,hDeg,hPath,hStart,hHub,hRest,hAll,hRim,hExtra,hTarget,hOrdinary,hMarkedRim,hOrdinaryRim⟩
+end Oberwolfach

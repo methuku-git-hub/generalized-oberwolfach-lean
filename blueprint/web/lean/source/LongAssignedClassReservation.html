@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongAssignedClassReservation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongAssignedClassReservation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FactorClassAssignment</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A factor assigned to the long class satisfies exactly the long-frequency</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> hypothesis used to construct its marked-class sampling probabilities. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem long_class_assigned_frequency {n:ℕ} (hn:0&lt;n)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {U:Type} [Fintype U] (F:U→SimpleGraph (Fin n))</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hF:∀u,(F u).IsRegularOfDegree 2) (S:Set ℕ) (hS:∀u,AllowedCycleLengths (F u) S)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (K:ℕ) (hK:0&lt;K) (hclass:∀u,factorPreparationClass (F u) K=none):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∀u,(1/2:ℝ)≤((Finset.univ.filter (fun v=&gt;K&lt;Fintype.card ((F u).connectedComponentMk v))).card:ℝ)/n:=by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   intro u</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   exact ((factor_preparation_class hn (F u) (hF u) S (hS u) K hK).1).mp (hclass u)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceParentPotentialAfterChanges.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceParentPotentialAfterChanges.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceWeightedLoadScaledChanges</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPotentialPhysicalDeletion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The original parent weight and marginal root condition after the same</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> physical changes as the reference configurations. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 12000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_reference_parent_potential_after_changes</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (r:ℕ) (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (hn:0&lt;Fintype.card V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hu:Fintype.card U≤Fintype.card V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (rho t τ A B pstar eps ζ kappa:ℝ) (hζ:0≤ζ) (hB:0≤B) (hpstar:0&lt;pstar)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (weight:(Fin (r+4+1)→V)→ℝ) (q:U→Γ→ℝ) (s:U→Color→ℝ) (a:Γ) (c:Color)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (σ σ&#x27;:RawMarkedOutcome V U Γ Color) (H H&#x27;:Bool→V→U→Prop)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (FR:SimpleGraph V) (FS:SimpleGraph (V⊕U))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hRim:∀ e,¬(rawMarkedPairRims P π d σ e↔rawMarkedPairRims P π d σ&#x27; e)→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       markedPairPhysical π e∈FR.edgeFinset)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hSpoke:∀ b v u,¬(H b v u↔H&#x27; b v u)→FS.Adj (Sum.inl v) (Sum.inr u))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hdegR:∀ v,(FR.degree v:ℝ)≤ζ*Fintype.card V)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hdegS:∀ z,(FS.degree z:ℝ)≤ζ*Fintype.card V):</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let DRef:=2*Fintype.card U/rho</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let pRef:=rho*(r+4:ℝ)*t/2</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let kRef:=pRef/(r+4:ℝ)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let sRef:=(r+4:ℝ)*t</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let seed:=fun W:MarkedWheel (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd (r+4) π (3*d)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (fun (_:V) (_:U)=&gt;True) (fun _ _=&gt;True)=&gt;weight W.1.val/(DRef*pRef^(r+4)*kRef*sRef^(r+4))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (Fintype.card V:ℝ)/2≤DRef → DRef≤2*Fintype.card V →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     pstar≤pRef → pstar≤kRef → pstar≤sRef → pRef≤1 → kRef≤1 → sRef≤1 →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     SuccessorSequenceWeightConditions P π (3*d) DRef τ A B weight →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∀ root,rawMarkedWheelMarginal P π d pRef kRef q s a c root≠0 →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       |typedMarkedPotentialLoad seed (rawMarkedPairRims P π d σ) H root-1|≤eps) →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     eps+33*((r+4:ℝ)+1)^4*(2*B/pstar^(2*(r+4)+1))*ζ≤kappa/4 →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     ∀ root,rawMarkedWheelMarginal P π d pRef kRef q s a c root≠0 →</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       |typedMarkedPotentialLoad seed (rawMarkedPairRims P π d σ&#x27;) H&#x27; root-1|≤kappa/4 :=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   intro DRef pRef kRef sRef seed hDlo hDhi hp hk hs hp1 hk1 hs1 hw hbase hbudget</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hseed:∀ W,0≤seed W ∧ seed W≤(2*B/pstar^(2*(r+4)+1))/(Fintype.card V:ℝ)^(r+4):=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     intro W</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     exact successor_seed_nonneg_upper hw (by omega) hn hDlo hDhi pRef kRef sRef pstar</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       hpstar hp hk hs hp1 hk1 hs1 hB W.1.val</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hB&#x27;:0≤2*B/pstar^(2*(r+4)+1):=by positivity</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   exact marked_reference_weighted_load_scaled_changes P π d (r+4) (by omega) hn hu σ σ&#x27; H H&#x27; seed</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (2*B/pstar^(2*(r+4)+1)) ζ hB&#x27; hζ hseed FR FS hdegR hdegS hRim hSpoke</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (fun root=&gt;rawMarkedWheelMarginal P π d pRef kRef q s a c root≠0) eps (kappa/4) hbase</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (by simpa only [Nat.cast_add,Nat.cast_ofNat] using hbudget)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a> end Oberwolfach</span></pre></html>

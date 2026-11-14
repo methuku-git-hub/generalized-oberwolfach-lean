@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedEvenWheelParameters.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedEvenWheelParameters.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedWheels</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SuccessorCyclicMargin</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The marked-wheel index `m` counts ordinary rim arcs; the wheel has</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> `m+1` rim edges. The even wheel length used in marked completion can</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> therefore be written as `r+5` with the reference-event parameter `r` odd. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem marked_even_wheel_reference_parameters (c:ℕ) (hc:Even c) (hc8:8≤c):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ r k₀:ℕ,3≤r ∧ Odd r ∧ c=r+5 ∧ r+4+1=(k₀+2)*2:=by</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   obtain ⟨q,hq⟩:=hc</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   refine ⟨c-5,q-2,?_,?_,?_,?_⟩</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   · omega</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   · apply Nat.not_even_iff_odd.mp</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     intro hr</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     obtain ⟨k,hk⟩:=hr</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     omega</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   · omega</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   · omega</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem marked_r_one_rim_cardinality:Fintype.card (Fin ((1:ℕ)+4+1))=6:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   simp</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> /-- A single threshold makes both the parity and successor-density margin</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> available for every sufficiently large even wheel length. -/</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem marked_even_wheel_parameters_with_successor_margin (α:ℝ) (hα:0&lt;α):</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∃ c₀:ℕ,8≤c₀ ∧ ∀ c:ℕ,c₀≤c→Even c→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       ∃ r k₀:ℕ,3≤r ∧ Odd r ∧ c=r+5 ∧ r+4+1=(k₀+2)*2 ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         successorCycleRatio k₀+α/4≤1/2+α/2:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let c₀:ℕ:=⌈2/α⌉₊+8</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   refine ⟨c₀,by dsimp [c₀];omega,?_⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   intro c hc hEven</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hc8:8≤c:=by dsimp [c₀] at hc;omega</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   obtain ⟨r,k₀,hr,hodd,hcR,hlen⟩:=marked_even_wheel_reference_parameters c hEven hc8</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   refine ⟨r,k₀,hr,hodd,hcR,hlen,?_⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hcScale:(2/α:ℝ)+8≤c:=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have ha:(2/α:ℝ)≤⌈2/α⌉₊:=Nat.le_ceil _</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hb:((⌈2/α⌉₊:ℕ):ℝ)+8≤c:=by exact_mod_cast hc</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     linarith</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hcEq:(c:ℝ)=2*((k₀:ℝ)+2):=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hh:c=(k₀+2)*2:=by omega</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     exact_mod_cast hh.trans (Nat.mul_comm (k₀+2) 2)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hd:0&lt;2*((k₀:ℝ)+2)-1:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hk:0≤(k₀:ℝ):=Nat.cast_nonneg _</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     linarith</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hmul:2≤α*(2*((k₀:ℝ)+2)-1):=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hc&#x27;:(2:ℝ)/α≤(c:ℝ)-8:=by linarith [hcScale]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have hh:2≤((c:ℝ)-8)*α:=(div_le_iff₀ hα).mp hc&#x27;</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     rw [hcEq] at hh</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     nlinarith</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   unfold successorCycleRatio</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hh:((k₀:ℝ)+2)/(2*((k₀:ℝ)+2)-1)≤1/2+α/4:=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     apply (div_le_iff₀ hd).mpr</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     nlinarith</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   linarith</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> </span>
+<span id="L57"><a href="#L57" class="ln">  57</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryClassFailureBudget.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryClassFailureBudget.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryCombinedFullHostInputs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The explicit ordinary common-event error is below the class probability</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> budget used by the simultaneous protected partition. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem ordinary_combined_failure_below_class_budget (n:ℕ) (hn:1≤n) (χ:ℝ) (hχ:0≤χ):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     1/(n:ℝ)+3/(n:ℝ)^2≤100*χ+200/(n:ℝ):=by</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>   have hn1:(1:ℝ)≤n:=by exact_mod_cast hn</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   have hn0:(0:ℝ)&lt;n:=by linarith</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hi:(1:ℝ)/(n:ℝ)^2≤1/(n:ℝ):=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     apply (div_le_div_iff₀ (by positivity) hn0).2</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     nlinarith</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hp:(0:ℝ)≤1/(n:ℝ):=by positivity</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have h3:(3:ℝ)/(n:ℝ)^2=3*(1/(n:ℝ)^2):=by ring</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have h200:(200:ℝ)/(n:ℝ)=200*(1/(n:ℝ)):=by ring</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   rw [h3,h200]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   nlinarith</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> end Oberwolfach</span></pre></html>

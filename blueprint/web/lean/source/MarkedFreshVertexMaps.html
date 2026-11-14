@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedFreshVertexMaps.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedFreshVertexMaps.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedHostGreedyChoices</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteConflictSeparatedChoices</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Choose actual new row and hub vertices for the finite expansion graphs.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> Rows are mutually separated; no assumption is imposed on old-root pairs. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 16000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U E K I J:Type} [Fintype V] [Fintype U] [Fintype I] [Fintype J]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     [DecidableEq V] [DecidableEq U] [DecidableEq I]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b l:ℕ} {c ch:ℝ}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_host_order_bounds</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (Q:MarkedHostExtensionCounts tail head ktail khead H₀ HK π b l c ch) (v₀:V):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     c≤(Fintype.card V:ℝ)∧ch≤(Fintype.card U:ℝ):=by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   constructor</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   · exact (Q.outgoing false false v₀ ∅ (by simp)).trans (by exact_mod_cast Finset.card_le_univ _)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   · simpa using Q.hubs ∅ ∅ (by simp) (by simp) (by simp)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> theorem marked_fresh_row_map (W Z:Finset V) (hc:c≤(Fintype.card V:ℝ))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hbudget:(W.card:ℝ)+(Fintype.card I+Z.card)*(2*b+1)&lt;c):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ f:I↪V,(∀ i,f i∉W∧f i∉Z∧∀ z∈Z,¬PermutationClose π b (f i) z)∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       PermutationSeparated π b f:=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let Good:I→V→Prop:=fun _ v=&gt;v∉Z∧∀ z∈Z,¬PermutationClose π b v z</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hchoose:∀ i:I,∀ B:Finset V,(B.card:ℝ)≤W.card+Fintype.card I*1*((2*b:ℝ)+1)→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       ∃ v,Good i v∧({v}:Finset V).card≤1∧Disjoint ({v}:Finset V) B:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     intro i B hB</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hb:(B.card:ℝ)+Z.card*(2*b+1)&lt;c:=by nlinarith only [hB,hbudget]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     obtain ⟨v,_,hav⟩:=marked_candidate_avoiding (π:=π) (b:=b) Finset.univ B Z (by simpa using hc) hb</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     exact ⟨v,hav.2,by simp,by simpa using hav.1⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   obtain ⟨f,hf,hd⟩:=finite_conflict_separated_choices (fun v:V=&gt;{v}) Good W 1</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (permutationConflictGraph π b) (2*b) (by positivity)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (fun v=&gt;by exact_mod_cast permutationConflictGraph_degree_le π b v) (by simpa only [Nat.cast_one] using hchoose)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hfi:Function.Injective f:=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     intro i j he;by_contra hij</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact Finset.disjoint_left.mp (hd i j hij).1 (Finset.mem_singleton_self _) (by simp [he])</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   refine ⟨⟨f,hfi⟩,?_,?_⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   · intro i;exact ⟨by simpa using (hf i).2.2,(hf i).1⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   · intro i j hij hh</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     exact (hd i j hij).2 _ (Finset.mem_singleton_self _) _ (Finset.mem_singleton_self _) ⟨fun he=&gt;hij (hfi he),hh⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> </span>
+<span id="L45"><a href="#L45" class="ln">  45</a> theorem finite_fresh_hub_map (B:Finset U)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hbudget:B.card+Fintype.card J≤Fintype.card U):</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     ∃ g:J↪U,∀ j,g j∉B:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let T:Finset U:=Finset.univ\B</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have ht:Fintype.card J≤Fintype.card T:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     rw [Fintype.card_coe,Finset.card_sdiff,Finset.inter_univ,Finset.card_univ]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     omega</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   obtain ⟨g⟩:=Function.Embedding.nonempty_of_card_le ht</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   refine ⟨g.trans (Function.Embedding.subtype (fun u=&gt;u∈T)),?_⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   intro j</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   exact (Finset.mem_sdiff.mp (g j).property).2</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> </span>
+<span id="L57"><a href="#L57" class="ln">  57</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedUniformCutRecordChoice.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedUniformCutRecordChoice.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedUniformCutParameterChoice</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Positive cut parameters in the notation of the cover-down record. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option maxHeartbeats 6000000</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_uniform_inner_cut_record_choice</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (α kstar tstar ζ δcap hcap:ℝ)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hα:0&lt;α) (hk:0&lt;kstar) (ht:0&lt;tstar) (hζ:ζ≤tstar/16)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hδcap:0&lt;δcap) (hhcap:0&lt;hcap):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∃ δ hIcut:ℝ,0&lt;δ ∧ δ≤δcap ∧ 0&lt;hIcut ∧ hIcut≤hcap ∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       δ≤α/32 ∧ δ≤kstar/32 ∧ 2*δ≤tstar/8 ∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       2*hIcut≤α*kstar/4 ∧ 2*hIcut≤tstar/8-ζ:=by</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   obtain ⟨δ,h,hδ,hδcap&#x27;,hh,hhcap&#x27;,hδα,hδk,hδt,hprod,hspoke⟩:=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     marked_uniform_inner_cut_parameter_choice α kstar tstar ζ δcap (2*hcap)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       hα hk ht hζ hδcap (by linarith)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   refine ⟨δ,h/2,hδ,hδcap&#x27;,by linarith,?_,hδα,hδk,hδt,?_,?_⟩ &lt;;&gt; linarith</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> end Oberwolfach</span></pre></html>

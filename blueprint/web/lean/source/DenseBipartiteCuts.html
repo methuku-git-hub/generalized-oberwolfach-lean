@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>DenseBipartiteCuts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>DenseBipartiteCuts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.DirectedCutBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Large cuts in a bipartite adjacency matrix with degree above half the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> part size. The two copies of the label set are kept as separate sides. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem matrixCut_large_of_minDegree {V : Type*} [Fintype V]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (M : V → V → ℕ) (hM : ∀ x y, M x y ≤ 1) (β δ : ℝ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hrow : ∀ x, (1 / 2 + β) * Fintype.card V ≤ ((∑ y, M x y : ℕ) : ℝ))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hcol : ∀ y, (1 / 2 + β) * Fintype.card V ≤ ((∑ x, M x y : ℕ) : ℝ))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (S T : Finset V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hlarge : (1 - 2 * δ) * Fintype.card V &lt; (S.card : ℝ) + T.card) :</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (β - δ) * Fintype.card V * min (S.card : ℝ) T.card ≤ (matrixCut M S T : ℝ) := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hsmallLarge (A B : Finset V) (N : V → V → ℕ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (hN : ∀ x y, N x y ≤ 1)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (hdeg : ∀ x, (1 / 2 + β) * Fintype.card V ≤ ((∑ y, N x y : ℕ) : ℝ))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (hab : (A.card : ℝ) ≤ B.card)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (hlarge : (1 - 2 * δ) * Fintype.card V &lt; (A.card : ℝ) + B.card) :</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (β - δ) * Fintype.card V * A.card ≤ (matrixCut N A B : ℝ) := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have hb : (1 / 2 - δ) * Fintype.card V ≤ (B.card : ℝ) := by linarith</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hh := matrixCut_row_lower N hN A B (fun x _ =&gt; hdeg x)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have hm := mul_le_mul_of_nonneg_left hb (show (0 : ℝ) ≤ A.card by positivity)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     nlinarith</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   rcases le_total (S.card : ℝ) T.card with h | h</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · rw [min_eq_left h]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     exact hsmallLarge S T M hM hrow h hlarge</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   · rw [min_eq_right h, matrixCut_transpose]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     exact hsmallLarge T S (fun x y =&gt; M y x) (fun x y =&gt; hM y x) hcol h (by linarith)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> theorem matrixEdges_normalized_large_cuts {V : Type*} [Fintype V] [DecidableEq V]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (M : V → V → ℕ) (hM : ∀ x y, M x y ≤ 1) (β δ h : ℝ)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hn : 0 &lt; Fintype.card V) (hh : h ≤ β - δ)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hrow : ∀ x, (1 / 2 + β) * Fintype.card V ≤ ((∑ y, M x y : ℕ) : ℝ))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hcol : ∀ y, (1 / 2 + β) * Fintype.card V ≤ ((∑ x, M x y : ℕ) : ℝ))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (S T : Finset V)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hlarge : 1 - 2 * δ &lt; (S.card : ℝ) / Fintype.card V + (T.card : ℝ) / Fintype.card V) :</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     h * Fintype.card V * Fintype.card V *</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       min ((S.card : ℝ) / Fintype.card V) ((T.card : ℝ) / Fintype.card V) ≤</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ((Finset.univ.filter (fun e : BipartiteEdges M =&gt; e.1 ∈ S ∧ e.2.1 ∈ T)).card : ℝ) := by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hn&#x27; : (0 : ℝ) &lt; Fintype.card V := by exact_mod_cast hn</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hl : (1 - 2 * δ) * Fintype.card V &lt; (S.card : ℝ) + T.card := by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     rw [← add_div] at hlarge</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact (lt_div_iff₀ hn&#x27;).mp hlarge</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hcut := matrixCut_large_of_minDegree M hM β δ hrow hcol S T hl</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hm0 : 0 ≤ min (S.card : ℝ) T.card := le_min (Nat.cast_nonneg _) (Nat.cast_nonneg _)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hcut&#x27; : h * Fintype.card V * min (S.card : ℝ) T.card ≤ (matrixCut M S T : ℝ) :=</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hh hn&#x27;.le) hm0).trans hcut</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   rw [min_div_div_right hn&#x27;.le]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hcancel : h * Fintype.card V * Fintype.card V *</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (min (S.card : ℝ) T.card / Fintype.card V) =</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       h * Fintype.card V * min (S.card : ℝ) T.card := by field_simp</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   rw [hcancel, bipartiteEdges_filter_card M (fun x y =&gt; x ∈ S ∧ y ∈ T)]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   convert hcut&#x27; using 1</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   simp only [matrixCut]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   congr 1</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   calc</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     _ = ∑ x : V, if x ∈ S then ∑ y ∈ T, M x y else 0 := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       apply Finset.sum_congr rfl</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       intro x _</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       by_cases hx : x ∈ S</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       · simp [hx, ← Finset.sum_filter]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       · simp [hx]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     _ = _ := by rw [← Finset.sum_filter]; simp</span>
+<span id="L69"><a href="#L69" class="ln">  69</a> </span>
+<span id="L70"><a href="#L70" class="ln">  70</a> end Oberwolfach</span></pre></html>

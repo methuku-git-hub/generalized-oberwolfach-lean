@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedDeepRowNumericBudget.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedDeepRowNumericBudget.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedEndpointBlockNumerics</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Choose the free-use cap and allowed fraction of processed roots before</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> the separation radius. Only the final order threshold depends on that</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> radius. These are the explicit budgets of the actual hub-and-row constructor. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 14000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem marked_deep_row_numeric_budget</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (l:ℕ) (beta theta lam tau:ℝ) (hb:0&lt;beta) (ht:0&lt;theta) (hl:0&lt;lam) (hta:0&lt;tau):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ K:ℕ,0&lt;K∧∃ eps:ℝ,0&lt;eps∧∀ b:ℕ,∃ N:ℕ,1≤N∧∀ size:ℕ,N≤size→</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∀ h n excluded S:ℕ,(h:ℝ)≤eps*size→(n:ℝ)≤eps*size→</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (excluded:ℝ)≤eps*size→S≤size→</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (2*h:ℕ)≤theta*(size:ℝ)∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (n*(K+4):ℕ)≤(n*(K+l+8):ℕ)∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (n*(l+4):ℕ)≤(n*(K+l+8):ℕ)∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (n*(K+l+8):ℕ)≤lam*(tau*size)∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (excluded:ℝ)+(S*(l+4):ℕ)/(K:ℝ)+(l+5)*(2*b+1)+8*(K+4:ℕ)+</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         2*(n*(4*(K+4)):ℕ)+2*(n*(l+4):ℕ)+4*h&lt;beta*size:=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   obtain ⟨K,hK⟩:=exists_nat_gt (max 1 (4*(l+4:ℕ)/beta))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hKpos:0&lt;K:=by exact_mod_cast (lt_of_le_of_lt (by positivity : (0:ℝ)≤1) ((le_max_left _ _).trans_lt hK))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hKr:0&lt;(K:ℝ):=by exact_mod_cast hKpos</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hsmall:(l+4:ℕ)/(K:ℝ)&lt;beta/4:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hh:=((div_lt_iff₀ hb).mp ((le_max_right _ _).trans_lt hK))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     apply (div_lt_iff₀ hKr).mpr</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     nlinarith only [hh]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let C:ℝ:=1+8*(K+4:ℕ)+2*(l+4:ℕ)+4</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hC:0&lt;C:=by dsimp [C];positivity</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let cap:ℝ:=K+l+8</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hcap:0&lt;cap:=by dsimp [cap];positivity</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   let eps:=min (theta/4) (min (lam*tau/(2*cap)) (beta/(4*C)))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have heps:0&lt;eps:=by dsimp [eps];positivity</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hept:eps≤theta/4:=min_le_left _ _</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hepc:eps≤lam*tau/(2*cap):=(min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hepb:eps≤beta/(4*C):=(min_le_right _ _).trans (min_le_right _ _)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hecap:eps*cap≤lam*tau/2:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hh:=(le_div_iff₀ (by positivity : 0&lt;2*cap)).mp hepc</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     nlinarith only [hh]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have heC:eps*C≤beta/4:=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hh:=(le_div_iff₀ (by positivity : 0&lt;4*C)).mp hepb</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     nlinarith only [hh]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   refine ⟨K,hKpos,eps,heps,?_⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro b</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let constant:ℝ:=(l+5:ℕ)*(2*b+1:ℕ)+8*(K+4:ℕ)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   obtain ⟨N,hN⟩:=exists_nat_gt (max 1 (4*constant/beta))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hN1:1≤N:=by exact_mod_cast ((le_max_left _ _).trans_lt hN).le</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   refine ⟨N,hN1,?_⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro size hsize h n excluded S hh hn he hS</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hnsize:(N:ℝ)≤size:=by exact_mod_cast hsize</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hsizepos:0&lt;(size:ℝ):=by exact_mod_cast (show 0&lt;size by omega)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hconst:constant&lt;beta*size/4:=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hbN:4*constant/beta&lt;(size:ℝ):=((le_max_right _ _).trans_lt hN).trans_le hnsize</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     have hm:=(div_lt_iff₀ hb).mp hbN</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     nlinarith only [hm]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hhub:(2*h:ℕ)≤theta*(size:ℝ):=by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hlim:=mul_le_mul_of_nonneg_right hept hsizepos.le</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     push_cast</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     nlinarith only [hh,hlim,mul_nonneg ht.le hsizepos.le]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hloss:(n*(K+l+8):ℕ)≤lam*(tau*(size:ℝ)):=by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have h1:=mul_le_mul_of_nonneg_right hn hcap.le</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     have h2:=mul_le_mul_of_nonneg_right hecap hsizepos.le</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     dsimp only [cap] at h1 h2</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     push_cast</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     nlinarith only [h1,h2,mul_nonneg (mul_nonneg hl.le hta.le) hsizepos.le]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hSreal:(S:ℝ)≤size:=by exact_mod_cast hS</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hfrac:(S*(l+4):ℕ)/(K:ℝ)≤beta*size/4:=by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hratio0:0≤(l+4:ℕ)/(K:ℝ):=by positivity</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     have h1:=mul_le_mul_of_nonneg_right hSreal hratio0</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have h2:=mul_le_mul_of_nonneg_left hsmall.le hsizepos.le</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     convert h1.trans h2 using 1 &lt;;&gt; push_cast &lt;;&gt; ring</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hrest:(excluded:ℝ)+2*(n*(4*(K+4)):ℕ)+2*(n*(l+4):ℕ)+4*h≤beta*size/4:=by</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     have hn1:=mul_le_mul_of_nonneg_right hn (show (0:ℝ)≤8*(K+4:ℕ) by positivity)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     have hn2:=mul_le_mul_of_nonneg_right hn (show (0:ℝ)≤2*(l+4:ℕ) by positivity)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     have hh4:=mul_le_mul_of_nonneg_right hh (show (0:ℝ)≤4 by positivity)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     have htotal:=mul_le_mul_of_nonneg_right heC hsizepos.le</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     dsimp [C] at htotal</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     push_cast at hn1 hn2 htotal ⊢</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     nlinarith only [he,hn1,hn2,hh4,htotal]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   refine ⟨hhub,Nat.mul_le_mul_left n (by omega),Nat.mul_le_mul_left n (by omega),hloss,?_⟩</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   dsimp only [constant] at hconst</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   push_cast at hconst hfrac hrest ⊢</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have hbetapos:0&lt;beta*size:=mul_pos hb hsizepos</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   nlinarith only [hconst,hfrac,hrest,hbetapos]</span>
+<span id="L86"><a href="#L86" class="ln">  86</a> </span>
+<span id="L87"><a href="#L87" class="ln">  87</a> end Oberwolfach</span></pre></html>

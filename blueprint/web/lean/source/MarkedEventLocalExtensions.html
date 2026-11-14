@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedEventLocalExtensions.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedEventLocalExtensions.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedRowExtensionApplication</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedIndexExtensionApplication</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! One common realized row/index estimate supplies all four marked</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> extension sets and all later separated index requests on the fixed domains.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> The coefficient and tolerance precede d and the supplied marginal arrays. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 512</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 5500000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_common_event_local_extensions (c : ℕ) (α pstar : ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hα : 0&lt;α) (hpstar : 0&lt;pstar) (hpstar1 : pstar≤1) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∃ β ε₀ : ℝ,0&lt;β ∧ 0&lt;ε₀ ∧ ∀ d : ℕ,∃ N : ℕ,</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       ∀ (V U Γ Color : Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>         [LinearOrder V] [DecidableEq U],</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ∀ (P : SimpleGraph V) (π : Equiv.Perm V) (A : Finset V) (B : Finset U)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         (p k : ℝ) (q : U→Γ→ℝ) (s : U→Color→ℝ) (g : Γ) (j : Color) (ε : ℝ),</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       N≤A.card → A.image π=A → ε≤ε₀ → pstar≤p → pstar≤k →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀ u,pstar≤q u g) → (∀ u,pstar≤s u j) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ v,(1/2+α)*A.card≤((A∩P.neighborFinset v).card:ℝ)) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       ∀ (σ : RawMarkedOutcome V U Γ Color) (H : Bool→V→U→Prop),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       MarkedRowsWithSpokes P π d (c+6) A p k q s g j (ε*A.card) σ H →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       MarkedIndicesWithSpokes π d (c+6) B q s g j (ε*B.card) σ H →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ b v u,β*A.card≤((markedOneExtensionSet (rawMarkedPairRims P π d σ) H A b v u).card:ℝ)) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ b v w u,v≠(if b then π w else w) →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         β*A.card≤((markedTwoExtensionSet (rawMarkedPairRims P π d σ) H A b v w u).card:ℝ)) ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ X Y : Finset V,Disjoint X Y → (X∪Y).card≤c+6 →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         ((X∪Y):Set V).Pairwise (fun v w=&gt;¬PermutationClose π (3*d) v w) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         β*B.card≤((common (common B X (fun v=&gt;Finset.univ.filter (H false v))) Y</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>           (fun v=&gt;Finset.univ.filter (H true v))).card:ℝ)) := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let γ:=min α 1</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let β:=min (pstar^3*γ/4) (pstar^(c+6)/2)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hγ : 0&lt;γ := lt_min hα (by norm_num)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hγ1 : γ≤1 := min_le_right _ _</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hγα : γ≤α := min_le_left _ _</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hβ : 0&lt;β := by dsimp [β];positivity</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   refine ⟨β,β,hβ,hβ,?_⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   intro d</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   obtain ⟨N,hN⟩:=exists_nat_gt (4*(6*(d:ℝ)+1)/γ)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   refine ⟨N,?_⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   intro V U Γ Color _ _ _ _ _ _ P π A B p k q s g j ε hn hA hε hp hk hq hs hdeg σ H hrows hindices</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hAn : (N:ℝ)≤A.card := by exact_mod_cast hn</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hloss : 2*(2*(3*d:ℕ)+1:ℝ)≤γ*A.card/2 := by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have hh:=(div_lt_iff₀ hγ).mp (hN.trans_le hAn)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     push_cast</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     nlinarith only [hh]</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hdeg&#x27; (v : V) : (1/2+γ/2)*A.card≤((A∩P.neighborFinset v).card:ℝ) := by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact (mul_le_mul_of_nonneg_right (by linarith only [hγα,hγ]) (Nat.cast_nonneg A.card)).trans (hdeg v)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   obtain ⟨h₁,h₂⟩:=marked_row_event_extension_sets P π d (c+6) (by omega) A hA p k q s g j γ pstar ε</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     hγ hγ1 hpstar hpstar1 hp hk hq hs hloss (hε.trans (min_le_left _ _)) hdeg&#x27; σ H hrows</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   refine ⟨?_,?_,?_⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   · intro b v u</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     exact (mul_le_mul_of_nonneg_right (min_le_left _ _) (Nat.cast_nonneg A.card)).trans (h₁ b v u)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   · intro b v w u hne</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact (mul_le_mul_of_nonneg_right (min_le_left _ _) (Nat.cast_nonneg A.card)).trans (h₂ b v w u hne)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   · intro X Y hXY hsize hsep</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hh:=marked_index_event_extension_lower π d (c+6) B q s g j pstar ε hpstar hpstar1</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (fun u _=&gt;hq u) (fun u _=&gt;hs u) (hε.trans (min_le_right _ _)) σ H hindices X Y hXY hsize hsep</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     exact (mul_le_mul_of_nonneg_right (min_le_right _ _) (Nat.cast_nonneg B.card)).trans hh</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

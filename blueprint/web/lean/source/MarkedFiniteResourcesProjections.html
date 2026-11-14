@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedFiniteResourcesProjections.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedFiniteResourcesProjections.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFiniteResourceOperations</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A mixed physical-resource set uniquely determines its rim set and its</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> spoke set, even when the underlying typed arc domains differ. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {V U E K E&#x27; K&#x27;:Type} [Fintype V] [Fintype U] [Fintype E] [Fintype K] [Fintype E&#x27;] [Fintype K&#x27;]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>   [DecidableEq V] [DecidableEq U] [DecidableEq E] [DecidableEq K] [DecidableEq E&#x27;] [DecidableEq K&#x27;]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>   {tail head:E→V} {ktail khead:K→V} {π:Equiv.Perm V}</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   {tail&#x27; head&#x27;:E&#x27;→V} {ktail&#x27; khead&#x27;:K&#x27;→V} {π&#x27;:Equiv.Perm V}</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem marked_finite_resources_determine_projections</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (A:Finset (E⊕K)) (S:Finset (V×U)) (A&#x27;:Finset (E&#x27;⊕K&#x27;)) (S&#x27;:Finset (V×U))</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (he:markedFiniteResources tail head ktail khead π A S=</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       markedFiniteResources tail&#x27; head&#x27; ktail&#x27; khead&#x27; π&#x27; A&#x27; S&#x27;):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     A.image (markedPhysicalEdge tail head ktail khead π)=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       A&#x27;.image (markedPhysicalEdge tail&#x27; head&#x27; ktail&#x27; khead&#x27; π&#x27;) ∧ S=S&#x27;:=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   constructor</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   · ext e</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     have h:=congrArg (fun R:Finset (Finset V⊕(V×U))=&gt;Sum.inl e∈R) he</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     simpa only [markedFiniteResources,Finset.mem_union,Finset.mem_image,Sum.inl.injEq,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       Sum.inr_ne_inl,and_false,exists_false,or_false] using Iff.of_eq h</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · ext z</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     have h:=congrArg (fun R:Finset (Finset V⊕(V×U))=&gt;Sum.inr z∈R) he</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     simpa only [markedFiniteResources,Finset.mem_union,Finset.mem_image,Sum.inr.injEq,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       Sum.inl_ne_inr,and_false,exists_false,false_or,exists_eq_right] using Iff.of_eq h</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> end Oberwolfach</span></pre></html>

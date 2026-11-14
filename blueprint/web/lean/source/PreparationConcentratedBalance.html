@@ -1,0 +1,34 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PreparationConcentratedBalance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PreparationConcentratedBalance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PreparationBalancedMeans</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Combine the marked contribution with all ordinary contributions on one</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> outcome, preserving each fixed coefficient and each error term. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 5000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem preparation_concentrated_balanced_sum {I:Type} [Fintype I]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (τ a m x t:ℝ) (b z means errors:I→ℝ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hbalance:a+∑ i,b i=1) (hm:(1-τ)*a≤m ∧ m≤(1+τ)*a)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hmeans:∀ i,(1-τ)*b i≤means i ∧ means i≤(1+τ)*b i)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hx:|x-m|&lt;t) (hz:∀ i,|z i-means i|&lt;errors i):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     |x+∑ i,z i-1|&lt;t+(∑ i,errors i)+τ:=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hmean:=preparation_balanced_means τ a m b means hbalance hm hmeans</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hmeanerr:|m+∑ i,means i-1|≤τ:=abs_le.mpr ⟨by linarith [hmean.1],by linarith [hmean.2]⟩</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hobs:|x+∑ i,z i-(m+∑ i,means i)|≤|x-m|+∑ i,|z i-means i|:=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     calc</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       _ = |(x-m)+∑ i,(z i-means i)|:=by rw [Finset.sum_sub_distrib];congr 1;ring</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       _ ≤ |x-m|+|∑ i,(z i-means i)|:=abs_add_le _ _</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       _ ≤ _:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         simpa only [add_comm] using add_le_add_left (Finset.abs_sum_le_sum_abs (fun i=&gt;z i-means i) Finset.univ) |x-m|</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hsum:(∑ i,|z i-means i|)≤∑ i,errors i:=Finset.sum_le_sum (fun i _=&gt;(hz i).le)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   calc</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     _ ≤ |x+∑ i,z i-(m+∑ i,means i)|+|m+∑ i,means i-1|:=abs_sub_le _ _ _</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     _ ≤ |x-m|+(∑ i,|z i-means i|)+τ:=by linarith [hobs,hmeanerr]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     _ &lt; t+(∑ i,errors i)+τ:=by linarith [hx,hsum]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> end Oberwolfach</span></pre></html>

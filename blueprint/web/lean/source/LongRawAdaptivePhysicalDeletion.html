@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongRawAdaptivePhysicalDeletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongRawAdaptivePhysicalDeletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongRawAdaptivePatternDegreeBound</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongRawDeletedIncidence</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The actual physical deletion graph supplies both auxiliary incidence</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> bounds; only the seed-specific near/far pair estimates remain to be shown. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 12000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {n:ℕ} {U I:Type} [Fintype U] [DecidableEq U] [Fintype I] [DecidableEq I]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem long_raw_adaptive_pattern_load_physical_deletion</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (P D:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d:ℕ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (R:I→Finset (LongRawHubResource n U)) (w:I→ℝ) (hw:∀i,0≤w i)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (root:LongRawHubResource n U) (target δ M N:ℝ) (hM:0≤M) (hN:0≤N)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hD:∀x,(D.degree x:ℝ)≤δ) (Sroot Troot:Finset (Fin n)):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let state:=longRawHubState P π d raw g j</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let T:=bernoulliVertexSet state</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let S:=longRawSurvivingResources P π d raw g j D.edgeFinset</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let survived:=fun z=&gt;decide (z∈S)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let Deleted:=T.filter (fun z=&gt;∃edge,typedResourcePhysical π</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       ((markedResourceTypeEquiv (V:=Fin n) (U:=U)) z)=Sum.inl edge ∧ edge∈D.edgeFinset)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀a∈Deleted,resourceOmittedPairWeight R w root a≤</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (if longRawResourceTail a∈Sroot ∨ longRawResourceHead a∈Troot then M else N))→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     |resourcePatternLoad R w (fun _ _=&gt;true) root survived-target|≤</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       |resourcePatternLoad R w (fun _ _=&gt;true) root state-target|+</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         2*δ*((Sroot.card+Troot.card:ℝ)*M+(n:ℝ)*N) :=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro state T S survived Deleted hpair</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hi:=long_raw_deleted_resource_incidence_bound P D π d raw g j δ hD</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   exact long_raw_adaptive_pattern_load_degree_bound P π d raw g j R w hw D.edgeFinset root target</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     longRawResourceTail longRawResourceHead (2*δ) M N hM hN Sroot Troot hi.1 hi.2 hpair</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> end Oberwolfach</span></pre></html>

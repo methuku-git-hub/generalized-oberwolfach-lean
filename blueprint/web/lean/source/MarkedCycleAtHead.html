@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedCycleAtHead.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedCycleAtHead.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedCanonicalCycleCompletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedExclusionBudget</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! A canonical cycle through a prescribed marked head, with optional</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> common spoke constraints. Only its free vertices avoid the old root set. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 18000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U E K:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b l:ℕ} {c ch:ℝ}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_cycle_at_head</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (Q:MarkedHostExtensionCounts tail head ktail khead H₀ HK π b l c ch)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hl:2≤l) (P:Finset U) (hP:P.card≤2) (W Z:Finset V) (v:V) (hv:v∈Z)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hvP:markedSpokesTo H₀ HK true P v)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hbudget:(W.card:ℝ)+(Z.card+l+12)*(2*b+1)&lt;c):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃ C:MarkedCycleTuple tail head ktail khead (l+4) π b,</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       C.val 0=v∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (∀ i:Fin (l+5),i≠0→C.val i∉W∧C.val i∉Z∧∀ z∈Z,¬PermutationClose π b (C.val i) z)∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       ∀ u∈P,MarkedHubCompatible H₀ HK C.val u:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hb0:(W.card:ℝ)+Z.card*(2*b+1)&lt;c:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have hh:=marked_exclusion_budget_mono W Z Z 0 (l+12) b c (by omega)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (by simpa only [Nat.cast_add,Nat.cast_ofNat,add_assoc] using hbudget)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     simpa only [Nat.cast_zero,add_zero] using hh</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   obtain ⟨x,hx,hxW,hxZ,hxs⟩:=marked_candidate_avoiding (π:=π)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (Finset.univ.filter (fun x=&gt;markedArcPresent tail head ktail khead false v x∧markedSpokesTo H₀ HK false P x))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     W Z (Q.outgoing false false v P hP) hb0</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hb1:(W.card:ℝ)+(insert x Z).card*(2*b+1)&lt;c:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hi:=Finset.card_insert_le x Z</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hh:=marked_exclusion_budget_mono W Z (insert x Z) 0 (l+12) b c (by omega)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (by simpa only [Nat.cast_add,Nat.cast_ofNat,add_assoc] using hbudget)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     simpa only [Nat.cast_zero,add_zero] using hh</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨y,hy,hyW,hyZ,hys⟩:=marked_candidate_avoiding (π:=π)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (Finset.univ.filter (fun y=&gt;markedArcPresent tail head ktail khead true y v∧markedSpokesTo H₀ HK false P y))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     W (insert x Z) (Q.incoming true false v P hP) hb1</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hxy:¬PermutationClose π b x y:=fun hh=&gt;hys x (Finset.mem_insert_self _ _) ((permutationClose_symm π b _ _).mp hh)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hbpath:(W.card:ℝ)+(Z.card+l+5)*(2*b+1)&lt;c:=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hh:=marked_exclusion_budget_mono W Z Z (l+5) (l+12) b c (by omega)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (by simpa only [Nat.cast_add,Nat.cast_ofNat,add_assoc] using hbudget)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     simpa only [Nat.cast_add,Nat.cast_ofNat,add_assoc] using hh</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   obtain ⟨p,C,hC,hp0,hpn,hpa,hCP⟩:=marked_canonical_cycle_completion Q hl P hP W Z v x y hv hxy</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (Finset.mem_filter.mp hx).2.1 (Finset.mem_filter.mp hy).2.1 hvP</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (Finset.mem_filter.mp hx).2.2 (Finset.mem_filter.mp hy).2.2 hxW hyW hxZ</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (fun hz=&gt;hyZ (Finset.mem_insert_of_mem hz)) hxs (fun z hz=&gt;hys z (Finset.mem_insert_of_mem hz)) hbpath</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   refine ⟨C,by simpa only [hC,Fin.cons_zero],?_,hCP⟩</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   intro i;refine Fin.cases ?_ (fun j=&gt;?_) i</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   · intro h;exact False.elim (h rfl)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · intro h;simpa only [hC,Fin.cons_succ] using hpa j</span>
+<span id="L52"><a href="#L52" class="ln">  52</a> </span>
+<span id="L53"><a href="#L53" class="ln">  53</a> end Oberwolfach</span></pre></html>

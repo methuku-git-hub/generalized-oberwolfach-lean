@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryRetainedActiveSeedBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryRetainedActiveSeedBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RetainedOrdinarySeedStability</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PhysicalOrdinaryFrequencyTargets</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedExpandedApproximateProjection</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The original ordinary frequency targets pass to the same retained</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> outcome at each active ordinary rim or spoke resource. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 12000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U:Type} [Fintype V] [Fintype U] [Nonempty V] [LinearOrder V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def ordinarySeedRootTarget (D p θ:ℝ) (f η:U→ℝ):(V×V)⊕(V×U)→ℝ</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   | .inl _ =&gt; ((1-θ)*∑u,f u)/(D*p)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   | .inr (_,u) =&gt; η u</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem retained_ordinary_active_seed_bounds</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d n:ℕ) (hd:2≤d) (hn:1≤n)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (p k:ℝ) (hp:0&lt;p) (hk:0≤k) (hsum:2*p+2*k≤1)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (q:U→Bool→ℝ) (hq:∀u g,0≤q u g) (hQ:∀u,∑g,q u g≤1/8)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (s:U→Bool→ℝ) (hs:∀u j,0≤s u j)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hS:∀u,∑j,s u j≤ intervalUncoveredProbability d (∑g,q u g))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (g₀ g j:Bool) (D τ ε θ B t Bseed ζ:ℝ) (hD:0&lt;D) (hB:0≤B)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hBseed:0≤Bseed) (hζ:0≤ζ) (hspos:∀u,0&lt;s u j)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (η f:U→ℝ) (hη:∀u,0≤η u) (hηexact:∀u,η u=(1-θ)*f u/s u j)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (w:OrdinaryCycle P (n+2)→ℝ) (hw:∀C,0≤w C)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hb:∀C,w C≤B/(Fintype.card V:ℝ)^n)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (he:∀x y,(∑C,if C.val.val.Adj x y then w C else 0)=if P.Adj x y then 1 else 0)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hdeg:∀x,|(P.degree x:ℝ)-D|≤ε*(Fintype.card V:ℝ))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hbudgetV:6*((n+2:ℕ):ℝ)^4*B*(2*(3*d))+ε*(Fintype.card V:ℝ)≤τ*D)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hbudgetE:5*((n+2:ℕ):ℝ)^4*B*(2*(3*d))/Fintype.card V≤τ)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (σ:RawMarkedOutcome V U Bool Bool)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (J:StartRetentionOutcome (rawStartHubSet π d (fun e=&gt;σ (Sum.inr e)) g₀)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;σ (Sum.inr e)) g₀)))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hu:Fintype.card U≤Fintype.card V):</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let R:=fun e:V×V=&gt;rawMarkedPairRims P π d σ (Sum.inl e)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let H:=retainedRawMarkedSpokes π d (fun e=&gt;σ (Sum.inr e)) g₀</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;σ (Sum.inr e)) g₀)) J g j false</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let weight:=physicalOrdinaryTupleWeight (π:=π) (b:=3*d) hn w</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     let seed:=fun W:OrderedOrdinaryWheel (U:=U) π (3*d) (n+2)=&gt;</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       η W.2*weight W.1.val/(((n+2:ℕ):ℝ)*D*p^(n+2)*(s W.2 j)^(n+1))</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (∀W,0≤seed W ∧ seed W≤Bseed/(Fintype.card V:ℝ)^(n+1)) →</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     RetainedRestrictionGood π d (fun e=&gt;σ (Sum.inr e)) g₀</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;σ (Sum.inr e)) g₀))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (fun _:Unit=&gt;Finset.univ) (fun _:Unit=&gt;Finset.univ) ζ J →</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (∀root,|resourcePatternLoad orderedOrdinaryResources seed (fun _ _=&gt;true) root</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (orderedOrdinaryResourceState P π d g j σ)-</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       ∑W,(if root∈orderedOrdinaryResources W then seed W else 0)*</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         ∏a∈orderedOrdinaryResources W\{root},rawMarkedWheelMarginal P π d p k q s g j</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>           (orderedOrdinaryResourceEmbedding a)|&lt;t) →</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     ∀root,decide (ordinaryPotentialKeep R H root)=true →</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       |resourcePatternLoad orderedOrdinaryResources seed (fun _ _=&gt;true) root</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         (fun e=&gt;decide (ordinaryPotentialKeep R H e))-ordinarySeedRootTarget D p θ f η root|≤</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         (t+3*(((n+1:ℕ):ℝ)+1)^3*Bseed*ζ)+τ*ordinarySeedRootTarget D p θ f η root := by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   intro R H weight seed hseed good hconc root hactive</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hnV:0&lt;Fintype.card V:=Fintype.card_pos</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have htarg:=physical_ordinary_frequency_targets_from_concentration P π p k hp hk hsum d hd q hq hQ s hs hS</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     hnoshort n hn hnV g j D τ ε hD hspos η hη θ f hηexact w hw B hB hb he hdeg hbudgetV hbudgetE σ t hconc</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hraw:|resourcePatternLoad orderedOrdinaryResources seed (fun _ _=&gt;true) root</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (orderedOrdinaryResourceState P π d g j σ)-ordinarySeedRootTarget D p θ f η root|≤</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       t+τ*ordinarySeedRootTarget D p θ f η root := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     cases root with</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     | inl xy=&gt;</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       rcases xy with ⟨x,y⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       have hR:R (x,y):=by simpa [ordinaryPotentialKeep] using hactive</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       have hr:markedPhysicalRim P π (3*d) (fun e=&gt;σ (Sum.inl e)) false x y=1 := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         simpa [R,rawMarkedPairRims] using hR</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       have hh:=(markedPhysicalRim_eq_one_iff P π (3*d) (fun e=&gt;σ (Sum.inl e)) false x y).mp hr</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       simpa [ordinarySeedRootTarget,seed,weight] using (htarg.2 x y hh.2.1 hh.1).le</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     | inr vu=&gt;</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       rcases vu with ⟨v,u⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       simpa [ordinarySeedRootTarget,seed,weight] using (htarg.1 v u).le</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have hstab:=retained_ordinary_seed_pattern_stability (m:=n+1) (b:=3*d) (π:=π) (by omega) hnV hu</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     seed Bseed ζ hBseed hζ hseed R d (fun e=&gt;σ (Sum.inr e)) g₀ _ J good g j root</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have hstate : (fun e=&gt;decide (ordinaryPotentialKeep R (rawMarkedSpokes π d (fun e=&gt;σ (Sum.inr e)) g j false) e)) =</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       orderedOrdinaryResourceState P π d g j σ := by</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     funext e</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     cases e with</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     | inl xy=&gt;simp [ordinaryPotentialKeep,R,orderedOrdinaryResourceState,typedMarkedResourceState,orderedOrdinaryResourceEmbedding]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     | inr vu=&gt;simp [ordinaryPotentialKeep,orderedOrdinaryResourceState,typedMarkedResourceState,</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>         orderedOrdinaryResourceEmbedding,rawMarkedPairSpokes]</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   rw [hstate] at hstab</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have htri:=abs_add_le</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (resourcePatternLoad orderedOrdinaryResources seed (fun _ _=&gt;true) root</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       (fun e=&gt;decide (ordinaryPotentialKeep R H e))-</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>       resourcePatternLoad orderedOrdinaryResources seed (fun _ _=&gt;true) root (orderedOrdinaryResourceState P π d g j σ))</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     (resourcePatternLoad orderedOrdinaryResources seed (fun _ _=&gt;true) root (orderedOrdinaryResourceState P π d g j σ)-</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>       ordinarySeedRootTarget D p θ f η root)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   have heq:resourcePatternLoad orderedOrdinaryResources seed (fun _ _=&gt;true) root</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       (fun e=&gt;decide (ordinaryPotentialKeep R H e))-ordinarySeedRootTarget D p θ f η root =</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     (resourcePatternLoad orderedOrdinaryResources seed (fun _ _=&gt;true) root</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>       (fun e=&gt;decide (ordinaryPotentialKeep R H e))-</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       resourcePatternLoad orderedOrdinaryResources seed (fun _ _=&gt;true) root (orderedOrdinaryResourceState P π d g j σ))+</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     (resourcePatternLoad orderedOrdinaryResources seed (fun _ _=&gt;true) root (orderedOrdinaryResourceState P π d g j σ)-</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>       ordinarySeedRootTarget D p θ f η root):=by ring</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   rw [heq]</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   linarith</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a> end Oberwolfach</span></pre></html>

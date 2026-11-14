@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongRawHubFrequenciesForAssignment.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongRawHubFrequenciesForAssignment.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MatchingFrequencyAssignmentForm</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongRawContextHubFrequencies</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.LongRawHubContext</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.LongAllHubAbsoluteFrequencies</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The same fixed state and matching simultaneously give all the requested</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> retained hub-frequency estimates. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 10000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem long_raw_context_hub_frequencies_for_assignment</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hn:0&lt;n) (F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (m:ℕ) (θ D p k τ t countErr γ eps:ℝ) (hθ0:0≤θ) (hθ1:θ≤1)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hb:∀u,(1/4:ℝ)≤longAssignedApproxOrdinaryWeight F hF K m θ u)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n)) (d:ℕ) (ℓ:Fin K→ℕ)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (raw:RawMarkedOutcome (Fin n) U Bool Bool) (g j:Bool)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (w:∀i,longRawHubCandidates (U:=U) π d m ℓ i→ℝ) (hr:∀i,0&lt;ℓ i)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hτ:0≤τ) (herr0:0≤t+4*τ) (herrle:t+4*τ≤eps/2)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hcount0:0≤countErr) (hcountle:4*countErr≤(eps/2)*n)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hγ:0≤γ) (hγε:γ≤eps) (heps:0≤eps) (heps1:eps≤1)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hload:∀i z,longRawHubState P π d raw g j z=true→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       |resourcePatternLoad (longRawHubResources (U:=U) π d m ℓ (some i)) (w (some i)) (fun _ _=&gt;true) z (longRawHubState P π d raw g j)-</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         longAssignedMixedTarget F hF K m θ D p k (some i) z|≤</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         t+τ*longAssignedMixedTarget F hF K m θ D p k (some i) z)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hcount:∀u,|(((ordinaryCommonHubSpokeRoots u).filter (fun v=&gt;longRawHubState P π d raw g j v=true)).card:ℝ)-</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       longAssignedApproxOrdinaryWeight F hF K m θ u*n|≤countErr)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hw:∀i c,0≤w i c):</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let state:=longRawHubState P π d raw g j</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let R:=longRawHubResources (U:=U) π d m ℓ</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let hub:=longRawHubNames (U:=U) π d m ℓ</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let e:{v // v∈bernoulliVertexSet state}↪_:=Function.Embedding.subtype _</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ∀M:Finset (RestrictedResource (mixedCandidateResources R) e),</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (∀i u,θ/(100*(K:ℝ))≤longAssignedKeptFraction F hF K θ i u→</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       let test:=mixedHubIndicator hub (some i) u</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       let mass:=∑c:RestrictedResource (mixedCandidateResources R) e,</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         test c.val.1 c.val.2*mixedCandidateWeight w c.val</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (1-γ)*mass≤∑c∈M,test c.val.1 c.val.2) →</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (∀i u,θ/(100*(K:ℝ))≤longAssignedKeptFraction F hF K θ i u→</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       let test:=mixedHubIndicator hub (some i) u</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       let mass:=∑c:RestrictedResource (mixedCandidateResources R) e,</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         test c.val.1 c.val.2*mixedCandidateWeight w c.val</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∑c∈M,test c.val.1 c.val.2)≤(1+γ)*mass) →</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     ∀i u,θ/(100*(K:ℝ))≤longAssignedKeptFraction F hF K θ i u→</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       |((M.filter (fun c=&gt;c.val.1=some i ∧ hub c.val.1 c.val.2=u)).card:ℝ)-</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         (1-θ)*(longAssignedKeptFraction F hF K θ i u*n/(ℓ i:ℝ))|≤(3*eps)*n :=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   intro state R hub e M hlow hup i u hi</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have h:=long_raw_context_hub_frequencies hn F hF m θ D p k τ t countErr γ eps hθ0 hθ1 hb</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     P π d ℓ raw g j w hr hτ herr0 herrle hcount0 hcountle hγ hγε heps heps1 hload hcount hw M hlow hup i u hi</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   exact matching_frequency_assignment_form _ θ _ n (ℓ i) eps h</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> end Oberwolfach</span></pre></html>

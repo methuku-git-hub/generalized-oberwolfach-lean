@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedPiecePositions.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedPiecePositions.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedPieceSourceOrientation</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedArcCount</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The prescribed-position construction for the manuscript&#x27;s ordered</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> path-and-cycle source model, with the structural conditions proved. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 3000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {I X V:Type} [Fintype I] [Fintype X] [Fintype V] [DecidableEq I] [DecidableEq X] [DecidableEq V]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem prescribed_piece_positions (ps:List (I×PrescribedSourcePiece X))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hshape:∀ p∈ps,p.2.Shape) (hapart:ps.Pairwise PrescribedPiecesApart) (i:I)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (A:Finset X) (hA:∀x∈A,∀y∈A,¬(prescribedSourceGraph ps i).Adj x y)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (f:X→V) (hinj:Set.InjOn f (↑A:Set X))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (M:Finset (V×V)) (hM:IsPrescribedOrientedMatching M) (Z:Finset V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hOldM:Disjoint (A.image f) (prescribedMatchingEndpoints M))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hOldZ:Disjoint (A.image f) Z) (hMZ:Disjoint (prescribedMatchingEndpoints M) Z)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (harc:Fintype.card X≤(prescribedArcFinset (prescribedSourceDigraph ps i)).card+A.card)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hsize:8*A.card+8*M.card+4*Z.card+10≤Fintype.card X):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∃ (B:Finset X) (g:X→V),A⊆B ∧ Set.InjOn g (↑B:Set X) ∧ (∀x∈A,g x=f x) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       B.image g=A.image f∪prescribedMatchingEndpoints M∪Z ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (prescribedInducedArcs (prescribedSourceDigraph ps i) B).image (Prod.map g g)=M := by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   exact prescribed_positions_with_arc_count (prescribedSourceGraph ps i) (prescribedSourceDigraph ps i)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (prescribed_source_model_degree ps hshape hapart i)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (prescribed_source_model_representation ps i)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (prescribed_source_model_arc_graph ps hshape i)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (prescribed_source_model_oriented ps hshape hapart i)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     A hA f hinj M hM Z hOldM hOldZ hMZ harc hsize</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedDecompositionPermutationDirected.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedDecompositionPermutationDirected.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedDecompositionIndexedDirected</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPermutationIntervalGeometryInjective</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Reconstruct all prescribed intervals from a physical marked-wheel packing,</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> with hubwise vertex partitions and a global physical-rim edge partition. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 40000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem marked_decomposition_permutation_reconstruction_directed</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {V U E K:Type*} [Fintype V] [Fintype U] [Fintype E] [Fintype K] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (tail head:E→V) (ktail khead:K→V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (m b:ℕ) (π:Equiv.Perm V) (hb:1≤b) (H₀ Hₖ:V→U→Prop)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hdec:HasResourceDecomposition (markedWheelPhysicalResources (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (m:=m) (π:=π) (b:=b) (H₀:=H₀) (Hₖ:=Hₖ))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (markedDecompositionTarget (markedPhysicalRimSet tail head ktail khead π) H₀ Hₖ))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (J:U→Type*) [∀u,Fintype (J u)] (k:∀u,J u→ℕ) (a:∀u,J u→V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hinj:∀u j,Function.Injective (fun i:Fin (k u j+1)=&gt;(π^i.val) (a u j)))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hdis:∀u (j l:J u),j≠l→Disjoint (permutationWindow π 0 (k u j) (a u j))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (permutationWindow π 0 (k u l) (a u l)))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hend:∀u j,(π^(k u j)) (a u j)∉Finset.univ.filter (fun x=&gt;H₀ x u∨Hₖ x u))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hmarked:∀u x,Hₖ x u↔x∈markedIntervalRootSet π (k u) (a u))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hsep:∀u x,Hₖ x u→¬H₀ x u)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hloopE:∀e:E,tail e≠head e) (hloopK:∀e:K,ktail e≠π (khead e))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hphysical:Function.Injective (markedPhysicalEdge tail head ktail khead π)):</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let G:=physicalEdgeGraph (markedPhysicalRimSet tail head ktail khead π)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let Y:U→Finset V:=fun u=&gt;markedIntervalRootSet π (k u) (a u)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∃v:∀u j,Fin (k u j+1)↪V,</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀u j,v u j 0=a u j) ∧ (∀u j,v u j (Fin.last (k u j))=(π^(k u j)) (a u j)) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∃M:∀u:U,Finset (HubMarkedCycle tail head ktail khead m π b H₀ Hₖ u),</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∃q:∀u (j:J u),G.Walk (v u j 0) (v u j (Fin.last (k u j))),</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀u j,(q u j).IsPath ∧ (q u j).length=k u j*(m+1)) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀u (j l:J u),j≠l→Disjoint (q u j).support.toFinset (q u l).support.toFinset) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀u,(Finset.univ.biUnion (fun j:J u=&gt;(q u j).support.toFinset))=</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (Finset.univ.filter (fun x=&gt;H₀ x u∨Hₖ x u)) ∪</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>           Finset.univ.image (fun j:J u=&gt;v u j (Fin.last (k u j)))) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (∀u (j l:J u),j≠l→Disjoint (walkPhysicalEdges (q u j)) (walkPhysicalEdges (q u l))) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (∀u w:U,u≠w→∀j:J u,∀l:J w,Disjoint (walkPhysicalEdges (q u j)) (walkPhysicalEdges (q w l))) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (∀u,(Finset.univ.biUnion (fun j:J u=&gt;walkPhysicalEdges (q u j)))=(M u).biUnion (hubCyclePhysicalEdges u)) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       Finset.univ.biUnion (fun u:U=&gt;Finset.univ.biUnion (fun j:J u=&gt;walkPhysicalEdges (q u j)))=</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         markedPhysicalRimSet tail head ktail khead π ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∀u (j l:J u),j≠l→Disjoint (walkPhysicalArcs (q u j)) (walkPhysicalArcs (q u l))) ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (∀u w:U,u≠w→∀j:J u,∀l:J w,Disjoint (walkPhysicalArcs (q u j)) (walkPhysicalArcs (q w l))) ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (∀u,(Finset.univ.biUnion (fun j:J u=&gt;walkPhysicalArcs (q u j)))=(M u).biUnion (fun C=&gt;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         markedCyclePhysicalArcs tail head ktail khead m π b (hubCycleAsMarked u C))) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∀u,(Finset.univ.filter (fun x=&gt;H₀ x u∨Hₖ x u)).card=(m+1)*(Y u).card) ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       Finset.univ.biUnion (fun u:U=&gt;Finset.univ.biUnion (fun j:J u=&gt;walkPhysicalArcs (q u j)))=</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         Finset.univ.image (markedPhysicalArc tail head ktail khead π) := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   let Y:U→Finset V:=fun u=&gt;markedIntervalRootSet π (k u) (a u)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hexist:∀u:U,∃v:∀j:J u,Fin (k u j+1)↪V,</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (∀j,v j 0=a u j) ∧ (∀j,v j (Fin.last (k u j))=(π^(k u j)) (a u j)) ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (∀j (i:Fin (k u j)),v j i.castSucc∈Y u) ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (∀j (i:Fin (k u j)),π (v j i.castSucc)=v j i.succ) ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (∀j,v j (Fin.last (k u j))∉Finset.univ.filter (fun x=&gt;H₀ x u∨Hₖ x u)) ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (∀j l:J u,j≠l→∀i:Fin (k u j),∀t:Fin (k u l),v j i.castSucc≠v l t.castSucc) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (∀x∈Y u,∃j:J u,∃i:Fin (k u j),v j i.castSucc=x) ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (∀j l:J u,j≠l→v j (Fin.last (k u j))≠v l (Fin.last (k u l))):=by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     intro u</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact marked_permutation_interval_geometry_of_injective π (k u) (a u)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (Finset.univ.filter (fun x=&gt;H₀ x u∨Hₖ x u)) (hinj u) (hdis u) (hend u)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   let v:∀u j,Fin (k u j+1)↪V:=fun u=&gt;Classical.choose (hexist u)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hv:=fun u=&gt;Classical.choose_spec (hexist u)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   obtain ⟨M,q,hpath,hvertices,hvertexcover,hedges,hcross,hhubedges,hglobal,harcs,harccross,harcHub,hcount,harcGlobal⟩:=</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     marked_decomposition_indexed_reconstruction_directed tail head ktail khead m b π hb H₀ Hₖ hdec Y hmarked hsep J k v</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (fun u=&gt;(hv u).2.2.1) (fun u=&gt;(hv u).2.2.2.1) (fun u=&gt;(hv u).2.2.2.2.1)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (fun u=&gt;(hv u).2.2.2.2.2.1) (fun u=&gt;(hv u).2.2.2.2.2.2.1) (fun u=&gt;(hv u).2.2.2.2.2.2.2)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       hloopE hloopK hphysical</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   exact ⟨v,(fun u=&gt;(hv u).1),(fun u=&gt;(hv u).2.1),M,q,hpath,hvertices,hvertexcover,hedges,hcross,hhubedges,hglobal,harcs,harccross,harcHub,hcount,harcGlobal⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> end Oberwolfach</span></pre></html>

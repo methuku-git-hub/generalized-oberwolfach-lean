@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedJointRecordOrderedErrorChoices.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedJointRecordOrderedErrorChoices.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedJointRecordErrorChoice</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedUniformCutRecordChoice</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Choose the cut geometry before the balance tolerance; the latter is</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> returned by the cover-down theorem only after the cut parameters are fixed. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem marked_joint_record_ordered_error_choices</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (r:ℕ) (α kstar tstar κ thetaDeep η x Cparent Clocal cap:ℝ)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hα:0&lt;α) (hk:0&lt;kstar) (ht:0&lt;tstar) (hκ:0&lt;κ) (hθ:0&lt;thetaDeep)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hη:0&lt;η) (hx:0&lt;x) (hCp:0≤Cparent) (hCl:0≤Clocal) (hcap:0&lt;cap):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ ζCut deltaI hIcut:ℝ,</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       0&lt;ζCut ∧ ζCut≤cap ∧ ζCut≤tstar/16 ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       0&lt;deltaI ∧ deltaI&lt;1/4 ∧ 0&lt;hIcut ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       deltaI≤α/32 ∧ deltaI≤kstar/32 ∧ 2*deltaI≤tstar/8 ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       2*hIcut≤α*kstar/4 ∧ 2*hIcut≤tstar/8-ζCut ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       ∀ etaBal:ℝ,0&lt;etaBal→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       ∃ tolRef ζActive τParent tolParent ζParent τ tolLocal ζLocal rowErr ζRow epsBal ζBal:ℝ,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         0&lt;tolRef ∧ tolRef≤cap ∧ 0&lt;ζActive ∧ ζActive≤cap ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         tolRef+(r+12:ℕ)*ζActive≤κ/4 ∧ tolRef+(r+12:ℕ)*ζActive≤x/2 ∧ ζActive≤κ/4 ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>         0&lt;τParent ∧ τParent≤cap ∧ 0&lt;tolParent ∧ tolParent≤cap ∧ 0&lt;ζParent ∧ ζParent≤cap ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         τParent+tolParent+Cparent*ζParent≤κ/4 ∧ τParent+tolParent+Cparent*ζParent≤thetaDeep/4 ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         0&lt;τ ∧ τ≤cap ∧ 0&lt;tolLocal ∧ tolLocal≤cap ∧ τ+tolLocal≤η/8 ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         0&lt;ζLocal ∧ ζLocal≤cap ∧ τ+tolLocal+Clocal*ζLocal≤η/4 ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         0&lt;rowErr ∧ rowErr≤cap ∧ 0&lt;ζRow ∧ ζRow≤cap ∧ rowErr+ζRow≤tstar/8 ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         0&lt;epsBal ∧ epsBal≤cap ∧ 0&lt;ζBal ∧ ζBal≤cap ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         epsBal+((r+4)+2:ℕ)*ζBal≤etaBal ∧ epsBal+((r+4)+2:ℕ)*ζBal≤x/2 ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         ∀ ε Cwide:ℝ,0&lt;ε→0≤Cwide→∃ ζWide:ℝ,0&lt;ζWide ∧ ζWide≤cap ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>           τ+tolLocal+Cwide*(4/ε)*ζWide≤η/4:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   let ζCut:=min cap (tstar/32)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hz:0&lt;ζCut:=by dsimp [ζCut];positivity</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hzcap:ζCut≤cap:=min_le_left _ _</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hzsmall:ζCut≤tstar/16:=by have hh:ζCut≤tstar/32:=min_le_right _ _;linarith</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   obtain ⟨deltaI,hIcut,hδ,hδcap,hi,hicap,hδα,hδk,hδt,hiprod,hispoke⟩:=</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     marked_uniform_inner_cut_record_choice α kstar tstar ζCut (1/8) cap hα hk ht hzsmall (by norm_num) hcap</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   refine ⟨ζCut,deltaI,hIcut,hz,hzcap,hzsmall,hδ,by linarith,hi, hδα,hδk,hδt,hiprod,hispoke,?_⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   intro etaBal hbal</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   exact marked_joint_record_error_choice r (r+4) κ thetaDeep η etaBal x tstar Cparent Clocal cap</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     hκ hθ hη hbal hx ht hCp hCl hcap</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> end Oberwolfach</span></pre></html>

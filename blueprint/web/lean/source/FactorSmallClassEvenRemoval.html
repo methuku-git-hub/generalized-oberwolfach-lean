@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FactorSmallClassEvenRemoval.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FactorSmallClassEvenRemoval.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FactorSequentialEvenRemoval</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FactorRemovalMargin</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The small-class removal induction with the manuscript&#x27;s original degree</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> margin. The single-copy embedding remains an explicit, separate obligation. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem factor_small_class_even_removal {n:ℕ} (D:ℕ) (δ α:ℝ) (hδ:0≤δ) (hα:0&lt;α)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (G:SimpleGraph (Fin n)) (hG:G.IsRegularOfDegree D) (hEven:Even D)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hdegree:(δ+α)*(n:ℝ)≤D)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (F:List (SimpleGraph (Fin n))) (hsmall:(F.length:ℝ)≤α*n/500)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hcopy:∀ P:SimpleGraph (Fin n),∀ d:ℕ,P.IsRegularOfDegree d→Even d→</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (δ+α/2)*(n:ℝ)≤d→∀ A∈F,</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ∃ H:SimpleGraph (Fin n),H≤P ∧ H.IsRegularOfDegree 2 ∧ Nonempty (H ≃g A)):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∃ R:SimpleGraph (Fin n),∃ pieces:List (SimpleGraph (Fin n)),</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       R.IsRegularOfDegree (D-2*F.length) ∧ R≤G ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (δ+α/2)*(n:ℝ)≤((D-2*F.length:ℕ):ℝ) ∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       List.Forall₂ (fun H A=&gt;Nonempty (H ≃g A) ∧ H.IsRegularOfDegree 2) pieces F ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (∀ H∈pieces,H≤G ∧ ∀ u v,H.Adj u v→¬R.Adj u v) ∧</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       pieces.Pairwise (fun H J=&gt;∀ u v,H.Adj u v→¬J.Adj u v) ∧</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀ u v,G.Adj u v ↔ R.Adj u v ∨ ∃ H∈pieces,H.Adj u v):=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let T:=⌈(δ+α/2)*(n:ℝ)⌉₊</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hm:T+2*F.length≤D:=factor_small_removal_integer_margin D F.length n δ α hδ hα hdegree hsmall</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hc:∀ P:SimpleGraph (Fin n),∀ d:ℕ,P.IsRegularOfDegree d→Even d→T≤d→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       ∀ A∈F,∃ H:SimpleGraph (Fin n),H≤P ∧ H.IsRegularOfDegree 2 ∧ Nonempty (H ≃g A):=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     intro P d hp he hd A hA</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     apply hcopy P d hp he _ A hA</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have hceil:(δ+α/2)*(n:ℝ)≤(T:ℝ):=Nat.le_ceil _</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     exact hceil.trans (by exact_mod_cast hd)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   obtain ⟨R,pieces,hR,hRG,hrel,hpairR,hpair,hexact⟩:=factor_sequential_even_removal T D G hG hEven F hm hc</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hmargin: (δ+α/2)*(n:ℝ)≤((D-2*F.length:ℕ):ℝ):=</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (factor_small_removal_margin D F.length n δ α hδ hα hdegree hsmall F.length (le_refl _)).2</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   exact ⟨R,pieces,hR,hRG,hmargin,hrel,hpairR,hpair,hexact⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> end Oberwolfach</span></pre></html>

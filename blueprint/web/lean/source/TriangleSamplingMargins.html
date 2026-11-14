@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TriangleSamplingMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TriangleSamplingMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Tactic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The deletion tolerance is fixed before the order and the realized</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> root sets. It pays both count losses and the unchanged-weight potential loss. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem triangle_sampling_margins (ε₀ τ η K C κ:ℝ)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hε:0&lt;ε₀) (hτ:0&lt;τ) (hη:0&lt;η) (hK:0&lt;K) (hC:0&lt;C) (hκ:0&lt;κ):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ ρ:ℝ,0&lt;ρ ∧ ∀ a b L:ℝ,0&lt;a → κ*a≤b → 0≤L → L≤ρ*a →</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       L≤τ*a ∧ (ε₀/4)*a+7*L≤(ε₀/2)*a ∧ (ε₀/4)*b+3*L≤(ε₀/2)*b ∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       η/8+K*L/a+(η/8+5*C*L/a)≤η/2:=by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   let ρ:=min τ (min (ε₀/28) (min (ε₀*κ/12) (η/(4*(K+5*C)))))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hρ:0&lt;ρ:=by dsimp [ρ];positivity</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   refine ⟨ρ,hρ,?_⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   intro a b L ha hba hL hLρ</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have h₁:ρ≤τ:=min_le_left _ _</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have h₂:ρ≤ε₀/28:=(min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have h₃:ρ≤ε₀*κ/12:=(min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have h₄:ρ≤η/(4*(K+5*C)):=(min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   refine ⟨hLρ.trans (mul_le_mul_of_nonneg_right h₁ ha.le),?_,?_,?_⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · have hh:=hLρ.trans (mul_le_mul_of_nonneg_right h₂ ha.le)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     nlinarith only [hh]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   · have hh:=hLρ.trans (mul_le_mul_of_nonneg_right h₃ ha.le)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hb:=mul_le_mul_of_nonneg_left hba hε.le</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     nlinarith only [hh,hb]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   · have hh:L/a≤η/(4*(K+5*C)):=((div_le_iff₀ ha).mpr hLρ).trans h₄</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hd:0&lt;4*(K+5*C):=by positivity</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have hbound:=(le_div_iff₀ hd).mp hh</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have he:K*L/a+5*C*L/a=(K+5*C)*(L/a):=by ring</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     nlinarith only [hbound,he]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>UniformRetentionLocalConditionalEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>UniformRetentionLocalConditionalEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RetentionRestrictionLocalSmallFailure</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.UniformRetentionConditionalEvent</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 8000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem uniform_retention_local_conditional_event</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (d:ℕ) (hd:0&lt;d) (p ζ c δ:ℝ) (hp:0&lt;p) (hζ:0&lt;ζ) (hc:0&lt;c) (hδ:0&lt;δ):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃m N:ℕ,1≤m ∧ 1≤N ∧ ∀(V U Γ Color:Type)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [Nonempty V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       [DecidableEq V] [DecidableEq U],</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     N≤Fintype.card V → Fintype.card U≤Fintype.card V →</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀(I:Type) (T:Finset I) (A:I→Finset V) (H:I→Finset U),</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∀i∈T,m≤(A i).card) → Set.InjOn (fun i=&gt;(A i).card) T →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀i∈T,(H i).card≤(A i).card) → (∀i∈T,c*((A i).card:ℝ)≤(H i).card) →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀(π:Equiv.Perm V) (σ:RawIntervalFamilyOutcome V U Γ Color) (g:Γ) (μ:ℝ),</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     p*Fintype.card V/d≤μ →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (∀x,|((rawStartHubSet π d σ g x).card:ℝ)-μ|≤(Fintype.card V:ℝ)^(3/5:ℝ)) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀i∈T,∀x,π x∈A i↔x∈A i) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     1-δ≤(startRetentionLaw (rawStartHubSet π d σ g) (startRetentionMinimum (rawStartHubSet π d σ g))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (startRetentionMinimum_le (rawStartHubSet π d σ g))).probability</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (fun J=&gt;∀i∈T,RetainedRestrictionLocalGood π d σ g (startRetentionMinimum (rawStartHubSet π d σ g)) (A i) (H i) ζ J):=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let K:ℝ:=4*d/p</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hK:0≤K:=by dsimp [K];positivity</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   obtain ⟨m,hm,hLocal⟩:=retained_restriction_local_family_small_failure d ζ K (2/5) c δ hζ hK (by norm_num) hc hδ</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   obtain ⟨N,hN,hN₂⟩:=eventually_retention_error_small p hp d hd</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   refine ⟨m,N,hm,hN,?_⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   intro V U Γ Color _ _ _ _ _ _ _ hn hu I T A H hmin hinj hHup hHlo π σ g μ hμ hcounts hInv</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   let n:=Fintype.card V</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hnpos:0&lt;n:=by dsimp [n];omega</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let Astart:=rawStartHubSet π d σ g</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   let p&#x27;:=K*(n:ℝ)^(-2/5:ℝ)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hp&#x27;:0≤p&#x27;:=by dsimp [p&#x27;];positivity</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hrate (v:V):(((Astart v).card-startRetentionMinimum Astart:ℕ):ℝ)/(Astart v).card≤p&#x27;:=</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     startRetentionMinimum_polynomial_rate Astart n d hnpos hd p μ hp hμ (hN₂ n (by dsimp [n];omega)) hcounts v</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   apply hLocal V U Γ Color I T A H n hmin hinj hHup hHlo (by intro i hi;exact Finset.card_le_univ (A i)) π hInv σ g</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (startRetentionMinimum Astart) (startRetentionMinimum_le Astart) p&#x27; hp&#x27; (by dsimp [p&#x27;]; simp only [neg_div]; exact le_rfl) hrate</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPreparationLengthChoice.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPreparationLengthChoice.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPreparationWeightChoice</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A fixed sufficiently large even marked cycle length meets the successor</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> weight theorem&#x27;s density requirement at any prescribed positive margin. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem marked_preparation_length_choice (γ:ℝ) (hγ:0&lt;γ) (L:ℕ):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     ∃ m:ℕ,3≤m ∧ L≤m ∧ Even (m+1) ∧</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>       ((m+1:ℕ):ℝ)/(2*((m+1:ℕ):ℝ)-2)+γ/2≤1/2+γ:=by</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   obtain ⟨k,hk⟩:=exists_nat_gt (max (1/γ) ((L:ℝ)+1))</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   let m:=2*k+1</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hk1:(1:ℝ)&lt;k:=by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     have hh:=(le_max_right (1/γ) ((L:ℝ)+1)).trans_lt hk</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     have hL:(0:ℝ)≤L:=by positivity</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     linarith</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hkpos:1≤k:=by exact_mod_cast (show (1:ℝ)≤k by linarith)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hm:3≤m:=by dsimp [m];omega</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have hmR:(0:ℝ)&lt;m:=by exact_mod_cast (show 0&lt;m by omega)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hkg:(1/γ:ℝ)&lt;m:=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     have hh:1/γ&lt;(k:ℝ):=(le_max_left (1/γ) ((L:ℝ)+1)).trans_lt hk</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     have hkM:(k:ℝ)≤m:=by dsimp [m];push_cast;linarith</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     exact hh.trans_le hkM</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hgm:1≤γ*(m:ℝ):=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have hh:1/γ&lt;(m:ℝ):=hkg</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     have hh&#x27;:1&lt;γ*(m:ℝ):=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       have h:= (div_lt_iff₀ hγ).mp hh</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       nlinarith</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     linarith</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hLm:L≤m:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hh:= (le_max_right (1/γ) ((L:ℝ)+1)).trans_lt hk</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have hh&#x27;:L≤k:=by exact_mod_cast (show (L:ℝ)≤k by linarith)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     dsimp [m]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     omega</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   refine ⟨m,hm,hLm,?_,?_⟩</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · dsimp [m]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact ⟨k+1,by omega⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · have hratio:((m+1:ℕ):ℝ)/(2*((m+1:ℕ):ℝ)-2)=1/2+1/(2*(m:ℝ)):=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       push_cast</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       field_simp [ne_of_gt hmR]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       &lt;;&gt; ring</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     rw [hratio]</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hbound:1/(2*(m:ℝ))≤γ/2:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       apply (div_le_iff₀ (by positivity:0&lt;2*(m:ℝ))).2</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       nlinarith [hgm]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     linarith</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> end Oberwolfach</span></pre></html>

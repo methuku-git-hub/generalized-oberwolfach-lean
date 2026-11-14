@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryCommonCycleProfiles.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryCommonCycleProfiles.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryRelativeFourTransformerAbsorber</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The fixed cycle coefficients supplied for each distinct pair of hubs.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> This records the existing fractional-degree and absorber-count hypotheses;</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> it does not assert their existence or change their domains after choices. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option synthInstance.maxSize 2048</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U Tpl:Type} [Fintype V] [Fintype U] [Fintype Tpl]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     [DecidableEq V] [DecidableEq U] [DecidableEq Tpl]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> structure OrdinaryCommonCycleProfiles (Q F:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (r:ℕ) (Tpls:Tpl→VertexAbsorberTemplate r) (β a b B η:ℝ) where</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   weight : ∀ u u&#x27;:U,u≠u&#x27;→LocalOrdinaryCycle Q F (Finset.univ.filter (fun v=&gt;H v u∧H v u&#x27;)) r→ℝ</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   size : ∀ u u&#x27;:U,u≠u&#x27;→β*Fintype.card V≤((Finset.univ.filter (fun v=&gt;H v u∧H v u&#x27;)).card:ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   bounds : ∀ u u&#x27; (hne:u≠u&#x27;) C,b/(Fintype.card V:ℝ)^(r-1)≤weight u u&#x27; hne C∧weight u u&#x27; hne C≤B/(Fintype.card V:ℝ)^(r-1)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   degree : ∀ u u&#x27; (hne:u≠u&#x27;),∀ v∈Finset.univ.filter (fun v=&gt;H v u∧H v u&#x27;),</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     |1-hypergraphWeightedDegree localOrdinaryVertices (weight u u&#x27; hne) v|≤η</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   absorbers : ∀ u u&#x27; (hne:u≠u&#x27;),∀ X:Finset V,X⊆Finset.univ.filter (fun v=&gt;H v u∧H v u&#x27;)→X.card=r→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     a*(Fintype.card V:ℝ)^(r*r)≤Fintype.card</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (LabelledAbsorberFamily (localOrdinaryVertices (Q:=Q) (F:=F) (T:=Finset.univ.filter (fun v=&gt;H v u∧H v u&#x27;)) (r:=r)) Tpls X)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> </span>
+<span id="L25"><a href="#L25" class="ln">  25</a> end Oberwolfach</span></pre></html>

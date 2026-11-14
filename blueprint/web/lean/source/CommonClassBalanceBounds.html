@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CommonClassBalanceBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CommonClassBalanceBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CommonClassBalanceGeometry</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Quantitative loss in the actual root-preserving class construction.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> All sizes and errors are measured at the original ambient order. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 12000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V:Type} [DecidableEq V]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a>  theorem changed_symm_eq (A B:Finset V):changed A B=changed B A:=by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   ext v</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   simp only [changed,Finset.mem_union,Finset.mem_sdiff,or_comm]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a>  theorem common_class_balance_bounds (π:Equiv.Perm V) (m:ℕ) (hm:1≤m)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (A₀ B₀ I ZK ZO:Finset V) (hAB:Disjoint A₀ (B₀∪ZO))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hZA:ZK⊆A₀) (hZI:Disjoint (ZK∪ZO) I) (hsep:Disjoint ZK (ZO.image π.symm))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hZ:ZO.card=m*ZK.card) (n q ε f:ℝ) (hn:0≤n) (hε:0≤ε)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hAc:|(A₀.card:ℝ)-q*n|≤ε*n) (hBc:|(B₀.card:ℝ)-m*q*n|≤ε*n)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hIc:(I.card:ℝ)≤ε*n) (hOc:((B₀∩A₀.image π).card:ℝ)≤ε*n) (hZc:(ZO.card:ℝ)≤f):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ A B:Finset V,ZK⊆A∧ZO⊆B∧A⊆A₀∧B⊆B₀∪ZO∧Disjoint A B∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       Disjoint (A∪B) I∧Disjoint B (A.image π)∧B.card=m*A.card∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (((changed A₀ A).card:ℝ)+(changed B₀ B).card≤4*(m+1)*ε*n+2*(m+1)*f+(m+1))∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       q*n-ε*n-(((changed A₀ A).card:ℝ)+(changed B₀ B).card)≤A.card:=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨A,B,hZA&#x27;,hZO&#x27;,hAA,hBB,hI,hπ,hcard,hL⟩:=</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     common_class_balanced_subsets π A₀ B₀ I ZK ZO m hm hZA hZI hsep hZ</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   rw [changed_symm_eq A A₀,changed_symm_eq B B₀] at hL</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have himb:|(B₀.card:ℝ)-m*A₀.card|≤(m+1)*ε*n:=by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     calc</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       _ = |((B₀.card:ℝ)-m*q*n)-m*((A₀.card:ℝ)-q*n)|:=by congr 1;ring</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       _ ≤ |(B₀.card:ℝ)-m*q*n|+|m*((A₀.card:ℝ)-q*n)|:=abs_sub _ _</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       _ ≤ _:=by rw [abs_mul,abs_of_nonneg (show (0:ℝ)≤m by positivity)];nlinarith only [hAc,hBc]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hfinal:((changed A₀ A).card:ℝ)+(changed B₀ B).card≤4*(m+1)*ε*n+2*(m+1)*f+(m+1):=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hsum:(B₀∩A₀.image π).card+2*(I.card:ℝ)+2*ZO.card≤3*ε*n+2*f:=by linarith</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hmR:(0:ℝ)≤m:=by positivity</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     nlinarith only [hL,himb,hsum,hmR]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hsize:q*n-ε*n-(((changed A₀ A).card:ℝ)+(changed B₀ B).card)≤A.card:=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hc:=card_difference_le_changed A₀ A</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have ha: q*n-ε*n≤A₀.card:=by linarith only [(abs_le.mp hAc).1]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have hh: (A₀.card:ℝ)-A.card≤(changed A₀ A).card:=(le_abs_self _).trans hc</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hnon:(0:ℝ)≤(changed B₀ B).card:=by positivity</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     linarith</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   exact ⟨A,B,hZA&#x27;,hZO&#x27;,hAA,hBB,hAB.mono hAA hBB,hI,hπ,hcard,hfinal,hsize⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> </span>
+<span id="L47"><a href="#L47" class="ln">  47</a> end Oberwolfach</span></pre></html>

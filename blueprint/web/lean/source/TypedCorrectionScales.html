@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TypedCorrectionScales.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TypedCorrectionScales.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SparseCorrectionScales</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Explicit scale inequalities for the four typed deletion matrices. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 1400000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem typed_correction_numeric {n q : ℕ} {δ ω ξ η h : ℝ}</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (hq : 1≤q) (hδ : 0&lt;δ) (hδ1 : δ≤1) (hω : 0&lt;ω) (hω1 : ω≤1)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hξ : 0&lt;ξ) (hξh : ((q:ℝ)+1)*ξ≤h/100) (hη : 0≤η)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hηsmall : η≤δ*ω*ξ/1000) (hn : 100≤δ*ω*ξ*n) :</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     let base := Nat.floor (ξ*n)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     3+4*(η*n)≤δ*(ω*base-3*(η*n)) ∧</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       (q:ℝ)*base+3*(η*n)≤h*n/2 ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ((q:ℝ)+2)*base≤2*((q:ℝ)+1)*ξ*n := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   intro base</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hn0 : (0:ℝ)≤n := Nat.cast_nonneg n</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hqR : (1:ℝ)≤q := by exact_mod_cast hq</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   have ha : 0≤ξ*n := mul_nonneg hξ.le hn0</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hbl : ξ*n-1≤(base:ℝ) := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     have hh := Nat.lt_floor_add_one (ξ*n)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     change ξ*n&lt;(base:ℝ)+1 at hh</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     linarith</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hbu : (base:ℝ)≤ξ*n := Nat.floor_le ha</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hc0 : 0≤δ*ω := mul_nonneg hδ.le hω.le</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hc1 : δ*ω≤1 := by nlinarith [mul_le_mul_of_nonneg_left hω1 hδ.le]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hCa : δ*ω*(ξ*n)≤ξ*n := by nlinarith [mul_le_mul_of_nonneg_right hc1 ha]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have he0 : 0≤η*n := mul_nonneg hη hn0</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hesmall : η*n≤δ*ω*(ξ*n)/1000 := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     nlinarith [mul_le_mul_of_nonneg_right hηsmall hn0]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hcbl : δ*ω*(ξ*n)-1≤δ*ω*base := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     nlinarith [mul_le_mul_of_nonneg_left hbl hc0]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hδe : δ*(η*n)≤η*n := by nlinarith [mul_le_mul_of_nonneg_right hδ1 he0]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hqb : (q:ℝ)*base≤q*(ξ*n) := mul_le_mul_of_nonneg_left hbu (Nat.cast_nonneg q)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hcap := mul_le_mul_of_nonneg_right hξh hn0</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hq2b := mul_le_mul_of_nonneg_left hbu (show (0:ℝ)≤q+2 by positivity)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hqa := mul_nonneg (show (0:ℝ)≤q by positivity) ha</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   refine ⟨?_,?_,?_⟩ &lt;;&gt; nlinarith</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> end Oberwolfach</span></pre></html>

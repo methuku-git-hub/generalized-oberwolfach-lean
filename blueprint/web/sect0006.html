@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bipartite edge colourings and the last partition step</title>
+<link rel="next" href="sect0007.html" title="Prescribed degrees and the deterministic protected partition" />
+<link rel="prev" href="sect0005.html" title="Checked transfers used in iteration" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000007">5 Bipartite edge colourings and the last partition step</h1>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:regular-bipartite">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.1</span>
+    <span class="theorem_thmtitle">Perfect matchings in a regular bipartite multigraph</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0006.html#bp:regular-bipartite">#</a>
+    
+    <a class="icon proof" href="sect0006.html#a0000000069"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.regularBipartite_card_eq" class="lean_decl">Oberwolfach.regularBipartite_card_eq</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.regularBipartite_hall" class="lean_decl">Oberwolfach.regularBipartite_hall</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.regularBipartite_perfectMatching" class="lean_decl">Oberwolfach.regularBipartite_perfectMatching</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.regularBipartite_decomposition" class="lean_decl">Oberwolfach.regularBipartite_decomposition</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Let \(X,Y\) be finite sets and \(M:X\times Y\to \mathbb N\) the edge multiplicity function of a bipartite multigraph. If every row sum and column sum is \(d\), there are bijections \(\sigma _c:X\to Y\), indexed by \(c{\lt}d\), such that </p>
+<div class="displaymath" id="a0000000070">
+  \[  M(x,y)=\sum _{c{\lt}d}\mathbf1_{\{ \sigma _c(x)=y\} }.  \]
+</div>
+<p> When \(d=0\), the index set is empty; no equality of the sizes of \(X,Y\) is required in that case. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000069">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>For \(d{\gt}0\), double counting gives \(d|X|=d|Y|\). For every \(S\subseteq X\), counting the edges incident with \(S\) gives \(d|S|\le d|N(S)|\), so Hall’s theorem supplies a perfect matching. Subtract one from the multiplicity of each of its edges. Every row sum and column sum decreases by one. Induction on \(d\) gives the asserted identity, including parallel copies. The Lean proof uses mathlib’s proved finite Hall theorem. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:konig">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.2</span>
+    <span class="theorem_thmtitle">König’s edge-colouring theorem</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0006.html#bp:konig">#</a>
+    
+    <a class="icon proof" href="sect0006.html#a0000000071"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0006.html#bp:regular-bipartite">Theorem 5.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bipartiteMultigraph_edgeColouring" class="lean_decl">Oberwolfach.bipartiteMultigraph_edgeColouring</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.BipartiteEdges" class="lean_decl">Oberwolfach.BipartiteEdges</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bipartiteMultigraph_properEdgeColouring" class="lean_decl">Oberwolfach.bipartiteMultigraph_properEdgeColouring</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    If every row and column sum of \(M\) is at most \(d\), its individual edges </p>
+<div class="displaymath" id="a0000000072">
+  \[  E_M=\{ (x,y,i):x\in X,\  y\in Y,\  0\le i{\lt}M(x,y)\}   \]
+</div>
+<p> admit a colouring with \(d\) colours such that two edges of the same colour sharing an endpoint are equal. </p>
+<p><i class="itshape">Manuscript label:</i> thm:prelim:konig.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000071">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Write \(r_x=\sum _yM(x,y)\) and \(s_y=\sum _xM(x,y)\). Complete \(M\) to a \(d\)-regular bipartite multigraph on \((X\sqcup Y,Y\sqcup X)\), with matrix </p>
+<div class="displaymath" id="a0000000073">
+  \[  \begin{pmatrix}  M
+
+& \operatorname {diag}(d-r_x)
+
+\\ \operatorname {diag}(d-s_y)
+
+& M^{\mathsf T} 
+
+\end{pmatrix}.  \]
+</div>
+<p> Apply the regular decomposition and restrict each matching to the original \(X\times Y\) block. For each pair \((x,y)\), the number of retained colours is exactly \(M(x,y)\). A bijection between these colours and its parallel-copy indices defines the edge colouring. The Lean proof establishes injectivity on each set of incident edges. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:partition-grouping">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">5.3</span>
+    <span class="lemma_thmtitle">Grouping matchings and recovering physical edges</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0006.html#bp:partition-grouping">#</a>
+    
+    <a class="icon proof" href="sect0006.html#a0000000074"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0006.html#bp:regular-bipartite">Theorem 5.1</a></li>
+          
+          <li><a href="sect0002.html#bp:graphs">Definition 1.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.regularBipartite_groupedDecomposition" class="lean_decl">Oberwolfach.regularBipartite_groupedDecomposition</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.regularPartition_of_balancedOrientation" class="lean_decl">Oberwolfach.regularPartition_of_balancedOrientation</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    A \(kq\)-regular bipartite multigraph splits into \(k\) multigraphs with degree \(q\) on both sides. Suppose moreover that its two parts are copies of the vertex set of a simple graph \(G\), and </p>
+<div class="displaymath" id="a0000000075">
+  \[  M(x,y)+M(y,x)=\mathbf1_{\{ xy\in E(G)\} }\quad \text{for all }x,y.  \]
+</div>
+<p> Then grouping the perfect matchings into \(k\) groups of size \(q\) and forgetting directions gives an exact edge partition of \(G\) into \(2q\)-regular spanning graphs. </p>
+<p><i class="itshape">Manuscript label:</i> lem:family:partition.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000074">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Reindex the \(kq\) perfect matchings by \([k]\times [q]\) and sum within each group. If its resulting multiplicities are \(Q_a(x,y)\), put \(W_a(x,y)=Q_a(x,y)+Q_a(y,x)\). Then </p>
+<div class="displaymath" id="a0000000076">
+  \[  \sum _aW_a(x,y)=\mathbf1_{\{ xy\in E(G)\} },\qquad \sum _yW_a(x,y)=2q.  \]
+</div>
+<p> The first identity makes every \(W_a(x,y)\) either zero or one, excludes loops, and proves that each physical edge belongs to exactly one group. The second gives the degree. The Lean conclusion uses the same <span class="ttfamily">EdgePartition</span> definition as the main target. </p>
+
+  </div>
+</div>
+<p>This verifies grouping and projection. The next chapter supplies the prescribed-degree construction and protected cores. The directed-path degree correction is checked below. The full random balanced-orientation event and complete protected-partition assembly are checked below. </p>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0005.html" title="Checked transfers used in iteration"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0007.html" title="Prescribed degrees and the deterministic protected partition"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

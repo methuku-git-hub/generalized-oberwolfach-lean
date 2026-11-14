@@ -1,0 +1,85 @@
+module
+
+public import Oberwolfach.OrdinaryDeepTraceCoverAndBalanceOrdered
+
+@[expose] public section
+/-! Apply the preselected cover and balance callbacks to one protected trace
+and the same sampled outcome. -/
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 50000000
+set_option synthInstance.maxSize 32768
+open scoped BigOperators
+noncomputable section
+namespace Oberwolfach
+attribute [local instance] Classical.propDecidable
+
+theorem ordinary_deep_trace_common_cover_balance
+    (mWheel d buffer:ℕ) (ρ₀ pmin hmin href δcut ζcut εcut ζlimit εsample:ℝ)
+    (ε ξ aLoad a ρ θ β η α ζ δ rate C rateParent:ℝ) (mBalance mCover:ℕ)
+    (hbalance:OrdinaryDeepTraceBalanceAt ε ρ₀ α pmin hmin η ζ δ rate d buffer β C mBalance)
+    (hcover:OrdinaryDeepTraceCoverAt mWheel 0 buffer ρ₀ hmin href δcut ζcut εcut ζlimit εsample ε ξ aLoad a ρ θ β η d mCover)
+    (hζlim:ζ≤ζlimit) (hζrate:ζ≤rateParent)
+    (hζcut:0≤ζcut) (hεcut:0≤εcut) (hζlimit:0≤ζlimit):
+    ∀(V U Γ Color:Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [LinearOrder V] [LinearOrder U],
+    ∀(P JQ G:SimpleGraph V) (JH Hs:V→U→Prop) (D m:ℕ),
+      P.IsRegularOfDegree D→0<Fintype.card V→(Fintype.card V:ℝ)/2≤D→
+      ρ₀≤ initialIndexDensity U D→initialIndexDensity U D≤1→mBalance≤m→mCover≤m→
+    ∀(Q:Vortex U P D β ε m) (π:Equiv.Perm V)
+      (hπ:∀i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i)
+      (σ:RawWheelOutcome V U Γ Color) (coins:Sym2 V→Bool) (j:Color) (s:U→Color→ℝ)
+      (Kres:Finset (Sym2 V⊕(V×U))) (cost deepCost:ℕ→ℝ) (i:ℕ),i+1<Q.length→
+    ∀(A:Finset (Sym2 V⊕(V×U))) (pR pH θhost εR εH βe βh αcut pstar:ℝ),
+    let f:=markedVortexVertexEmbedding Q (i+1);let g:=markedVortexHubEmbedding Q (i+1)
+    let I:=markedVortexInnerVertices Q (i+1);let T:=ordinaryVortexBufferedVertices Q (i+1) buffer
+    let B:=markedVortexInnerHubs Q (i+1);let W:=ordinaryVortexBufferedHubs Q (i+1) buffer
+    let ρi:=markedVortexPermutation Q π hπ (i+1)
+    let Ploc:=P.comap f;let Floc:=(permutationConflictGraph π (3*d)).comap f
+    let Gloc:=G.comap f;let Hloc:=fun v u=>Hs (f v) (g u)
+    let raw:=ordinaryRawRestrictPair f g σ
+    let F:=permutationConflictGraph π (3*d)
+    let R:=rawWheelGraph P σ;let J:=rawWheelSpokes π d σ j
+    let S:=(R\F)\JQ;let H:=fun v u=>J v u∧¬JH v u
+    let S₀:=S\ordinaryResourceRim S Kres;let H₀:=fun v u=>H v u∧¬(Sum.inr (v,u)∈Kres)
+    let X:=fun k=>Q.extendedVertices (k+1);let Tdeep:=fun k=>Q.extendedVertices (k+buffer)
+    let Z:=fun k=>Q.extendedIndices (k+1);let Wdeep:=fun k=>Q.extendedIndices (k+buffer)
+    let Jwin:=Finset.Icc (i+2-buffer) i
+    let Ledit:=2*((3*d:ℕ):ℝ)+∑j∈Jwin,cost j;
+    pmin≤pR→pR≤1→hmin≤pH→pH≤1→1/2≤θhost→(θhost+α)*Fintype.card V≤D→
+    pR=initialIndexDensity U D*pH→(∀u,s u j=pH)→
+    0≤εR→εR≤δ→εR≤εsample→0≤εH→εH≤δ→εH≤εsample→0≤βe→βe≤δ→0≤βh→βh≤δ→
+    (∀v∈Q.extendedVertices 1,∀w∈Q.extendedVertices 1,¬JQ.Adj v w)→
+    (∀v u,JH v u→¬(v∈Q.extendedVertices 1 ∧ u∈Q.extendedIndices 1))→
+    Disjoint Kres (ordinaryRootResources (Q.extendedVertices 1) (Q.extendedIndices 1))→
+    OrdinaryFixedVortexRowIndexEvent 3 d εR εH P F D m β ε Q π hπ pR pH s j σ→
+    OrdinaryProtectedTrace S₀ H₀ X Tdeep Z Wdeep cost deepCost (i+1) A→ ordinaryHostResources G Hs=A→
+    (∀t∈Jwin,0≤cost t ∧ cost t≤4*rate*Fintype.card (markedVortexVertexType Q t⊕markedVortexHubType Q t)+C)→
+    (∀v,G.degree v=2*(Finset.univ.filter (Hs v)).card)→
+    (∀u,(mWheel+1)∣(Finset.univ.filter (fun v=>Hs v u)).card)→
+    OrdinaryFixedVortexDeepCoverEvent mWheel 0 d a aLoad ρ θ P D m β ε Q π hπ j σ→
+    OrdinaryInducedRimCutEvent (Q.extendedVertices (i+2)) (sampledOrientation (rawWheelGraph P σ) coins) αcut pstar→
+    0<pH→δcut≤min (αcut/32) (pstar/512)→href≤αcut*pstar/64→
+    0≤(∑t∈Jwin,cost t) ∧
+    OrdinaryCleanupParentProfiles Ploc Gloc Floc Hloc ρi d I B pR pH (θhost+α-β/2)
+      (εR*I.card) (εH*B.card) Ledit βe βh (fun u=>s (g u)) j raw ∧
+    (initialIndexDensity U D*pH)*β*I.card+εR*I.card+2*(εH*B.card)+3*Ledit≤η*I.card ∧
+    Ledit≤rateParent*Fintype.card (markedVortexVertexType Q (i+1)) ∧
+    OrdinaryNonrootWheelCoverResult mWheel 0 ξ aLoad Gloc Floc Hloc I T B W:=by
+  intro V U Γ Color _ _ _ _ _ _ P JQ G JH Hs D m hreg hn hD hρlo hρhi hmB hmC Q π hπ σ coins j s Kres cost deepCost i hi
+    A pR pH θhost εR εH βe βh αcut pstar f g I T B W ρi Ploc Floc Gloc Hloc raw F R J S H S₀ H₀ X Tdeep Z Wdeep Jwin Ledit
+    hpRlo hpRhi hpHlo hpHhi hθhost hdegree hpEq hs hεR0 hεR hεRsample hεH0 hεH hεHsample hβe0 hβe hβh0 hβh hJQ hJH havoid hgood htrace hstate hcost hbal hdiv hdeep hrim hpH hcut hhref
+  obtain ⟨hwin0,hwinI,hwinB,hprofile,hnear,hmargin,hLinner,hLparent⟩:=
+    hbalance V U Γ Color P JQ JH D m hreg hn hD hρlo hρhi hmB Q π hπ s j σ
+      pR pH θhost εR εH βe βh hpRlo hpRhi hpHlo hθhost hdegree hpEq hs hεR0 hεR hεH0 hεH hβe0 hβe hβh0 hβh
+      Kres hJQ hJH havoid hgood cost deepCost i hi A G Hs htrace hstate hcost
+  have hI0:0≤(I.card:ℝ):=by positivity
+  have hW0:0≤(Fintype.card (markedVortexVertexType Q (i+1)):ℝ):=by positivity
+  have hLcover:Ledit≤ζlimit*I.card:=hLinner.trans (mul_le_mul_of_nonneg_right hζlim hI0)
+  have hLrate:Ledit≤rateParent*Fintype.card (markedVortexVertexType Q (i+1)):=
+    hLparent.trans (mul_le_mul_of_nonneg_right hζrate hW0)
+  have hL0:0≤Ledit:=by dsimp [Ledit];positivity
+  have hh:=hcover V U Γ Color P JQ G JH Hs D m hreg hn hD hρlo hρhi hmC Q π hπ σ coins j s Kres cost deepCost i hi
+    A pR pH (θhost+α-β/2) εR εH Ledit βe βh αcut pstar θhost α hpHlo hεRsample hεHsample hLcover
+    hprofile rfl hεR0 hεH0 hdegree hpEq hgood hmargin htrace hstate hbal hdiv hdeep hrim hpH hpHhi hεcut hζcut hζlimit hL0 hcut hhref
+  exact ⟨hwin0,hprofile,hmargin,hLrate,hh⟩
+end Oberwolfach

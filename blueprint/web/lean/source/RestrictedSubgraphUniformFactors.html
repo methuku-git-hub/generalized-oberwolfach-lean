@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RestrictedSubgraphUniformFactors.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RestrictedSubgraphUniformFactors.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.NearRegularUniformConflictFactors</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RegularSubgraphInducedNearRegular</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The near-regular host required by the sampled two-factor lemma is</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> obtained by restricting a regular graph to a sufficiently large domain. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 4000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem restricted_regular_subgraph_factors_uniform_roots (m:ℕ) (hm:2≤m) (α:ℝ)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hα:0&lt;α) (hα1:α≤1):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ η:ℝ,0&lt;η ∧ ∀ s:ℕ,(m+1)∣s→∃ k:ℕ,(m+1)∣k ∧ ∀ L:ℝ,0≤L→∃ N:ℕ,</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∀ (V:Type) [Fintype V] [DecidableEq V] (G Q F:SimpleGraph V) (D:ℕ),</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     G.IsRegularOfDegree D→Q≤G→(∀ v,(F.degree v:ℝ)≤L)→∀ (B T:Finset V) (t:ℝ),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (∀ v,((G\Q).degree v:ℝ)≤t)→N≤B.card→T⊆B→T.card=s→(∀ x∈T,∀ y∈T,¬F.Adj x y)→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ((Fintype.card V-B.card:ℕ):ℝ)+t≤η*B.card→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     cycleThreshold (m+1)+α≤(D:ℝ)/Fintype.card V→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let W:Type:={v:V // v∈B}</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let H:SimpleGraph W:=Q.induce (B:Set V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let T&#x27;:Finset W:=T.subtype (fun v=&gt;v∈B);</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ S:Finset W,S.card=k ∧ Disjoint S T&#x27; ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ x∈S∪T&#x27;,∀ y∈S∪T&#x27;,¬(F.induce (B:Set V)).Adj x y) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       let R:=S∪T&#x27;</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       let J:=H.induce (R:Set W)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       let S&#x27;:Finset (R:Set W):=S.subtype (fun v=&gt;v∈R)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       ∃ M₁ M₂:Finset (OrdinaryCycle J (m+1)),</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (∀ C∈M₁,∀ E∈M₁,C≠E→Disjoint (ordinaryCycleVertices J (m+1) C) (ordinaryCycleVertices J (m+1) E)) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         M₁.biUnion (ordinaryCycleVertices J (m+1))=Finset.univ ∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         (∀ C∈M₂,∀ E∈M₂,C≠E→Disjoint (ordinaryCycleVertices J (m+1) C) (ordinaryCycleVertices J (m+1) E)) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         M₂.biUnion (ordinaryCycleVertices J (m+1))=S&#x27; ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (∀ C∈M₁,∀ E∈M₂,Disjoint C.val.val.edgeFinset E.val.val.edgeFinset) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         (∀ C∈M₁,(ordinaryCycleVertices J (m+1) C∩(Finset.univ\S&#x27;)).card≤1):=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   obtain ⟨η,hη,hbase⟩:=near_regular_host_conflict_free_factors_uniform_roots m hm α hα hα1</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   refine ⟨η,hη,?_⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   intro s hdivs</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   obtain ⟨k,hk,hbase⟩:=hbase s hdivs</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   refine ⟨k,hk,?_⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   intro L hL</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   obtain ⟨N,hbase⟩:=hbase L hL</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   refine ⟨max N 1,?_⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   intro V _ _ G Q F D hreg hQ hF B T t hdel hB hTB hT hTfree hmissing hθ</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let W:Type:={v:V // v∈B}</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let H:SimpleGraph W:=Q.induce (B:Set V)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let T&#x27;:Finset W:=T.subtype (fun v=&gt;v∈B)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hW:Fintype.card W=B.card:=Fintype.card_coe B</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hT&#x27;:T&#x27;.card=s:=by dsimp [T&#x27;];rw [Finset.card_subtype,Finset.filter_eq_self.mpr hTB,hT]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hBpos:0&lt;B.card:=by omega</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   obtain ⟨v,hv⟩:=Finset.card_pos.mp hBpos</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hn:0&lt;Fintype.card V:=Fintype.card_pos_iff.mpr ⟨v⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hnR:(0:ℝ)&lt;Fintype.card V:=by exact_mod_cast hn</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hD:D≤Fintype.card V:=by have hh:=G.degree_lt_card_verts v;rw [hreg v] at hh;omega</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hDR:(D:ℝ)≤Fintype.card V:=by exact_mod_cast hD</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hθ1:(D:ℝ)/Fintype.card V≤1:=(div_le_one hnR).mpr hDR</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hnear:∀ v:W,|((H.degree v):ℝ)-((D:ℝ)/Fintype.card V)*Fintype.card W|≤η*Fintype.card W:=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     intro v</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     rw [hW]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     exact (regular_subgraph_induced_near_centre G Q D hreg hQ B t hdel v).trans hmissing</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hF&#x27;:∀ v:W,((F.induce (B:Set V)).degree v:ℝ)≤L:=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     intro v</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have hh:((F.induce (B:Set V)).degree v:ℝ)≤F.degree v.val:=by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       exact_mod_cast induced_degree_le_ambient F B v</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     exact hh.trans (hF v.val)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hTfree&#x27;:∀ x∈T&#x27;,∀ y∈T&#x27;,¬(F.induce (B:Set V)).Adj x y:=by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     intro x hx y hy hxy</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     exact hTfree x.val (Finset.mem_subtype.mp hx) y.val (Finset.mem_subtype.mp hy) hxy</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   exact hbase W (by rw [hW];omega) H (F.induce (B:Set V)) T&#x27; hT&#x27;</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     ((D:ℝ)/Fintype.card V) hθ hθ1 hF&#x27; hTfree&#x27; hnear</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> end Oberwolfach</span></pre></html>

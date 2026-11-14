@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPackingVertexCount.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPackingVertexCount.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPackingHubFactors</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedHubFactorVertexCount</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The prescribed spoke set at each hub has (m+1) vertices for each</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> marked root in a physical marked-wheel decomposition. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 12000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem marked_packing_hub_vertex_count</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {V U E K:Type*} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {tail head:E→V} {ktail khead:K→V} {m b:ℕ} {π:Equiv.Perm V} {H₀ Hₖ:V→U→Prop}</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (P:Finset (MarkedWheel tail head ktail khead m π b H₀ Hₖ))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hP:∀W∈P,∀Z∈P,W≠Z→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources Z))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hspoke:∀v u,Sum.inr (v,u)∈P.biUnion markedWheelPhysicalResources ↔ H₀ v u∨Hₖ v u)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (Y:U→Finset V) (hmarked:∀u x,Hₖ x u↔x∈Y u) (hsep:∀u x,Hₖ x u→¬H₀ x u):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀u,(Finset.univ.filter (fun x=&gt;H₀ x u∨Hₖ x u)).card=(m+1)*(Y u).card := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   intro u</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   obtain ⟨M,hM,hcover,_⟩:=marked_packing_to_hub_factors P hP hspoke u</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hYS:Y u⊆Finset.univ.filter (fun x=&gt;H₀ x u∨Hₖ x u):=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     intro x hx</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     simp only [Finset.mem_filter,Finset.mem_univ,true_and]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     exact Or.inr ((hmarked u x).2 hx)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   exact marked_hub_factor_vertex_count tail head ktail khead m b π H₀ Hₖ u M hM _ (Y u) hcover hYS (hmarked u) (hsep u)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> end Oberwolfach</span></pre></html>

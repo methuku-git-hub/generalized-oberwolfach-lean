@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceLoadChosenErrorsEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceLoadChosenErrorsEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceLoadFromDensityBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedJointLoadMargin</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedReferenceDensitiesLoadEvent</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedParentLocalLoadExtraEvent</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedSeedDensities</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Full-parent marked loads under the reference normalization, intersected</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> with an arbitrary event of the same retained sampling law. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 30000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_reference_load_from_chosen_errors</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (r d:ℕ) (hd:2≤d) (rho t B ρstar sstar K eta χ Q pret κ θ ω:ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hρ:0&lt;rho) (ht:0&lt;t) (hω:0&lt;ω) (hB:0&lt;B) (hρstar:0&lt;ρstar) (hsstar:0&lt;sstar)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hρlo:ρstar≤rho) (hρhi:rho≤1) (hslo:sstar≤((r+4:ℕ):ℝ)*t) (hshi:((r+4:ℕ):ℝ)*t≤1/100)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hκ:0&lt;κ) (hθ:0&lt;θ) (hK:1≤K)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (heta:0&lt;eta) (heta1:eta&lt;1) (hχ:0&lt;χ) (hpret:0&lt;pret):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let m:=r+4;</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let s₀:ℝ:=m*t;</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let pRef:ℝ:=rho*s₀/2;</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let kRef:ℝ:=pRef/m;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let pstar:ℝ:=ρstar*sstar/(2*m);</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∃ τ ε ζ:ℝ,0&lt;τ ∧ 0&lt;ε ∧ 0&lt;ζ ∧ ∃ N:ℕ,1≤N ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀ (V U Γ Color:Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       [LinearOrder V] [Nonempty V] [DecidableEq U],</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     N≤Fintype.card V → ω*Fintype.card V≤(Fintype.card U:ℝ) → Fintype.card U≤Fintype.card V →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ∀ (P:SimpleGraph V) (π:Equiv.Perm V),</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (∀ x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let DRef:ℝ:=2*Fintype.card U/rho;</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∀ A:ℝ,(Fintype.card V:ℝ)/2≤DRef → DRef≤2*Fintype.card V →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀ weight:(Fin (m+1)→V)→ℝ,SuccessorSequenceWeightConditions P π (3*d) DRef τ A B weight →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∀ (q:U→Γ→ℝ) (hq:∀ u a,0≤q u a) (hQ:∀ u,∑ a,q u a≤1/8)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a)) (a:Γ) (j:Color),</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (∀ u,q u a=s₀/m) → (∀ u,s u j=s₀) → pret*Fintype.card V≤(s₀/m)*Fintype.card U →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let hp:0&lt;pRef:=by dsimp [pRef,s₀,m]; positivity</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let hk:0&lt;kRef:=by dsimp [kRef,pRef,s₀,m]; positivity</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let hphys:2*pRef+2*kRef≤1:=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       have hh:=marked_seed_density_bounds m (by dsimp [m];omega) rho s₀ ρstar sstar hρstar hsstar hρlo hρhi (by simpa [m,s₀] using hslo) (by simpa [m,s₀] using hshi)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       exact hh.2.2.2.2.2.2.2.2;</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     let μ:=rawMarkedRetentionLaw π d hd a pRef kRef hp.le hk.le hphys q hq hQ s hs hS;</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     ∀ Extra:(RawMarkedRetainedOutcome π d a)→Prop,</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     μ.probability Extra-χ-(Fintype.card V:ℝ)^(-Q)≤μ.probability (fun z=&gt;Extra z ∧ ((fun z=&gt;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         let H:=retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j;</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         let seed:=fun W:MarkedWheel (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd m π (3*d)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>           (fun (_:V) (_:U)=&gt;True) (fun _ _=&gt;True)=&gt;weight W.1.val/(DRef*pRef^m*kRef*s₀^m);</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         (∀ root,rawMarkedWheelMarginal P π d pRef kRef q s a j root≠0 →</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>           |typedMarkedPotentialLoad seed (rawMarkedPairRims P π d z.1) H root-1|≤κ/4) ∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         MarkedLocalSpokeLoadsWithSpokes P π d m DRef pRef kRef s₀ weight (θ/4) z.1 H)) z) := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   intro m s₀ pRef kRef pstar</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hpstar:0&lt;pstar:=by dsimp [pstar,m];positivity</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   let coef:ℝ:=11*((m:ℝ)+1)^4*(2*B/pstar^(2*m+1))*K</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hcoef:0≤coef:=by dsimp [coef];positivity</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   let target:ℝ:=min κ θ</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have htarget:0&lt;target:=lt_min hκ hθ</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   obtain ⟨τ,ε,ζ,ζlocal,hτ,hε,hζ,hζlocal,hbound,_⟩:=marked_joint_load_margin_choice target target coef coef htarget htarget hcoef hcoef</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have herr:τ+ε+coef*ζ≤κ/4:=hbound.trans (div_le_div_of_nonneg_right (min_le_left κ θ) (by norm_num))</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have herrLocal:τ+ε+coef*ζ≤θ/4:=hbound.trans (div_le_div_of_nonneg_right (min_le_right κ θ) (by norm_num))</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   obtain ⟨N,hN,hbase⟩:=marked_reference_load_from_density_lower_bounds r d hd rho t B ρstar sstar ε K eta χ Q pret ζ κ θ ω</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     hρ ht hω hB hρstar hsstar hρlo hρhi hslo hshi hε hK heta heta1 hχ hpret hζ</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   refine ⟨τ,ε,ζ,hτ,hε,hζ,N,hN,?_⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   intro V U Γ Color _ _ _ _ _ _ _ hn hU hUV P π hnoshort DRef A hDlo hDhi weight hw q hq hQ s hs hS a j ha hj hmass hp hk hphys μ Extra</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   exact hbase V U Γ Color hn hU hUV P π hnoshort τ A hDlo hDhi herr herrLocal weight hw q hq hQ s hs hS a j ha hj hmass Extra</span>
+<span id="L68"><a href="#L68" class="ln">  68</a> end Oberwolfach</span></pre></html>

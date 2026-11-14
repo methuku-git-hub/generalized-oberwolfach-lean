@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedIterationToleranceChoices.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedIterationToleranceChoices.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedIterationErrorScales</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Explicit choices of the two uniform deletion allowances. The global</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> allowance precedes the later analytic tolerance x; the star allowance is</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> chosen after x and before the inner balance and order thresholds. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 4000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem marked_iteration_global_tolerance_choice</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (r h : ℕ) (κ γ p k omega C θ b : ℝ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hκ : 0&lt;κ) (hγ : 0&lt;γ) (hp : 0&lt;p) (hk : 0&lt;k) (ho : 0&lt;omega)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hC : 0≤C) (hθ : 0&lt;θ) (hb : 0&lt;b) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃ ζmax : ℝ,0&lt;ζmax ∧ ∀ ε ζ : ℝ,ε≤κ/4→0≤ζ→ζ≤ζmax→</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       ε+ζ≤κ ∧ ε+4*ζ≤κ ∧ ε+2*h*ζ≤κ ∧ ε+h*ζ≤κ ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ζ≤(κ-ε)*omega ∧ ε≤κ ∧ 2*ζ≤(3/4)*γ*p^2 ∧ ζ≤γ*min p k/8 ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       C*ζ≤κ/4 ∧ C*ζ≤θ/4 ∧ 2*(r+5:ℝ)*ζ≤b ∧ (2*r+11:ℝ)*ζ≤b := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   obtain ⟨z0,hz0,hbase⟩ := marked_iteration_reference_scale h κ γ p k omega C hκ hγ hp hk ho hC</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let zmax := min z0 (min (θ/(4*(C+1))) (b/(2*(r:ℝ)+12)))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   refine ⟨zmax,by dsimp [zmax];positivity,?_⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   intro ε ζ he hz hzmax</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   obtain ⟨h1,h2,h3,h4,h5,h6,h7,h8,h9⟩ := hbase ε ζ he hz (hzmax.trans (min_le_left _ _))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have ht := (hzmax.trans (min_le_right _ _)).trans (min_le_left _ _)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hb&#x27; := (hzmax.trans (min_le_right _ _)).trans (min_le_right _ _)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have ht&#x27; := (le_div_iff₀ (show 0&lt;4*(C+1) by positivity)).mp ht</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hb&#x27;&#x27; := (le_div_iff₀ (show 0&lt;2*(r:ℝ)+12 by positivity)).mp hb&#x27;</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   refine ⟨h1,h2,h3,h4,h5,h6,h7,h8,h9,?_,?_,?_⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   · nlinarith only [ht&#x27;,hz]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   · nlinarith only [hb&#x27;&#x27;,hz]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   · nlinarith only [hb&#x27;&#x27;,hz]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> </span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem marked_iteration_local_tolerance_choice</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (m h : ℕ) (x eps C t β η : ℝ)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hx : 0&lt;x) (heps : 0&lt;eps) (hC : 0≤C) (ht : 0&lt;t) (hβ : 0&lt;β) (hη : 0&lt;η) :</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     ∃ sigmaMax : ℝ,0&lt;sigmaMax ∧ ∀ sigma : ℝ,0≤sigma→sigma≤sigmaMax→</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (m+2:ℝ)*sigma≤x/4 ∧ 2*(h:ℝ)*sigma≤x/2 ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       4*C*sigma/eps≤min (t/8) (min β (η/4)) := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   let b := min (t/8) (min β (η/4))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hb : 0&lt;b := by dsimp [b];positivity</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let sigmaMax := min (x/(4*((m:ℝ)+2)))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (min (x/(4*((h:ℝ)+1))) (eps*b/(4*(C+1))))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   refine ⟨sigmaMax,by dsimp [sigmaMax];positivity,?_⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   intro sigma hs hmax</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have h1 := hmax.trans (min_le_left _ _)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have h2 := (hmax.trans (min_le_right _ _)).trans (min_le_left _ _)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have h3 := (hmax.trans (min_le_right _ _)).trans (min_le_right _ _)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have h1&#x27; := (le_div_iff₀ (show 0&lt;4*((m:ℝ)+2) by positivity)).mp h1</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have h2&#x27; := (le_div_iff₀ (show 0&lt;4*((h:ℝ)+1) by positivity)).mp h2</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have h3&#x27; := (le_div_iff₀ (show 0&lt;4*(C+1) by positivity)).mp h3</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨by nlinarith only [h1&#x27;],by nlinarith only [h2&#x27;,hs],?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   apply (div_le_iff₀ heps).mpr</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   change 4*C*sigma≤b*eps</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   nlinarith only [h3&#x27;,hs]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> </span>
+<span id="L55"><a href="#L55" class="ln">  55</a> end Oberwolfach</span></pre></html>

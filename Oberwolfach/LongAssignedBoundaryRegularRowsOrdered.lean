@@ -1,0 +1,333 @@
+module
+
+public import Oberwolfach.LongAssignedBoundaryRegularPairsOrdered
+public import Oberwolfach.LongAssignedReferenceBalancedReservedPairs
+public import Oberwolfach.LongAssignedReferenceReservedPairsLocalFamily
+public import Oberwolfach.LongAssignedReferenceReservedPairsRimRow
+public import Oberwolfach.LongAssignedReferenceReservedPairs
+public import Oberwolfach.RawMarkedRetainedFullRows
+public import Oberwolfach.RawMarkedRetainedReservedPairs
+public import Oberwolfach.RawIntervalExtendedHubsUpper
+public import Oberwolfach.LongAssignedIntervalProbabilityUpper
+public import Oberwolfach.RawMarkedRetainedPairsAssignedStarts
+public import Oberwolfach.LongAssignedReferenceStartsReservedTests
+public import Oberwolfach.RawMarkedRetainedPairsStarts
+public import Oberwolfach.RawProtectedPairHubLower
+public import Oberwolfach.LongAssignedUnassignedSlack
+public import Oberwolfach.LongAssignedReferenceManuscriptAssignmentPathTests
+public import Oberwolfach.LongAssignedReferenceManuscriptAssignmentNeighbourTests
+public import Oberwolfach.RawIntervalHubStartBaseEvent
+public import Oberwolfach.FiniteLawIntersectionLower
+public import Oberwolfach.LongAssignedReferenceManuscriptAssignment
+public import Oberwolfach.LongPaddedPartialsFromRetainedTests
+
+@[expose] public section
+/-! A single actual retained outcome supports a matching after every later
+physical deletion satisfying the displayed original quantitative margins. -/
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 12000000
+open scoped BigOperators
+noncomputable section
+namespace Oberwolfach
+attribute [local instance] Classical.propDecidable
+attribute [local instance] referenceWitnessFinDecidable
+
+theorem long_assigned_boundary_regular_reserved_rows_ordered
+    (K m d:ℕ) (hK3:3≤K) (hm:7≤m) (hd:2≤d)
+    (θ ρ₀ BM:ℝ) (hθpos:0<θ) (hθ:θ≤1/100) (hρ₀:0<ρ₀) (hBM:0<BM)
+    (hspace:1/(8*(d:ℝ))≤θ/2)
+    (BO:Fin K→ℝ) (hBO:∀i,0<BO i)
+    (ζret:ℝ) (hζret:0<ζret)
+    (alpha γ ε₀ eps lam αHost rPart:ℝ) (Bpart:ℕ) (hαHost:0<αHost) (hrPart:0<rPart) (hε₀:ε₀<1) (heps:0<eps) (heps1:eps≤1) (hγε:γ≤eps) (hlam:0≤lam) (hlamθ:lam≤θ) (hepsAssign:3*eps≤lam*(θ/(100*(K:ℝ)^2))) (halpha:0<alpha) (halphaMass:alpha≤θ/(200*(K:ℝ)*(K:ℝ))) (hγ:0<γ) (Cscale δrow:ℝ) (hCscale:0≤Cscale) (hδrow:0<δrow) (hδbound:δrow≤(1-ε₀)/256):
+    let ni:=@longPaddedSeedExponent K
+    let hni:=@long_padded_seed_exponent_positive K
+    let hpadded:=@long_padded_seed_length_eq_exponent K
+    let pstar₀:=min (1/4:ℝ) (min (ρ₀/8) (ρ₀/(6*((m:ℝ)+1))))
+    let BMseed₀:=2*BM/pstar₀^(2*m+1)
+    let BOseed₀:=fun i=>2*BO i/pstar₀^(2*(ni i+2))
+    let Kpair₀:=1+((m:ℝ)+1)^4*BMseed₀+∑i:Fin K,((ni i:ℝ)+2)^3*BOseed₀ i
+    let C₀:=10*(((m:ℝ)+1)^4*BMseed₀+∑i:Fin K,((ni i:ℝ)+2)^4*BOseed₀ i)
+    ∃η:ℝ,0<η ∧ ∃t₀ τ₀ Δ ξ:ℝ,0<t₀ ∧ 0<τ₀ ∧ τ₀≤1/16 ∧ 0<Δ ∧ 0<ξ ∧ 4*ξ≤eps/2 ∧ ∀ξPart:ℝ,0<ξPart→∃N:ℕ,∀n:ℕ,∀hn:max N 1≤n,∀(U:Type) [Fintype U] [DecidableEq U],
+    ∀(F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)
+    (Allowed:Set ℕ) (hAllowed:∀u,AllowedCycleLengths (F u) Allowed)
+    (ρ D:ℝ) (hρlo:ρ₀≤ρ) (hρ1:ρ≤1) (hD:0<D)
+    (hsize:ρ*D=2*Fintype.card U) (hcut:(1/((m:ℝ)+1))/(d:ℝ)≤θ)
+    (hclass:∀u,factorPreparationClass (F u) K=none)
+    (P Zpart:SimpleGraph (Fin n)) (Dpart:ℕ) (mpart:Fin 2→ℕ) (I:Finset (Fin n)) (Ilevel:Type) (Tlevel:Finset Ilevel)
+    (Alevel Blevel:Ilevel→Finset (Fin n))
+    (hmin:∀i∈Tlevel,localRowBudgetThreshold Cscale δrow hCscale hδrow≤(Alevel i).card)
+    (hinj:Set.InjOn (fun i=>(Alevel i).card) Tlevel)
+    (hB:∀i∈Tlevel,((Blevel i).card:ℝ)≤Cscale*(Alevel i).card)
+    (π:Equiv.Perm (Fin n))
+    (τ A:ℝ) (weight:(Fin (m+1)→Fin n)→ℝ)
+    (hw:SuccessorSequenceWeightConditions P π (3*d) D τ A BM weight)
+    (hDlo:(n:ℝ)/2≤D) (hDhi:D≤2*n)
+    (w:∀i,OrdinaryCycle P (ni i+2)→ℝ) (hw0:∀i C,0≤w i C)
+    (hwupper:∀i C,w i C≤BO i/(n:ℝ)^(ni i))
+    (huv:Fintype.card U≤n)
+    (hnoshort:∀x l,0<l→l<2*d+1→(π^l) x≠x)
+    (εHost:ℝ)
+    (he:∀i∈longRetainedSeedIndices F hF K θ,∀x y,
+      (∑C:OrdinaryCycle P (ni i+2),if C.val.val.Adj x y then w i C else 0)=if P.Adj x y then 1 else 0)
+    (hdeg:∀x,|(P.degree x:ℝ)-D|≤εHost*n)
+    (hbudgetV:∀i∈longRetainedSeedIndices F hF K θ,
+      6*((ni i+2:ℕ):ℝ)^4*BO i*(2*(3*d))+εHost*n≤τ*D)
+    (hbudgetE:∀i∈longRetainedSeedIndices F hF K θ,
+      5*((ni i+2:ℕ):ℝ)^4*BO i*(2*(3*d))/n≤τ)
+    (hτnonneg:0≤τ) (hτbound:τ≤τ₀),
+    let t:=t₀
+    let tHub:=ξ*(n:ℝ)
+    let b:=longAssignedApproxOrdinaryWeight F hF K m θ
+    let a:=longAssignedApproxMarkedWeight F hF K m θ
+    let p₁:=ρ*(1/100)/2
+    let k₁:=ρ*((1/100)/(m:ℝ))/2
+    let p₂:=(∑u,b u)/D
+    let k₂:=(∑u,a u)/D
+    let udens:=2*(∑u,(1-1/100-(1/100)/(m:ℝ)-a u-b u))/D
+    let q:=longAssignedIntervalProbability F hF K m θ
+    let s:=longAssignedSpokeProbability F hF K m θ
+    let hLaw:=long_assigned_actual_raw_law_parameters (by omega) F hF Allowed hAllowed K (by omega) m d hm hd θ ρ₀ ρ D
+      hθpos.le hθ hρ₀ hρlo hρ1 hD hsize hcut hclass
+    let μ:=FiniteLaw.pi (rawExpandedMarkedWheelLaw (V:=Fin n) p₁ k₁ p₂ k₂ udens
+      hLaw.1 hLaw.2.1 hLaw.2.2.1 hLaw.2.2.2.1 hLaw.2.2.2.2.1 hLaw.2.2.2.2.2.1
+      d hd q hLaw.2.2.2.2.2.2.1 hLaw.2.2.2.2.2.2.2.1 s
+      hLaw.2.2.2.2.2.2.2.2.1 hLaw.2.2.2.2.2.2.2.2.2)
+    let f:=fun (ω:∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Bool Bool e) e=>
+      rawExpandedMarkedCollapse e (ω e)
+    let pstar:=min (1/4:ℝ) (min (ρ₀/8) (ρ₀/(6*((m:ℝ)+1))))
+    let BMseed:=2*BM/pstar^(2*m+1)
+    let BOseed:=fun i=>2*BO i/pstar^(2*(ni i+2))
+    let Wm:=longAssignedMarkedSeed F hF K m d θ D π weight
+    let Wo:=longAssignedOrdinarySeed F hF K m d θ D P π ni hni w
+    let C:=10*(((m:ℝ)+1)^4*BMseed+∑i:Fin K,((ni i:ℝ)+2)^4*BOseed i)
+    let ℓ:=fun i=>ni i+2
+    let W:=longMixedSeedWeight Wm Wo
+    let R:=longRawHubResources (U:=U) π d m ℓ
+    let Pair:Option (Fin K)→ℝ:=fun i=>match i with
+      | none=>((m:ℝ)+1)^4*BMseed
+      | some i=>((ni i:ℝ)+2)^3*BOseed i
+    let Kpair:=1+((m:ℝ)+1)^4*BMseed+∑i:Fin K,((ni i:ℝ)+2)^3*BOseed i
+    let failure:=4*(Fintype.card U:ℝ)*Real.exp (-2*tHub^2/((4*(d:ℝ)+3)^2*(n:ℝ)))
+    letI : Nonempty (Fin n):=⟨⟨0,by omega⟩⟩
+    let Ret:=fun raw:RawMarkedOutcome (Fin n) U Bool Bool=>
+      StartRetentionOutcome (rawStartHubSet π d (fun e=>raw (Sum.inr e)) false)
+        (startRetentionMinimum (rawStartHubSet π d (fun e=>raw (Sum.inr e)) false))
+    let ν:=fun raw:RawMarkedOutcome (Fin n) U Bool Bool=>
+      startRetentionLaw (rawStartHubSet π d (fun e=>raw (Sum.inr e)) false)
+        (startRetentionMinimum (rawStartHubSet π d (fun e=>raw (Sum.inr e)) false)) (startRetentionMinimum_le _)
+    ∀(hPartReg:P.IsRegularOfDegree Dpart) (hPartEven:Even Dpart)
+    (hPartMin:(1/2+αHost)*(n:ℝ)≤(Dpart:ℝ))
+    (hPartSum:(∑i,mpart i)=Dpart/2)
+    (hPartMass:∀i,expandedBinaryProbability p₁ k₁ p₂ k₂ udens i/2*Dpart=(mpart i:ℝ))
+    (hPartLower:(2*p₁+2*k₁+2*p₂+2*k₂+udens=1) ∨ ∀i,rPart≤expandedBinaryProbability p₁ k₁ p₂ k₂ udens i)
+    (hPartProtect:∀v,(Zpart.degree v:ℝ)≤αHost/100000*n)
+    (Prior:RawMarkedRetainedOutcome (U:=U) (Color:=Bool) π d false→Prop),
+    1-ε₀≤(rawMarkedRetentionLaw π d hd false p₁ k₁ hLaw.1 hLaw.2.1 (by dsimp only [p₁,k₁]; have hp:=hLaw.2.2.1; have hk:=hLaw.2.2.2.1; have hu:=hLaw.2.2.2.2.1; have hh:=hLaw.2.2.2.2.2.1; linarith)
+      q hLaw.2.2.2.2.2.2.1 hLaw.2.2.2.2.2.2.2.1 s hLaw.2.2.2.2.2.2.2.2.1 hLaw.2.2.2.2.2.2.2.2.2).probability Prior →
+    ∃z:(Σω:∀e:RawWheelCoordinate (Fin n) U,RawExpandedMarkedCoordinateState Bool Bool e,Ret (f ω)),
+      0<(μ.sigma (fun ω=>ν (f ω))).mass z ∧ Prior ⟨f z.1,z.2⟩ ∧
+        (∀A:SimpleGraph (Fin n),(∀v,A.degree v≤Bpart)→
+          ∃S:SimpleGraph (Fin n),S≤P ∧ S.IsRegularOfDegree (2*mpart 0) ∧
+            (∀x y,(Zpart⊔A).Adj x y→(S.Adj x y↔(longPhysicalStateGraph P z.1 {0,1,2,3,4}).Adj x y)) ∧
+            (∀v,((changed ((longPhysicalStateGraph P z.1 {0,1,2,3,4}).neighborFinset v) (S.neighborFinset v)).card:ℝ)≤ξPart*n)) ∧
+        (∀v,((rawIntervalBoundaryHubSet π d (fun e=>z.1 (Sum.inr e)) Finset.univ v).card:ℝ)≤
+          4*(Fintype.card U:ℝ)/d+4*(n:ℝ)^(3/4:ℝ)) ∧
+        ((∀v,Even (P.degree v)) → (∀v,(1/2+αHost)*(n:ℝ)≤P.degree v) →
+          BalancedSampleOrientationEvent P αHost (fun e=>(z.1 (Sum.inl e)).2)) ∧
+        (∀a x,
+          |((∑y,sampledColourOrientation P (fun e=>z.1 (Sum.inl e)) a x y:ℕ):ℝ)-
+            markedExpandedPhysicalProbability p₁ k₁ p₂ k₂ udens a/2*P.degree x|<(n:ℝ)^(3/5:ℝ) ∧
+          |((∑y,sampledColourOrientation P (fun e=>z.1 (Sum.inl e)) a y x:ℕ):ℝ)-
+            markedExpandedPhysicalProbability p₁ k₁ p₂ k₂ udens a/2*P.degree x|<(n:ℝ)^(3/5:ℝ) ∧
+          |(sampledColourDegree P (fun e=>(z.1 (Sum.inl e)).1) a x:ℝ)-
+            markedExpandedPhysicalProbability p₁ k₁ p₂ k₂ udens a*P.degree x|<(n:ℝ)^(3/5:ℝ)) ∧
+        (∀x,|(((P.neighborFinset x∩I).filter (fun y=>(z.1 (Sum.inl s(x,y))).1=4)).card:ℝ)-
+          udens*(P.neighborFinset x∩I).card|<(n:ℝ)^(3/4:ℝ)) ∧
+        (∀j∈Tlevel,∀x∈Blevel j,|(((P.neighborFinset x∩Alevel j).filter (fun y=>(z.1 (Sum.inl s(x,y))).1=4)).card:ℝ)-
+          udens*(P.neighborFinset x∩Alevel j).card|<((Alevel j).card:ℝ)^(3/4:ℝ)) ∧
+        RetainedRestrictionGood π d (fun e=>z.1 (Sum.inr e)) false
+          (startRetentionMinimum (rawStartHubSet π d (fun e=>z.1 (Sum.inr e)) false))
+          (fun _:Unit=>Finset.univ) (fun _:Unit=>Finset.univ) ζret z.2 ∧
+        (∀x y,x≠y→((5/32:ℝ)*θ^2-1/(4*(d:ℝ)))*Fintype.card U-5*(n:ℝ)^(3/4:ℝ)≤
+          (rawProtectedPairHubs π d (fun e=>z.1 (Sum.inr e)) false true
+            (startRetentionMinimum (rawStartHubSet π d (fun e=>z.1 (Sum.inr e)) false)) z.2 x y).card) ∧
+        (∀v,((rawIntervalExtendedAnyHubSet π d (fun e=>z.1 (Sum.inr e)) v).card:ℝ)≤
+          4*(Fintype.card U:ℝ)/(m:ℝ)+4*(n:ℝ)^(3/4:ℝ)) ∧
+        (∀x y,x≠y→(5/8:ℝ)*(1/100:ℝ)^2*Fintype.card U-(n:ℝ)^(3/4:ℝ)≤
+          (((Finset.univ:Finset U).filter (fun u=>rawIntervalFamilyState π d (fun e=>z.1 (Sum.inr e)) (x,u)=some (Sum.inr false) ∧
+            rawIntervalFamilyState π d (fun e=>z.1 (Sum.inr e)) (y,u)=some (Sum.inr false))).card:ℝ)) ∧
+        (∀u i,|rawIntervalUnassignedHubCountOn π d (fun e=>z.1 (Sum.inr e)) u
+          (rawSelectedNeighbourTestSet P π d (fun e=>z.1 (Sum.inl e)) i)-
+          (rawSelectedNeighbourTestSet P π d (fun e=>z.1 (Sum.inl e)) i).card*
+          (1-(∑g,q u g)-(∑j,s u j))|<(n:ℝ)^(3/4:ℝ)) ∧
+        (∀u i,|rawIntervalReservedLabelHubCountOn π d (fun e=>z.1 (Sum.inr e)) u false
+          (rawSelectedNeighbourTestSet P π d (fun e=>z.1 (Sum.inl e)) i)-
+          (rawSelectedNeighbourTestSet P π d (fun e=>z.1 (Sum.inl e)) i).card*s u false|<(n:ℝ)^(3/4:ℝ)) ∧
+        (∀x y,x≠y→((P.neighborFinset x∩P.neighborFinset y).card:ℝ)*p₁^2-(n:ℝ)^(3/4:ℝ)-
+          2*(2*((3*d:ℕ):ℝ)+1)≤((Finset.univ.filter (fun v=>
+            0<markedPhysicalRim P π (3*d) (fun e=>markedExpandedPhysicalCollapse (z.1 (Sum.inl e))) false x v ∧
+            0<markedPhysicalRim P π (3*d) (fun e=>markedExpandedPhysicalCollapse (z.1 (Sum.inl e))) false v y)).card:ℝ)) ∧
+        (∀u g,|rawIntervalHubStartCount π d g (fun e=>z.1 (Sum.inr e)) u-(n:ℝ)*q u g/d|<(n:ℝ)^(3/4:ℝ)/d) ∧
+        (∀b u,|rawMarkedRestrictedSpokeCol π d (fun e=>z.1 (Sum.inr e)) true true b u Finset.univ-
+          (if b then q u true else s u true)*(n:ℝ)|<tHub) ∧
+        (∀u,|(((ordinaryCommonHubSpokeRoots u).filter (fun root=>
+          longRawHubState P π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) true true root=true)).card:ℝ)-
+          longAssignedApproxOrdinaryWeight F hF K m θ u*n|≤tHub) ∧
+        rawMarkedSeedConcentrated P π d m p₂ k₂ q s true true t Wm
+          (fun e=>rawExpandedApproximateCollapse e (z.1 e)) ∧
+        (∀i,rawOrdinarySeedConcentrated P π d (ni i+2) p₂ k₂ q s true true t (Wo i)
+          (fun e=>rawExpandedApproximateCollapse e (z.1 e))) ∧
+        (∀i root,longRawHubState P π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) true true root=true→
+          |resourcePatternLoad (longRawHubResources (U:=U) π d m (fun i=>ni i+2) i)
+            (longMixedSeedWeight Wm Wo i) (fun _ _=>true) root
+            (longRawHubState P π d (fun e=>rawExpandedApproximateCollapse e (z.1 e)) true true)-
+            longAssignedMixedTarget F hF K m θ D p₂ k₂ i root|≤
+          t+τ*longAssignedMixedTarget F hF K m θ D p₂ k₂ i root) ∧
+        (∀(Del:SimpleGraph (Fin n)) (δ:ℝ), (∀x,(Del.degree x:ℝ)≤δ)→
+          δ≤Δ*n→
+          let raw:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=>rawExpandedApproximateCollapse e (z.1 e)
+          let hub:=longRawHubNames (U:=U) π d m ℓ
+          let S:=longRawSurvivingResources P π d raw true true Del.edgeFinset
+          let e:{v // v∈S}↪_:=Function.Embedding.subtype _
+          ∀ztest:LongRetainedHubTest F hF K θ,
+            θ*(n:ℝ)/(200*(K:ℝ)*(K:ℝ))≤
+              ∑c:RestrictedResource (mixedCandidateResources R) e,
+                longRetainedHubIndicator F hF θ hub ztest c.val*mixedCandidateWeight W c.val) ∧
+        (∀(Del:SimpleGraph (Fin n)) (δ:ℝ), (∀x,(Del.degree x:ℝ)≤δ)→
+          δ≤Δ*n→0≤t+C*(δ/(n:ℝ))+4*τ ∧ t+C*(δ/(n:ℝ))+4*τ≤eps/2) ∧
+        (∀(Del:SimpleGraph (Fin n)) (δ:ℝ), (∀x,(Del.degree x:ℝ)≤δ)→
+          δ≤Δ*n→
+          let raw:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=>rawExpandedApproximateCollapse e (z.1 e)
+          let S:=longRawSurvivingResources P π d raw true true Del.edgeFinset
+          let T:=bernoulliVertexSet (longRawHubState P π d raw true true)
+          let e:S↪LongRawHubResource n U:=Function.Embedding.subtype _
+          let Cand:=RestrictedResource (mixedCandidateResources R) e
+          let Q:=restrictedResourceSet (mixedCandidateResources R) e
+          let fS:=survivingResourceEmbedding S T (long_raw_surviving_resources_subset P π d raw true true Del.edgeFinset)
+          let φ:=fS.trans (markedRawSampledPhysicalEmbedding P π d raw true true)
+          let hub:=longRawHubNames (U:=U) π d m ℓ
+          let test:=fun (j:LongRetainedHubTest F hF K θ) (c:Cand)=>longRetainedHubIndicator F hF θ hub j c.val
+          ∃M:Finset Cand,(∀c∈M,0<mixedCandidateWeight W c.val) ∧
+            (∀c∈M,∀c'∈M,c≠c'→Disjoint (Q c) (Q c')) ∧
+            (∀x,alpha*n≤(rimIncidentResources φ x).card →
+              ((rimIncidentResources φ x\M.biUnion Q).card:ℝ)≤γ*(rimIncidentResources φ x).card) ∧
+            (∀i,((longRawIncidenceSet S i\M.biUnion Q).card:ℝ)≤max (alpha*n) (γ*(longRawIncidenceSet S i).card)) ∧
+            (∀i,alpha*n≤(longRawIncidenceSet S i).card →
+              ((longRawIncidenceSet S i\M.biUnion Q).card:ℝ)≤γ*(longRawIncidenceSet S i).card) ∧
+            (∀j,(1-γ)*(∑c,test j c*mixedCandidateWeight W c.val)≤∑c∈M,test j c) ∧
+            (∀j,(∑c∈M,test j c)≤(1+γ)*(∑c,test j c*mixedCandidateWeight W c.val)) ∧
+            (∀x,((physicalRimResidualGraph (markedRawSampledPhysicalEmbedding P π d raw true true)
+              ((M.map (survivingCandidateEmbedding (mixedCandidateResources R) S T
+                (long_raw_surviving_resources_subset P π d raw true true Del.edgeFinset))).biUnion
+                (restrictedResourceSet (mixedCandidateResources R) (Function.Embedding.subtype (·∈T))))).degree x:ℝ)≤max alpha γ*n+δ) ∧
+            let selected:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=>rawExpandedMarkedCollapse e (z.1 e)
+            let H:=retainedRawMarkedSpokes π d (fun e=>z.1 (Sum.inr e)) false
+              (startRetentionMinimum (rawStartHubSet π d (fun e=>z.1 (Sum.inr e)) false)) z.2 false false
+            ∀(Reserve:Finset (Finset (Fin n)⊕(Fin n×U))) (X:Finset (Fin n)) (Z:Finset U),
+            MarkedFixedTerminalAbsorber P π d m selected H Reserve X Z →
+            let state:=longRawHubState P π d raw true true
+    let T:=bernoulliVertexSet state
+    let eraw:{z // z∈T}↪_:=Function.Embedding.subtype _
+    let q:=survivingCandidateEmbedding (mixedCandidateResources R) S T (long_raw_surviving_resources_subset P π d raw true true Del.edgeFinset)
+    let N:=M.map q
+    let A:=LongRawSelectedOrdinary π d m ℓ eraw N
+    let Q:=longRawSelectedOrdinaryWheel π d m ℓ eraw N
+    ∃assign:A↪(Σu,(F u).ConnectedComponent),
+    ∃C:∀a:A,(F (Q a).val.2).ConnectedComponent,
+      (∀a,(⟨(Q a).val.2,C a⟩:Σu,(F u).ConnectedComponent)=assign a) ∧
+    (∀u,Fintype.card (longRawSourceDomain F π d m ℓ eraw N C u) =
+      ∑i:Fin K,(N.filter (fun c=>c.val.1=some i ∧
+        longRawSeedHub π d m ℓ c.val.1 c.val.2=u)).card * ℓ i) ∧
+    (∀u,Fintype.card {v:Fin n // v∉longRawSourceDomain F π d m ℓ eraw N C u} =
+      n - ∑i:Fin K,(N.filter (fun c=>c.val.1=some i ∧
+        longRawSeedHub π d m ℓ c.val.1 c.val.2=u)).card * ℓ i) ∧
+    (∀u,|((Fintype.card (longRawSourceDomain F π d m ℓ eraw N C u):ℕ):ℝ) -
+      (1-θ)*(n:ℝ)*(∑i:Fin K,longAssignedKeptFraction F hF K θ i u)| ≤
+      ((max (3*eps) 0)*(n:ℝ))*(∑i:Fin K,((ℓ i:ℕ):ℝ))) ∧
+    (∀u,|((Fintype.card {v:Fin n // v∉longRawSourceDomain F π d m ℓ eraw N C u}:ℕ):ℝ) -
+      ((n:ℝ)-(1-θ)*(n:ℝ)*(∑i:Fin K,longAssignedKeptFraction F hF K θ i u))| ≤
+      ((max (3*eps) 0)*(n:ℝ))*(∑i:Fin K,((ℓ i:ℕ):ℝ))) ∧
+    (∀u, (n:ℝ)*ordinaryAssignedFraction F hF K u none -
+      ((max (3*eps) 0)*(n:ℝ))*(∑i:Fin K,((ℓ i:ℕ):ℝ)) ≤
+        ((Fintype.card {v:Fin n // v∉longRawSourceDomain F π d m ℓ eraw N C u}:ℕ):ℝ) ∧
+      ((Fintype.card {v:Fin n // v∉longRawSourceDomain F π d m ℓ eraw N C u}:ℕ):ℝ) ≤
+        (n:ℝ)*(ordinaryAssignedFraction F hF K u none+(101/100:ℝ)*θ) +
+          ((max (3*eps) 0)*(n:ℝ))*(∑i:Fin K,((ℓ i:ℕ):ℝ))) ∧
+    (∀u v,K<Fintype.card ((F u).connectedComponentMk v)→
+      v∉longRawSourceDomain F π d m ℓ eraw N C u) ∧
+    let T:=longRawSourceDomain F π d m ℓ eraw N C
+    ∃ψ:∀u,(T u)↪Fin n,
+      (∀u x y,(F u).Adj x.val y.val→
+        rawMarkedPairRims P π d raw (Sum.inl (ψ u x,ψ u y)) ∨
+        rawMarkedPairRims P π d raw (Sum.inl (ψ u y,ψ u x))) ∧
+      (∀u v,u≠v→Disjoint
+        (partialFactorPhysicalEdges (T u) ((F u).induce (T u)) (ψ u))
+        (partialFactorPhysicalEdges (T v) ((F v).induce (T v)) (ψ v))) ∧
+      (∀u x y,(F u).Adj x.val y.val→Sum.inl ({ψ u x,ψ u y}:Finset (Fin n))∉Reserve) ∧
+      (∀u x y,(F u).Adj x.val y.val→s(ψ u x,ψ u y)∉Del.edgeFinset)) :=by
+  intro ni hni hpadded pstar₀ BMseed₀ BOseed₀ Kpair₀ C₀
+  let δrow_1:ℝ:=(1-ε₀)/2
+  let εprior:ℝ:=ε₀+δrow_1
+  let pstarRow:ℝ:=ρ₀/(400*(m:ℝ))
+  have hδrow_1:0<δrow_1:=by dsimp [δrow_1];linarith
+  have hεprior:εprior<1:=by dsimp [εprior,δrow_1];linarith
+  have hpstarRow:0<pstarRow:=by dsimp [pstarRow];positivity
+  obtain ⟨m₀,Nrows,hm₀,hRows⟩:=raw_marked_retained_full_rows_high_probability d hd pstarRow ζret δrow_1 hpstarRow hζret hδrow_1
+  obtain ⟨Nsize,hNsize⟩:=exists_nat_gt (4*(m₀:ℝ)/ρ₀)
+  have hδinner:δrow≤(1-εprior)/128:=by dsimp [εprior,δrow_1];linarith only [hδbound]
+  obtain ⟨η,hη,t₀,τ₀,Δ,ξ,ht₀,hτ₀,hτhalf,hΔ,hξ,hξeps,hMain⟩:=
+    long_assigned_boundary_regular_reserved_pairs_ordered K m d hK3 hm hd θ ρ₀ BM hθpos hθ hρ₀ hBM hspace
+      BO hBO alpha γ εprior eps lam αHost rPart Bpart hαHost hrPart hεprior heps heps1 hγε hlam hlamθ hepsAssign halpha halphaMass hγ Cscale δrow hCscale hδrow hδinner
+  refine ⟨η,hη,t₀,τ₀,Δ,ξ,ht₀,hτ₀,hτhalf,hΔ,hξ,hξeps,?_⟩
+  intro ξPart hξPart
+  obtain ⟨N,hMain⟩:=hMain ξPart hξPart
+  refine ⟨max (max N Nrows) Nsize,?_⟩
+  intro n hn U _ _ F hF Allowed hAllowed ρ D hρlo hρ1 hD hsize hcut hclass P Zpart Dpart mpart I Ilevel Tlevel Alevel Blevel hmin hinj hB π τ A weight hw hDlo hDhi w hw0 hwupper huv hnoshort εHost he hdeg hbudgetV hbudgetE hτnonneg hτbound
+  intro t tHub b a p₁ k₁ p₂ k₂ udens q s hLaw μ f pstar BMseed BOseed Wm Wo C ℓ W R Pair Kpair failure Ret ν hPartReg hPartEven hPartMin hPartSum hPartMass hPartLower hPartProtect Prior hprior
+  have hnpos:0<n:=by omega
+  letI:NeZero n:=⟨by omega⟩
+  have hD0:0≤D:=hD.le
+  have hρD:=mul_le_mul_of_nonneg_right hρlo hD0
+  have hDn:=mul_le_mul_of_nonneg_left hDlo hρ₀.le
+  have hU:(ρ₀*(n:ℝ))/4≤Fintype.card U:=by nlinarith
+  have hnsize:(Nsize:ℝ)≤n:=by exact_mod_cast (show Nsize≤n by omega)
+  have hUmin:m₀≤Fintype.card U:=by
+    have hh:4*(m₀:ℝ)/ρ₀<(n:ℝ):=lt_of_lt_of_le hNsize hnsize
+    have hh':4*(m₀:ℝ)<(n:ℝ)*ρ₀:=(div_lt_iff₀ hρ₀).1 hh
+    have : (m₀:ℝ)≤Fintype.card U:=by nlinarith
+    exact_mod_cast this
+  have hq0:∀u,q u false=(1/100:ℝ)/(m:ℝ):=by
+    intro u
+    dsimp only [q,longAssignedIntervalProbability]
+    rfl
+  have hmass:pstarRow*(n:ℝ)≤((1/100:ℝ)/(m:ℝ))*Fintype.card U:=by
+    have hqpos:0≤(1/100:ℝ)/(m:ℝ):=by positivity
+    have hh:=mul_le_mul_of_nonneg_left hU hqpos
+    dsimp [pstarRow]
+    have heq:ρ₀/(400*(m:ℝ))*(n:ℝ)=((1/100:ℝ)/(m:ℝ))*(ρ₀*(n:ℝ)/4):=by ring
+    rw [heq]
+    exact hh
+  have hsum:2*p₁+2*k₁≤1:=by
+    dsimp only [p₁,k₁];have hp:=hLaw.2.2.1;have hk:=hLaw.2.2.2.1;have hu:=hLaw.2.2.2.2.1;have hh:=hLaw.2.2.2.2.2.1;linarith
+  let Base:=rawMarkedRetentionLaw π d hd false p₁ k₁ hLaw.1 hLaw.2.1 hsum
+    q hLaw.2.2.2.2.2.2.1 hLaw.2.2.2.2.2.2.2.1 s hLaw.2.2.2.2.2.2.2.2.1 hLaw.2.2.2.2.2.2.2.2.2
+  let Rows:RawMarkedRetainedOutcome (U:=U) (Color:=Bool) π d false→Prop:=fun z=>
+    RetainedRestrictionGood π d (fun e=>z.1 (Sum.inr e)) false
+      (startRetentionMinimum (rawStartHubSet π d (fun e=>z.1 (Sum.inr e)) false))
+      (fun _:Unit=>Finset.univ) (fun _:Unit=>Finset.univ) ζret z.2
+  have hRowsBase:1-δrow_1≤Base.probability Rows:=by
+    have hh:=hRows (Fin n) (by simpa using (show Nrows≤n by omega)) U Bool Bool hUmin (by simpa using huv)
+      π hnoshort p₁ k₁ hLaw.1 hLaw.2.1 hsum q hLaw.2.2.2.2.2.2.1 hLaw.2.2.2.2.2.2.2.1
+      s hLaw.2.2.2.2.2.2.2.2.1 hLaw.2.2.2.2.2.2.2.2.2 false ((1/100:ℝ)/(m:ℝ)) hq0 (by simpa using hmass)
+    simpa only [Base,Rows,Fintype.card_fin] using hh
+  let Prior':RawMarkedRetainedOutcome (U:=U) (Color:=Bool) π d false→Prop:=fun z=>Prior z ∧ Rows z
+  have hPrior':1-εprior≤Base.probability Prior':=by
+    have hh:=finiteLaw_intersection_lower Base Prior Rows ε₀ δrow_1 hprior hRowsBase
+    dsimp only [Prior',εprior]
+    linarith
+  have hnMain:max N 1≤n:=by omega
+  have hh:=hMain n hnMain U F hF Allowed hAllowed ρ D hρlo hρ1 hD hsize hcut hclass P Zpart Dpart mpart I Ilevel Tlevel Alevel Blevel hmin hinj hB π τ A weight hw hDlo hDhi w hw0 hwupper huv hnoshort εHost he hdeg hbudgetV hbudgetE hτnonneg hτbound hPartReg hPartEven hPartMin hPartSum hPartMass hPartLower hPartProtect Prior' hPrior'
+  obtain ⟨z,hz,hPrior,hPart,hBoundary,hBal,hColourDegrees,hRim,hFamily,hrest⟩:=hh
+  exact ⟨z,hz,hPrior.1,hPart,hBoundary,hBal,hColourDegrees,hRim,hFamily,hPrior.2,hrest⟩
+end Oberwolfach

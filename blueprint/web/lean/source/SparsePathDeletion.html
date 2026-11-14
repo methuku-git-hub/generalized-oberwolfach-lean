@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SparsePathDeletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SparsePathDeletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SparseRootWheels</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryWheelHostInclusion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Local deletion bounds require degrees only at the queried endpoints.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> In particular they do not assume a small deletion degree at the row root</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> whose incident edges are being covered. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 3500000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U : Type*} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem two_common_neighbours_after_deletion (Q D : SimpleGraph V) (A : Finset V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (x y : V) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (A∩Q.neighborFinset x∩Q.neighborFinset y).card≤</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (A∩(Q\D).neighborFinset x∩(Q\D).neighborFinset y).card+D.degree x+D.degree y := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let C:=A∩(Q\D).neighborFinset x∩(Q\D).neighborFinset y</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hs : A∩Q.neighborFinset x∩Q.neighborFinset y⊆C∪(D.neighborFinset x∪D.neighborFinset y):=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     intro v hv</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     have hvA:=(Finset.mem_inter.mp (Finset.mem_inter.mp hv).1).1</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     have hx:=(Q.mem_neighborFinset x v).mp (Finset.mem_inter.mp (Finset.mem_inter.mp hv).1).2</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     have hy:=(Q.mem_neighborFinset y v).mp (Finset.mem_inter.mp hv).2</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     by_cases hDx:D.Adj x v</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     · exact Finset.mem_union_right _ (Finset.mem_union_left _ ((D.mem_neighborFinset x v).mpr hDx))</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     by_cases hDy:D.Adj y v</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     · exact Finset.mem_union_right _ (Finset.mem_union_right _ ((D.mem_neighborFinset y v).mpr hDy))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     exact Finset.mem_union_left _ (Finset.mem_inter.mpr ⟨Finset.mem_inter.mpr</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ⟨hvA,((Q\D).mem_neighborFinset x v).mpr ⟨hx,hDx⟩⟩,((Q\D).mem_neighborFinset y v).mpr ⟨hy,hDy⟩⟩)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hh:=(Finset.card_le_card hs).trans ((Finset.card_union_le _ _).trans</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (Nat.add_le_add_left (Finset.card_union_le _ _) C.card))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   simpa only [SimpleGraph.card_neighborFinset_eq_degree,Nat.add_assoc] using hh</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> theorem ordinary_root_wheel_after_local_deletion (Q D F : SimpleGraph V) (H : V→U→Prop)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (A W : Finset V) (x v w : V) (u:U) (hxA:x∉A) (hvw:v≠w)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hxv:Q.Adj x v) (hxw:Q.Adj x w) (hDxv:¬D.Adj x v) (hDxw:¬D.Adj x w)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hFroot:∀ a∈({x,v,w}:Finset V),∀ b∈({x,v,w}:Finset V),¬F.Adj a b)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hHroot:H x u∧H v u∧H w u) (hHA:∀ a∈A,H a u)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (r:ℕ) (hr:4≤r) (L d b:ℝ) (hL:0≤L)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hF:∀ a,(F.degree a:ℝ)≤L) (hD:∀ a,a≠x → (D.degree a:ℝ)≤d)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hcount:∀ a,a≠x → ∀ b&#x27;,b&#x27;≠x → b≤((A∩Q.neighborFinset a∩Q.neighborFinset b&#x27;).card:ℝ))</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hbudget:W.card+((r:ℝ)+3)*(L+1)+2*d&lt;b) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∃ C:OrdinaryWheel Q F H r,ordinaryWheelHub C=u ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (ordinaryWheelRim C).Adj x v ∧ (ordinaryWheelRim C).Adj x w ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       Disjoint (ordinaryWheelRim C) D ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (∀ a∈(ordinaryWheelRim C).support,a∈({x,v,w}:Finset V) ∨ a∈A∧a∉W) := by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let Ω:Finset V:=Finset.univ\{x}</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hAΩ:A⊆Ω:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     intro a ha</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     simp only [Ω,Finset.mem_sdiff,Finset.mem_univ,Finset.mem_singleton,true_and]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     intro he</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     exact hxA (he ▸ ha)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hcounts (a:V) (ha:a∈Ω) (b&#x27;:V) (hb&#x27;:b&#x27;∈Ω) :</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       b-2*d≤((A∩(Q\D).neighborFinset a∩(Q\D).neighborFinset b&#x27;).card:ℝ):=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hax:a≠x:=by simpa only [Ω,Finset.mem_sdiff,Finset.mem_univ,Finset.mem_singleton,true_and] using ha</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hbx:b&#x27;≠x:=by simpa only [Ω,Finset.mem_sdiff,Finset.mem_univ,Finset.mem_singleton,true_and] using hb&#x27;</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hh:=two_common_neighbours_after_deletion Q D A a b&#x27;</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hhR : ((A∩Q.neighborFinset a∩Q.neighborFinset b&#x27;).card:ℝ)≤</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       (A∩(Q\D).neighborFinset a∩(Q\D).neighborFinset b&#x27;).card+D.degree a+D.degree b&#x27;:=by exact_mod_cast hh</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     linarith only [hhR,hcount a hax b&#x27; hbx,hD a hax,hD b&#x27; hbx]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   obtain ⟨C,hCu,hCxv,hCxw,hCs⟩:=ordinary_root_wheel_from_common_counts_within (Q\D) F H A W Ω hAΩ x v w</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (by simp [Ω,hxv.ne.symm]) (by simp [Ω,hxw.ne.symm]) u hvw ⟨hxv,hDxv⟩ ⟨hxw,hDxw⟩ hFroot hHroot hHA</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     r hr L (b-2*d) hL hF (by intro a ha b&#x27; hb&#x27;;convert hcounts a ha b&#x27; hb&#x27; using 1 &lt;;&gt; congr!) (by linarith only [hbudget])</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   refine ⟨ordinaryWheelInclude sdiff_le C,hCu,hCxv,hCxw,?_,hCs⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   apply disjoint_iff_inf_le.mpr</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   intro a b&#x27; he</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   exact ((C.val.1.property he.1).2 he.2).elim</span>
+<span id="L69"><a href="#L69" class="ln">  69</a> </span>
+<span id="L70"><a href="#L70" class="ln">  70</a> end Oberwolfach</span></pre></html>

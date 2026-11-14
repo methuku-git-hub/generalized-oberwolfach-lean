@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ActualInnerTargetsCovered.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ActualInnerTargetsCovered.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.InnerRequiredTargets</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ResidualActualData</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The complement embedding covers every required inner target for the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> same old image and residual embedding. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem actual_inner_targets_covered_by_complement</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {X V I:Type} [Fintype X] [Fintype V] [Fintype I]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     [DecidableEq X] [DecidableEq V] [DecidableEq I]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (K J:I→Type) [∀w,DecidableEq (K w)] [∀w,DecidableEq (J w)]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (F:I→SimpleGraph X) (data:∀w,ActualResidualData (K:=K w) (J:=J w) (F w))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (D:I→Finset X) (ψ:I→X→V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (fC:∀w,{x // x∉D w}↪V) (Φ:∀w,{x // x∈(data w).remaining}→V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hDR:∀w,Disjoint (D w) (data w).remaining)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hold:∀w (x:{x // x∉D w}),x.val∈(data w).oldDomain→fC w x=ψ w x.val)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hnew:∀w (x:{x // x∈(data w).remaining}) (hx:x.val∉D w),fC w ⟨x.val,hx⟩=Φ w x)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (H:Finset I) (A:Finset V) (reserved selected absorber:I→Finset V):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let occupied:=fun w=&gt;((data w).oldDomain\D w).image (ψ w)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let Z:=innerRequiredTargets H A reserved selected absorber occupied</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (∀w v,v∈Z w→∃x,Φ w x=v)→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∀w∈H,A⊆reserved w∪selected w∪absorber w∪Finset.univ.image (fC w):=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   intro occupied Z hZ w hw v hv</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   by_cases hmem:v∈reserved w∪selected w∪absorber w</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   · exact Finset.mem_union_left _ hmem</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   · apply Finset.mem_union_right</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     by_cases hOcc:v∈occupied w</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     · obtain ⟨x,hx,hxv⟩:=Finset.mem_image.mp hOcc</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       have hxOld: x∈(data w).oldDomain:=(Finset.mem_sdiff.mp hx).1</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       have hxD:x∉D w:=(Finset.mem_sdiff.mp hx).2</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       exact Finset.mem_image.mpr ⟨⟨x,hxD⟩,Finset.mem_univ _,(hold w ⟨x,hxD⟩ hxOld).trans hxv⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     · have hvZ:v∈Z w:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         simp only [Z,innerRequiredTargets,hw,if_true,Finset.mem_sdiff,Finset.mem_union]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         refine ⟨hv,?_⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         intro hh</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         rcases hh with hh|hh</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         · exact hmem (by simpa only [Finset.mem_union] using hh)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         · exact hOcc hh</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       obtain ⟨x,hx⟩:=hZ w v hvZ</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       have hxD:x.val∉D w:=by intro h;exact Finset.disjoint_left.mp (hDR w) h x.property</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       exact Finset.mem_image.mpr ⟨⟨x.val,hxD⟩,Finset.mem_univ _,(hnew w x hxD).trans hx⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> end Oberwolfach</span></pre></html>

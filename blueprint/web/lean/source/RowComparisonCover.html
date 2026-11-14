@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RowComparisonCover.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RowComparisonCover.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RowCoverPackings</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The row-root construction in the comparison host is a new packing</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> in the actual host, disjoint from every previously chosen wheel. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 3000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {V U I:Type} [Fintype V] [Fintype U] [Fintype I] [DecidableEq V] [DecidableEq U]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   {Q F:SimpleGraph V} {H:V→U→Prop} {r:ℕ}</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem row_comparison_cover_image (M:Finset (OrdinaryWheel Q F H r)) (A:Finset V) (x:V) (K:ℕ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hM:∀ W∈M,x∉(ordinaryWheelRim W).support)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (C:I→OrdinaryWheel (Q\spanningRestriction (ordinaryWheelRimGraph M) A) F</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (fun a u=&gt;H a u∧¬(a∈A∧ordinaryPackingSpokes M a u)) r)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hsupport:∀ i,∀ a∈(ordinaryWheelRim (C i)).support,a=x∨a∈A)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hdis:∀ i j,i≠j → Disjoint (ordinaryWheelResources (C i)) (ordinaryWheelResources (C j)))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hrim:∀ a,(wheelFamilyRim C).Adj x a ↔ Q.Adj x a)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hspoke:∀ u,wheelFamilySpokes C x u ↔ H x u)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hdeg:∀ a,a≠x → (wheelFamilyRim C).degree a≤2*(K+1))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hrow:∀ a,a≠x → (Finset.univ.filter (fun u=&gt;wheelFamilySpokes C a u)).card≤K+1)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hcol:∀ u,(Finset.univ.filter (fun a=&gt;wheelFamilySpokes C a u)).card≤r) :</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ N:Finset (OrdinaryWheel Q F H r),OrdinaryRowCover N x A K ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       Disjoint (N.biUnion ordinaryWheelResources) (M.biUnion ordinaryWheelResources) := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   let C&#x27;:I→OrdinaryWheel Q F H r:=fun i=&gt;ordinaryWheelToLarger sdiff_le (fun _ _ h=&gt;h.1) (C i)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hr:wheelFamilyRim C&#x27;=wheelFamilyRim C:=rfl</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hs:wheelFamilySpokes C&#x27;=wheelFamilySpokes C:=rfl</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   refine ⟨Finset.univ.image C&#x27;,ordinaryRowCover_of_family C&#x27; x A K hsupport hdis hrim hspoke ?_ hrow hcol,?_⟩</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   · convert hdeg using 1 &lt;;&gt; congr!</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   · apply Finset.disjoint_left.mpr</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     intro e he heM</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     obtain ⟨W,hW,heW⟩:=Finset.mem_biUnion.mp he</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     obtain ⟨i,_,rfl⟩:=Finset.mem_image.mp hW</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     exact Finset.disjoint_left.mp (ordinary_wheel_comparison_disjoint M A x hM (C i) (hsupport i)) heW heM</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> </span>
+<span id="L38"><a href="#L38" class="ln">  38</a> end Oberwolfach</span></pre></html>

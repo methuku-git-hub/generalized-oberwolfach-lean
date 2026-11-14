@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryActualPositionCapacity.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryActualPositionCapacity.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryAssignedCapacityCeiling</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The exact natural-number ceiling in the assignment lemma satisfies the</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> position capacity under the ordinary caller&#x27;s displayed numerical bounds. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> theorem ordinary_actual_position_capacity</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     (n θ C ε lam d a A Z E:ℝ) (hn:0&lt;n) (hθ:0≤θ) (hC:1≤C)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hε:0≤ε) (hlam:0≤lam) (hd:0&lt;d) (ha:0&lt;a) (hE0:0≤E)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hearly:C*(ε+ε^2/a)≤1/100000)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hlate:C/d+C*lam+C*lam/a≤θ/100000)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hA:A≤(2/d+lam)*n) (hZ:Z≤(2*θ*ε+2*lam)*n)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hE:E≤C*(θ*ε^2+lam*ε)*n^2+C*d*n)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hlarge:8*(4*C*d/a+1)+10≤θ*n/16):</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     8*A+8*((⌈4*E/(a*n)⌉₊:ℕ):ℝ)+4*Z+10≤θ*n/4 := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hv:=ordinary_assigned_ceiling_bound n θ C ε lam a d E hn ha hE0 hE</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   apply ordinary_position_capacity_from_displayed_bounds n θ C ε lam (1/d) (1/a) A Z</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ((⌈4*E/(a*n)⌉₊:ℕ):ℝ) (4*C*d/a+1) hn.le hθ hC hε hlam (by positivity) (by positivity)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   · convert hearly using 1 &lt;;&gt; ring</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   · convert hlate using 1 &lt;;&gt; ring</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · convert hA using 1 &lt;;&gt; ring</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · exact hZ</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   · exact hv</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   · exact hlarge</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> end Oberwolfach</span></pre></html>

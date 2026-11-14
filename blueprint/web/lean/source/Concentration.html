@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Concentration.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>Concentration.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Probability.Moments.SubGaussian</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Tactic</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-!</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> Concentration for sums of independent bounded real random variables.</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> Independence is imposed on the original random variables. In particular,</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> different contributions of one physical edge must be combined into a single</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable before this theorem is applied.</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> -/</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option autoImplicit false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators NNReal ENNReal</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open MeasureTheory ProbabilityTheory</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem subgaussian_absolute_tail</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     {X : Ω → ℝ} {c : ℝ≥0} (hX : HasSubgaussianMGF X c μ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     {t : ℝ} (ht : 0 ≤ t) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     μ.real {ω | t ≤ |X ω|} ≤ 2 * Real.exp (-t ^ 2 / (2 * c)) := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hevent : {ω | t ≤ |X ω|} =</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       {ω | t ≤ X ω} ∪ {ω | t ≤ -X ω} := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ext ω</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     simp only [Set.mem_ofPred_eq, Set.mem_union, le_abs]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   rw [hevent]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hupper := hX.measure_ge_le ht</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hlower := hX.neg.measure_ge_le ht</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hunion := measureReal_union_le (μ := μ) {ω | t ≤ X ω} {ω | t ≤ -X ω}</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   simp only [Pi.neg_apply] at hlower</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   exact hunion.trans (by linarith)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> </span>
+<span id="L31"><a href="#L31" class="ln">  31</a> /-- Hoeffding&#x27;s two-sided bound, with the sum of squared interval lengths.</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> The interval and independence assumptions are explicit; no independence</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> between derived tests or between different colours is required. -/</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> theorem boundedIndependentSum_tail</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     {Ω I : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (X : I → Ω → ℝ) (a b : I → ℝ) (s : Finset I)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hindep : iIndepFun X μ)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hmeas : ∀ i ∈ s, AEMeasurable (X i) μ)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hbounded : ∀ i ∈ s, ∀ᵐ ω ∂μ, X i ω ∈ Set.Icc (a i) (b i))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     {t : ℝ} (ht : 0 ≤ t) :</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     μ.real {ω | t ≤ |(∑ i ∈ s, X i ω) - ∑ i ∈ s, ∫ ω, X i ω ∂μ|} ≤</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       2 * Real.exp (-2 * t ^ 2 / (∑ i ∈ s, (b i - a i) ^ 2)) := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   classical</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let Y i ω := X i ω - ∫ z, X i z ∂μ</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let c (i : I) : ℝ≥0 := (‖b i - a i‖₊ / 2) ^ 2</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hY : iIndepFun Y μ :=</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     hindep.comp (fun i x =&gt; x - ∫ z, X i z ∂μ) (fun i =&gt; by fun_prop)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hsub (i : I) (hi : i ∈ s) : HasSubgaussianMGF (Y i) (c i) μ :=</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     hasSubgaussianMGF_of_mem_Icc (hmeas i hi) (hbounded i hi)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hsum := HasSubgaussianMGF.sum_of_iIndepFun hY hsub</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have htail := subgaussian_absolute_tail hsum ht</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hc : ((∑ i ∈ s, c i : ℝ≥0) : ℝ) =</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (∑ i ∈ s, (b i - a i) ^ 2) / 4 := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     simp only [NNReal.coe_sum, c, NNReal.coe_pow, NNReal.coe_div, NNReal.coe_ofNat,</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       coe_nnnorm, Real.norm_eq_abs]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     rw [Finset.sum_div]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     apply Finset.sum_congr rfl</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     intro i _</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     rw [div_pow, sq_abs]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     norm_num</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have heq : -t ^ 2 / (2 * ((∑ i ∈ s, c i : ℝ≥0) : ℝ)) =</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       -2 * t ^ 2 / (∑ i ∈ s, (b i - a i) ^ 2) := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     rw [hc]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     ring</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   simpa only [Y, Finset.sum_sub_distrib, heq] using htail</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a> end Oberwolfach</span></pre></html>

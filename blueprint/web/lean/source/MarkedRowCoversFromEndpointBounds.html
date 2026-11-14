@@ -1,0 +1,105 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedRowCoversFromEndpointBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedRowCoversFromEndpointBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedRowCoverAfterFreeDeletion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedSequentialRowCover</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedComparisonCover</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedRowRequiredResources</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Successive marked row covers from actual endpoint blocks. Every</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> one-row existence premise of the induction is discharged by the proved</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> bounded-deletion construction; the root stars and coefficient choices</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> remain fixed throughout. -/</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option autoImplicit false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option synthInstance.maxSize 4096</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> set_option maxHeartbeats 14000000</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> noncomputable section</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> namespace Oberwolfach</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> variable {V U E T : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     {tail head : E→V} {ktail khead : T→V} {H₀ HK : V→U→Prop}</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     {π : Equiv.Perm V} {b l n : ℕ} {c ch : ℝ}</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem marked_row_covers_from_endpoint_bounds</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (Q : MarkedHostExtensionCounts tail head ktail khead H₀ HK π b l c ch)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hl : 2≤l) (hb : 1≤b) (hphys : Function.Injective (markedPhysicalEdge tail head ktail khead π))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (F : Finset V) (hF : ∀ z,π z∈F ↔ z∈F)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (v : Fin n→V) (hv : Function.Injective v) (hvF : ∀ i,v i∉F)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (A₀ A₁ X₀ X₁ : Fin n→Finset V) (Y₀ Y₁ : Fin n→Finset U)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hY : ∀ i,Disjoint (Y₀ i) (Y₁ i))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (ain : ∀ i,(A₀ i⊕A₁ i) ↪ E⊕T) (xout : ∀ i,(X₀ i⊕X₁ i) ↪ E⊕T)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hinhead : ∀ i a,Sum.elim head khead (ain i a)=v i)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hintail : ∀ i a,Sum.elim tail ktail (ain i a)=taggedSubsetValue (A₀ i) (A₁ i) a)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (houttail : ∀ i x,Sum.elim tail ktail (xout i x)=v i)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (houthead : ∀ i x,Sum.elim head khead (xout i x)=taggedSubsetValue (X₀ i) (X₁ i) x)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hintype : ∀ i a,(ain i a).isRight=a.isRight)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (houttype : ∀ i x,(xout i x).isRight=x.isRight)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hAF : ∀ i,A₀ i∪A₁ i⊆F) (hXF : ∀ i,X₀ i∪X₁ i⊆F)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hsepA : ∀ i z,z∈A₀ i∪A₁ i→¬PermutationClose π b z (v i))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hsepX : ∀ i z,z∈X₀ i∪X₁ i→¬PermutationClose π b z (v i))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hY₀ : ∀ i u,u∈Y₀ i→H₀ (v i) u) (hY₁ : ∀ i u,u∈Y₁ i→HK (v i) u)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hbalA : ∀ i,(A₀ i).card+(A₁ i).card=(Y₀ i).card+(Y₁ i).card)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hbalX : ∀ i,(X₀ i).card+(X₁ i).card=(Y₀ i).card+(Y₁ i).card)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hmarked : ∀ i,(A₁ i).card=(Y₁ i).card)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (K : ℕ) (hK : 0&lt;K) (degree tau lam : ℝ) (htau : 0&lt;tau) (hlam : 0&lt;lam)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hdeg : 2*tau+(2*(2*b+1):ℕ)≤degree) (hmargin : (2*(2*b+1):ℕ)&lt;lam*tau)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (hgap : ∀ i,((X₁ i).card:ℝ)+2*tau≤(Y₀ i).card)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (loss : ℝ) (hrloss : (n*(K+4):ℕ)≤loss) (hcloss : (n*(l+4):ℕ)≤loss)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hcutloss : loss≤lam*tau)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (B₁ : ∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈A₁ i) (fun y=&gt;y∈Y₁ i) (degree+loss) tau (2*lam))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (B₂ : ∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈A₀ i) (fun y=&gt;y∈Y₀ i) (degree+loss) tau (2*lam))</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (B₃ : ∀ i,BipartiteBlockBounds HK (fun a=&gt;a∈X₁ i) (fun y=&gt;y∈Y₀ i) (degree+loss) tau (2*lam))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (B₄ : ∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈X₀ i) (fun y=&gt;y∈Y₀ i) (degree+loss) tau (2*lam))</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (B₅ : ∀ i,BipartiteBlockBounds H₀ (fun a=&gt;a∈X₀ i) (fun y=&gt;y∈Y₁ i) (degree+loss) tau (2*lam))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hbudget : ∀ i,((Fᶜ).card:ℝ)+(((Y₀ i).card+(Y₁ i).card)*(l+4):ℕ)/(K:ℝ)+</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (l+5)*(2*b+1)+8*(K+4:ℕ)+2*(n*(4*(K+4)):ℕ)+2*(n*(l+4):ℕ)&lt;c) :</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     ∃ C : Fin n→Finset (MarkedWheel tail head ktail khead (l+3) π b H₀ HK),</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (∀ i,MarkedRowCover (C i) (v i) F</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         (markedRowRequiredResources (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>           (π:=π) (ain i) (xout i) (v i) (Y₀ i∪Y₁ i)) (Y₀ i∪Y₁ i) K) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (∀ i j,i≠j→Disjoint ((C i).biUnion markedWheelPhysicalResources)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         ((C j).biUnion markedWheelPhysicalResources)) := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   let required := fun i=&gt;markedRowRequiredResources (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (π:=π) (ain i) (xout i) (v i) (Y₀ i∪Y₁ i)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   apply sequential_marked_row_covers v hv F hvF required (fun i=&gt;Y₀ i∪Y₁ i)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   intro i M havoid hMr hMs hMc</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   let D := spanningRestriction (markedPackingRimGraph M) F</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   let J := fun x u=&gt;x∈F ∧ markedPackingSpokes M x u</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hD (x : V) : (D.degree x:ℝ)≤(n*(4*(K+4)):ℕ) := by exact_mod_cast hMr x</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hJrow (x : V) : (Finset.univ.filter (J x)).card≤n*(K+4) := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     by_cases hx : x∈F</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · simpa only [J,hx,true_and] using hMs x hx</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     · simp [J,hx]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hJcol (u : U) : (Finset.univ.filter (fun x=&gt;J x u)).card≤n*(l+4) := by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     apply (Finset.card_le_card (show Finset.univ.filter (fun x=&gt;J x u)⊆</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       Finset.univ.filter (fun x=&gt;markedPackingSpokes M x u) from</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         fun x hx=&gt;Finset.mem_filter.mpr ⟨Finset.mem_univ _,(Finset.mem_filter.mp hx).2.2⟩)).trans</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     simpa only [Nat.add_assoc] using hMc u</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   obtain ⟨W,hW,hA,hX,hU,hR,hS,hCol,hrows,hhubs,hroots,hWD,hWJ⟩ :=</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     marked_row_cover_after_free_deletion Q hl hb hphys F hF (v i) (hvF i)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       D (fun x y h=&gt;(spanningRestriction_adj _ _ _ _).mp h |&gt;.2)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       J (fun x u h=&gt;h.1) (n*(4*(K+4)):ℕ) (by positivity) hD</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       (n*(K+4)) (n*(l+4)) (by convert hJrow using 1 &lt;;&gt; congr!)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       (by convert hJcol using 1 &lt;;&gt; congr!) loss hrloss hcloss</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       (A₀ i) (A₁ i) (X₀ i) (X₁ i) (Y₀ i) (Y₁ i) (hY i) (ain i) (xout i)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       (hinhead i) (hintail i) (houttail i) (houthead i) (hintype i) (houttype i)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       (hAF i) (hXF i) (hsepA i) (hsepX i) (hY₀ i) (hY₁ i)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       (hbalA i) (hbalX i) (hmarked i) K hK degree tau lam htau hlam hcutloss hdeg hmargin (hgap i)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       (B₁ i) (B₂ i) (B₃ i) (B₄ i) (B₅ i) (hbudget i)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   let N := Finset.univ.image W</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hN : MarkedRowCover N (v i) F (required i) (Y₀ i∪Y₁ i) K :=</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     markedRowCover_of_family W (v i) F (required i) (Y₀ i∪Y₁ i) K hW hrows hhubs hroots</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>       (marked_row_required_covered (ain i) (xout i) (v i) (Y₀ i∪Y₁ i)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>         (fun j=&gt;markedWheelPhysicalResources (W j)) hA hX hU) hR hS (by simpa only [Nat.add_assoc] using hCol)</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   refine ⟨N,hN,?_⟩</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   apply marked_comparison_cover_disjoint (by omega) hb hphys M N F hF (v i) havoid hN.rows</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   · intro Z hZ</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     obtain ⟨j,_,rfl⟩ := Finset.mem_image.mp hZ</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     exact hWD j</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   · intro x u hu</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     have he : markedPackingSpokes N=markedFamilySpokes W := marked_family_image_spokes W</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     rw [he] at hu</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     exact hWJ x u hu</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a> </span>
+<span id="L102"><a href="#L102" class="ln"> 102</a> end Oberwolfach</span></pre></html>

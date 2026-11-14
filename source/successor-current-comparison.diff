@@ -1,0 +1,31 @@
+--- frozen-successor
++++ current-successor
+@@ -212,8 +212,9 @@
+ Discard all tuples with two labels at $\operatorname{dist}_\pi$ at
+ most $b$. Through a fixed eligible interface edge, the
+ two fixed auxiliary endpoint labels are already $(b,\pi)$-separated.
+-Any other violating pair reduces the number of free
+-choices by one. There are at most
++Every label has at most $2b$ other labels at $\pi$-distance
++at most $b$, so each other violating pair reduces the number of
++free choices by one. There are at most
+ $C_{c,b}n^{c-3}$ discarded tuples through this edge,
+ so their total weight is $O(1/n)$.
+ For a fixed label at a fixed position, there are at most
+@@ -223,13 +224,9 @@
+ and a sufficiently small choice of $\eta$, followed by
+ large $n$, give all required load estimates.
+ 
+-These estimates hold independently of the number or lengths of the
+-cycles of $\pi$.
+-A label has at most $2b$ other labels at distance at most $b$, and $\pi$ and
+-$\pi^{-1}$ preserve cardinalities. Thus the discarded weights are
+-$O_{c,b}(1/n)$ at an arc and $O_{c,b}(1)$ at a vertex. Only the order
+-threshold increases with $b$; the individual positive bounds can be
+-chosen from the fixed degree margin before $b$ and $\tau$.
++These bounds use no restriction on the cycle lengths of $\pi$.
++The constants $a_1,C_2$ depend only on $c,\beta$; only the order
++threshold in the discarded-weight estimates depends on $b$.
+ 
+ \end{proof}
+ 

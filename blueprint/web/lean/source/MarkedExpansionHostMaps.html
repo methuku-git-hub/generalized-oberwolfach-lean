@@ -1,0 +1,103 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedExpansionHostMaps.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedExpansionHostMaps.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedExpansionWheelFamilies</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.IndexedMarkedExpansionSimplicity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedPaddedTypedPresence</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Actual vertex maps for an indexed expansion. Old incidences are crossed</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> with the displayed private wheels; every resulting incidence is in the host. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 18000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V₀ U₀ V U E K A S:Type} [Fintype V₀] [Fintype U₀]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [Fintype V] [Fintype U] [Fintype A] [Fintype S]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     [DecidableEq V₀] [DecidableEq U₀] [DecidableEq V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     [DecidableEq A] [DecidableEq S]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     {tail head:E→V} {ktail khead:K→V} {H₀ HK:V→U→Prop} {π:Equiv.Perm V} {b l:ℕ}</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> def markedExpansionHostRows (f:V₀→V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (C:(A⊕S)→MarkedWheel tail head ktail khead (l+4) π b H₀ HK):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     V₀⊕((A⊕S)×Fin (l+5))→V:=Sum.elim f (fun p=&gt;(C p.1).1.val p.2)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a> def markedExpansionHostHubs (g:U₀→U)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (C:(A⊕S)→MarkedWheel tail head ktail khead (l+4) π b H₀ HK):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     U₀⊕(A⊕S)→U:=Sum.elim g (fun i=&gt;(C i).2.val)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem marked_expansion_host_rows_injective (f:V₀→V)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (C:(A⊕S)→MarkedWheel tail head ktail khead (l+4) π b H₀ HK)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hf:Function.Injective f) (Z:Finset V) (hfZ:∀ v,f v∈Z)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hnew:∀ i k,(C i).1.val k∉Z)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hsep:∀ i j k k&#x27;,((i,k):(A⊕S)×Fin (l+5))≠(j,k&#x27;)→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       ¬PermutationClose π b ((C i).1.val k) ((C j).1.val k&#x27;)):</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     Function.Injective (markedExpansionHostRows f C):=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   rintro (v|⟨i,k⟩) (w|⟨j,k&#x27;⟩) he</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   · exact congrArg Sum.inl (hf he)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · change f v=(C j).1.val k&#x27; at he</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact False.elim (hnew j k&#x27; (he ▸ hfZ v))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   · change (C i).1.val k=f w at he</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact False.elim (hnew i k (he.symm ▸ hfZ w))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   · apply congrArg Sum.inr</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     by_contra hne</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     exact hsep i j k k&#x27; hne (Or.inl he)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> </span>
+<span id="L44"><a href="#L44" class="ln">  44</a> theorem marked_expansion_host_hubs_injective (g:U₀→U)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (C:(A⊕S)→MarkedWheel tail head ktail khead (l+4) π b H₀ HK)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hg:Function.Injective g) (B:Finset U) (hgB:∀ u,g u∈B)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hnew:∀ i,(C i).2.val∉B) (hC:Function.Injective (fun i=&gt;(C i).2.val)):</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     Function.Injective (markedExpansionHostHubs g C):=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   rintro (u|i) (v|j) he</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   · exact congrArg Sum.inl (hg he)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   · change g u=(C j).2.val at he</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact False.elim (hnew j (he ▸ hgB u))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   · change (C i).2.val=g v at he</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact False.elim (hnew i (he.symm ▸ hgB v))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   · exact congrArg Sum.inr (hC he)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> </span>
+<span id="L57"><a href="#L57" class="ln">  57</a> theorem marked_expansion_host_present (G:IndexedMarkedGraph V₀ U₀ A S)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (f:V₀→V) (g:U₀→U)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (C:(A⊕S)→MarkedWheel tail head ktail khead (l+4) π b H₀ HK)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (hC:∀ i,MarkedExpansionWheelConditions (f∘G.src) (f∘G.dst) (f∘G.row) (g∘G.hub) G.jr G.js i (C i)):</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     let D:=indexedMarkedExpansion G (l+4) (by omega)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     let F:=markedExpansionHostRows f C</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     let H:=markedExpansionHostHubs g C</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (∀ a,markedArcPresent tail head ktail khead (D.jr a) (F (D.src a)) (F (D.dst a)))∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (∀ s,if D.js s then HK (F (D.row s)) (H (D.hub s)) else H₀ (F (D.row s)) (H (D.hub s))):=by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   dsimp only</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   constructor</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   · rintro (a|⟨a|s,k⟩)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     · exact (hC (.inl a)).1</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     · change markedArcPresent tail head ktail khead (decide (k=Fin.last (l+4)))</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         ((C (.inl a)).1.val k) (markedExpansionHostRows f C ((indexedMarkedExpansion G (l+4) (by omega)).dst (.inr (.inl a,k))))</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       rw [indexedMarkedExpansion_dst_private_rim]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       by_cases hk:k=markedExpansionRimPosition (l+4) (by omega) (G.jr a)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       · rw [if_pos hk,hk,markedExpansionRimPosition_type]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>         exact (hC (.inl a)).2</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       · rw [if_neg hk]</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>         simpa only [markedExpansionHostRows,Sum.elim_inr,markedArcPresent,decide_eq_true_eq] using</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>           marked_cycle_canonical_typed_presence (C (.inl a)).1 k</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     · change markedArcPresent tail head ktail khead (decide (k=Fin.last (l+4)))</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>         ((C (.inr s)).1.val k) ((C (.inr s)).1.val (finRotate (l+5) k))</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       simpa only [markedArcPresent,decide_eq_true_eq] using</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>         marked_cycle_canonical_typed_presence (C (.inr s)).1 k</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   · rintro (s|⟨a|s,k⟩)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     · exact (hC (.inr s)).1</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     · change if decide (k=0) then HK ((C (.inl a)).1.val k) (C (.inl a)).2.val</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>         else H₀ ((C (.inl a)).1.val k) (C (.inl a)).2.val</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       simpa only [decide_eq_true_eq] using marked_wheel_canonical_spoke_presence (C (.inl a)) k</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     · change if decide (k=0) then HK ((C (.inr s)).1.val k)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>         (markedExpansionHostHubs g C ((indexedMarkedExpansion G (l+4) (by omega)).hub (.inr (.inr s,k))))</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>         else H₀ ((C (.inr s)).1.val k)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>         (markedExpansionHostHubs g C ((indexedMarkedExpansion G (l+4) (by omega)).hub (.inr (.inr s,k))))</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>       rw [indexedMarkedExpansion_hub_private_spoke]</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       by_cases hk:k=markedExpansionSpokePosition (l+4) (by omega) (G.js s)</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>       · rw [if_pos hk,hk,markedExpansionSpokePosition_type]</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>         exact (hC (.inr s)).2</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       · rw [if_neg hk]</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>         simpa only [markedExpansionHostHubs,Sum.elim_inr,decide_eq_true_eq] using</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>           marked_wheel_canonical_spoke_presence (C (.inr s)) k</span>
+<span id="L99"><a href="#L99" class="ln">  99</a> </span>
+<span id="L100"><a href="#L100" class="ln"> 100</a> end Oberwolfach</span></pre></html>

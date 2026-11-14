@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedActualParentCutsTargetEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedActualParentCutsTargetEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedCutVortexTargetUniform</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedFixedVortexBaselineGeometry</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedFixedVortexParentDegrees</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.RawMarkedRetention</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Parent reference cut families at the supplied density t₀, with the</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> vortex and sample sizes chosen uniformly from the fixed lower density. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 25000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_actual_parent_cuts_target_event</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (α ρ₀ tstar kstar χ:ℝ) (hα:0&lt;α) (hα1:α≤1) (hρ₀:0&lt;ρ₀)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (htstar:0&lt;tstar) (htstar1:tstar≤1) (hkstar:0&lt;kstar) (hχ:0&lt;χ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (β ε:ℝ) (hb:0≤β) (hbα:β≤α/8) (hb1:β≤1/4) (he:0&lt;ε) (he1:ε&lt;1/4)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (d:ℕ) (hd:2≤d):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃ m₀:ℕ,1≤m₀ ∧ ∀ (V U Γ Color:Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       [LinearOrder V] [Nonempty V] [DecidableEq U]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (G:SimpleGraph V) (D m:ℕ),G.IsRegularOfDegree D→0&lt;Fintype.card V→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (1/2+α)*Fintype.card V≤(D:ℝ)→ρ₀ ≤ initialIndexDensity U D→initialIndexDensity U D≤1→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       m₀≤m→∀ (Q:Vortex U G D β ε m) (π:Equiv.Perm V)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (hpres:∀ i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)→∀ L:ℕ,L&lt;Q.length→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let W:=markedVortexVertexType Q</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let Z:=markedVortexHubType Q</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let f:=markedVortexVertexEmbedding Q</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let g:=markedVortexHubEmbedding Q</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let ρ:=markedVortexPermutation Q π hpres;</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∀ (p k:ℝ) (hp:0≤p) (hk:0≤k) (hsum:2*p+2*k≤1),kstar≤p→kstar≤k→</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∀ (q:U→Γ→ℝ) (hq:∀ u a,0≤q u a) (hQ:∀ u,∑ a,q u a≤1/8)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (a:Γ) (j:Color) (s₀ t₀:ℝ),(∀ u,q u a=t₀)→(∀ u,s u j=s₀)→</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       tstar≤s₀→tstar≤t₀→t₀≤1→t₀≤s₀→</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ∀ (Extra:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a→Prop) (err:ℝ),</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     1-err≤(rawMarkedRetentionLaw π d hd a p k hp hk hsum q hq hQ s hs hS).probability Extra→</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     1-χ-err≤(rawMarkedRetentionLaw π d hd a p k hp hk hsum q hq hQ s hs hS).probability</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (fun z=&gt;(∀ i≤L,MarkedReferenceCutFamilies (G.comap (f i)) (ρ i) d a j (α/8) p k t₀</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (rawMarkedRestrictPair (f i) (g i) z.1)) ∧ Extra z):=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   obtain ⟨M,hM,hcuts⟩:=marked_cut_vortex_target_uniform_event (α/8) kstar tstar (ρ₀/8) ε χ</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (by positivity) (by linarith) hkstar htstar htstar1 (by positivity) he (by linarith) hχ d hd</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   obtain ⟨m₀,hm₀,hgeo⟩:=marked_fixed_vortex_baseline_geometry β ε ρ₀ hb hb1 he he1 hρ₀ M</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   refine ⟨m₀,hm₀,?_⟩</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro V U Γ Color _ _ _ _ _ _ _ G D m hreg hn hD hρlo hρhi hm Q π hpres hshort L hL W Z f g ρ</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hmpos:0&lt;m:=by omega</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hρ:0 &lt; initialIndexDensity U D:=hρ₀.trans_le hρlo</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hhalf:(Fintype.card V:ℝ)/2≤D:=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have hn0:(0:ℝ)≤Fintype.card V:=Nat.cast_nonneg _</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     nlinarith [mul_nonneg hα.le hn0]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hgeom:=hgeo V U G D m hreg hn hhalf hρlo hρhi hm Q π hpres L hL</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hfield (i:ℕ) (hi:i≤L):=marked_vortex_fixed_parent_degree_fields Q hreg hn hD hα hρ hb hbα hb1 he hmpos i (by omega)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hmin (i:ℕ) (hi:i≤L):M≤Fintype.card (W i):=(hgeom.2 i hi).2.2.1</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hscale (i:ℕ) (hi:i&lt;L):(Fintype.card (W (i+1)):ℝ)≤ε*Fintype.card (W i):=(hgeom.2 i (by omega)).2.2.2.2.2.2.2.2.1</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hhublo (i:ℕ) (hi:i≤L):(ρ₀/8)*(Fintype.card (W i):ℝ)≤Fintype.card (Z i):=(hgeom.2 i hi).2.2.2.2.1</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hhubhi (i:ℕ) (hi:i≤L):Fintype.card (Z i)≤Fintype.card (W i):=(hgeom.2 i hi).2.2.2.2.2.1</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hparent (i:ℕ) (hi:i≤L) (v:W i):(1/2+α/8)*Fintype.card (W i)≤((G.comap (f i)).degree v:ℝ):=by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hc:=mul_le_mul_of_nonneg_right (show (1/2+α/8:ℝ)≤1/2+α/2 by linarith) (Nat.cast_nonneg (Fintype.card (W i)))</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact hc.trans ((hfield i hi).1 v)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   intro p k hp hk hsum hpmin hkmin q hq hQ s hs hS a j s₀ t₀ hq0 hs0 hslo htlo htone hts Extra err hExtra</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   let E:=fun σ:RawMarkedOutcome V U Γ Color=&gt;∀ i≤L,MarkedReferenceCutFamilies (G.comap (f i)) (ρ i) d a j (α/8) p k t₀</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (rawMarkedRestrictPair (f i) (g i) σ)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hraw:=hcuts V U Γ Color W Z G π hshort f g ρ hgeom.1 L hmin hscale hhublo hhubhi hparent</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     p k hp hk hsum hpmin hkmin q hq hQ s hs hS a j s₀ t₀ hq0 hs0 hslo htlo t₀ htlo htone hts le_rfl</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   let μ:=rawMarkedRetentionLaw π d hd a p k hp hk hsum q hq hQ s hs hS</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hE:1-χ≤μ.probability (fun z=&gt;E z.1):=by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     rw [rawMarkedRetentionLaw_raw_projection]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     exact hraw</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hj:=finiteLaw_good_intersection μ (fun z=&gt;E z.1) Extra err hExtra</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   change 1-χ-err≤μ.probability (fun z=&gt;E z.1 ∧ Extra z)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   linarith only [hE,hj]</span>
+<span id="L74"><a href="#L74" class="ln">  74</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedSourceRepresentation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedSourceRepresentation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedFamilyArcUniqueness</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedPieceSourceArcs</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PrescribedSourceDegree</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The degree-two hypothesis follows from the ordered path-and-cycle</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> representation and the physical interpretation of source arcs. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> variable {I X:Type} [Fintype I] [Fintype X] [DecidableEq I] [DecidableEq X]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem prescribed_source_degree_from_components</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (Q:I→SimpleGraph X) (Dsrc:I→X→X→Prop) (Fsrc:I→SimpleGraph X)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (ps:List (I×PrescribedSourcePiece X))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hpieces:∀ p∈ps,p.2.Valid (Dsrc p.1) (Fsrc p.1))</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hapart:ps.Pairwise PrescribedPiecesApart)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hDQ:∀ i x y,Dsrc i x y→(Q i).Adj x y)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hcoverE:∀ i e,e∈(Q i).edgeFinset→∃ p∈ps,p.1=i ∧ e∈p.2.edges)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hcoverA:∀ i x y,Dsrc i x y→∃ p∈ps,p.1=i ∧ (x,y)∈p.2.arcs):</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ i x,(Q i).degree x≤2 := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have huniq:=prescribed_source_family_unique_directions Dsrc Fsrc ps hpieces hapart hcoverA</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   intro i</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   apply prescribed_source_degree_from_directions (Q i) (Dsrc i) ?_ (huniq.1 i) (huniq.2 i)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro x y</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   constructor</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · intro hxy</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have he:s(x,y)∈(Q i).edgeFinset:=SimpleGraph.mem_edgeFinset.mpr hxy</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     obtain ⟨p,hp,hpi,hpE⟩:=hcoverE i s(x,y) he</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     rw [prescribed_piece_edges_are_arc_images] at hpE</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     obtain ⟨e,he,hphys⟩:=Finset.mem_image.mp hpE</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     rcases e with ⟨u,v⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have ha:Dsrc i u v:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       have hh:=prescribed_piece_arc_source p.2 (Dsrc p.1) (Fsrc p.1) (hpieces p hp) (u,v) he</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       simpa [hpi] using hh</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     change s(u,v)=s(x,y) at hphys</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     rcases Sym2.eq_iff.mp hphys with ⟨hu,hv⟩|⟨hu,hv⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     · subst u;subst v;exact Or.inl ha</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     · subst u;subst v;exact Or.inr ha</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   · intro hxy</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rcases hxy with hxy|hyx</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     · exact hDQ i x y hxy</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     · exact (hDQ i y x hyx).symm</span>
+<span id="L43"><a href="#L43" class="ln">  43</a> end Oberwolfach</span></pre></html>

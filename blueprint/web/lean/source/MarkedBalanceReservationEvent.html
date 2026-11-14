@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedBalanceReservationEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedBalanceReservationEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedBalanceTestSets</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.IncidentReservationCountEvent</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Simultaneous estimates for the actual ordinary outdegree, marked</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> outdegree, ordinary indegree, marked indegree and the two spoke degrees</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> following boundary reservation. The original physical coin law is used. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 6000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem marked_balance_reservation_common_event (ε:ℝ) (hε:0&lt;ε) (q:ℕ):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃ N:ℕ,∀ (V U E K:Type) [Fintype V] [Fintype U] [Fintype E] [Fintype K]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       [DecidableEq V] [DecidableEq U],N≤Fintype.card (V⊕U)→</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀ (tail head:E→V) (ktail khead:K→V) (H₀ HK:V→U→Prop) (π:Equiv.Perm V),</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     Function.Injective (markedPhysicalEdge tail head ktail khead π)→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ (X:Finset V) (Z:Finset U) (p:ℝ) (hp:0≤p) (hp1:p≤1),</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     1-1/(Fintype.card (V⊕U):ℝ)^q≤</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (FiniteLaw.pi (fun _:Sym2 (V⊕U)=&gt;FiniteLaw.retentionCoin p hp hp1)).probability</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (fun σ=&gt;∀ (r:V⊕U) (j:Fin 6),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>         let A:=markedBalanceTermSet tail head ktail khead H₀ HK r j</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         let I:=A.filter (fun a=&gt;(if markedActiveAuxTail tail ktail H₀ HK a=r</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>           then markedActiveAuxHead head khead H₀ HK a else markedActiveAuxTail tail ktail H₀ HK a)∈ordinaryInnerVertices X Z)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>         let keep:=markedActiveRetained</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>           (fun e=&gt;¬markedBoundaryRimAllowed π X σ false (tail e) (head e))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>           (fun e=&gt;¬markedBoundaryRimAllowed π X σ true (ktail e) (khead e))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>           (fun x u=&gt;H₀ x u∧¬markedBoundarySpokeAllowed X Z σ x u)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>           (fun x u=&gt;HK x u∧¬markedBoundarySpokeAllowed X Z σ x u);</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         |((A.filter keep).card:ℝ)-</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>           (if r∈ordinaryInnerVertices X Z then (1-p)*(A.card-I.card) else A.card-p*I.card)|≤ε*Fintype.card (V⊕U)):=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   obtain ⟨N,hN⟩:=incident_reservation_count_common_event 6 4 ε (by norm_num) hε 1 q</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   refine ⟨N,?_⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro V U E K _ _ _ _ _ _ hn tail head ktail khead H₀ HK π hphys X Z p hp hp1</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   classical</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let coin:MarkedActiveEdge E K H₀ HK↪Sym2 (V⊕U):=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ⟨markedActivePhysicalCoin tail head ktail khead π H₀ HK,</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       markedActivePhysicalCoin_injective tail head ktail khead π H₀ HK hphys⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let T:(V⊕U)×Fin 6→Finset (MarkedActiveEdge E K H₀ HK):=</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     fun z=&gt;markedBalanceTermSet tail head ktail khead H₀ HK z.1 z.2</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hcount:(Fintype.card ((V⊕U)×Fin 6):ℝ)≤6*(Fintype.card (V⊕U):ℝ)^1:=by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     simp only [Fintype.card_prod,Fintype.card_fin,Nat.cast_mul,Nat.cast_ofNat,pow_one];nlinarith</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hT (z:(V⊕U)×Fin 6) (a:MarkedActiveEdge E K H₀ HK) (ha:a∈T z):</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       markedActiveAuxTail tail ktail H₀ HK a=z.1∨markedActiveAuxHead head khead H₀ HK a=z.1:=</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     markedBalanceTermSet_incident tail head ktail khead H₀ HK z.1 z.2 a ha</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hsize (z:(V⊕U)×Fin 6):((T z).card:ℝ)≤4*Fintype.card (V⊕U):=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact_mod_cast markedBalanceTermSet_card tail head ktail khead H₀ HK π hphys z.1 z.2</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hevent:=hN (Fintype.card (V⊕U)) hn (MarkedActiveEdge E K H₀ HK) (V⊕U) (Sym2 (V⊕U))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     ((V⊕U)×Fin 6) hcount (markedActiveAuxTail tail ktail H₀ HK) (markedActiveAuxHead head khead H₀ HK)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     coin (ordinaryInnerVertices X Z) Prod.fst T hT hsize p hp hp1</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   apply hevent.trans</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   apply finiteLaw_probability_mono</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   intro σ hσ r j A I keep</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have he:A.filter keep=(T (r,j)).filter (fun a=&gt;¬((markedActiveAuxTail tail ktail H₀ HK a∈ordinaryInnerVertices X Z∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       markedActiveAuxHead head khead H₀ HK a∈ordinaryInnerVertices X Z)∨</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       ((markedActiveAuxTail tail ktail H₀ HK a∈ordinaryInnerVertices X Z∨</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         markedActiveAuxHead head khead H₀ HK a∈ordinaryInnerVertices X Z)∧σ (coin a)=true))):=by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     ext a</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     simp only [Finset.mem_filter]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact and_congr_right (fun _=&gt;marked_active_reservation_complement tail head ktail khead H₀ HK π X Z σ a)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   rw [he]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   convert hσ (r,j) using 1 &lt;;&gt; congr!</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TwoFactorPrescribedMarkersIndependent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TwoFactorPrescribedMarkersIndependent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TwoFactorExtendedMarkers</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! The residual prescribed set formed from final-path endpoints and</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> surviving selected-path markers is independent. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {V I:Type} [Fintype V] [DecidableEq V] [DecidableEq I]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem two_factor_residual_prescribed_markers_independent</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (F Q:SimpleGraph V) (hF:F.IsRegularOfDegree 2) (hQ:Q≤F)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (s₁ s₂:Finset I) (u v:I→V) (P:∀ i,F.Walk (u i) (v i))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hp:∀i∈s₁∪s₂,(P i).IsPath)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hP:(↑(s₁∪s₂):Set I).PairwiseDisjoint (fun i=&gt;(P i).support.toFinset))</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (c d:ℕ) (hc:3≤c) (hlen:∀i∈s₁∪s₂,(P i).length=c*d+4)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (R:Finset V):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     let A₀ := (s₁.biUnion (fun i=&gt;{(P i).getVert 2,(P i).getVert (2+c*d)})) ∪</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (R ∩ s₂.biUnion (fun i=&gt;(Finset.range (d+1)).image (fun j=&gt;(P i).getVert (2+c*j))));</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ x∈A₀,∀ y∈A₀,¬Q.Adj x y := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let s:=s₁∪s₂</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   let T:=fun _ : I=&gt;(Finset.range (d+1)).image (fun j=&gt;2+c*j)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   let A:=s.biUnion (fun i=&gt;(T i).image (P i).getVert)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hind:=two_factor_extended_markers_independent F hF s u v P hp hP c d hc hlen</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hsub:(s₁.biUnion (fun i=&gt;{(P i).getVert 2,(P i).getVert (2+c*d)})) ∪</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (R ∩ s₂.biUnion (fun i=&gt;(Finset.range (d+1)).image (fun j=&gt;(P i).getVert (2+c*j))))⊆A := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     intro x hx</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     rcases Finset.mem_union.mp hx with hx|hx</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     · obtain ⟨i,hi,hx⟩:=Finset.mem_biUnion.mp hx</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       have hi&#x27;:i∈s := Finset.mem_union_left _ hi</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       simp only [Finset.mem_insert,Finset.mem_singleton] at hx</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       rcases hx with rfl|rfl</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       · apply Finset.mem_biUnion.mpr</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         refine ⟨i,hi&#x27;,Finset.mem_image.mpr ⟨2,?_,rfl⟩⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         exact Finset.mem_image.mpr ⟨0,by simp,by simp⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       · apply Finset.mem_biUnion.mpr</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         refine ⟨i,hi&#x27;,Finset.mem_image.mpr ⟨2+c*d,?_,rfl⟩⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         exact Finset.mem_image.mpr ⟨d,by simp,rfl⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     · obtain ⟨i,hi,hx⟩:=Finset.mem_biUnion.mp (Finset.mem_inter.mp hx).2</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       obtain ⟨j,hj,rfl⟩:=Finset.mem_image.mp hx</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       apply Finset.mem_biUnion.mpr</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       refine ⟨i,Finset.mem_union_right _ hi,Finset.mem_image.mpr ⟨2+c*j,?_,rfl⟩⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       exact Finset.mem_image.mpr ⟨j,hj,rfl⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   dsimp only</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   intro x hx y hy hxy</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   exact hind x (hsub hx) y (hsub hy) (hQ hxy)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> end Oberwolfach</span></pre></html>

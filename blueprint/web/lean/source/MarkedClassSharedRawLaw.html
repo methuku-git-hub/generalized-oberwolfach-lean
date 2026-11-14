@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedClassSharedRawLaw.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedClassSharedRawLaw.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ClassSharedRawProduct</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedExpandedRawLaw</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! All marked classes may use one global physical colouring and one shared</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> orientation while retaining their exact separate raw wheel laws. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem marked_class_shared_raw_law {V:Type} [Fintype V] [DecidableEq V] {k:ℕ}</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (U:Fin k→Type) [∀ a,Fintype (U a)] [∀ a,DecidableEq (U a)]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (ρ p t p₂ t₂ u:Fin k→ℝ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hρ:∀ a,0&lt;ρ a) (htotal:∑ a,ρ a=1)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hp:∀ a,0≤p a) (ht:∀ a,0≤t a) (hp₂:∀ a,0≤p₂ a) (ht₂:∀ a,0≤t₂ a) (hu:∀ a,0≤u a)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hbalance:∀ a,2*p a+2*t a+2*p₂ a+2*t₂ a+u a=ρ a)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (d:Fin k→ℕ) (hd:∀ a,2≤d a)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (q:∀ a,U a→Bool→ℝ) (hq:∀ a w g,0≤q a w g) (hQ:∀ a w,∑ g,q a w g≤1/8)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (s:∀ a,U a→Bool→ℝ) (hs:∀ a w j,0≤s a w j)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hS:∀ a w,∑ j,s a w j ≤ intervalUncoveredProbability (d a) (∑ g,q a w g)):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let hρ0:=fun a=&gt;(hρ a).le</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let inside:=fun a=&gt;FiniteLaw.categorical (markedPhysicalInsideProbability (p a) (t a) (p₂ a) (t₂ a) (u a) (ρ a))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (marked_physical_inside_nonneg (p a) (t a) (p₂ a) (t₂ a) (u a) (ρ a) (hp a) (ht a) (hp₂ a) (ht₂ a) (hu a) (hρ a))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (marked_physical_inside_sum (p a) (t a) (p₂ a) (t₂ a) (u a) (ρ a) (hρ a) (hbalance a))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let joint:=(FiniteLaw.categorical ρ hρ0 htotal).sigma inside</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let physical:=FiniteLaw.pi (fun _:Sym2 V=&gt;joint.prod FiniteLaw.fairCoin)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let μ:=fun a=&gt;rawExpandedMarkedWheelLaw (V:=V) (U:=U a) (p a) (t a) (p₂ a) (t₂ a) (u a)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (hp a) (ht a) (hp₂ a) (ht₂ a) (hu a)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (by have hh:=Finset.single_le_sum (fun b _=&gt;(hρ b).le) (Finset.mem_univ a);linarith [hbalance a])</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (d a) (hd a) (q a) (hq a) (hQ a) (s a) (hs a) (hS a)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let noise:=fun a=&gt;FiniteLaw.pi (fun e=&gt;μ a (Sum.inr e))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let law:=physical.prod (FiniteLaw.pi noise);</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     law.map (fun z e=&gt;(z.1 e).1.1)=FiniteLaw.pi (fun _:Sym2 V=&gt;FiniteLaw.categorical ρ hρ0 htotal) ∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀ a,law.map (fun z=&gt;combineSumCoordinates</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (fun e=&gt;(markedPhysicalOptionIndex (classRefinedView a (z.1 e).1),(z.1 e).2)) (z.2 a))=</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         FiniteLaw.pi (μ a):=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   intro hρ0 inside joint physical μ noise law</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hphysical:=marked_class_physical_product (E:=Sym2 V) ρ p t p₂ t₂ u hρ htotal hp ht hp₂ ht₂ hu hbalance</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   let view:=fun (a:Fin k) (z:Sym2 V→((Σ _:Fin k,Fin 5)×Bool)) e=&gt;(markedPhysicalOptionIndex (classRefinedView a (z e).1),(z e).2)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hview:∀ a,physical.map (view a)=FiniteLaw.pi (fun e=&gt;μ a (Sum.inl e)):=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     intro a</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     exact hphysical.2 a</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have h:=class_shared_raw_product physical (fun z e=&gt;(z e).1.1) view μ hview</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   exact ⟨by simpa [physical] using h.1.trans hphysical.1,h.2⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> end Oberwolfach</span></pre></html>

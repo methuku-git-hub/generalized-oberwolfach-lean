@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ClassRefinementLaw.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ClassRefinementLaw.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteLawSigmaProjection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteLawMap</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A single categorical class choice, refined conditionally, has exactly the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> original categorical projection. Distinct class views remain coupled. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace FiniteLaw</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def optional {A:Type} [Fintype A] (p:ℝ) (hp:0≤p) (hp1:p≤1) (μ:FiniteLaw A):FiniteLaw (Option A) where</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   mass x:=match x with | none=&gt;1-p | some a=&gt;p*μ.mass a</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   nonneg x:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     cases x with</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     | none =&gt; exact sub_nonneg.mpr hp1</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     | some a =&gt; exact mul_nonneg hp (μ.nonneg a)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   total:=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     rw [Fintype.sum_option]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     simp only [←Finset.mul_sum,μ.total,mul_one]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ring</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> end FiniteLaw</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> </span>
+<span id="L25"><a href="#L25" class="ln">  25</a> def classRefinedView {C A:Type} [DecidableEq C] (a:C) (z:Σ _:C,A):Option A:=</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   if z.1=a then some z.2 else none</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem categorical_refinement_class_marginal {k:ℕ} {A:Type} [Fintype A]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (ρ:Fin k→ℝ) (hρ:∀ a,0≤ρ a) (htotal:∑ a,ρ a=1)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (ν:Fin k→FiniteLaw A) (a:Fin k):</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let μ:=(FiniteLaw.categorical ρ hρ htotal).sigma ν;</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     μ.map (classRefinedView (A:=A) a)=FiniteLaw.optional (ρ a) (hρ a)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (by have h:=Finset.single_le_sum (fun b _=&gt;hρ b) (Finset.mem_univ a);linarith) (ν a):=by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   intro μ</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   apply finiteLaw_ext</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   intro x</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   cases x with</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   | none =&gt;</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     simp only [FiniteLaw.map,FiniteLaw.optional]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     rw [Fintype.sum_sigma]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hsum:(∑ c:Fin k,((if c=a then ρ c else 0)+(if c=a then 0 else ρ c)))=1:=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       calc</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         _ = ∑ c:Fin k,ρ c:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>           apply Finset.sum_congr rfl</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>           intro c _</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>           by_cases h:c=a &lt;;&gt; simp [h]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         _ = 1:=htotal</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     have hs0:(∑ c:Fin k,if c=a then ρ c else 0)=ρ a:=by simp</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hs:(∑ c:Fin k,if c=a then 0 else ρ c)=1-ρ a:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       rw [Finset.sum_add_distrib,hs0] at hsum</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       linarith</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     calc</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       _ = ∑ c:Fin k,if c=a then 0 else ρ c:=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         apply Finset.sum_congr rfl</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>         intro c _</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         by_cases hc:c=a</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         · simp [classRefinedView,hc]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         · simp [classRefinedView,hc,μ,FiniteLaw.sigma,FiniteLaw.categorical,←Finset.mul_sum,(ν c).total]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       _ = _:=hs</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   | some x =&gt;</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     simp only [FiniteLaw.map,FiniteLaw.optional]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     rw [Fintype.sum_sigma]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     have heach (c:Fin k):</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         (∑ z:A,if classRefinedView a ⟨c,z⟩=some x then μ.mass ⟨c,z⟩ else 0)=</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>           if c=a then ρ a*(ν a).mass x else 0:=by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       by_cases hc:c=a</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       · subst c</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         simp [classRefinedView,μ,FiniteLaw.sigma,FiniteLaw.categorical]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       · simp [classRefinedView,hc]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     calc</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>       _ = ∑ c:Fin k,if c=a then ρ a*(ν a).mass x else 0:=by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         apply Finset.sum_congr rfl</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>         intro c _</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         convert heach c using 1</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>         apply Finset.sum_congr rfl</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>         intro y _</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>         by_cases h:classRefinedView a ⟨c,y⟩=some x &lt;;&gt; simp [h]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       _ = _:=by simp</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> end Oberwolfach</span>
+<span id="L80"><a href="#L80" class="ln">  80</a> </span></pre></html>

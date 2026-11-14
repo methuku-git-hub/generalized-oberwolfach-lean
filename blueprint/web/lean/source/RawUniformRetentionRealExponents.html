@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawUniformRetentionRealExponents.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawUniformRetentionRealExponents.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawUniformRetention</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Real polynomial exponents in the manuscript&#x27;s restriction interface.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> Rounding exponents upward changes only uniform thresholds, not the law. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 2400000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem raw_uniform_retention_restrictions_real (d : ℕ) (hd : 2≤d)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (C Q p ζ : ℝ) (hp : 0&lt;p) (hζ : 0&lt;ζ) :</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃ m N : ℕ,1≤m ∧ 1≤N ∧ ∀ (V U Γ Color I : Type)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [Fintype I] [Nonempty V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       [DecidableEq V] [DecidableEq U],</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     N≤Fintype.card V → Fintype.card U≤Fintype.card V →</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (Fintype.card I:ℝ)≤(Fintype.card V:ℝ)^C →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀ (π : Equiv.Perm V), (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (g : Γ) (t₀ : ℝ),(∀ u,q u g=t₀) → p*Fintype.card V≤t₀*Fintype.card U →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (S : I→Finset V) (T : I→Finset U),</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ i x,π x∈S i ↔ x∈S i) → (∀ i,m≤(S i).card) → (∀ i,m≤(T i).card) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     1-(Fintype.card V:ℝ)^(-Q)≤(rawUniformRetentionLaw π d hd g q hq hQ s hs hS).probability</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (fun z=&gt;(∀ a,|((rawStartHubSet π d z.1 g a).card:ℝ)-t₀*Fintype.card U/d|≤(Fintype.card V:ℝ)^(3/5:ℝ)) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         RetainedRestrictionGood π d z.1 g (startRetentionMinimum (rawStartHubSet π d z.1 g)) S T ζ z.2) := by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   obtain ⟨m,N,hm,hN1,hN⟩ := raw_uniform_retention_restrictions d (Nat.ceil C) (Nat.ceil Q) hd p ζ hp hζ</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨m,N,hm,hN1,?_⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro V U Γ Color I _ _ _ _ _ _ _ _ hn hu hI π hπ q hq hQ s hs hS g t₀ hg hmass S T hInv hSc hTc</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hn1 : (1:ℝ)≤Fintype.card V := by exact_mod_cast hN1.trans hn</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hi : Fintype.card I≤(Fintype.card V)^(Nat.ceil C) := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hh := hI.trans (Real.rpow_le_rpow_of_exponent_le hn1 (Nat.le_ceil C))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     rw [Real.rpow_natCast] at hh</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     exact_mod_cast hh</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have he : 1/(Fintype.card V:ℝ)^(Nat.ceil Q)≤(Fintype.card V:ℝ)^(-Q) := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hh := Real.rpow_le_rpow_of_exponent_le hn1 (neg_le_neg (Nat.le_ceil Q))</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     simpa only [Real.rpow_neg (by linarith : (0:ℝ)≤Fintype.card V),Real.rpow_natCast,one_div] using hh</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   exact (sub_le_sub_left he 1).trans</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hN V U Γ Color I hn hu hi π hπ q hq hQ s hs hS g t₀ hg hmass S T hInv hSc hTc)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a> </span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

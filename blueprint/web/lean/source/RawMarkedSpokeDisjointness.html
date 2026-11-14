@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawMarkedSpokeDisjointness.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawMarkedSpokeDisjointness.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawMarkedHubCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The two raw spoke classes, including the successor of a marked label,</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> are disjoint at a fixed hub. This is a deterministic property of every raw</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> outcome, not a consequence of marginal probabilities. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem rawIntervalCovered_successor_blocked</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {V Γ Color : Type} [Fintype V] [DecidableEq V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (π : Equiv.Perm V) (d : ℕ) (hd : 1≤d) (σ : RawIntervalOutcome V Γ Color)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (x : V) (g : Γ) (hx : rawIntervalCovered π d σ x g) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     rawIntervalBlocked π d σ (π x) := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   obtain ⟨a,ha,hxa⟩ := hx</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   refine ⟨g,a,ha,?_⟩</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   obtain ⟨i,hi⟩ := (permutationWindow_mem_iff π 0 (d-1) a x).mp hxa</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   apply (permutationWindow_mem_iff π 0 d a (π x)).mpr</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   refine ⟨⟨i.val+1,by have hh:=i.isLt;omega⟩,?_⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   simp only [pow_zero,Equiv.Perm.one_apply] at hi ⊢</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   rw [pow_succ&#x27;,Equiv.Perm.mul_apply,hi]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem rawMarkedSpokes_disjoint</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     {V U Γ Color : Type} [Fintype V] [DecidableEq V]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (π : Equiv.Perm V) (d : ℕ) (σ : RawIntervalFamilyOutcome V U Γ Color)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (g : Γ) (j : Color) (v : V) (u : U) :</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     ¬(rawMarkedSpokes π d σ g j false v u ∧ rawMarkedSpokes π d σ g j true v u) := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   rintro ⟨h₀,hK⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   change rawIntervalFamilyState π d σ (v,u)=some (Sum.inr j) at h₀</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   change rawIntervalFamilyState π d σ (v,u)=some (Sum.inl g) at hK</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have h := h₀.symm.trans hK</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   cases h</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a> theorem rawMarkedSpokes_successor_disjoint</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     {V U Γ Color : Type} [Fintype V] [DecidableEq V]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (π : Equiv.Perm V) (d : ℕ) (hd : 1≤d) (σ : RawIntervalFamilyOutcome V U Γ Color)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (g : Γ) (j : Color) (v : V) (u : U) :</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     ¬(rawMarkedSpokes π d σ g j false (π v) u ∧ rawMarkedSpokes π d σ g j true v u) := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   rintro ⟨h₀,hK⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hn := (rawIntervalState_label_iff π d (fun e=&gt;σ (u,e)) (π v) j).mp h₀</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hc := (rawIntervalState_interval_iff π d (fun e=&gt;σ (u,e)) v g).mp hK</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   exact hn.1 (rawIntervalCovered_successor_blocked π d hd _ v g hc)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a> </span>
+<span id="L47"><a href="#L47" class="ln">  47</a> theorem rawMarkedSpokeClasses_disjoint</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     {V U Γ Color : Type} [Fintype V] [DecidableEq V]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (π : Equiv.Perm V) (d : ℕ) (hd : 1≤d) (σ : RawIntervalFamilyOutcome V U Γ Color)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (g : Γ) (j : Color) (u : Fin 2→U) :</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     let T := fun b : Bool=&gt;Finset.univ.filter (fun v=&gt;∀ i,rawMarkedSpokes π d σ g j b v (u i))</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     Disjoint (T false) (T true) ∧ Disjoint (T false) ((T true).image π) := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   intro T</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   constructor</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   · apply Finset.disjoint_left.mpr</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     intro v h₀ hK</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     exact rawMarkedSpokes_disjoint π d σ g j v (u 0)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       ⟨(Finset.mem_filter.mp h₀).2 0,(Finset.mem_filter.mp hK).2 0⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   · apply Finset.disjoint_left.mpr</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     intro v h₀ hK</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     obtain ⟨w,hw,rfl⟩ := Finset.mem_image.mp hK</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     exact rawMarkedSpokes_successor_disjoint π d hd σ g j w (u 0)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       ⟨(Finset.mem_filter.mp h₀).2 0,(Finset.mem_filter.mp hw).2 0⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

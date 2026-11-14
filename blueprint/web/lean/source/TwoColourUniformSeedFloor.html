@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TwoColourUniformSeedFloor.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TwoColourUniformSeedFloor.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Basic.Real.Basic</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Tactic</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A single fixed lower bound applies to both the selected and approximate</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> spoke colours and to the two approximate rim probabilities. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem two_colour_uniform_seed_floor {U:Type} (s₀ pstar p₂ k₂:ℝ) (b:U→ℝ)</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (hs₀:0&lt;s₀) (hpstar:0&lt;pstar) (hp:pstar≤p₂) (hk:pstar≤k₂) (hb:∀ u,pstar≤b u):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     let floor:=min s₀ pstar</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     let s:=fun (u:U) (j:Bool)=&gt;if j then b u else s₀;</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     0&lt;floor ∧ floor≤p₂ ∧ floor≤k₂ ∧ ∀ u j,floor≤s u j:=by</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   intro floor s</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hf:0&lt;floor:=lt_min hs₀ hpstar</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hs:floor≤s₀:=min_le_left _ _</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hp&#x27;:floor≤pstar:=min_le_right _ _</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   refine ⟨hf,hp&#x27;.trans hp,hp&#x27;.trans hk,?_⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   intro u j</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   cases j &lt;;&gt; simp [s,hs,hp&#x27;.trans (hb u)]</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongCapacityBoundedAssembly.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongCapacityBoundedAssembly.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongCapacityMixingReserve</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongCapacityPointwiseBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Exact edge equations and uniform positive path-tuple weights are obtained</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> simultaneously from the same fixed point. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def longCycleLower (L : Fin 3 → ℕ) (a₀ d₀ d₁ : ℝ) : ℝ :=</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   ∑ c,threeSectorCoefficient L (conditionalPathLower a₀ d₀ d₁) (halfResidualLower a₀ d₀ d₁) (d₁/3) c</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> def longCycleUpper (L : Fin 3 → ℕ) (a₁ d₀ d₁ : ℝ) : ℝ :=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   ∑ c,threeSectorCoefficient L (conditionalPathUpper a₁ d₀ d₁) (halfResidualUpper a₁ d₀ d₁) (d₀/3) c</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem longCycleLower_pos (L : Fin 3 → ℕ) (a₀ d₀ d₁ : ℝ)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (ha₀ : 0&lt;a₀) (hd₀ : 0&lt;d₀) (hd₁ : 0&lt;d₁) : 0&lt;longCycleLower L a₀ d₀ d₁ := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   apply Finset.sum_pos _ Finset.univ_nonempty</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   intro c _</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   exact threeSectorCoefficient_pos L _ _ _</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (fun k =&gt; conditionalPathLower_pos a₀ d₀ d₁ k ha₀ hd₀ hd₁)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (fun k =&gt; halfResidualLower_pos a₀ d₀ d₁ k ha₀ hd₀ hd₁) (by positivity) c</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem longCycleUpper_pos (L : Fin 3 → ℕ) (a₁ d₀ d₁ : ℝ)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (ha₁ : 0&lt;a₁) (hd₀ : 0&lt;d₀) (hd₁ : 0&lt;d₁) : 0&lt;longCycleUpper L a₁ d₀ d₁ := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   apply Finset.sum_pos _ Finset.univ_nonempty</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro c _</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   exact threeSectorCoefficient_pos L _ _ _</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (fun k =&gt; conditionalPathUpper_pos a₁ d₀ d₁ k ha₁ hd₀ hd₁)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (fun k =&gt; halfResidualUpper_pos a₁ d₀ d₁ k ha₁ hd₀ hd₁) (by positivity) c</span>
+<span id="L34"><a href="#L34" class="ln">  34</a> </span>
+<span id="L35"><a href="#L35" class="ln">  35</a> set_option maxHeartbeats 800000 in</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> theorem long_capacity_bounded_interval_weights {X : Type*} [Fintype X]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (a : ℕ → X → X → ℝ) (d : ℕ → X → ℝ)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (ha : ∀ i x y, 0 ≤ a i x y) (hd : ∀ i x, 0 &lt; d i x)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hrow : ∀ i x, ∑ y, a i x y=d i x)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hcol : ∀ i y, ∑ x, a i x y=d (i+1) y)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (M : ℝ) (hM : 0 &lt; M) (hms : ∀ i, ∑ x, d i x=M)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (s L : Fin 3 → ℕ) (t : ℕ)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hbd : ∀ i x, d (s i+L i) x=d (s (finRotate 3 i)) x)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (J : Finset ℕ) (hJ : J.card ≤ 1) (κ B : ℝ)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hκ : 0 &lt; κ) (hκ1 : κ &lt; 1) (hB : 1 ≤ B)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (ht : 1+3*⌈Real.log (10*(B+1)) / (-Real.log (1-κ))⌉₊ ≤ t)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hL : ∀ i, 4*t+1 ≤ L i)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hupper : ∀ i j, s i ≤ j → j &lt; s i+L i → j ∉ J → ∀ x y,</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       capacityTransition a d j x y ≤ B*capacityProfile d M (j+1) y)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hminor : ∀ i j, s i ≤ j → j+3 ≤ s i+L i → j ∉ J → j+1 ∉ J → j+2 ∉ J →</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       ∀ x y, κ*capacityProfile d M (j+3) y ≤ transitionWalk (capacityTransition a d) j 3 x y)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (n a₀ a₁ d₀ d₁ : ℝ) (hn : (Fintype.card X : ℝ)=n) (hnpos : 0&lt;n)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (ha₀ : 0&lt;a₀) (ha₁ : 0&lt;a₁) (hd₀ : 0&lt;d₀) (hd₁ : 0&lt;d₁)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hdscale : ∀ i x, d₀*n ≤ d i x ∧ d i x ≤ d₁*n) :</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     ∃ ω : (∀ i,Fin (L i+1) → X) → ℝ,</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>       (∀ p,0≤ω p) ∧ (∑ p,ω p)=M ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (∀ (i : Fin 3) (j : Fin (L i)) (x y : X),</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         (∑ p,if p i j.castSucc=x ∧ p i j.succ=y then ω p else 0)=a (s i+j.val) x y) ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (∀ p,0&lt;ω p → ∀ i,p i (Fin.last (L i))=p (finRotate 3 i) 0) ∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       (∀ p,(∀ i,p i (Fin.last (L i))=p (finRotate 3 i) 0) →</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>         (∀ i (j : Fin (L i)),a₀ ≤ a (s i+j.val) (p i j.castSucc) (p i j.succ) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>           a (s i+j.val) (p i j.castSucc) (p i j.succ) ≤ a₁) →</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         longCycleLower L a₀ d₀ d₁/n^((∑ i,L i)-2) ≤ ω p ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>           ω p ≤ longCycleUpper L a₁ d₀ d₁/n^((∑ i,L i)-2)) := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   obtain ⟨Q,ω,hω0,hωM,hωedge,hωsupp,hfixed,hformula⟩ :=</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     long_capacity_interval_assembly a d ha hd hrow hcol M hM hms s L t hbd J hJ κ B hκ hκ1 hB ht hL hupper hminor</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   obtain ⟨hmix,hres⟩ := long_capacity_mixing_reserve a d ha hd hrow hcol M hM hms s L t hbd J hJ κ B hκ hκ1 hB ht hL hupper hminor</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   refine ⟨ω,hω0,hωM,hωedge,hωsupp,?_⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   intro p hp hap</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hb (c : Fin 3) := long_capacity_sector_bounds a d ha hd hrow hcol M n a₀ a₁ d₀ d₁</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     hn hnpos ha₀ ha₁ hd₀ hd₁ hms hdscale s L (fun i =&gt; by have := hL i;omega) hbd</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     hmix hres Q hfixed p hp hap c</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hlo := Finset.sum_le_sum (fun c (_ : c∈Finset.univ) =&gt; (hb c).1)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hup := Finset.sum_le_sum (fun c (_ : c∈Finset.univ) =&gt; (hb c).2)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   rw [← Finset.sum_div] at hlo hup</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   rw [hformula p hp]</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   exact ⟨hlo,hup⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a> </span>
+<span id="L79"><a href="#L79" class="ln">  79</a> end Oberwolfach</span></pre></html>

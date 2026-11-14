@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RawMarkedRetentionLocalEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RawMarkedRetentionLocalEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawMarkedRetentionLocalProjection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.RawUniformRetentionLocalEvent</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 8000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem raw_marked_retention_local_event</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (d:ℕ) (hd:2≤d) (p ζ c δ:ℝ) (hp:0&lt;p) (hζ:0&lt;ζ) (hc:0&lt;c) (hδ:0&lt;δ):</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     ∃m N:ℕ,1≤m ∧ 1≤N ∧ ∀(V U Γ Color:Type)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [Nonempty V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       [LinearOrder V] [DecidableEq U],</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     N≤Fintype.card V → Fintype.card U≤Fintype.card V →</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∀(I:Type) (T:Finset I) (A:I→Finset V) (H:I→Finset U),</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀i∈T,m≤(A i).card) → Set.InjOn (fun i=&gt;(A i).card) T →</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (∀i∈T,(H i).card≤(A i).card) → (∀i∈T,c*((A i).card:ℝ)≤(H i).card) →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀(π:Equiv.Perm V) (p₁ k₁:ℝ) (hp₁:0≤p₁) (hk₁:0≤k₁) (hphys:2*p₁+2*k₁≤1) (hnoshort:∀x l,0&lt;l→l&lt;2*d+1→(π^l) x≠x)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (q:U→Γ→ℝ) (hq:∀u g,0≤q u g) (hQ:∀u,∑g,q u g≤1/8)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (s:U→Color→ℝ) (hs:∀u j,0≤s u j) (hS:∀u,∑j,s u j ≤ intervalUncoveredProbability d (∑g,q u g))</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (g:Γ) (t₀:ℝ), (∀u,q u g=t₀) → p*Fintype.card V≤t₀*Fintype.card U →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀i∈T,∀x,π x∈A i↔x∈A i) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     1-δ≤(rawMarkedRetentionLaw π d hd g p₁ k₁ hp₁ hk₁ hphys q hq hQ s hs hS).probability</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (fun z=&gt;∀i∈T,RetainedRestrictionLocalGood π d (fun e=&gt;z.1 (Sum.inr e)) g</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) g)) (A i) (H i) ζ z.2):=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   obtain ⟨m,N,hm,hN,hraw⟩:=raw_uniform_retention_local_event d hd p ζ c δ hp hζ hc hδ</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   refine ⟨m,N,hm,hN,?_⟩</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   intro V U Γ Color _ _ _ _ _ _ _ hn hu I T A H hmin hinj hHup hHlo π p₁ k₁ hp₁ hk₁ hphys hnoshort q hq hQ s hs hS g t₀ hg hmass hInv</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hh:=hraw V U Γ Color hn hu I T A H hmin hinj hHup hHlo π hnoshort q hq hQ s hs hS g t₀ hg hmass hInv</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hproj:=raw_marked_retention_local_projection_probability π d hd g p₁ k₁ hp₁ hk₁ hphys q hq hQ s hs hS I T A H ζ</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   rw [hproj]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   exact hh</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> end Oberwolfach</span></pre></html>

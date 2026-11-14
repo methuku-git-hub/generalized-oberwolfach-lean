@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryLocalTargetError.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryLocalTargetError.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryLocalLoads</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The original ordinary local target is close to one. The conflict</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> loss is applied before restricting to the sparse host; no density factor</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> is attached to the realized forbidden-pair deletion. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 2400000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V : Type} [Fintype V] [DecidableEq V] {r : ℕ}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem ordinaryLocalTarget_error (P F : SimpleGraph V) (hr : 2≤r) (hn : 0&lt;Fintype.card V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (weight : OrdinaryCycle P r→ℝ) (hweight : ∀ C,0≤weight C)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (B L D δ : ℝ) (hB : 0≤B) (hL : 0≤L) (hδ : 0≤δ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hweightB : ∀ C,weight C≤B/(Fintype.card V:ℝ)^(r-2))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hF : ∀ v,(F.degree v:ℝ)≤L)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hedge : ∀ x y,(∑ C,if C.val.val.Adj x y then weight C else 0)=if P.Adj x y then 1 else 0)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hD : (Fintype.card V:ℝ)/2≤D) (v : V) (hdeg : |(P.degree v:ℝ)-D|≤δ*Fintype.card V) :</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     |ordinaryLocalTarget P F weight D v-1|≤2*δ+12*(r:ℝ)^4*B*L/Fintype.card V := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let n : ℝ := Fintype.card V</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hnR : 0&lt;n := Nat.cast_pos.mpr hn</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hDpos : 0&lt;D := (half_pos hnR).trans_le hD</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   have hload := ordinary_admissible_cycle_vertex_load P F r hr hn weight hweight B hB hweightB L hF hedge v</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hid : ordinaryLocalTarget P F weight D v-(P.degree v:ℝ)/D=</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (2/D)*((∑ C,if v∈C.val.val.support ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (∀ x∈C.val.val.support,∀ y∈C.val.val.support,¬F.Adj x y) then weight C else 0)-(P.degree v:ℝ)/2) := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     unfold ordinaryLocalTarget;ring</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hmid : |ordinaryLocalTarget P F weight D v-(P.degree v:ℝ)/D|≤6*(r:ℝ)^4*B*L/D := by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     rw [hid,abs_mul,abs_of_nonneg (show 0≤2/D by positivity)]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have hh := mul_le_mul_of_nonneg_left hload (show 0≤2/D by positivity)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     convert hh using 1 &lt;;&gt; ring</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hlast : |(P.degree v:ℝ)/D-1|≤δ*n/D := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have he : (P.degree v:ℝ)/D-1=((P.degree v:ℝ)-D)/D := by field_simp</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     rw [he,abs_div,abs_of_pos hDpos]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     exact div_le_div_of_nonneg_right hdeg hDpos.le</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hlo : 6*(r:ℝ)^4*B*L/D≤12*(r:ℝ)^4*B*L/n := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hh := div_le_div_of_nonneg_left (show 0≤6*(r:ℝ)^4*B*L by positivity) (half_pos hnR) hD</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     convert hh using 1 &lt;;&gt; field_simp &lt;;&gt; ring</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hhi : δ*n/D≤2*δ := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     have hh := div_le_div_of_nonneg_left (show 0≤δ*n by positivity) (half_pos hnR) hD</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have he : δ*n/(n/2)=2*δ := by field_simp</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact hh.trans_eq he</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have ht := abs_sub_le (ordinaryLocalTarget P F weight D v) ((P.degree v:ℝ)/D) 1</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   linarith only [ht,hmid,hlast,hlo,hhi]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> end Oberwolfach</span></pre></html>

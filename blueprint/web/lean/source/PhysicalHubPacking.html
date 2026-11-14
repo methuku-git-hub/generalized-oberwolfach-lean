@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PhysicalHubPacking.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PhysicalHubPacking.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Data.Finset.Disjoint</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Mathlib.Data.Fintype.Powerset</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A single resource packing splits into disjoint physical rim-edge sets</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> indexed by its original hub. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> def physicalHubRims {C U V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (S:Finset C) (hub:C→U) (R:C→Finset (Finset V⊕(V×U))) (w:U):Finset (Finset V):=</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   Finset.univ.filter (fun e=&gt;∃c∈S,hub c=w ∧ Sum.inl e∈R c)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem physical_hub_rims_packed</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {C U V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (S:Finset C) (hub:C→U) (R:C→Finset (Finset V⊕(V×U)))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hpack:∀c∈S,∀c&#x27;∈S,c≠c&#x27;→Disjoint (R c) (R c&#x27;)):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (∀w z,w≠z→Disjoint (physicalHubRims S hub R w) (physicalHubRims S hub R z)) ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀c∈S,∀e,Sum.inl e∈R c→e∈physicalHubRims S hub R (hub c)):=by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   constructor</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   · intro w z hne</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     intro e he hf</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     simp only [physicalHubRims,Finset.mem_filter,Finset.mem_univ,true_and] at he hf</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     obtain ⟨c,hc,hw,hr⟩:=he</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     obtain ⟨c&#x27;,hc&#x27;,hz,hr&#x27;⟩:=hf</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     have hcc:c≠c&#x27;:=by intro heq;apply hne;rw [←hw,←hz,heq]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     exact Finset.disjoint_left.mp (hpack c hc c&#x27; hc&#x27; hcc) hr hr&#x27;</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   · intro c hc e he</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     simp only [physicalHubRims,Finset.mem_filter,Finset.mem_univ,true_and]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     exact ⟨c,hc,rfl,he⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> end Oberwolfach</span></pre></html>

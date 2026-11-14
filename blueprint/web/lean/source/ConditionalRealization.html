@@ -1,0 +1,254 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ConditionalRealization.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ConditionalRealization.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FiniteUniform</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteSamplingMeasure</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Conditional realization of compatible finite marginals. The boundary law</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> is fixed and every interval law is recovered exactly. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem finiteLaw_mass_le_map {P B : Type*} [Fintype P] [Fintype B]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (μ : FiniteLaw P) (f : P → B) (p : P) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     μ.mass p ≤ (μ.map f).mass (f p) := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hh := Finset.single_le_sum (s := Finset.univ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (f := fun q =&gt; if f q = f p then μ.mass q else 0)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (fun q _ =&gt; by split_ifs; exact μ.nonneg q; exact le_refl _) (Finset.mem_univ p)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   simpa only [ite_true, FiniteLaw.map] using hh</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> def FiniteLaw.conditionOnMap {P B : Type*} [Fintype P] [Fintype B]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (μ : FiniteLaw P) (f : P → B) (b : B) : FiniteLaw P := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   classical</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   by_cases hz : (μ.map f).mass b = 0</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   · exact μ</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · exact {</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       mass p := if f p = b then μ.mass p / (μ.map f).mass b else 0</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       nonneg p := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         split_ifs</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         · exact div_nonneg (μ.nonneg p) ((μ.map f).nonneg b)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         · exact le_refl _</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       total := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         have hh (p : P) : (if f p = b then μ.mass p / (μ.map f).mass b else 0) =</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>             (if f p = b then μ.mass p else 0) / (μ.map f).mass b := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>           split_ifs &lt;;&gt; simp</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         simp_rw [hh]</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         rw [← Finset.sum_div]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         exact div_self hz }</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem finiteLaw_conditionOnMap_weight {P B : Type*} [Fintype P] [Fintype B]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (μ : FiniteLaw P) (f : P → B) (b : B) (p : P) :</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (μ.map f).mass b * (μ.conditionOnMap f b).mass p =</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       if f p = b then μ.mass p else 0 := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   by_cases hz : (μ.map f).mass b = 0</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   · simp only [hz, zero_mul]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     by_cases hp : f p = b</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     · have hh := finiteLaw_mass_le_map μ f p</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       rw [hp, hz] at hh</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       simp only [hp, ite_true]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       exact (le_antisymm hh (μ.nonneg p)).symm</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     · simp only [hp, ite_false]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   · simp only [FiniteLaw.conditionOnMap, hz, dite_false]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     by_cases hp : f p = b</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     · simp only [hp, ite_true]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       exact mul_div_cancel₀ _ hz</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     · simp only [hp, ite_false, mul_zero]</span>
+<span id="L57"><a href="#L57" class="ln">  57</a> </span>
+<span id="L58"><a href="#L58" class="ln">  58</a> theorem finiteLaw_conditionOnMap_reconstruct {T P B : Type*}</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     [Fintype T] [Fintype P] [Fintype B]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (ν : FiniteLaw T) (μ : FiniteLaw P) (g : T → B) (f : P → B)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (h : ν.map g = μ.map f) (p : P) :</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (∑ t, ν.mass t * (μ.conditionOnMap f (g t)).mass p) = μ.mass p := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   change ν.expectation (fun t =&gt; (μ.conditionOnMap f (g t)).mass p) = _</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   rw [← finiteLaw_map_expectation ν g (fun b =&gt; (μ.conditionOnMap f b).mass p), h]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   unfold FiniteLaw.expectation</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   simp_rw [finiteLaw_conditionOnMap_weight]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   simp</span>
+<span id="L68"><a href="#L68" class="ln">  68</a> </span>
+<span id="L69"><a href="#L69" class="ln">  69</a> theorem finiteLaw_pi_coordinate_probability {I : Type*} [Fintype I] [DecidableEq I]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     {P : I → Type*} [∀ i, Fintype (P i)]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (μ : ∀ i, FiniteLaw (P i)) (i : I) (p : P i) :</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (FiniteLaw.pi μ).probability (fun σ =&gt; σ i = p) = (μ i).mass p := by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   let : ∀ i, MeasurableSpace (P i) := fun _ =&gt; ⊤</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   let : ∀ i, MeasurableSingletonClass (P i) := fun _ =&gt; ⟨fun _ =&gt; trivial⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hh := finiteLaw_coordinate_expectation μ i (fun q =&gt; if q = p then 1 else 0)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   simpa [FiniteLaw.expectation, FiniteLaw.probability, mul_ite] using hh</span>
+<span id="L77"><a href="#L77" class="ln">  77</a> </span>
+<span id="L78"><a href="#L78" class="ln">  78</a> theorem finiteLaw_conditional_realization_with_formula</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     {T I : Type*} [Fintype T] [Fintype I] [DecidableEq I]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     {P B : I → Type*} [∀ i, Fintype (P i)] [∀ i, Fintype (B i)]</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (ν : FiniteLaw T) (μ : ∀ i, FiniteLaw (P i))</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     (g : ∀ i, T → B i) (f : ∀ i, P i → B i)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     (h : ∀ i, ν.map (g i) = (μ i).map (f i)) :</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     ∃ Ω : FiniteLaw (Σ _ : T, ∀ i, P i),</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       (∀ t, (∑ σ, Ω.mass ⟨t, σ⟩) = ν.mass t) ∧</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       (∀ i p, Ω.probability (fun z =&gt; z.2 i = p) = (μ i).mass p) ∧</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       (∀ t σ, 0 &lt; Ω.mass ⟨t, σ⟩ → ∀ i, f i (σ i) = g i t) ∧</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       (∀ t σ, Ω.mass ⟨t, σ⟩ = ν.mass t *</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>         ∏ i, ((μ i).conditionOnMap (f i) (g i t)).mass (σ i)) := by</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   let κ (t : T) (i : I) := (μ i).conditionOnMap (f i) (g i t)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   let Ω := ν.sigma (fun t =&gt; FiniteLaw.pi (κ t))</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   refine ⟨Ω, ?_, ?_, ?_, ?_⟩</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   · intro t</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     change (∑ σ, ν.mass t * (FiniteLaw.pi (κ t)).mass σ) = _</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     rw [← Finset.mul_sum, (FiniteLaw.pi (κ t)).total, mul_one]</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   · intro i p</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     change (∑ z : (Σ _ : T, ∀ i, P i), if z.2 i = p then</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>       ν.mass z.1 * (FiniteLaw.pi (κ z.1)).mass z.2 else 0) = _</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     rw [Fintype.sum_sigma]</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     have hh (t : T) :</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>         (∑ σ, if σ i = p then ν.mass t * (FiniteLaw.pi (κ t)).mass σ else 0) =</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>         ν.mass t * (κ t i).mass p := by</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>       rw [← finiteLaw_pi_coordinate_probability (κ t) i p]</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>       unfold FiniteLaw.probability</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>       rw [Finset.mul_sum]</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>       apply Finset.sum_congr rfl</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>       intro σ hσ</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>       split_ifs &lt;;&gt; simp</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     simp_rw [hh]</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     exact finiteLaw_conditionOnMap_reconstruct ν (μ i) (g i) (f i) (h i) p</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>   · intro t σ hpos i</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     by_contra hbad</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     have hv : 0 &lt; ν.mass t := by</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>       have hh := (mul_pos_iff.mp hpos)</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>       rcases hh with ⟨hv, _⟩ | ⟨hv, _⟩</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>       · exact hv</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>       · exact False.elim ((not_lt_of_ge (ν.nonneg t)) hv)</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     have hK : 0 &lt; ((μ i).map (f i)).mass (g i t) := by</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>       rw [← h i]</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>       exact hv.trans_le (finiteLaw_mass_le_map ν (g i) t)</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     have hz : (κ t i).mass (σ i) = 0 := by</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>       dsimp only [κ]</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>       simp only [FiniteLaw.conditionOnMap, hK.ne&#x27;, dite_false, hbad, ite_false]</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     have hprod : (FiniteLaw.pi (κ t)).mass σ = 0 := by</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>       exact Finset.prod_eq_zero (Finset.mem_univ i) hz</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     change 0 &lt; ν.mass t * (FiniteLaw.pi (κ t)).mass σ at hpos</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     rw [hprod, mul_zero] at hpos</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     exact (lt_irrefl 0) hpos</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>   · intro t σ</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     rfl</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a> </span>
+<span id="L132"><a href="#L132" class="ln"> 132</a> theorem finiteLaw_conditional_realization</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     {T I : Type*} [Fintype T] [Fintype I] [DecidableEq I]</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     {P B : I → Type*} [∀ i, Fintype (P i)] [∀ i, Fintype (B i)]</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     (ν : FiniteLaw T) (μ : ∀ i, FiniteLaw (P i))</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     (g : ∀ i, T → B i) (f : ∀ i, P i → B i)</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     (h : ∀ i, ν.map (g i) = (μ i).map (f i)) :</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     ∃ Ω : FiniteLaw (Σ _ : T, ∀ i, P i),</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>       (∀ t, (∑ σ, Ω.mass ⟨t, σ⟩) = ν.mass t) ∧</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>       (∀ i p, Ω.probability (fun z =&gt; z.2 i = p) = (μ i).mass p) ∧</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>       (∀ t σ, 0 &lt; Ω.mass ⟨t, σ⟩ → ∀ i, f i (σ i) = g i t) := by</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>   obtain ⟨Ω, hb, hp, hs, _⟩ := finiteLaw_conditional_realization_with_formula ν μ g f h</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>   exact ⟨Ω, hb, hp, hs⟩</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a> </span>
+<span id="L145"><a href="#L145" class="ln"> 145</a> theorem weighted_conditional_realization_with_formula</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     {T I : Type*} [Fintype T] [Fintype I] [DecidableEq I]</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>     {P E : I → Type*} [∀ i, Fintype (P i)] [∀ i, Fintype (E i)]</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>     (J : T → ℝ) (w : ∀ i, P i → ℝ) (B : ℝ) (hB : 0 &lt; B)</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>     (hJ : ∀ t, 0 ≤ J t) (hw : ∀ i p, 0 ≤ w i p)</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>     (hJsum : ∑ t, J t = B) (hwsum : ∀ i, ∑ p, w i p = B)</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>     (g : ∀ i, T → E i) (f : ∀ i, P i → E i)</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>     (hmarg : ∀ i e, (∑ t, if g i t = e then J t else 0) =</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>       ∑ p, if f i p = e then w i p else 0) :</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>     ∃ W : (Σ _ : T, ∀ i, P i) → ℝ,</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>       (∀ z, 0 ≤ W z) ∧ (∑ z, W z) = B ∧</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>       (∀ t, (∑ σ, W ⟨t, σ⟩) = J t) ∧</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>       (∀ i p, (∑ z, if z.2 i = p then W z else 0) = w i p) ∧</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>       (∀ t σ, 0 &lt; W ⟨t, σ⟩ → ∀ i, f i (σ i) = g i t) ∧</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>       (∀ t σ, W ⟨t, σ⟩ = J t * ∏ i,</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>         if f i (σ i) = g i t then</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>           w i (σ i) / (∑ p, if f i p = g i t then w i p else 0) else 0) := by</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>   let ν : FiniteLaw T := {</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>     mass t := J t / B</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>     nonneg t := div_nonneg (hJ t) hB.le</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>     total := by rw [← Finset.sum_div, hJsum, div_self hB.ne&#x27;] }</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>   let μ (i : I) : FiniteLaw (P i) := {</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>     mass p := w i p / B</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>     nonneg p := div_nonneg (hw i p) hB.le</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>     total := by rw [← Finset.sum_div, hwsum i, div_self hB.ne&#x27;] }</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>   have hm (i : I) : ν.map (g i) = (μ i).map (f i) := by</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>     apply finiteLaw_ext</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>     intro e</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>     change (∑ t, if g i t = e then J t / B else 0) =</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a>       ∑ p, if f i p = e then w i p / B else 0</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>     have hid (a : ℝ) (b : Prop) [Decidable b] :</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>         (if b then a / B else 0) = (if b then a else 0) / B := by</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>       split_ifs &lt;;&gt; simp</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>     simp_rw [hid, ← Finset.sum_div]</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>     rw [hmarg i e]</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>   obtain ⟨Ω, hboundary, hpaths, hsupport, hformula⟩ :=</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>     finiteLaw_conditional_realization_with_formula ν μ g f hm</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>   refine ⟨fun z =&gt; B * Ω.mass z, ?_, ?_, ?_, ?_, ?_, ?_⟩</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>   · intro z</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a>     exact mul_nonneg hB.le (Ω.nonneg z)</span>
+<span id="L185"><a href="#L185" class="ln"> 185</a>   · rw [← Finset.mul_sum, Ω.total, mul_one]</span>
+<span id="L186"><a href="#L186" class="ln"> 186</a>   · intro t</span>
+<span id="L187"><a href="#L187" class="ln"> 187</a>     rw [← Finset.mul_sum, hboundary]</span>
+<span id="L188"><a href="#L188" class="ln"> 188</a>     exact mul_div_cancel₀ _ hB.ne&#x27;</span>
+<span id="L189"><a href="#L189" class="ln"> 189</a>   · intro i p</span>
+<span id="L190"><a href="#L190" class="ln"> 190</a>     have heq (z : Σ _ : T, ∀ i, P i) :</span>
+<span id="L191"><a href="#L191" class="ln"> 191</a>         (if z.2 i = p then B * Ω.mass z else 0) =</span>
+<span id="L192"><a href="#L192" class="ln"> 192</a>         B * (if z.2 i = p then Ω.mass z else 0) := by</span>
+<span id="L193"><a href="#L193" class="ln"> 193</a>       split_ifs &lt;;&gt; simp</span>
+<span id="L194"><a href="#L194" class="ln"> 194</a>     simp_rw [heq]</span>
+<span id="L195"><a href="#L195" class="ln"> 195</a>     rw [← Finset.mul_sum]</span>
+<span id="L196"><a href="#L196" class="ln"> 196</a>     change B * Ω.probability (fun z =&gt; z.2 i = p) = _</span>
+<span id="L197"><a href="#L197" class="ln"> 197</a>     rw [hpaths i p]</span>
+<span id="L198"><a href="#L198" class="ln"> 198</a>     exact mul_div_cancel₀ _ hB.ne&#x27;</span>
+<span id="L199"><a href="#L199" class="ln"> 199</a>   · intro t σ hp</span>
+<span id="L200"><a href="#L200" class="ln"> 200</a>     exact hsupport t σ ((mul_pos_iff_of_pos_left hB).mp hp)</span>
+<span id="L201"><a href="#L201" class="ln"> 201</a>   · intro t σ</span>
+<span id="L202"><a href="#L202" class="ln"> 202</a>     change B * Ω.mass ⟨t, σ⟩ = _</span>
+<span id="L203"><a href="#L203" class="ln"> 203</a>     rw [hformula]</span>
+<span id="L204"><a href="#L204" class="ln"> 204</a>     change B * (J t / B * _) = _</span>
+<span id="L205"><a href="#L205" class="ln"> 205</a>     rw [← mul_assoc, mul_div_cancel₀ _ hB.ne&#x27;]</span>
+<span id="L206"><a href="#L206" class="ln"> 206</a>     by_cases hzero : J t = 0</span>
+<span id="L207"><a href="#L207" class="ln"> 207</a>     · simp only [hzero, zero_mul]</span>
+<span id="L208"><a href="#L208" class="ln"> 208</a>     · apply congrArg (fun z =&gt; J t * z)</span>
+<span id="L209"><a href="#L209" class="ln"> 209</a>       apply Finset.prod_congr rfl</span>
+<span id="L210"><a href="#L210" class="ln"> 210</a>       intro i _</span>
+<span id="L211"><a href="#L211" class="ln"> 211</a>       have hJpos : 0 &lt; J t := lt_of_le_of_ne (hJ t) (Ne.symm hzero)</span>
+<span id="L212"><a href="#L212" class="ln"> 212</a>       have hKpos : 0 &lt; ((μ i).map (f i)).mass (g i t) := by</span>
+<span id="L213"><a href="#L213" class="ln"> 213</a>         rw [← hm i]</span>
+<span id="L214"><a href="#L214" class="ln"> 214</a>         exact (div_pos hJpos hB).trans_le (finiteLaw_mass_le_map ν (g i) t)</span>
+<span id="L215"><a href="#L215" class="ln"> 215</a>       have hKform : ((μ i).map (f i)).mass (g i t) =</span>
+<span id="L216"><a href="#L216" class="ln"> 216</a>           (∑ p, if f i p = g i t then w i p else 0) / B := by</span>
+<span id="L217"><a href="#L217" class="ln"> 217</a>         change (∑ p, if f i p = g i t then w i p / B else 0) = _</span>
+<span id="L218"><a href="#L218" class="ln"> 218</a>         rw [Finset.sum_div]</span>
+<span id="L219"><a href="#L219" class="ln"> 219</a>         apply Finset.sum_congr rfl</span>
+<span id="L220"><a href="#L220" class="ln"> 220</a>         intro p _</span>
+<span id="L221"><a href="#L221" class="ln"> 221</a>         split_ifs &lt;;&gt; simp</span>
+<span id="L222"><a href="#L222" class="ln"> 222</a>       have hc : ((μ i).conditionOnMap (f i) (g i t)).mass (σ i) =</span>
+<span id="L223"><a href="#L223" class="ln"> 223</a>           (if f i (σ i) = g i t then (μ i).mass (σ i) else 0) /</span>
+<span id="L224"><a href="#L224" class="ln"> 224</a>             ((μ i).map (f i)).mass (g i t) := by</span>
+<span id="L225"><a href="#L225" class="ln"> 225</a>         apply (eq_div_iff hKpos.ne&#x27;).mpr</span>
+<span id="L226"><a href="#L226" class="ln"> 226</a>         simpa only [mul_comm] using finiteLaw_conditionOnMap_weight (μ i) (f i) (g i t) (σ i)</span>
+<span id="L227"><a href="#L227" class="ln"> 227</a>       rw [hc, hKform]</span>
+<span id="L228"><a href="#L228" class="ln"> 228</a>       by_cases he : f i (σ i) = g i t</span>
+<span id="L229"><a href="#L229" class="ln"> 229</a>       · simp only [he, ite_true]</span>
+<span id="L230"><a href="#L230" class="ln"> 230</a>         exact div_div_div_cancel_right₀ hB.ne&#x27; _ _</span>
+<span id="L231"><a href="#L231" class="ln"> 231</a>       · simp only [he, ite_false, zero_div]</span>
+<span id="L232"><a href="#L232" class="ln"> 232</a> </span>
+<span id="L233"><a href="#L233" class="ln"> 233</a> theorem weighted_conditional_realization</span>
+<span id="L234"><a href="#L234" class="ln"> 234</a>     {T I : Type*} [Fintype T] [Fintype I] [DecidableEq I]</span>
+<span id="L235"><a href="#L235" class="ln"> 235</a>     {P E : I → Type*} [∀ i, Fintype (P i)] [∀ i, Fintype (E i)]</span>
+<span id="L236"><a href="#L236" class="ln"> 236</a>     (J : T → ℝ) (w : ∀ i, P i → ℝ) (B : ℝ) (hB : 0 &lt; B)</span>
+<span id="L237"><a href="#L237" class="ln"> 237</a>     (hJ : ∀ t, 0 ≤ J t) (hw : ∀ i p, 0 ≤ w i p)</span>
+<span id="L238"><a href="#L238" class="ln"> 238</a>     (hJsum : ∑ t, J t = B) (hwsum : ∀ i, ∑ p, w i p = B)</span>
+<span id="L239"><a href="#L239" class="ln"> 239</a>     (g : ∀ i, T → E i) (f : ∀ i, P i → E i)</span>
+<span id="L240"><a href="#L240" class="ln"> 240</a>     (hmarg : ∀ i e, (∑ t, if g i t = e then J t else 0) =</span>
+<span id="L241"><a href="#L241" class="ln"> 241</a>       ∑ p, if f i p = e then w i p else 0) :</span>
+<span id="L242"><a href="#L242" class="ln"> 242</a>     ∃ W : (Σ _ : T, ∀ i, P i) → ℝ,</span>
+<span id="L243"><a href="#L243" class="ln"> 243</a>       (∀ z, 0 ≤ W z) ∧ (∑ z, W z) = B ∧</span>
+<span id="L244"><a href="#L244" class="ln"> 244</a>       (∀ t, (∑ σ, W ⟨t, σ⟩) = J t) ∧</span>
+<span id="L245"><a href="#L245" class="ln"> 245</a>       (∀ i p, (∑ z, if z.2 i = p then W z else 0) = w i p) ∧</span>
+<span id="L246"><a href="#L246" class="ln"> 246</a>       (∀ t σ, 0 &lt; W ⟨t, σ⟩ → ∀ i, f i (σ i) = g i t) := by</span>
+<span id="L247"><a href="#L247" class="ln"> 247</a>   obtain ⟨W, hW, ht, hb, hp, hs, _⟩ :=</span>
+<span id="L248"><a href="#L248" class="ln"> 248</a>     weighted_conditional_realization_with_formula J w B hB hJ hw hJsum hwsum g f hmarg</span>
+<span id="L249"><a href="#L249" class="ln"> 249</a>   exact ⟨W, hW, ht, hb, hp, hs⟩</span>
+<span id="L250"><a href="#L250" class="ln"> 250</a> </span>
+<span id="L251"><a href="#L251" class="ln"> 251</a> end Oberwolfach</span></pre></html>

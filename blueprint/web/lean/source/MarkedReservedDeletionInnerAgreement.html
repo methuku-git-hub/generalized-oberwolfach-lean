@@ -1,0 +1,55 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReservedDeletionInnerAgreement.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReservedDeletionInnerAgreement.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReservedResourceGraphs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedRawPairUnchangedFromGraphs</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedSampleDeletedArcs</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Deleting an absorber outside the protected pair leaves the restricted</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> raw sample and both physical spoke relations unchanged on that pair. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 8000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_reserved_deletion_protects_inner_pair</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     {W Z:Type} [Fintype W] [Fintype Z] [LinearOrder W] [DecidableEq Z]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (C:Finset (Finset V⊕(V×U))) (I:Finset V) (J:Finset U)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hC:∀ e∈C,¬markedInnerResource I J e)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (f:W→V) (g:Z→U) (hf:∀ x,f x∈I) (hg:∀ u,g u∈J):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let DR:=physicalEdgeGraph (markedReservedRimPairs C)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let DS:=markedFiniteSpokeGraph (markedReservedSpokePairs C);</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     rawMarkedRestrictPair f g (rawMarkedDeleteRims σ DR.edgeFinset)=rawMarkedRestrictPair f g σ ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (fun b x u=&gt;markedDeletePhysicalSpokes H DS b (f x) (g u))=</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (fun b x u=&gt;H b (f x) (g u)):=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   intro DR DS</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨hr,hs⟩:=marked_reserved_graphs_avoid_internal_resources C I J hC</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   exact marked_raw_pair_unchanged_from_graphs σ H DR DS I J hr hs f g hf hg</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> /-- Every original typed arc whose endpoints lie in the invariant inner</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> vertex set has the same direction and type after reserving the absorber. -/</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> theorem marked_reserved_deletion_preserves_inner_arcs</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (σ:RawMarkedOutcome V U Γ Color)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (C:Finset (Finset V⊕(V×U))) (I:Finset V) (J:Finset U)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hI:∀ x,π x∈I↔x∈I) (hC:∀ e∈C,¬markedInnerResource I J e):</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let DR:=physicalEdgeGraph (markedReservedRimPairs C)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let σ&#x27;:=rawMarkedDeleteRims σ DR.edgeFinset;</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     ∀ (mark:Bool) (e:MarkedSampleArc P π (3*d) (fun a=&gt;σ (Sum.inl a)) mark),</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       e.val.1∈I→e.val.2∈I→</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       ∃ e&#x27;:MarkedSampleArc P π (3*d) (fun a=&gt;σ&#x27; (Sum.inl a)) mark,e&#x27;.val=e.val :=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   intro DR σ&#x27; mark e h₁ h₂</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hgraph:∀ x∈I,∀ y∈I,¬DR.Adj x y:=(marked_reserved_graphs_avoid_internal_resources C I J hC).1</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hy:(if mark then π e.val.2 else e.val.2)∈I:=by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     cases mark &lt;;&gt; simp only [Bool.false_eq_true,ite_false,ite_true]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     · exact h₂</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     · exact (hI _).mpr h₂</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hd:s(e.val.1,if mark then π e.val.2 else e.val.2)∉DR.edgeFinset:=by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     simpa only [SimpleGraph.mem_edgeFinset,SimpleGraph.mem_edgeSet] using hgraph e.val.1 h₁ _ hy</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hnew:markedPhysicalRim P π (3*d) (fun a=&gt;σ&#x27; (Sum.inl a)) mark e.val.1 e.val.2=1:=</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (markedPhysicalRim_delete_iff P π d σ DR.edgeFinset mark e.val.1 e.val.2).mpr ⟨e.property,hd⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   exact ⟨⟨e.val,hnew⟩,rfl⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a> end Oberwolfach</span></pre></html>

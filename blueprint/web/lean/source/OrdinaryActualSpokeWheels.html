@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryActualSpokeWheels.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryActualSpokeWheels.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TransformerActualData</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinarySpokeWheelFamilies</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Actual spoke-edge wheel pairs, retaining the original and image hub</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> separately. No injectivity of either vertex map is assumed; only injectivity</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> on the physical old spokes is used. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 6000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a>  structure OrdinaryActualSpokeWheels (G Q F:SimpleGraph V) (H₀ H:V→U→Prop)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (φ:V→V) (ψ:U→U) (r:ℕ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (p:(G.edgeFinset⊕{e:V×U // H₀ e.1 e.2})→(Σ a:V,Σ c:V,Q.Walk a c)) where</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   first : {e:V×U // H₀ e.1 e.2}→OrdinaryWheel Q F H r</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   second : {e:V×U // H₀ e.1 e.2}→OrdinaryWheel Q F H r</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   first_hub : ∀ e,ordinaryWheelHub (first e)=e.val.2</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   second_hub : ∀ e,ordinaryWheelHub (second e)=ψ e.val.2</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   first_support : ∀ e v,v∈(ordinaryWheelRim (first e)).support↔v=e.val.1∨v∈(p (.inr e)).2.2.support</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   second_support : ∀ e v,v∈(ordinaryWheelRim (second e)).support↔v=φ e.val.1∨v∈(p (.inr e)).2.2.support</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   first_disjoint : ∀ e f,e≠f→Disjoint (ordinaryWheelResources (first e)) (ordinaryWheelResources (first f))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   second_disjoint : ∀ e f,e≠f→Disjoint (ordinaryWheelResources (second e)) (ordinaryWheelResources (second f))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   rim_difference : ∀ i e,</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (if Sum.inl e∈ordinaryWheelResources (first i) then (1:ℤ) else 0)-</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (if Sum.inl e∈ordinaryWheelResources (second i) then 1 else 0)=</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (if e=s(i.val.1,(p (.inr i)).1) then 1 else 0)+(if e=s(i.val.1,(p (.inr i)).2.1) then 1 else 0)-</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (if e=s(φ i.val.1,(p (.inr i)).1) then 1 else 0)-(if e=s(φ i.val.1,(p (.inr i)).2.1) then 1 else 0)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   spoke_difference : ∀ i v z,</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (if Sum.inr (v,z)∈ordinaryWheelResources (first i) then (1:ℤ) else 0)-</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (if Sum.inr (v,z)∈ordinaryWheelResources (second i) then 1 else 0)=</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (if v=i.val.1∧z=i.val.2 then 1 else 0)-(if v=φ i.val.1∧z=ψ i.val.2 then 1 else 0)+</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (if v∈(p (.inr i)).2.2.support∧z=i.val.2 then 1 else 0)-</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (if v∈(p (.inr i)).2.2.support∧z=ψ i.val.2 then 1 else 0)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> </span>
+<span id="L38"><a href="#L38" class="ln">  38</a>  theorem ordinary_actual_spoke_wheels (G Q F:SimpleGraph V) (H₀ H:V→U→Prop)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (φ:V→V) (ψ:U→U) (r:ℕ) (hr:3≤r)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (p:(G.edgeFinset⊕{e:V×U // H₀ e.1 e.2})→(Σ a:V,Σ c:V,Q.Walk a c))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (R:Finset V) (hroot:∀ e:{e:V×U // H₀ e.1 e.2},e.val.1∈R∧φ e.val.1∈R∧e.val.1≠φ e.val.1)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hpath:∀ e:{e:V×U // H₀ e.1 e.2},(p (.inr e)).2.2.IsPath∧(p (.inr e)).2.2.length=r-2)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hends:∀ e:{e:V×U // H₀ e.1 e.2},Q.Adj e.val.1 (p (.inr e)).1∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       Q.Adj (φ e.val.1) (p (.inr e)).1∧Q.Adj e.val.1 (p (.inr e)).2.1∧Q.Adj (φ e.val.1) (p (.inr e)).2.1)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (havoid:∀ i,∀ v∈(p i).2.2.support,v∉R)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (hdis:∀ i j,i≠j→Disjoint (p i).2.2.support.toFinset (p j).2.2.support.toFinset)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hF:∀ e:{e:V×U // H₀ e.1 e.2},∀ v∈insert e.val.1 (insert (φ e.val.1) (p (.inr e)).2.2.support.toFinset),</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       ∀ w∈insert e.val.1 (insert (φ e.val.1) (p (.inr e)).2.2.support.toFinset),¬F.Adj v w)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hH:∀ e:{e:V×U // H₀ e.1 e.2},H e.val.1 e.val.2∧H (φ e.val.1) (ψ e.val.2))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hHp:∀ e:{e:V×U // H₀ e.1 e.2},∀ v∈(p (.inr e)).2.2.support,H v e.val.2∧H v (ψ e.val.2))</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hφedge:Function.Injective (fun e:{e:V×U // H₀ e.1 e.2}=&gt;(φ e.val.1,ψ e.val.2))):</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     Nonempty (OrdinaryActualSpokeWheels G Q F H₀ H φ ψ r p):=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   obtain ⟨W,W&#x27;,hh,hs,hs&#x27;,hd,hd&#x27;,hrim,hspoke⟩:=ordinary_spoke_wheel_families Q F H r hr R</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (fun e:{e:V×U // H₀ e.1 e.2}=&gt;e.val.1) (fun e=&gt;φ e.val.1) (fun e=&gt;e.val.2) (fun e=&gt;ψ e.val.2)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (fun e=&gt;p (.inr e)) (fun e=&gt;⟨(hroot e).1,(hroot e).2.1⟩) (fun e=&gt;(hroot e).2.2) hpath</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (fun e=&gt;⟨(hends e).1,(hends e).2.2.1,(hends e).2.1,(hends e).2.2.2⟩)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (fun e=&gt;havoid (.inr e))</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (fun e f he=&gt;hdis (.inr e) (.inr f) (fun hh=&gt;he (Sum.inr.inj hh)))</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     hF hH hHp (by intro e f he;exact Subtype.ext (Prod.ext (Prod.mk.inj he).1 (Prod.mk.inj he).2)) hφedge</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   exact ⟨⟨W,W&#x27;,fun e=&gt;(hh e).1,fun e=&gt;(hh e).2,hs,hs&#x27;,hd,hd&#x27;,hrim,hspoke⟩⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a>  theorem balanced_spoke_root_mem_support (G:SimpleGraph V) (H₀:V→U→Prop)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (hbalance:∀ v,G.degree v=2*((Finset.univ:Finset U).filter (H₀ v)).card)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (e:{e:V×U // H₀ e.1 e.2}):e.val.1∈G.support:=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hn:0&lt;((Finset.univ:Finset U).filter (H₀ e.val.1)).card:=</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     Finset.card_pos.mpr ⟨e.val.2,Finset.mem_filter.mpr ⟨Finset.mem_univ _,e.property⟩⟩</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   by_contra he</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hh:=(G.degree_eq_zero_iff_notMem_support e.val.1).mpr he</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   rw [hbalance] at hh</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   omega</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

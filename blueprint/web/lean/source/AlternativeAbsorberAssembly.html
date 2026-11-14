@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AlternativeAbsorberAssembly.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>AlternativeAbsorberAssembly.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.UniversalAbsorberReservoir</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A fixed union absorbs each member of a finite family of alternative</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> remainders. The alternatives may overlap; only their absorber resources</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> must be disjoint, and avoid every alternative. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 4000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem alternative_absorber_union {I E W:Type*} [Fintype I] [DecidableEq I]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [DecidableEq E] [DecidableEq W]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (R:W→Finset E) (X A:I→Finset E)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hA:∀ i,IsResourceAbsorber R (X i) (A i))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hAA:∀ i j,i≠j→Disjoint (A i) (A j))</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hAX:∀ i j,Disjoint (A i) (X j)):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     HasResourceDecomposition R (Finset.univ.biUnion A)∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       ∀ i,IsResourceAbsorber R (X i) (Finset.univ.biUnion A) := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   refine ⟨resource_decomposition_biUnion R A Finset.univ (fun i _=&gt;(hA i).2.1)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (fun i _ j _=&gt;hAA i j),?_⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hchoices (i:I):(1:ℝ)≤((Finset.univ.filter (fun j=&gt;HasResourceDecomposition R (A j∪X i))).card:ℝ):=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     exact_mod_cast (Finset.one_le_card.mpr ⟨i,Finset.mem_filter.mpr ⟨Finset.mem_univ _,(hA i).2.2⟩⟩)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hu:=universal_absorber_reservoir R X A Finset.univ 1</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (fun i _ j _=&gt;hAA i j) (fun i _=&gt;(hA i).2.1) hchoices</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   intro i</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hd:Disjoint (({i}:Finset I).biUnion X) (Finset.univ.biUnion A):=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     simp only [Finset.singleton_biUnion]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     intro e he hx</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     obtain ⟨j,_,hj⟩:=Finset.mem_biUnion.mp hx</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     exact Finset.disjoint_left.mp (hAX j i) hj he</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hh:=hu {i} (by simp) (by intro j hj k hk hne;simp only [Finset.mem_singleton] at hj hk;exact (hne (hj.trans hk.symm)).elim) hd</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   simpa only [Finset.singleton_biUnion] using hh</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a> end Oberwolfach</span></pre></html>

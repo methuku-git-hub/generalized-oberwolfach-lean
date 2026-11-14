@@ -1,0 +1,141 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReferenceLevelEarlyVortexGeometry.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReferenceLevelEarlyVortexGeometry.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedReferenceLevelChosenConfiguration</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedVortexUniformEarlyGeometry</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedJointRecordErrorChoice</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.MarkedReferenceLevelOrderedConfiguration</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.MarkedSharedConfigurationDelayedActive</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.MarkedUniformReferenceLevelConstructorDensities</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> import Oberwolfach.MarkedUniformReferenceLevelConstructor</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> import Oberwolfach.MarkedReferenceLevelStepProperty</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> import Oberwolfach.MarkedReferenceStateStepDecomposition</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> import Oberwolfach.MarkedReferenceDeletionState</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> import Oberwolfach.MarkedNextSampleCanonicalRemainder</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> import Oberwolfach.MarkedDeletedCoverFixedRemainder</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> import Oberwolfach.MarkedReferenceInputStability</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> import Oberwolfach.MarkedGlobalCoverInputMargins</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> import Oberwolfach.MarkedLocalCoverInputMargins</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> import Oberwolfach.MarkedNestedIterationBalanceInputs</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> import Oberwolfach.MarkedResourceDomainMonotonicity</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> import Oberwolfach.MarkedIterationNeighbourhoodFromResources</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> import Oberwolfach.MarkedIterationToleranceChoices</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> /-! Choose the vortex ratio and inner density before the constants that</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> depend on them, and choose sampling errors only after the level theorem has</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> returned its balance tolerance. The conclusion remains conditional on a</span>
+<span id="L24"><a href="#L24" class="ln">  24</a> valid reference-level record. -/</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> set_option autoImplicit false</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> set_option synthInstance.maxSize 32768</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> set_option maxHeartbeats 24000000</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> open scoped BigOperators</span>
+<span id="L30"><a href="#L30" class="ln">  30</a> noncomputable section</span>
+<span id="L31"><a href="#L31" class="ln">  31</a> namespace Oberwolfach</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> theorem marked_reference_level_step_with_early_vortex_geometry (gamma pA0 α:ℝ)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hα:0&lt;α)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hg:0&lt; gamma) (hg1:gamma≤   1) (hpA0:0&lt; pA0) (hpA01:pA0≤   1/2):</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∃ c₀:ℕ,∀ r:ℕ,2≤r→c₀≤r+5→∀ rho₀ omega₀ t₀ p0 betaConfig betaCommon aLoA BA:ℝ,</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     0&lt;rho₀ → rho₀≤1 → 0&lt;omega₀ → 0&lt;t₀ → t₀≤1 → 0&lt;p0 → p0≤1/2 → 0&lt;betaConfig → 0&lt;betaCommon → 0&lt;aLoA → 0&lt;BA →</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     ∃ zetaCfg betaA:ℝ,0&lt;zetaCfg ∧ 0&lt;betaA ∧ betaA≤betaConfig ∧ betaA≤betaCommon ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     3*betaA≤markedLocalCycleCoefficient r α (t₀/2) p0-(r+5:ℕ)*zetaCfg ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     3*betaA≤markedLocalPathCoefficient r α (t₀/2) p0-(r+4:ℕ)*zetaCfg ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     ∃ Kgeom:ℕ,0&lt; Kgeom∧   ∃ kappa0 ξ thetaDeep:ℝ,0&lt; kappa0∧   0&lt;ξ∧   0&lt; thetaDeep∧   ∀ kappa:ℝ,0&lt; kappa →            kappa≤   kappa0 →            </span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∃ ζCut hIcut ε₀ deltaI:ℝ, 0&lt;ζCut ∧ ζCut≤1 ∧ ζCut≤t₀/16 ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       0&lt;hIcut ∧ 2*hIcut≤α*p0/4 ∧ 2*hIcut≤t₀/8-ζCut ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       0&lt;ε₀ ∧ ε₀≤hIcut ∧ 4*ε₀≤ξ ∧ ε₀≤kappa ∧ ε₀≤α/8 ∧ ε₀≤1/8 ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       0&lt;deltaI ∧ deltaI&lt;1/4 ∧ deltaI≤α/32 ∧ deltaI≤p0/32 ∧ 2*deltaI≤t₀/8 ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     ∀ ε:ℝ,0&lt;ε → ε≤ε₀ →</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     ∃ omegaInner xiDeep:ℝ, 0&lt;omegaInner ∧ omegaInner≤1 ∧ 0&lt;xiDeep ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       omegaInner≤ε/8 ∧ omegaInner≤rho₀*ε/64 ∧ ε^2≤xiDeep ∧ xiDeep≤ξ ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (4*(Kgeom:ℝ)+(3*r+50:ℕ))*xiDeep≤kappa/2 ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (∀ rho t:ℝ,rho₀≤rho → t₀≤t → (1+2/rho)*xiDeep≤t*omegaInner/32) ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     ∀ alphaInner:ℝ,0&lt;alphaInner →</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     ∃ betaExt epsilonExt betaRec zetaCommon:ℝ,0&lt; betaExt ∧ 0&lt;epsilonExt ∧ 0&lt;betaRec ∧ 0&lt;zetaCommon ∧ zetaCommon≤kappa/4 ∧</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     betaRec≤betaExt ∧ betaRec≤betaA ∧ betaRec≤t₀/4 ∧</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     3*betaRec≤markedLocalCycleCoefficient r α (t₀/2) p0-(r+5:ℕ)*zetaCfg ∧</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     3*betaRec≤markedLocalPathCoefficient r α (t₀/2) p0-(r+4:ℕ)*zetaCfg ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     ∃ gammaMax:ℝ,0&lt;gammaMax ∧ ∀ gammaLoss iota aLo B:ℝ,0&lt;gammaLoss → gammaLoss≤gammaMax → 0&lt; iota → 0&lt;aLo → 0≤B →        </span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     ∃ η ηEnd ζ ζD pmax:ℝ,0&lt;η∧   0&lt;ηEnd∧   0&lt;ζ∧   0&lt;ζD∧   0&lt; pmax∧   pmax≤   1/8∧   </span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     ∀ (p:ℝ),0&lt;p → p≤1 → p≤pmax →            ∃ θ:ℝ,0&lt;θ∧   </span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     ∃ delta:ℝ,0&lt; delta∧   ∀ x:ℝ,0&lt; x →    x≤   delta →    </span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     let pstarLocal:=rho₀*t₀/2</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     let Cparent:=11*(((r+4:ℕ):ℝ)+1)^4*(2*BA/pstarLocal^(2*(r+4)+1))</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     let Clocal:=5*(((r+4:ℕ):ℝ)+1)^4*(2*BA/pstarLocal^(2*(r+4)+1));</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     ∃ sigmaMax:ℝ,0&lt;sigmaMax ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     ∀ sigmaLoss:ℝ,0&lt;sigmaLoss → sigmaLoss≤sigmaMax → ∀ omegaI:ℝ,0&lt;omegaI →</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     ∃ etaBal:ℝ,0&lt;etaBal ∧ ∃ NI:ℕ,</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       ∃ tolRef ζActive τParent tolParent ζParent τ tolLocal ζLocal rowErr ζRow epsBal ζBal:ℝ,</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         0&lt;tolRef ∧ tolRef≤1 ∧ 0&lt;ζActive ∧ ζActive≤1 ∧</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>         tolRef+(r+12:ℕ)*ζActive≤kappa/4 ∧ tolRef+(r+12:ℕ)*ζActive≤x/2 ∧ ζActive≤kappa/4 ∧</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>         0&lt;τParent ∧ τParent≤1 ∧ 0&lt;tolParent ∧ tolParent≤1 ∧ 0&lt;ζParent ∧ ζParent≤1 ∧</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>         τParent+tolParent+Cparent*ζParent≤kappa/4 ∧ τParent+tolParent+Cparent*ζParent≤thetaDeep/4 ∧</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>         0&lt;τ ∧ τ≤1 ∧ 0&lt;tolLocal ∧ tolLocal≤1 ∧ τ+tolLocal≤η/8 ∧</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>         0&lt;ζLocal ∧ ζLocal≤1 ∧ τ+tolLocal+Clocal*ζLocal≤η/4 ∧</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         0&lt;rowErr ∧ rowErr≤1 ∧ 0&lt;ζRow ∧ ζRow≤1 ∧ rowErr+ζRow≤t₀/8 ∧</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>         0&lt;epsBal ∧ epsBal≤1 ∧ 0&lt;ζBal ∧ ζBal≤1 ∧</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>         epsBal+((r+4)+2:ℕ)*ζBal≤etaBal ∧ epsBal+((r+4)+2:ℕ)*ζBal≤x/2 ∧</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>         (∀ ε Cwide:ℝ,0&lt;ε→0≤Cwide→∃ ζWide:ℝ,0&lt;ζWide ∧ ζWide≤1 ∧</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>           τ+tolLocal+Cwide*(4/ε)*ζWide≤η/4) ∧</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     ∀ d:ℕ,1≤d → ∃ N:ℕ,1≤N ∧</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     ∀ rho omega t:ℝ,rho₀≤rho → rho≤1 → omega₀≤omega → omega≤1 → t₀≤t → (r+4:ℝ)*t≤1 →</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     pA0≤rho*(r+4:ℝ)*t/2 → p0≤rho*(r+4:ℝ)*t/2 → p0≤rho*t/2 → p0≤t →</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     ∀ (Gamma Color : Type) [Fintype Gamma] [Fintype Color],</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     ∀ level:MarkedReferenceLevelData Gamma Color r d N NI Kgeom gamma rho omega t p0 betaA aLoA BA</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       kappa ξ thetaDeep alphaInner omegaInner iota betaRec aLo B η x omegaI hIcut deltaI etaBal,</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       MarkedReferenceLevelStepProperty level gammaLoss sigmaLoss := by</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   obtain ⟨c₀,hcover⟩:=marked_reference_level_step_chosen_configuration gamma pA0 α hα hg hg1 hpA0 hpA01</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   refine ⟨c₀,?_⟩</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   intro r hr hrc rho₀ omega₀ t₀ p0 betaConfig betaCommon aLoA BA hrho₀ hrho₀1 ho₀ ht₀ ht₀1 hp0 hp01 hbConfig hbCommon haA hBA</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   obtain ⟨zetaCfg,betaA,hzeta,hbetaA,hbetaConfig,hbetaCommon,hcycle,hpath,Kgeom,hKgeom,kappa0,ξ,thetaDeep,hkappa0,hξ,hΘDeep,hcover⟩:=</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     hcover r hr hrc rho₀ omega₀ t₀ p0 betaConfig betaCommon aLoA BA hrho₀ hrho₀1 ho₀ ht₀ ht₀1 hp0 hp01 hbConfig hbCommon haA hBA</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   refine ⟨zetaCfg,betaA,hzeta,hbetaA,hbetaConfig,hbetaCommon,hcycle,hpath,Kgeom,hKgeom,kappa0,ξ,thetaDeep,hkappa0,hξ,hΘDeep,?_⟩</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   intro kappa hkappa hkk</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   let ζCut := min 1 (t₀/32)</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   have hCut : 0&lt;ζCut := by dsimp [ζCut]; positivity</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   have hCutCap : ζCut≤1 := min_le_left _ _</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   have hCutSmall : ζCut≤t₀/16 := by</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     have hh : ζCut≤t₀/32 := min_le_right _ _</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     linarith</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   obtain ⟨hIcut, ε₀, deltaI, hi, hiprod, hispoke, he₀, hecut, heξ, heκ, heα, he8,</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     hδ, hδsmall, hδα, hδp, hδt, hgeometry⟩ :=</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     marked_vortex_uniform_early_geometry r α p0 t₀ ζCut rho₀ kappa ξ Kgeom</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       hα hp0 ht₀ hCutSmall hrho₀ hkappa hξ (by positivity)</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   refine ⟨ζCut,hIcut,ε₀,deltaI,hCut,hCutCap,hCutSmall,hi,hiprod,hispoke,</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     he₀,hecut,heξ,heκ,heα,he8,hδ,hδsmall,hδα,hδp,hδt,?_⟩</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   intro ε he hecap</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>   obtain ⟨omegaInner,xiDeep,hOmega,hOmega1,hxiDeep,hωv,hωu,hxiLower,hxiUpper,hxiScale,hxiGap⟩ :=</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     hgeometry ε he hecap</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>   refine ⟨omegaInner,xiDeep,hOmega,hOmega1,hxiDeep,hωv,hωu,hxiLower,hxiUpper,hxiScale,hxiGap,?_⟩</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   intro alphaInner hAlpha</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>   obtain ⟨betaExt,epsilonExt,betaRec,zetaCommon,hBetaExt,hEpsilonExt,hbetaRec,hcommon,hcommonCap,hbcap,hba,hbt,hbcycle,hbpath,gammaMax,hGammaMax,hcover⟩:=</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>     hcover kappa hkappa hkk alphaInner omegaInner hAlpha hOmega hOmega1</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>   refine ⟨betaExt,epsilonExt,betaRec,zetaCommon,hBetaExt,hEpsilonExt,hbetaRec,hcommon,hcommonCap,hbcap,hba,hbt,hbcycle,hbpath,gammaMax,hGammaMax,?_⟩</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>   intro gammaLoss iota aLo B hGammaLoss hGammaBound hIota haLo hB</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   obtain ⟨η,ηEnd,ζ,ζD,pmax,hη,hηEnd,hζ,hζD,hpmax,hpmax8,hcover⟩:=</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     hcover gammaLoss iota aLo B hGammaLoss hGammaBound hIota haLo hB</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>   refine ⟨η,ηEnd,ζ,ζD,pmax,hη,hηEnd,hζ,hζD,hpmax,hpmax8,?_⟩</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>   intro p hp hp1 hpp</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>   obtain ⟨θ,hθ,delta,hdelta,hcover⟩:=hcover p hp hp1 hpp</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>   refine ⟨θ,hθ,delta,hdelta,?_⟩</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>   intro x hx hxdelta pstarLocal Cparent Clocal</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>   obtain ⟨sigmaMax,hSigmaMax,hcover⟩:=hcover x hx hxdelta</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>   have hpstar:0&lt;pstarLocal:=by dsimp [pstarLocal];positivity</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>   have hCp:0≤Cparent:=by dsimp [Cparent];positivity</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>   have hCl:0≤Clocal:=by dsimp [Clocal];positivity</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>   refine ⟨sigmaMax,hSigmaMax,?_⟩</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>   intro sigmaLoss hSigmaLoss hSigmaBound omegaI hoI</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>   obtain ⟨etaBal,hetaBal,NI,hcover⟩:=hcover sigmaLoss hSigmaLoss hSigmaBound omegaI hIcut deltaI hoI hi hδ hδsmall</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>   obtain ⟨tolRef,ζActive,τParent,tolParent,ζParent,τ,tolLocal,ζLocal,rowErr,ζRow,epsBal,ζBal,</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     htol,htolcap,hζ,hζcap,hκref,hxref,hζκ,hτP,hτPcap,htolP,htolPcap,hζP,hζPcap,hκP,hθP,</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     hτ,hτcap,htolLocal,htcap,hbase,hζLocal,hζLocalCap,hlocal,hrow,hrowcap,hζrow,hζrowcap,hrowmargin,</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     heb,hecap,hzb,hzbcap,hbalmargin,hxmargin,hwide⟩:=</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>       marked_joint_record_error_choice r (r+4) kappa thetaDeep η etaBal x t₀ Cparent Clocal 1</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>         hkappa hΘDeep hη hetaBal hx ht₀ hCp hCl (by norm_num)</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>   exact ⟨etaBal,hetaBal,NI,tolRef,ζActive,τParent,tolParent,ζParent,τ,tolLocal,ζLocal,rowErr,ζRow,epsBal,ζBal,</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     htol,htolcap,hζ,hζcap,hκref,hxref,hζκ,hτP,hτPcap,htolP,htolPcap,hζP,hζPcap,hκP,hθP,</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     hτ,hτcap,htolLocal,htcap,hbase,hζLocal,hζLocalCap,hlocal,hrow,hrowcap,hζrow,hζrowcap,hrowmargin,</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     heb,hecap,hzb,hzbcap,hbalmargin,hxmargin,hwide,hcover⟩</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a> end Oberwolfach</span></pre></html>

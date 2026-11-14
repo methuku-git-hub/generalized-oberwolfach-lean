@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedProtectedResourceRestoration.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedProtectedResourceRestoration.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedInnerResources</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedIncidentResources</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The exact resource identity in the protected restoration step.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> Only the prescribed inner correction and the active inner packing are</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> removed. Their effects on the deeper star and induced pair are explicit. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 10000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U:Type} [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def markedStarResource (T:Finset V) (W:Finset U):Finset V⊕(V×U)→Prop:=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   Sum.elim (fun e=&gt;∃ v∈e,v∈T) (fun z=&gt;z.1∈T∨z.2∈W)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem marked_active_inner_avoids_star</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (I T:Finset V) (J W:Finset U) (e:Finset V⊕(V×U))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (he:markedInnerResource (I\T) (J\W) e):¬markedStarResource T W e:=by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   cases e with</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   | inl e=&gt;</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     rintro ⟨v,hv,hT⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     exact (Finset.mem_sdiff.mp (he hv)).2 hT</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   | inr z=&gt;</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     rintro (ht|hw)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     · exact (Finset.mem_sdiff.mp he.1).2 ht</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     · exact (Finset.mem_sdiff.mp he.2).2 hw</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem marked_protected_resource_restoration</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (FE FD FU E₀:Finset (Finset V⊕(V×U))) (I T:Finset V) (J W:Finset U)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hE:FE.filter (markedInnerResource I J)=E₀)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hD:FD.filter (markedInnerResource I J)=∅)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hU:FU.filter (markedInnerResource I J)=FU.filter (markedInnerResource (I\T) (J\W)))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hEU:Disjoint FE FU)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hstar:∀ e∈E₀,markedStarResource T W e)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hdeep:E₀.filter (markedInnerResource T W)=∅)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hpair:∀ e:Finset V,Sum.inl e∈FU→e.Nonempty):</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let A:=(FE∪FD∪FU).filter (markedInnerResource I J)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     A=E₀∪FU.filter (markedInnerResource (I\T) (J\W)) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     Disjoint E₀ (FU.filter (markedInnerResource (I\T) (J\W))) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     A.filter (markedStarResource T W)=E₀ ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     A.filter (markedInnerResource T W)=∅ ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∀ p:Finset V⊕(V×U)→Prop,</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (A.filter p).card≤(E₀.filter p).card+</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         ((FU.filter (markedInnerResource (I\T) (J\W))).filter p).card:=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let B:=FU.filter (markedInnerResource (I\T) (J\W))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have he:(FE∪FD∪FU).filter (markedInnerResource I J)=E₀∪B:=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     rw [Finset.filter_union,Finset.filter_union,hE,hD,Finset.union_empty,hU]</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hEB:Disjoint E₀ B:=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     rw [←hE]</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     exact hEU.mono (Finset.filter_subset _ _) (Finset.filter_subset _ _)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hBs:B.filter (markedStarResource T W)=∅:=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     apply Finset.eq_empty_iff_forall_notMem.mpr</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     intro e he</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     obtain ⟨he,hs⟩:=Finset.mem_filter.mp he</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     exact marked_active_inner_avoids_star I T J W e (Finset.mem_filter.mp he).2 hs</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hBd:B.filter (markedInnerResource T W)=∅:=by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     apply Finset.eq_empty_iff_forall_notMem.mpr</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     intro e he</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     obtain ⟨he,hd⟩:=Finset.mem_filter.mp he</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     obtain ⟨he,ha⟩:=Finset.mem_filter.mp he</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     have hn:=marked_active_inner_avoids_star I T J W e ha</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     cases e with</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     | inl e=&gt;</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       obtain ⟨v,hv⟩:=hpair e he</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       exact hn ⟨v,hv,hd hv⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     | inr z=&gt;exact hn (Or.inl hd.1)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   refine ⟨he,hEB,?_,?_,?_⟩</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   · rw [he,Finset.filter_union,hBs,Finset.union_empty]</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     exact Finset.filter_eq_self.mpr hstar</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   · rw [he,Finset.filter_union,hdeep,hBd,Finset.union_empty]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   · intro p</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     rw [he,Finset.filter_union]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     exact Finset.card_union_le _ _</span>
+<span id="L76"><a href="#L76" class="ln">  76</a> </span>
+<span id="L77"><a href="#L77" class="ln">  77</a> theorem marked_protected_restoration_margin</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (epsilon gamma sigma C xi nu N m:ℝ)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     (he:0&lt;epsilon) (hN:0≤N) (hm:0≤m) (hC:0≤C) (hxi:0≤xi)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     (hgam:0≤gamma) (hsize:epsilon*N≤2*m)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     (hnu:nu=gamma*epsilon/200) (hcor:C*xi≤gamma/100) (hstar:C*xi≤sigma):</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     C*xi*m+nu*N≤gamma*m/50∧C*xi*m≤sigma*m:=by</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   have h1:C*xi*m≤gamma*m/100:=by nlinarith only [mul_le_mul_of_nonneg_right hcor hm]</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have h2:nu*N≤gamma*m/100:=by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     rw [hnu]</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     nlinarith only [mul_le_mul_of_nonneg_left hsize hgam]</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   exact ⟨by linarith only [h1,h2],mul_le_mul_of_nonneg_right hstar hm⟩</span>
+<span id="L88"><a href="#L88" class="ln">  88</a> </span>
+<span id="L89"><a href="#L89" class="ln">  89</a> end Oberwolfach</span></pre></html>

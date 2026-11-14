@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedSuccessorPositionalSum.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedSuccessorPositionalSum.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SuccessorSequenceWeights</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryCycleWeightRestriction</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedCycleIncidence</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Restriction of a supported successor weighting to the marked tuple</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> index set preserves its positional sums. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 3500000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem successor_weight_marked_cycle_position</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (m b:ℕ) (D τ A B:ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (w:(Fin (m+1)→V)→ℝ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hw:SuccessorSequenceWeightConditions P π b D τ A B w) (x:V):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (1-τ)*D≤(∑ C:MarkedCycleTuple (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd m π b,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       if C.val 0=x then w C.val else 0) ∧</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∑ C:MarkedCycleTuple (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd m π b,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       if C.val 0=x then w C.val else 0)≤D:=by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   let Q:=fun C:Fin (m+1)→V=&gt;IsMarkedCycleTuple (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd m π b C</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let f:=fun C:Fin (m+1)→V=&gt;if C 0=x then w C else 0</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hz:∀ C,¬Q C→f C=0:=by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     intro C hC</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     by_cases h:w C=0</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     · simp [f,h]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     · have hp:0&lt;w C:=lt_of_le_of_ne (hw.nonneg C) (Ne.symm h)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       have hsep:PermutationSeparated π b C:=(hw.support C hp).2</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       have hq:Q C:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         refine ⟨hsep,?_,?_⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         · intro i;exact ⟨(C i.castSucc,C i.succ),rfl,rfl⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         · exact ⟨(C (Fin.last m),C 0),rfl,rfl⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       exact (hC hq).elim</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have he:=finite_sum_restrict_of_zero Q f hz</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have he&#x27;:(∑ C:Fin (m+1)→V,if C 0=x then w C else 0)=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∑ C:MarkedCycleTuple (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd m π b,</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         if C.val 0=x then w C.val else 0:=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     calc</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       _ = ∑ C,f C := by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         apply Finset.sum_congr rfl</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         intro C _</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         rfl</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       _ = _ := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         simpa only [Q,f] using he</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have he&#x27;&#x27;:(∑ C:Fin (m+1)→V,@ite ℝ (C 0=x) (Classical.propDecidable _) (w C) 0)=</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       ∑ C:MarkedCycleTuple (Prod.fst:V×V→V) Prod.snd Prod.fst Prod.snd m π b,</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         if C.val 0=x then w C.val else 0:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     calc</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       _ = (∑ C:Fin (m+1)→V,if C 0=x then w C else 0) := by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>         apply Finset.sum_congr rfl</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         intro C _</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>         split_ifs &lt;;&gt; rfl</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       _ = _ := he&#x27;</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hh:=hw.positions 0 x</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   constructor</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   · exact hh.1.trans_eq he&#x27;&#x27;</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   · exact he&#x27;&#x27;.symm.le.trans hh.2</span>
+<span id="L60"><a href="#L60" class="ln">  60</a> end Oberwolfach</span></pre></html>

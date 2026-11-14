@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PartitionPlacement.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PartitionPlacement.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PermutationImages</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SubsetCounts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Exact joint placement probabilities for distinct prescribed labels in</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> distinct cells of a uniform partition. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> def distinctCellEmbeddingEquiv {I V : Type*} [Fintype V] {k : ℕ}</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {d : Fin k → ℕ} (P : FixedPartition V k d) (a : I ↪ Fin k) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     {f : I ↪ V // ∀ i, P.1 (f i) = a i} ≃ (∀ i, {v : V // P.1 v = a i}) where</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   toFun f i := ⟨f.1 i, f.2 i⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   invFun f := ⟨⟨fun i =&gt; (f i).1, by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     intro i j h</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     apply a.injective</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     calc</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       a i = P.1 (f i).1 := (f i).2.symm</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       _ = P.1 (f j).1 := congrArg P.1 h</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       _ = a j := (f j).2⟩, fun i =&gt; (f i).2⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   left_inv f := by apply Subtype.ext; ext i; rfl</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   right_inv f := by funext i; rfl</span>
+<span id="L26"><a href="#L26" class="ln">  26</a> </span>
+<span id="L27"><a href="#L27" class="ln">  27</a> theorem distinctCell_embedding_count {I V : Type*} [Fintype I] [Fintype V]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     {k : ℕ} {d : Fin k → ℕ} (P : FixedPartition V k d) (a : I ↪ Fin k) :</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     Fintype.card {f : I ↪ V // ∀ i, P.1 (f i) = a i} = ∏ i, d (a i) := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   rw [Fintype.card_congr (distinctCellEmbeddingEquiv P a), Fintype.card_pi]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   simp only [P.2]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> </span>
+<span id="L33"><a href="#L33" class="ln">  33</a> theorem uniformEmbedding_cell_probability {I V : Type*} [Fintype I] [Fintype V]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     [Nonempty (I ↪ V)] {k : ℕ} {d : Fin k → ℕ}</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (P : FixedPartition V k d) (a : I ↪ Fin k) :</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (FiniteLaw.uniform (I ↪ V)).probability (fun f =&gt; ∀ i, P.1 (f i) = a i) =</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       ((∏ i, d (a i) : ℕ) : ℝ) / (Fintype.card V).descFactorial (Fintype.card I) := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   rw [finiteLaw_uniform_probability, Fintype.card_embedding_eq]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   congr 1</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   norm_cast</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   convert! distinctCell_embedding_count P a using 1</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   congr 1</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   exact Subsingleton.elim _ _</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> </span>
+<span id="L45"><a href="#L45" class="ln">  45</a> theorem fixedPartition_joint_placement {I V : Type*} [Fintype I] [Fintype V]</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     {k : ℕ} {d : Fin k → ℕ} [Nonempty (FixedPartition V k d)]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (x : I ↪ V) (a : I ↪ Fin k) :</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (FiniteLaw.uniform (FixedPartition V k d)).probability</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (fun Q =&gt; ∀ i, Q.1 (x i) = a i) =</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       ((∏ i, d (a i) : ℕ) : ℝ) / (Fintype.card V).descFactorial (Fintype.card I) := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   letI : Nonempty (I ↪ V) := ⟨x⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   let P := Classical.choice (inferInstance : Nonempty (FixedPartition V k d))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have h := uniformEmbedding_cell_probability P a</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   rw [← uniformPermutation_inverse_images x, finiteLaw_map_probability] at h</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   rw [← fixedPartition_uniform P, finiteLaw_map_probability]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   exact h</span>
+<span id="L57"><a href="#L57" class="ln">  57</a> </span>
+<span id="L58"><a href="#L58" class="ln">  58</a> end Oberwolfach</span></pre></html>

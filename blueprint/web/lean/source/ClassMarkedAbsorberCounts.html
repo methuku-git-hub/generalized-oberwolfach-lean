@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ClassMarkedAbsorberCounts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ClassMarkedAbsorberCounts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FixedClassRootOrder</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedHubAbsorberAbundance</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Paired absorber counts for every root set of the fixed class profile.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The root order and actual cycle records are constructed from the cycle and</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> root-omitted common-path counts; absorber existence is not an input. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 12000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a>  theorem class_marked_absorber_counts (m:ℕ) (hm:3&lt;m+1) (β:ℝ) (hβ:0&lt;β):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃ N:ℕ,∀ (V E K:Type) [Fintype V] [DecidableEq V],N≤Fintype.card V→</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∀ (tail head:E→V) (ktail khead:K→V) (π:Equiv.Perm V) (b:ℕ) (A B:Finset V),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     Disjoint A B→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     β*(Fintype.card V:ℝ)^(m+1)≤Fintype.card (ClassMarkedCycle tail head ktail khead m π b A B)→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (∀ j:Bool,∀ v v&#x27;:V,v≠v&#x27;→(if j then v∈A else v∈B)→(if j then v&#x27;∈A else v&#x27;∈B)→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       β*(Fintype.card V:ℝ)^m≤Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m π b</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>         (fun x (_:Unit)=&gt;x∈B) (fun x (_:Unit)=&gt;x∈A) j v v&#x27; () ()))→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ X:Finset V,X⊆A∪B→(X∩A).card=1→(X∩B).card=m→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (β/2)^(m+2)*(Fintype.card V:ℝ)^((m+1)*(m+1))≤</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>         Fintype.card (LabelledAbsorberFamily (classMarkedCycleVertices (tail:=tail) (head:=head)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>           (ktail:=ktail) (khead:=khead) (m:=m) (π:=π) (b:=b) (A:=A) (B:=B))</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>           (fun (_:Unit)=&gt;pairedAbsorberTemplate (m+1)) X):=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨N,hN⟩:=paired_absorber_order_threshold m β hβ</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   refine ⟨N,?_⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   intro V E K _ _ hn tail head ktail khead π b A B hAB hbase hpath X hX hXA hXB</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   obtain ⟨x,hx,hxset,hxA,hxB⟩:=fixed_class_root_order m A B X hAB hX hXA hXB</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hcount:=marked_hub_paired_absorber_count (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (m:=m) (π:=π) (b:=b) (H₀:=fun x (_:Unit)=&gt;x∈B) (Hₖ:=fun x (_:Unit)=&gt;x∈A)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     hm () x hx ⟨hxA,hxB⟩ β hβ hbase (by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       intro j v v&#x27; hne hv hv&#x27;</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       simpa only [Fintype.card_eq_nat_card] using hpath j v v&#x27; hne hv hv&#x27;) (hN _ hn).1 (hN _ hn).2</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   rw [hxset] at hcount</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let R:=classMarkedCycleVertices (tail:=tail) (head:=head) (ktail:=ktail) (khead:=khead)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (m:=m) (π:=π) (b:=b) (A:=A) (B:=B)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   let embed:LabelledCycleRecord R (pairedAbsorberTemplate (m+1)).val X→</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       LabelledAbsorberFamily R (fun (_:Unit)=&gt;pairedAbsorberTemplate (m+1)) X:=fun D=&gt;⟨(),D⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hi:Function.Injective embed:=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     intro D E he</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     exact eq_of_heq (Sigma.mk.inj_iff.mp he).2</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   exact hcount.trans (by exact_mod_cast Fintype.card_le_of_injective embed hi)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> </span>
+<span id="L46"><a href="#L46" class="ln">  46</a> end Oberwolfach</span></pre></html>

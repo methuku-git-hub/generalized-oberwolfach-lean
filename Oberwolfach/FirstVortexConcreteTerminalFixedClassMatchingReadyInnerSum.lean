@@ -1,0 +1,323 @@
+module
+
+public import Oberwolfach.FirstVortexConcreteTerminalMatchingReadyInnerSum
+public import Oberwolfach.FirstVortexConcreteTerminalFixedClassMatchingTestedInnerSum
+
+@[expose] public section
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 80000000
+open scoped BigOperators
+noncomputable section
+namespace Oberwolfach
+attribute [local instance] Classical.propDecidable
+local instance concreteFixedMatchingReadyInnerSumFinGeometry (n:ℕ):DecidableEq (Fin n):=selectedAlignedSourceWithLoadFin n
+local instance (priority := 2000) concreteFixedMatchingReadyInnerSumSixGeometry : DecidableEq (Fin 6) := instDecidableEqFin 6
+local instance concreteFixedMatchingReadyInnerSumArcGeometry {n:ℕ} (P:(Fin n×Fin n)→Prop):DecidableEq {e:Fin n×Fin n // P e}:=Classical.decEq _
+attribute [local instance] partitionedDivisibleArcFinite partitionedDivisibleOrdFinite partitionedDivisibleMarkFinite
+
+theorem first_vortex_concrete_terminal_fixed_class_matching_ready_inner_sum
+    (α lam lamAssign ε δold δlocal δglobal θ eps ξ ρ₀ bmatch ξPart ζret:ℝ) (d K r:ℕ) (Δ rho δLoss εInner eta:ℝ) (e:ℕ)
+    (hα:0<α) (hlam:0<lam) (hε:0<ε) (hδ:0<δold) (hδ1:δold≤1) (hθ:0<θ) (hepsPos:0<eps)
+    (hρ₀:0<ρ₀) (hbmatch:0<bmatch) (hαb:(2*α)/16≤bmatch)
+    (hbd:bmatch≤((ρ₀/4)/40000)/16) (hεsmall:ε≤(ρ₀/4)/80000)
+    (hθδ:10*θ≤δold) (hθlocal:θ≤δold/32) (hθhi:θ≤1/100)
+    (hlamlocal:lam≤δold*ε/32) (hspacing:1/(d:ℝ)≤θ/1024)
+    (hd:3≤d) (hK:3≤K) (hm:7≤(r+4))
+    (heps:3*eps≤lam*(θ/(100*(K:ℝ)^2))) (hξ:4*ξ≤eps/2) (hξ0:0≤ξ)
+    (hρ₀hi:ρ₀≤1) (hδglobal:0<δglobal) (hθglobal:10*θ≤δglobal)
+    (hprecise:ε≤((ρ₀/4)/40000)/8192)
+    (ξCap:ℝ) (hξPartCap:ξPart≤ξCap)
+    (hCap:∀ξ':ℝ,ξ'≤ξCap→lam+ξ'≤((ρ₀/4)/40000)*θ/4096 ∧
+      ξ'/2≤(lamAssign-lam)*ε ∧ ξ'≤α/32 ∧
+      ∀n:ℕ,∀(U:Type) [Fintype U] (G:SimpleGraph (Fin n)) (D mm:ℕ) (β:ℝ)
+        (Q:Vortex U G D β ε mm),0<mm→ξ'*n≤(δlocal-δold)*((Q.extendedVertices 1).card:ℝ))
+    (hlamθ:lam≤θ) (hdlarge:(r+4)+2≤d)
+    (Nret:ℕ) (hNret:∀n:ℕ,Nret≤n→∀q errOrd:ℝ,
+      q≤1/((((r+4):ℕ):ℝ)+1)→errOrd≤θ*n→
+      (n:ℝ)*q/d+(((((r+4)+1)*d-1:ℕ):ℝ))*(2*((n:ℝ)^(3/4:ℝ)/d)+ζret*n)+errOrd≤4*θ*n)
+    (hrho:0<rho) (heta:0<eta) (hetaR:eta≤rho)
+    (hbudget:Δ+δLoss<eta) (hsupply:rho+Δ+δLoss+εInner<ρ₀/(400*((r+4:ℕ):ℝ))):
+    ∃N:ℕ,∀n:ℕ,N≤n→∀ [Nonempty (Fin n)] (U:Type) [Fintype U] [DecidableEq U]
+    (P:SimpleGraph (Fin n)) (π:Equiv.Perm (Fin n))
+    (Dv mm:ℕ) (β:ℝ) (Vort:Vortex U P Dv β ε mm)
+    (hreg:P.IsRegularOfDegree Dv) (hDv:0<Dv) (hρhi:initialIndexDensity U Dv≤1)
+    (hρlo:ρ₀ ≤ initialIndexDensity U Dv) (hDlo:(n:ℝ)/2≤Dv) (hDhi:(Dv:ℝ)≤2*n) (hmm:0<mm)
+    (F:U→SimpleGraph (Fin n)) (hF:∀w,(F w).IsRegularOfDegree 2)
+    (Allowed:Set ℕ) (hAllowed:∀u,AllowedCycleLengths (F u) Allowed)
+    (hclass:∀u,factorPreparationClass (F u) K=none)
+    (hcut:(1/(((r+4):ℝ)+1))/(d:ℝ)≤θ)
+    (hcutHost:5/((((r+4):ℝ)+1)*(d:ℝ)+5)+(((r+4):ℝ)+1)*(d:ℝ)/(K:ℝ)≤θ/2)
+    (hnoshort:∀x l,0<l→l<2*d+1→(π^l) x≠x)
+    (hεα:ε≤α/1000) (hlamhi:lam≤α/128)
+    (a γ ρ ξSeed ΔSeed:ℝ)
+    (haEq:a=min (lam/(10*(d:ℝ))) (θ/(200*(K:ℝ)^2)))
+    (hγEq:γ=min (eps/2) (min (1/2:ℝ) (min (lam/(10*(d:ℝ))) (lam/10))))
+    (hρEq:ρ=θ/4096) (hΔeps:Δ≤eps/8)
+    (hξSeed:ξSeed≤ξ) (hΔSeed:Δ≤ΔSeed) (heps1:eps≤1)
+    (hζ:ζret≤θ/4096) (hζ0:0≤ζret)
+    (τ Asrc BM:ℝ) (hBM:0<BM) (weight:(Fin ((r+4)+1)→Fin n)→ℝ)
+    (hw:SuccessorSequenceWeightConditions P π (3*d) Dv τ Asrc BM weight)
+    (BO:Fin K→ℝ) (hBO:∀i,0<BO i)
+    (w:∀i:Fin K,OrdinaryCycle P (longPaddedSeedExponent i+2)→ℝ) (hw0:∀i C,0≤w i C)
+    (hwupper:∀i C,w i C≤BO i/(n:ℝ)^(longPaddedSeedExponent i))
+    (z:MarkedExpandedActualOutcome (U:=U) π d) (ζselect:ℝ) (hζselect:ζselect≤ζret) (Inner:Finset (Fin n)) (βList:ℝ)
+    (terr τerr:ℝ) (hτerr:0≤τerr)
+,
+    FirstVortexConcreteBoundaryEvent P π d r Dv mm β ε Vort θ ρ₀ BM BO F hF weight w
+      a γ eps Δ ξSeed ΔSeed ζret ζselect βList terr τerr z Inner →
+    ∀(γLoss σLoss:ℝ) (size a₀ b₀ e₀ f₀ L Bpart:ℕ) (εAbs ζCorr ξCorr:ℝ),
+    (hsize:2*mm≤size)→(hL:L+1=Vort.length)→
+    (hπ:∀i v,π v∈Vort.extendedVertices i↔v∈Vort.extendedVertices i)→
+    0≤ξCorr→6*(8*((((r+4):ℕ):ℝ)+1)*ξCorr*n)≤min (γLoss*n) (σLoss*n)→
+    ε≤εAbs→e₀≤Bpart→
+    LongEveryClassValidDeletionEvent Δ P π d r γLoss σLoss ξPart z
+      (Vort.extendedVertices 1) (Vort.extendedIndices 1) K Bpart θ Dv a γ eps βList F hF weight w→
+    (let σ:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=>rawExpandedMarkedCollapse e (z.1 e)
+     let H:=retainedRawMarkedSpokes π d (fun e=>σ (Sum.inr e)) false
+        (startRetentionMinimum (rawStartHubSet π d (fun e=>σ (Sum.inr e)) false)) z.2 false false;
+     MarkedProtectedAbsorbableCorrectionWithBounds P π d r size a₀ b₀ e₀ f₀ εAbs ζCorr ξCorr σ H
+        (Vort.extendedVertices 1) (Vort.extendedIndices 1))→
+    ∀(αAssign ρreserve:ℝ), αAssign/2=α → (e₀:ℝ)≤ρreserve*n → e₀≤e →
+    ∀(βfinal κ boundary loc lossInside inside δsmall ρsmall δspoke:ℝ),
+    0<Fintype.card U → ε≤δglobal → 0<βfinal → βfinal≤1 →
+    δglobal≤(βfinal/100)^2 → 0<n → 100/βfinal≤(n:ℝ) →
+    2/Real.sqrt δglobal≤(n:ℝ) → Fintype.card U≤n →
+    0<κ → (hδsmall:0<δsmall) → (hθsmall:10*θ≤δsmall) →
+    Classical.choose (first_vortex_all_hub_small_load_from_tests δsmall θ d hδsmall hθ hθsmall hspacing)≤n →
+    ρsmall≤θ/4096 →
+    max a γ*n≤ρsmall*n → εInner*n+((6*d+2:ℕ):ℝ)≤δsmall*n/4 →
+    0≤δspoke → δsmall+κ≤Real.sqrt δspoke →
+    2*(δsmall*n+(κ*n+1))≤δLoss*n → 10*θ≤κ*(βfinal/4) →
+    δglobal≤(βfinal/200)^2 → 200/βfinal≤(n:ℝ) →
+    0≤loc → 0≤ inside → 4*(Fintype.card U:ℝ)/d+4*(n:ℝ)^(3/4:ℝ)≤boundary →
+    loc≤eta*n → inside≤((Vort.extendedVertices 1).card:ℝ)*eta*n →
+    0≤2*((boundary+2*(max a γ*n))+((6*d+2:ℕ):ℝ)+(κ*n+1)) →
+    ((Vort.extendedVertices 1).card:ℝ)*(Δ*n+2*((6*d+2:ℕ):ℝ))+
+      (n:ℝ)*(2*((boundary+2*(max a γ*n))+((6*d+2:ℕ):ℝ)+(κ*n+1)))≤lossInside →
+    ((Vort.extendedVertices 1).card:ℝ)*((n:ℝ)^(3/5:ℝ)+(d:ℝ)*(n:ℝ)^(3/5:ℝ))+lossInside≤ inside →
+    (n:ℝ)^(3/5:ℝ)+(d:ℝ)*(n:ℝ)^(3/5:ℝ)+
+      (Δ*n+2*((boundary+2*(max a γ*n))+((6*d+2:ℕ):ℝ)+(κ*n+1))+(6*d+2:ℕ))≤loc →
+    0≤ρreserve → βfinal+2*ρreserve≤βList/2 → Δ≤ξ →
+    ∃D₀:MarkedReferenceDeletion P π d (fun x=>rawExpandedMarkedCollapse x (z.1 x)),
+    ∃C:Finset (Finset (Fin n)⊕(Fin n×U)), longTerminalProtectedReserve P π d r z z.2 (Vort.extendedVertices 1) (Vort.extendedIndices 1) γLoss σLoss e₀ (Vort.extendedVertices (L+1)) (Vort.extendedIndices (L+1)) D₀ C ∧
+    ∀S:SimpleGraph (Fin n),S≤P → S.IsRegularOfDegree (2*Fintype.card U) →
+      (∀v,((changed ((longPhysicalStateGraph P z.1 {0,1,2,3,4}).neighborFinset v) (S.neighborFinset v)).card:ℝ)≤ξPart*n) →
+      (∀x∈Vort.extendedVertices 1,∀y∈Vort.extendedVertices 1,S.Adj x y↔(longPhysicalStateGraph P z.1 {0,1,2,3,4}).Adj x y) → markedResourceRimGraph C≤S →
+    ∃Mhost:Fin n→Fin n→ℕ, ∃Del:SimpleGraph (Fin n),
+      S≤P ∧ S.IsRegularOfDegree (2*Fintype.card U) ∧
+      (∀v,((changed ((longPhysicalStateGraph P z.1 {0,1,2,3,4}).neighborFinset v) (S.neighborFinset v)).card:ℝ)≤ξPart*n) ∧
+      (∀x∈(Vort.extendedVertices 1),∀y∈(Vort.extendedVertices 1),S.Adj x y↔(longPhysicalStateGraph P z.1 {0,1,2,3,4}).Adj x y) ∧
+      markedResourceRimGraph C≤S ∧
+      (∀x∈(Vort.extendedVertices 1),∀y∈(Vort.extendedVertices 1),(longSelectedPhysicalGraph P π d z.1).Adj x y→S.Adj x y) ∧
+      LongClassMatchingDeletionWitness Δ P π d r z (Vort.extendedVertices 1) K θ Dv a γ eps βList F hF weight w D₀ C S Mhost Del ∧
+      FirstVortexClassPreparedRetainedFullPackingOutcomeWithAllHubLoad P S π Dv mm d (r+4) β ε Vort F hF θ lamAssign eps δlocal δglobal (αAssign/2) bmatch ρ₀ ξ Δ a γ weight w z.1
+        (startRetentionMinimum (rawStartHubSet π d (fun x=>z.1 (Sum.inr x)) false)) z.2 ∧
+    let t:=startRetentionMinimum (rawStartHubSet π d (fun x=>z.1 (Sum.inr x)) false)
+    let raw:RawMarkedOutcome (Fin n) U Bool Bool:=fun x=>rawExpandedApproximateCollapse x (z.1 x)
+    let ℓ:=fun i:Fin K=>longPaddedSeedExponent i+2
+    let R:=mixedCandidateResources (longRawSeedResources (U:=U) π d (r+4) ℓ)
+    let Tmix:=bernoulliVertexSet (longRawHubState P π d raw true true)
+    let Q:=longRawSurvivingResources P π d raw true true Del.edgeFinset
+    let q:=survivingCandidateEmbedding R Q Tmix (long_raw_surviving_resources_subset P π d raw true true Del.edgeFinset)
+    let φ:=markedRawSampledPhysicalEmbedding P π d raw true true;
+    0<K→θ≤1→∀ζRet capActive:ℝ,
+    0<capActive→0<ε→ε≤1/4→0<mm→0≤ζRet→ζRet≤capActive/128→ζret≤ζRet*ε/2→
+    (2*((n:ℝ)+2*(n:ℝ)^(3/4:ℝ))/(d:ℝ)+2*max a γ*n)≤capActive*(ε*n)/128→
+    (∀E:ℕ,(E:ℝ)≤(θ*ε^2+lamAssign*ε)*(n:ℝ)^2+24*d*n→
+      2*(⌈4*(E:ℝ)/(((ρ₀/4)/40000)*n)⌉₊:ℕ)≤capActive*(ε*n)/128)→
+    ((Vort.extendedVertices 1).card:ℝ)≤εInner*n→∀p₂ k₂ u:ℝ,
+    (∀v,|((rawStartHubSet π d (fun x=>z.1 (Sum.inr x)) false v).card:ℝ)-
+      (∑w,longAssignedIntervalProbability F hF K (r+4) θ w false/(d:ℝ))|<(n:ℝ)^(3/5:ℝ))→
+    (∀j v,|((∑x,sampledColourOrientation P (fun x=>z.1 (Sum.inl x)) j x v:ℕ):ℝ)-
+      markedExpandedPhysicalProbability (initialIndexDensity U Dv*(1/100:ℝ)/2) (initialIndexDensity U Dv*((1/100:ℝ)/((r+4:ℕ):ℝ))/2) p₂ k₂ u j/2*P.degree v|<(n:ℝ)^(3/5:ℝ))→
+    0≤γ→0≤θ→u≤2*θ→
+    (∀v,|((sampledColourDegree P (fun e=>(z.1 (Sum.inl e)).1) 4 v):ℝ)-u*(P.degree v:ℝ)|≤(n:ℝ)^(3/5:ℝ))→
+    ∀(εBalance ζChange ζGlobal lossRow lossCol:ℝ),0≤ζGlobal→ζret≤ζGlobal→
+    let σ:RawMarkedOutcome (Fin n) U Bool Bool:=fun e=>rawExpandedMarkedCollapse e (z.1 e)
+    let Hraw:=retainedRawMarkedSpokes π d (fun e=>raw (Sum.inr e)) false t z.2 false false;
+    MarkedRestrictedBalanceWithSpokes P π d (r+4) Finset.univ Finset.univ εBalance σ Hraw→
+    (∀v,((Finset.univ.filter (fun w=>¬(Hraw false v w↔rawMarkedPairSpokes π d raw false false false v w))).card:ℝ)≤lossRow)→
+    (∀w,((Finset.univ.filter (fun v=>¬(Hraw false v w↔rawMarkedPairSpokes π d raw false false false v w))).card:ℝ)≤lossCol)→
+    2*(lossRow+(δspoke*n+(Real.sqrt δspoke*n+1)))+
+      (εBalance+2*(((2*θ+2*max a (4*γ)+2*ξPart)*n+2*(δsmall*n+(κ*n+1)))+(n:ℝ)^(3/5:ℝ)+Δ*n+2*(6*d+2:ℕ)+Δ*n+((1+2/rho)*eta*n+1)))≤ζChange*n→
+    2*(lossCol+10*θ*n)+εBalance≤ζChange*n→
+    ∃Mix:Finset (RestrictedResource R (Function.Embedding.subtype (·∈Q))),
+      (∀c∈Mix,∀c'∈Mix,c≠c'→Disjoint (restrictedResourceSet R (Function.Embedding.subtype (·∈Q)) c)
+        (restrictedResourceSet R (Function.Embedding.subtype (·∈Q)) c')) ∧
+      (∀i,((longRawIncidenceSet Q i\Mix.biUnion (restrictedResourceSet R (Function.Embedding.subtype (·∈Q)))).card:ℝ)≤
+        max (a*n) (γ*(longRawIncidenceSet Q i).card)) ∧
+    ∃(Pack:Finset (Sym2 (Fin n))) (E:U→Finset (Sym2 (Fin n))) (Spokes:U→Finset (Fin n)),
+      let Used:=physicalRimCandidateUnion φ (restrictedResourceSet R (Function.Embedding.subtype (·∈Tmix))) (Mix.map q)
+      let Sel:=longSelectedPhysicalGraph P π d z.1
+      let Req:=fun x y=>Mhost x y=1 ∧ markedPhysicalRim P π (3*d)
+        (fun x=>markedExpandedPhysicalCollapse (z.1 (Sum.inl x))) true x (π.symm y)≠1
+      let Kbase:=longRequiredPhysicalGraph S (S\Used) Sel π d (Vort.extendedVertices 1) Req (fun x y=>Used.Adj x y)
+      let Kplus:=fun Pack:Finset (Sym2 (Fin n))=>longClassInnerRequiredRepair S Used Kbase (Vort.extendedVertices 1) Pack
+      let DelPlus:=Del⊔markedResourceRimGraph C
+      let Small:=SimpleGraph.fromEdgeSet (↑Pack:Set (Sym2 (Fin n)))⊔prescribedPhysicalUnion E
+      let Peligible:=longEligibleResidualArc Mhost Small ⊥
+      let T₁:=longDualInitialMarked P (fun x=>z.1 (Sum.inl x)) Mhost Small (longOrdinaryArcEligible π d) (longMarkedArcEligible π d);
+      ∃T:Finset {x:(Fin n)×(Fin n) // Peligible x},
+      (∀v,((changed ((longSelectedPhysicalGraph P π d z.1).neighborFinset v) ((S\Small).neighborFinset v)).card:ℝ)≤
+        ((2*θ+2*max a (4*γ)+2*ξPart)*n+2*(δsmall*n+(κ*n+1)))+(n:ℝ)^(3/5:ℝ)+Δ*n+2*(6*d+2:ℕ)) ∧
+      Pack=Used.edgeFinset ∧ Pack⊆(longApproximatePhysicalGraph P π d z.1).edgeFinset ∧
+      (∀v,((prescribedPhysicalUnion E).degree v:ℝ)≤5*Real.sqrt δglobal*Fintype.card (Fin n)) ∧
+      (∀x y,Small.Adj x y→¬(markedResourceRimGraph C).Adj x y) ∧
+      (∀v,directedInCount Peligible T v=d*startRetentionMinimum (rawStartHubSet π d (fun x=>z.1 (Sum.inr x)) false)) ∧
+      (∀x∈T,longMarkedArcEligible π d x.val) ∧ (∀x,x∉T→longOrdinaryArcEligible π d x.val) ∧
+      (∀x,x.val.1∈(Vort.extendedVertices 1)→(x∈T↔x∈T₁)) ∧
+      (∀x,Sum.inl ({x.val.1,x.val.2}:Finset (Fin n))∈C→(x∈T↔x∈T₁)) ∧
+      (∀v,((physicalEdgeGraph (changedDirectedPhysicalEdges Peligible T T₁)).degree v:ℝ)≤(1+2/rho)*eta*n+1) ∧
+      (∀mark a b,a∈(Vort.extendedVertices 1)→b∈(Vort.extendedVertices 1)→
+        (markedPhysicalRim P π (3*d) (fun x=>markedExpandedPhysicalCollapse (z.1 (Sum.inl x))) mark a b=1 ↔
+          if mark then ∃e:residualMarkedArc Peligible T,e.val.val.1=a∧π.symm e.val.val.2=b
+          else ∃e:residualOrdinaryArc Peligible T,e.val.val.1=a∧e.val.val.2=b)) ∧
+      let Y:=fun w=>markedIntervalRootSet π (fun _:retainedMarkedIndex π d (fun x=>raw (Sum.inr x)) false t z.2 w=>d) Subtype.val
+      let H₀:=fun v w=>v∈Spokes w\Y w
+      MarkedRemainderDivisible
+        (fun x:residualOrdinaryArc Peligible T=>x.val.val.1) (fun x=>x.val.val.2)
+        (fun x:residualMarkedArc Peligible T=>x.val.val.1) (fun x=>π.symm x.val.val.2)
+        (retainedRawMarkedSpokes π d (fun x=>raw (Sum.inr x)) false t z.2 false true true) Finset.univ
+        (Finset.univ.filter (fun pair:(Fin n)×U=>H₀ pair.1 pair.2∨retainedRawMarkedSpokes π d (fun x=>raw (Sum.inr x)) false t z.2 false true true pair.1 pair.2)) (r+4) ∧
+      ∃A:Finset (Fin n×Fin n),Small.edgeFinset=A.image (fun a=>s(a.1,a.2)) ∧
+        (∀a∈A,Mhost a.1 a.2=1) ∧
+        LongFactorComplementProvenance F S P π d (r+4) raw t z.2 Pack E A Spokes ∧
+        LongResidualSpokeCompletionControl π d raw t z.2 Spokes θ δglobal ∧
+        (∀w,(((Vort.extendedVertices 1).filter (fun v=>retainedRawMarkedSpokes π d (fun x=>raw (Sum.inr x)) false t z.2 false false false v w ∧ v∉Spokes w\Y w)).card:ℝ)≤
+          ζRet*(Vort.extendedVertices 1).card+(2*((n:ℝ)+2*(n:ℝ)^(3/4:ℝ))/(d:ℝ)+2*max a γ*n)+2*(⌈4*((Kplus Pack).edgeFinset.card:ℝ)/(((ρ₀/4)/40000)*n)⌉₊:ℕ)) ∧
+        (∀w v,v∈(Vort.extendedVertices 1)→v∈Spokes w\Y w → retainedRawMarkedSpokes π d (fun x=>raw (Sum.inr x)) false t z.2 false false false v w) ∧
+        (∃Old,(FirstVortexClassPrescribedAssignmentNoMarkedBudget P S DelPlus Used (Kplus Pack) (Vort.extendedVertices 1) π d z.1 t z.2 (Vort.extendedIndices 1) αAssign bmatch ρ₀ θ ε lamAssign Old Pack ∧ Pack=Used.edgeFinset) ∧
+          ∀w,((innerRequiredTargets (Vort.extendedIndices 1) (Vort.extendedVertices 1) (rawReservedSpokeList π d (fun e=>raw (Sum.inr e)))
+            (retainedFinalMarkedAt π d (fun e=>raw (Sum.inr e)) t z.2) (fun _=>∅) Old w).card:ℝ)≤(θ/1024)*n) ∧
+        (∀w∈(Vort.extendedIndices 1),∀v∈(Vort.extendedVertices 1),v∈Spokes w\Y w↔retainedRawMarkedSpokes π d (fun e=>raw (Sum.inr e)) false t z.2 false false false v w) ∧
+        (∀v,v∉(Vort.extendedVertices 1)→((changed ((longSelectedPhysicalGraph P π d z.1).neighborFinset v) ((S\Small).neighborFinset v)).card:ℝ)≤
+          (2*θ+2*max a (4*γ)+2*ξPart)*n+2*((boundary+2*(max a γ*n))+((6*d+2:ℕ):ℝ)+(κ*n+1))+
+            (n:ℝ)^(3/5:ℝ)+Δ*n+2*(6*d+2:ℕ)) ∧
+        (∀v,v∉(Vort.extendedVertices 1)→((physicalEdgeGraph (changedDirectedPhysicalEdges Peligible T T₁)).degree v:ℝ)≤
+          loc+(inside/(n:ℝ)+loc)/rho+1) ∧
+        (∀v,v∉(Vort.extendedVertices 1)→((prescribedPhysicalUnion E).degree v:ℝ)≤
+          2*((boundary+2*(max a γ*n))+((6*d+2:ℕ):ℝ)+(κ*n+1))) ∧
+        ∃Cimage:U→Finset (Fin n),
+          (∀w v,v∈rawReservedSpokeList π d (fun e=>raw (Sum.inr e)) w→v∉Cimage w→v∈Spokes w\Y w) ∧
+          (∀v,v∉(Vort.extendedVertices 1)→((Finset.univ.filter (fun w=>v∈Cimage w)).card:ℝ)≤
+            (boundary+2*(max a γ*n))+((6*d+2:ℕ):ℝ)+(κ*n+1)) ∧
+      ∃τ:RawMarkedOutcome (Fin n) U Bool Bool,
+        (∀e,τ (Sum.inr e)=rawExpandedMarkedCollapse (Sum.inr e) (z.1 (Sum.inr e))) ∧
+        (∀e:Sym2 (Fin n),e.toFinset⊆Vort.extendedVertices 1→τ (Sum.inl e)=markedExpandedPhysicalCollapse (z.1 (Sum.inl e))) ∧
+        (let f:=markedVortexActiveVertexEmbedding Vort 1
+         let g:=markedVortexNonDeeperHubToPhysical Vort 0
+         let ρ:=markedVortexActivePermutation Vort π hπ 1;
+         rawMarkedPairRims (P.comap f) ρ d (rawMarkedRestrictPair f g τ)=
+         rawMarkedPairRims (P.comap f) ρ d (rawMarkedRestrictPair f g (fun e=>rawExpandedMarkedCollapse e (z.1 e)))) ∧
+        (∀ (i:ℕ), 1 ≤ i →
+          rawMarkedRestrictPair (markedVortexVertexEmbedding Vort i) (markedVortexHubEmbedding Vort i) (fun e=>rawExpandedMarkedCollapse e (z.1 e))=
+          rawMarkedRestrictPair (markedVortexVertexEmbedding Vort i) (markedVortexHubEmbedding Vort i) τ ∧
+          (fun b v u=>retainedRawMarkedSpokes π d (fun e=>raw (Sum.inr e)) false t z.2 false false b (markedVortexVertexEmbedding Vort i v) (markedVortexHubEmbedding Vort i u))=
+          (fun b v u=>if b then retainedRawMarkedSpokes π d (fun e=>raw (Sum.inr e)) false t z.2 false false true (markedVortexVertexEmbedding Vort i v) (markedVortexHubEmbedding Vort i u)
+            else markedVortexVertexEmbedding Vort i v∈Spokes (markedVortexHubEmbedding Vort i u)\Y (markedVortexHubEmbedding Vort i u))) ∧
+        (∀mark x y,markedPhysicalRim P π (3*d) (fun e=>τ (Sum.inl e)) mark x y=1 ↔
+          if mark then ∃e:residualMarkedArc Peligible T,e.val.val.1=x∧π.symm e.val.val.2=y
+          else ∃e:residualOrdinaryArc Peligible T,e.val.val.1=x∧e.val.val.2=y) ∧
+        MarkedRemainderDivisible
+          (fun e:MarkedSampleArc P π (3*d) (fun e=>τ (Sum.inl e)) false=>e.val.1) (fun e=>e.val.2)
+          (fun e:MarkedSampleArc P π (3*d) (fun e=>τ (Sum.inl e)) true=>e.val.1) (fun e=>e.val.2)
+          (retainedRawMarkedSpokes π d (fun e=>raw (Sum.inr e)) false t z.2 false true true) Finset.univ
+          (Finset.univ.filter (fun pair:(Fin n)×U=>H₀ pair.1 pair.2∨retainedRawMarkedSpokes π d (fun e=>raw (Sum.inr e)) false t z.2 false true true pair.1 pair.2)) (r+4) ∧
+        ∃(FR:SimpleGraph (Fin n)) (FS:SimpleGraph (Fin n⊕U)),
+          (∀a,¬(rawMarkedPairRims P π d σ a↔rawMarkedPairRims P π d τ a)→markedPairPhysical π a∈FR.edgeFinset) ∧
+          (∀v,(FR.degree v:ℝ)≤((2*θ+2*max a (4*γ)+2*ξPart)*n+2*(δsmall*n+(κ*n+1)))+(n:ℝ)^(3/5:ℝ)+Δ*n+2*(6*d+2:ℕ)+Δ*n+((1+2/rho)*eta*n+1)) ∧
+          (∀v,v∉(Vort.extendedVertices 1)→(FR.degree v:ℝ)≤
+            (2*θ+2*max a (4*γ)+2*ξPart)*n+2*((boundary+2*(max a γ*n))+((6*d+2:ℕ):ℝ)+(κ*n+1))+
+              (n:ℝ)^(3/5:ℝ)+Δ*n+2*(6*d+2:ℕ)+Δ*n+(loc+(inside/(n:ℝ)+loc)/rho+1)) ∧
+          (∀b v w,¬(Hraw b v w↔(if b then retainedRawMarkedSpokes π d (fun e=>raw (Sum.inr e)) false t z.2 false true true v w else v∈Spokes w\Y w))→FS.Adj (Sum.inl v) (Sum.inr w)) ∧
+          (∀x,(FS.degree x:ℝ)≤ζChange*n) ∧
+          (∀B:Finset U,∀v,v∉(Vort.extendedVertices 1)→(∑w∈B,if ¬(Hraw false v w↔v∈Spokes w\Y w) then (1:ℝ) else 0)≤
+            2*(ζGlobal*n+((boundary+2*(max a γ*n))+((6*d+2:ℕ):ℝ)+(κ*n+1)))+
+              (εBalance+2*((2*θ+2*max a (4*γ)+2*ξPart)*n+2*((boundary+2*(max a γ*n))+((6*d+2:ℕ):ℝ)+(κ*n+1))+
+                (n:ℝ)^(3/5:ℝ)+Δ*n+2*(6*d+2:ℕ)+Δ*n+(loc+(inside/(n:ℝ)+loc)/rho+1)))) ∧
+        (let W:=↥((Finset.univ\markedVortexInnerVertices Vort 1):Finset (markedVortexVertexType Vort 1))
+         let Z:=markedVortexNonDeeperHubType Vort 0
+         let f:=markedVortexActiveVertexEmbedding Vort 1
+         let g:=markedVortexNonDeeperHubToPhysical Vort 0
+         let H:=retainedRawMarkedSpokes π d (fun e=>raw (Sum.inr e)) false t z.2 false false
+         let H':=fun b v w=>if b then H true v w else v∈Spokes w\Y w
+         let HL:=fun b v u=>H b (f v) (g u)
+         let HL':=fun b v u=>H' b (f v) (g u)
+         let FS:=markedSpokeChangeGraph HL HL';
+         (∀b v u,¬(HL b v u↔HL' b v u)→FS.Adj (Sum.inl v) (Sum.inr u)) ∧
+         (∀u:Z,(FS.degree (Sum.inr u):ℝ)≤capActive*Fintype.card W)) ∧
+        LongResidualSpokeCompletionControl π d raw t z.2 Spokes θ δspoke :=by
+  obtain ⟨N,hN⟩:=first_vortex_concrete_terminal_fixed_class_matching_tested_inner_sum α lam lamAssign ε δold δlocal δglobal θ eps ξ ρ₀ bmatch ξPart ζret d K r Δ rho δLoss εInner eta e
+    hα hlam hε hδ hδ1 hθ hepsPos hρ₀ hbmatch hαb hbd hεsmall hθδ hθlocal hθhi hlamlocal hspacing hd hK hm heps hξ hξ0
+    hρ₀hi hδglobal hθglobal hprecise ξCap hξPartCap hCap hlamθ hdlarge Nret hNret hrho heta hetaR hbudget hsupply
+  refine ⟨N,?_⟩
+  intro n hn _ U _ _ P π Dv mm β Vort hreg hDv hρhi hρlo hDlo hDhi hmm F hF Allowed hAllowed hclass hcut hcutHost hnoshort
+    hεα hlamhi a γ ρ ξSeed ΔSeed haEq hγEq hρEq hΔeps hξSeed hΔSeed heps1 hζ hζ0 τ Asrc BM hBM weight hw BO hBO w hw0 hwupper z ζselect hζselect Inner βList terr τerr hτerr hEvent
+  intro γLoss σLoss size a₀ b₀ e₀ f₀ L Bpart εAbs ζCorr ξCorr hsize hL hπ hξCorr hbudgetCorr heAbs heB hEvery hProtected αAssign ρreserve hαAssign hReserveScale hee
+  intro βfinal κ boundary loc lossInside inside δsmall ρsmall δspoke hU hεδ hβ hβ1 hδbound hn0 hnβ hnδ hu hκ hδsmall hθsmall hnsmall hρsmall hscale hbadsmall hδspoke hspokeScale hSharp hθκ hδstrong hnstrong hloc hinside hboundaryRate hlocGlobal hinsideGlobal hOuterNonneg hInsideBound hInsideBudget hlocalBudget hρreserve hListMargin hΔξ
+  have ht:=@first_vortex_concrete_matching_tests n K U _ _ _ P π d r Dv mm β ε Vort θ ρ₀ BM BO F hF weight w a γ eps Δ ξSeed ΔSeed ζret ζselect βList terr τerr z Inner
+  have hdT:concreteBoundaryMatchingTestsFin n=concreteFixedMatchingReadyInnerSumFinGeometry n:=Subsingleton.elim _ _
+  have hdTK:concreteBoundaryMatchingTestsFin K=concreteFixedMatchingReadyInnerSumFinGeometry K:=Subsingleton.elim _ _
+  try rw [hdT] at ht
+  try rw [hdTK] at ht
+  obtain ⟨hHub,hCol,hGood,hBoundary,hStarts⟩:=ht hEvent
+  have hc:=hN n hn
+  have hd:concreteFixedMatchingTestedInnerSumFinGeometry n=concreteFixedMatchingReadyInnerSumFinGeometry n:=Subsingleton.elim _ _
+  have hdK:concreteFixedMatchingTestedInnerSumFinGeometry K=concreteFixedMatchingReadyInnerSumFinGeometry K:=Subsingleton.elim _ _
+  have hd6:concreteFixedMatchingTestedInnerSumSixGeometry=concreteFixedMatchingReadyInnerSumSixGeometry:=Subsingleton.elim _ _
+  try rw [hd] at hc
+  try rw [hdK] at hc
+  try rw [hd6] at hc
+  obtain ⟨D₀,C,hTerminal,hFor⟩:=hc U P π Dv mm β Vort hreg hDv hρhi hρlo hDlo hDhi hmm F hF Allowed hAllowed hclass hcut hcutHost hnoshort
+    hεα hlamhi a γ ρ ξSeed ΔSeed haEq hγEq hρEq hΔeps hξSeed hΔSeed heps1 hζ hζ0 τ Asrc BM hBM weight hw BO hBO w hw0 hwupper z ζselect hζselect Inner βList terr τerr hτerr hEvent
+    γLoss σLoss size a₀ b₀ e₀ f₀ L Bpart εAbs ζCorr ξCorr hsize hL hπ hξCorr hbudgetCorr heAbs heB hEvery hProtected αAssign ρreserve hαAssign hReserveScale
+    βfinal κ boundary loc lossInside inside δsmall ρsmall δspoke hU hεδ hβ hβ1 hδbound hn0 hnβ hnδ hu hκ hδsmall hθsmall hnsmall hρsmall hscale hbadsmall hδspoke hspokeScale hSharp hθκ hδstrong hnstrong hloc hinside hboundaryRate hlocGlobal hinsideGlobal hOuterNonneg hInsideBound hInsideBudget hlocalBudget hρreserve hListMargin hΔξ
+  refine ⟨D₀,C,hTerminal,?_⟩
+  intro S hSP0 hregS0 hEdit0 hInner0 hRes0
+  obtain ⟨Mhost,Del,hSP,hregS,hEdit,hInner,hRes,hCover,hwitness,hPrepared,hOut⟩:=hFor S hSP0 hregS0 hEdit0 hInner0 hRes0
+  refine ⟨Mhost,Del,hSP,hregS,hEdit,hInner,hRes,hCover,hwitness,hPrepared,?_⟩
+  intro t raw ℓ R Tmix Q q φ hKpos hθone ζRet capActive hcap hεpos hεone hmmpos hζRet hζCap hretScale hPbound hEdgeBudget hcard p₂ k₂ u hstarts hdegrees hγ0 hθ0 huDensity hcolour εBalance ζChange ζGlobal lossRow lossCol hζGlobal hζmono σ Hraw hbal hRetRow hRetCol hBudgetRow hBudgetCol
+  have hLocal:=first_vortex_global_retention_to_local P Dv mm β ε Vort hεpos (by linarith) hmmpos π d (fun e=>z.1 (Sum.inr e)) false t z.2 ζret ζRet hζRet hretScale hGood
+  have hMonotone:=retained_restriction_good_mono_tolerance π d (fun e=>z.1 (Sum.inr e)) false t (fun _:Unit=>Finset.univ) (fun _:Unit=>Finset.univ) ζret ζGlobal z.2 hζmono hGood
+  have hLists:=long_matching_reserved_lists_from_witness Δ P π d r z (Vort.extendedVertices 1) K θ Dv a γ eps βList F hF weight w D₀ C S Del Mhost hwitness
+  have hdecList:referenceWitnessFinDecidable n=concreteFixedMatchingReadyInnerSumFinGeometry n:=Subsingleton.elim _ _
+  try rw [hdecList] at hLists
+  have hLists':∀w,IsExtendingList (fun x y=>rawSelectedPhysicalRelation P π d (fun e=>z.1 (Sum.inl e)) x y ∧ ¬Del.Adj x y)
+      (rawReservedSpokeList π d (fun e=>raw (Sum.inr e)) w\(Vort.extendedVertices 1∪retainedFinalMarkedAt π d (fun e=>raw (Sum.inr e)) t z.2 w)) (βList/2):=by
+    intro w
+    have hh:=hLists w
+    dsimp only [raw,t,rawExpandedApproximateCollapse,id]
+    convert hh using 1 <;> congr! 5 <;> first | rfl | exact Subsingleton.elim _ _
+  have hAbs:=hTerminal.2.2.2
+  have hC:C.card≤e:=hTerminal.2.1.trans hee
+  apply hOut (Vort.extendedVertices (L+1)) (Vort.extendedIndices (L+1))
+  · exact hKpos
+  · exact hθone
+  · exact hcap
+  · exact hεpos
+  · exact hεone
+  · exact hmmpos
+  · exact hζRet
+  · exact hζCap
+  · exact hPbound
+  · exact hEdgeBudget
+  · simpa only [raw,rawExpandedApproximateCollapse,id] using hLocal
+  · simpa only [longTerminalProtectedReserve,raw,t,rawExpandedApproximateCollapse,id] using hAbs
+  · exact hLists'
+  · exact hcard
+  · exact hC
+  · exact hstarts
+  · exact hdegrees
+  · exact hγ0
+  · exact hθ0
+  · exact huDensity
+  · exact hcolour
+  · exact hζGlobal
+  · exact hbal
+  · simpa only [raw,rawExpandedApproximateCollapse,id] using hMonotone
+  · exact hRetRow
+  · exact hRetCol
+  · exact hBudgetRow
+  · exact hBudgetCol
+end Oberwolfach

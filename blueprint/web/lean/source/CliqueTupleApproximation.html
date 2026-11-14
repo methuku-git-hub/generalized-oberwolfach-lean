@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CliqueTupleApproximation.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CliqueTupleApproximation.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CliqueRetentionExpansion</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.FiniteTupleConflicts</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.GoodTupleSummation</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.TupleRetentionBounds</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Passing from root-tuple retention estimates to simultaneous retention</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> in cliques. Conflicting tuples contribute zero, with their number bounded</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> by actual cross-neighbour counts. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 2000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem clique_tuple_approximation</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     {V C J : Type*} [Fintype V] [Fintype C] [Fintype J]</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (G : SimpleGraph V) (T : J → Finset V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hT : ∀ j,∀ u∈T j,∀ v∈T j,u≠v → G.Adj u v)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (μ : FiniteLaw (V → C×Bool)) (c : C) {s A : ℕ}</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hsize : ∀ j,(T j).card≤s)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hcross : ∀ i j,i≠j → ∀ v∈T i,((T j).filter (G.Adj v)).card≤A)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     {b ε : ℝ} (hb : 0≤b) (hε : 0≤ε)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hgood : ∀ f : (j : J) → {v // v∈T j},</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ i j,¬G.Adj (f i).val (f j).val) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       b≤μ.probability (fun σ=&gt;∀ j,coinRetainedColour G σ (f j).val=some c) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       μ.probability (fun σ=&gt;∀ j,coinRetainedColour G σ (f j).val=some c)≤(1+ε)*b) :</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     |μ.probability (fun σ=&gt;∀ j,∃ v∈T j,coinRetainedColour G σ v=some c)-</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∏ j,((T j).card : ℝ))*b|≤</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∏ j,((T j).card : ℝ))*ε*b+</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         (((Fintype.card J)^2*A*s^(Fintype.card J-1) : ℕ) : ℝ)*b := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   classical</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let X := fun j : J=&gt;{v // v∈T j}</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let bad := fun f : ∀ j,X j=&gt;∃ i j,i≠j ∧ G.Adj (f i).val (f j).val</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   letI : DecidablePred bad := fun f=&gt;Classical.propDecidable (bad f)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let p := fun f : ∀ j,X j=&gt;μ.probability (fun σ=&gt;∀ j,coinRetainedColour G σ (f j).val=some c)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hp (f : ∀ j,X j) (hf : ¬bad f) : b≤p f ∧ p f≤(1+ε)*b := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     apply hgood f</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     intro i j hadj</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     exact hf ⟨i,j,fun he=&gt;G.irrefl (he ▸ hadj),hadj⟩</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hz (f : ∀ j,X j) (hf : bad f) : p f=0 := by</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     obtain ⟨i,j,_,hij⟩ := hf</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     exact conflicting_retention_probability_zero G μ (fun j=&gt;(f j).val) c ⟨i,j,hij⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hX (j : J) : Fintype.card (X j)≤s := by simpa only [X,Fintype.card_coe] using hsize j</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hpairCount (i j : J) (hij : i≠j) (a : X i) :</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (Finset.univ.filter (fun b : X j=&gt;G.Adj a.val b.val)).card≤A := by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     apply (Finset.card_le_card_of_injOn</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (s:=Finset.univ.filter (fun b : X j=&gt;G.Adj a.val b.val))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (t:=(T j).filter (G.Adj a.val)) (fun x : X j=&gt;x.val) ?_ ?_).trans</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (hcross i j hij a.val a.property)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     · intro x hx</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       exact Finset.mem_filter.mpr ⟨x.property,(Finset.mem_filter.mp hx).2⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     · intro x _ y _ he</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       exact Subtype.ext he</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   have hB : (Finset.univ.filter bad).card≤(Fintype.card J)^2*A*s^(Fintype.card J-1) := by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hh := finite_tuple_conflict_count (fun i j a b=&gt;G.Adj a.val b.val) hpairCount hX</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     convert hh using 1</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     apply congrArg Finset.card</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     ext f</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     simp only [Finset.mem_filter,bad]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hN : (Fintype.card (∀ j,X j) : ℝ)=∏ j,((T j).card : ℝ) := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     simp only [Fintype.card_pi,X,Fintype.card_coe,Nat.cast_prod]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hh := finite_sum_good_approximation bad p hb hε hp hz</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   rw [hN] at hh</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   have hBR : ((Finset.univ.filter bad).card : ℝ)≤</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (((Fintype.card J)^2*A*s^(Fintype.card J-1) : ℕ) : ℝ) := by exact_mod_cast hB</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   rw [clique_joint_retention_expansion G T hT μ c]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   exact hh.trans (add_le_add (le_refl _) (mul_le_mul_of_nonneg_right hBR hb))</span>
+<span id="L70"><a href="#L70" class="ln">  70</a> </span>
+<span id="L71"><a href="#L71" class="ln">  71</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,153 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryPackingTransport.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryPackingTransport.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryWheelRestriction</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryIncidentResources</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Physical incident sets and transport of a packing from a smaller host. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 1200000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U : Type*} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def ordinaryPhysicalIncidentEdges (Q : SimpleGraph V) (H : V → U → Prop)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (x : V⊕U) : Finset (Sym2 V⊕(V×U)) :=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   Finset.univ.filter (fun e=&gt;ordinaryResourceState Q H e=true ∧ ordinaryResourceIncident x e)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem ordinaryIncidentEdges_image (Q : SimpleGraph V) (H : V → U → Prop) (x : V⊕U) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (ordinaryIncidentEdges Q H x).image Subtype.val=ordinaryPhysicalIncidentEdges Q H x := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   ext e</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   simp only [ordinaryIncidentEdges,ordinaryPhysicalIncidentEdges,Finset.mem_image,</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     Finset.mem_filter,Finset.mem_univ,true_and]</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   constructor</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   · rintro ⟨⟨a,ha⟩,hx,rfl⟩</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     exact ⟨ha,hx⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   · rintro ⟨ha,hx⟩</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     exact ⟨⟨e,ha⟩,hx,rfl⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem ordinaryActiveResources_image {Q F : SimpleGraph V} {H : V → U → Prop} {r : ℕ}</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (W : OrdinaryWheel Q F H r) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (ordinaryActiveResources W).image Subtype.val=ordinaryWheelResources W := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   ext e</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   simp only [Finset.mem_image,ordinaryActiveResources_mem]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   constructor</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   · rintro ⟨a,ha,rfl⟩;exact ha</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   · intro he</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     exact ⟨⟨e,ordinaryWheelResources_present W e he⟩,he,rfl⟩</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem ordinary_leftover_card_physical {Q F : SimpleGraph V} {H : V → U → Prop} {r : ℕ}</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (M : Finset (OrdinaryWheel Q F H r)) (x : V⊕U) :</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (ordinaryIncidentEdges Q H x \ M.biUnion ordinaryActiveResources).card=</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (ordinaryPhysicalIncidentEdges Q H x \ M.biUnion ordinaryWheelResources).card := by</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hh := Finset.card_image_of_injective</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (ordinaryIncidentEdges Q H x \ M.biUnion ordinaryActiveResources) Subtype.val_injective</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   rw [Finset.image_sdiff _ _ Subtype.val_injective,ordinaryIncidentEdges_image,</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     Finset.biUnion_image] at hh</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   simp only [ordinaryActiveResources_image] at hh</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   exact hh.symm</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> theorem ordinaryPhysicalIncidentEdges_rim (Q : SimpleGraph V) (H : V → U → Prop) (v : V) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     ordinaryPhysicalIncidentEdges Q H (Sum.inl v)=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (Q.incidenceFinset v).image Sum.inl ∪</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (Finset.univ.filter (H v)).image (fun u=&gt;Sum.inr (v,u)) := by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   ext e</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   cases e with</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   | inl e =&gt;</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     simp only [ordinaryPhysicalIncidentEdges,Finset.mem_filter,Finset.mem_univ,true_and,</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       ordinaryResourceState,Sum.elim_inl,decide_eq_true_eq,ordinaryResourceIncident,</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       Finset.mem_union,Finset.mem_image,Sum.inl.injEq,Sum.inr_ne_inl,and_false,exists_false,</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       or_false,exists_eq_right,SimpleGraph.mem_incidenceFinset]</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     rfl</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   | inr vu =&gt;</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     rcases vu with ⟨z,u⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     simp only [ordinaryPhysicalIncidentEdges,Finset.mem_filter,Finset.mem_univ,true_and,</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       ordinaryResourceState,Sum.elim_inr,decide_eq_true_eq,ordinaryResourceIncident,</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       Finset.mem_union,Finset.mem_image,Sum.inl_ne_inr,and_false,exists_false,false_or,</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       Sum.inr.injEq,Prod.mk.injEq]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     constructor</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     · rintro ⟨h,rfl⟩;exact ⟨u,h,rfl,rfl⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     · rintro ⟨a,h,rfl,rfl⟩;exact ⟨h,rfl⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> </span>
+<span id="L73"><a href="#L73" class="ln">  73</a> theorem ordinaryPhysicalIncidentEdges_hub (Q : SimpleGraph V) (H : V → U → Prop) (u : U) :</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     ordinaryPhysicalIncidentEdges Q H (Sum.inr u)=</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       (Finset.univ.filter (fun v=&gt;H v u)).image (fun v=&gt;Sum.inr (v,u)) := by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   ext e</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   cases e with</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   | inl e =&gt; simp [ordinaryPhysicalIncidentEdges,ordinaryResourceIncident]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   | inr vu =&gt;</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     rcases vu with ⟨v,a⟩</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     simp only [ordinaryPhysicalIncidentEdges,Finset.mem_filter,Finset.mem_univ,true_and,</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       ordinaryResourceState,Sum.elim_inr,decide_eq_true_eq,ordinaryResourceIncident,</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       Finset.mem_image,Sum.inr.injEq,Prod.mk.injEq]</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     constructor</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     · rintro ⟨h,rfl⟩;exact ⟨v,h,rfl,rfl⟩</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     · rintro ⟨z,h,rfl,rfl⟩;exact ⟨h,rfl⟩</span>
+<span id="L87"><a href="#L87" class="ln">  87</a> </span>
+<span id="L88"><a href="#L88" class="ln">  88</a> theorem ordinaryPhysicalIncidentEdges_rim_card (Q : SimpleGraph V) (H : V → U → Prop) (v : V) :</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     (ordinaryPhysicalIncidentEdges Q H (Sum.inl v)).card=</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>       Q.degree v+(Finset.univ.filter (H v)).card := by</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   rw [ordinaryPhysicalIncidentEdges_rim,Finset.card_union_of_disjoint]</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   · rw [Finset.card_image_of_injective _ Sum.inl_injective,</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       Finset.card_image_of_injective _ (by intro a b he;simpa using he),</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>       SimpleGraph.card_incidenceFinset_eq_degree]</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   · apply Finset.disjoint_left.mpr</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     intro e he hf</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     obtain ⟨a,ha,rfl⟩ := Finset.mem_image.mp he</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     obtain ⟨b,hb,hb&#x27;⟩ := Finset.mem_image.mp hf</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     exact Sum.inr_ne_inl hb&#x27;</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a> </span>
+<span id="L101"><a href="#L101" class="ln"> 101</a> theorem ordinaryPhysicalIncidentEdges_hub_card (Q : SimpleGraph V) (H : V → U → Prop) (u : U) :</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     (ordinaryPhysicalIncidentEdges Q H (Sum.inr u)).card=</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>       (Finset.univ.filter (fun v=&gt;H v u)).card := by</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>   rw [ordinaryPhysicalIncidentEdges_hub]</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   exact Finset.card_image_of_injective _ (by intro a b he;simpa using he)</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a> </span>
+<span id="L107"><a href="#L107" class="ln"> 107</a> theorem ordinaryPhysicalIncidentEdges_delete (Q D : SimpleGraph V) (H E : V → U → Prop)</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     (x : V⊕U) :</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     ordinaryPhysicalIncidentEdges (Q\D) (fun v u=&gt;H v u ∧ ¬E v u) x=</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       ordinaryPhysicalIncidentEdges Q H x \ ordinaryPhysicalIncidentEdges D E x := by</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>   ext e</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>   simp only [ordinaryPhysicalIncidentEdges,Finset.mem_filter,Finset.mem_univ,true_and,</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     Finset.mem_sdiff]</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>   cases e with</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>   | inl e =&gt;</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     induction e using Sym2.ind with</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     | _ v w =&gt;</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>       simp only [ordinaryResourceState,Sum.elim_inl,decide_eq_true_eq,SimpleGraph.mem_edgeSet,</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>         SimpleGraph.sdiff_adj]</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>       tauto</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>   | inr vu =&gt;</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     simp only [ordinaryResourceState,Sum.elim_inr,decide_eq_true_eq]</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     tauto</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a> </span>
+<span id="L125"><a href="#L125" class="ln"> 125</a> theorem finset_uncovered_le_after_deletion {α : Type*} [DecidableEq α]</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     (S D C : Finset α) : (S\C).card≤((S\D)\C).card+D.card := by</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>   calc</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     _ ≤ (((S\D)\C)∪D).card := by</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>       apply Finset.card_le_card</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>       intro e he</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>       simp only [Finset.mem_sdiff,Finset.mem_union] at *</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>       tauto</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     _ ≤ _ := Finset.card_union_le _ _</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a> </span>
+<span id="L135"><a href="#L135" class="ln"> 135</a> theorem ordinary_packing_transport {P Q F : SimpleGraph V} {Hbase H : V → U → Prop} {r : ℕ}</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     (hQ : Q≤P) (hH : ∀ v u,H v u → Hbase v u)</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     (M : Finset (OrdinaryWheel Q F H r))</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     (hM : ∀ W∈M,∀ Z∈M,W≠Z → Disjoint (ordinaryWheelResources W) (ordinaryWheelResources Z)) :</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>     let M&#x27; := M.image (ordinaryWheelToLarger (F:=F) (r:=r) hQ hH)</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>     (∀ W∈M&#x27;,∀ Z∈M&#x27;,W≠Z → Disjoint (ordinaryWheelResources W) (ordinaryWheelResources Z)) ∧</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     M&#x27;.biUnion ordinaryWheelResources=M.biUnion ordinaryWheelResources := by</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>   constructor</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>   · intro W hW Z hZ hne</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>     obtain ⟨w,hw,rfl⟩ := Finset.mem_image.mp hW</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>     obtain ⟨z,hz,rfl⟩ := Finset.mem_image.mp hZ</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>     exact hM w hw z hz (by intro he;exact hne (congrArg _ he))</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>   · rw [Finset.image_biUnion]</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>     rfl</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a> </span>
+<span id="L150"><a href="#L150" class="ln"> 150</a> end Oberwolfach</span></pre></html>

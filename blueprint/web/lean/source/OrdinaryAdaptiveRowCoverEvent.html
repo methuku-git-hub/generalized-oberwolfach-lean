@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryAdaptiveRowCoverEvent.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryAdaptiveRowCoverEvent.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryNeighbourhoodCommonEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryRelativeCountChanges</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrdinaryRowCoverFromRelativeCounts</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! On one original-law event, every later bounded modification with</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> balanced row roots admits the successive ordinary row covers. The outside</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> domain is fixed before exposure; the modified graphs and root list are not. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 7000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ordinary_adaptive_row_cover_event (r:ℕ) (hr:4≤r) (C₀ α ω p₀:ℝ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hC₀:1≤C₀) (hα:0&lt;α) (hω:0&lt;ω) (hp₀:0&lt;p₀) (hp₀1:p₀≤1):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ K:ℕ,0&lt;K ∧ ∃ θ ε₀:ℝ,0&lt;θ ∧ 0&lt;ε₀ ∧ ∀ d D q₀:ℕ,∀ hd:2≤d,∃ N:ℕ,</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ (V U Γ Color:Type) [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       [DecidableEq V] [DecidableEq U],</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ (P F:SimpleGraph V) (π:Equiv.Perm V) (A:Finset V),N≤A.card →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (Fintype.card V:ℝ)≤C₀*A.card → (Fintype.card U:ℝ)≤C₀*A.card → ω*A.card≤(Fintype.card U:ℝ) →</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       permutationConflictGraph π (3*d)≤F → (∀ a,F.degree a≤D) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ a b,P.Adj a b → ¬F.Adj a b) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ a,(1/2+α)*A.card≤((A∩P.neighborFinset a).card:ℝ)) →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     ∀ (pR pH:ℝ) (hpR:0≤pR) (hpR1:pR≤1),p₀≤pR → p₀≤pH → pH≤1 →</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀ (q:U→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (s:U→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (j:Color),(∀ u,s u j=pH) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     1-1/(A.card:ℝ)^q₀≤</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (FiniteLaw.pi (rawWheelLaw (fun _=&gt;pR) (fun _=&gt;hpR) (fun _=&gt;hpR1) d hd q hq hQ s hs hS)).probability</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (fun σ=&gt;∀ (Q:SimpleGraph V) (H:V→U→Prop) (L:ℝ),0≤L →</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         6*L≤ε₀*A.card → 6*L≤ε₀*Fintype.card U → Q≤P →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         (∀ v,((changed ((rawWheelGraph P σ).neighborFinset v) (Q.neighborFinset v)).card:ℝ)≤L) →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         (∀ v,((changed (Finset.univ.filter (rawWheelSpokes π d σ j v)) (Finset.univ.filter (H v))).card:ℝ)≤L) →</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         (∀ u,((changed (Finset.univ.filter (fun v=&gt;rawWheelSpokes π d σ j v u))</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>           (Finset.univ.filter (fun v=&gt;H v u))).card:ℝ)≤L) →</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         ∀ (n:ℕ) (x:Fin n→V),(n:ℝ)≤θ*A.card → Function.Injective x → (∀ i,x i∉A) →</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         (∀ i,Q.neighborFinset (x i)⊆A) →</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         (∀ i,Q.degree (x i)=2*(Finset.univ.filter (H (x i))).card) →</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         ∃ C:Fin n→Finset (OrdinaryWheel Q F H r),</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>           (∀ i,OrdinaryRowCover (C i) (x i) A K) ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>           (∀ i j,i≠j → Disjoint ((C i).biUnion ordinaryWheelResources) ((C j).biUnion ordinaryWheelResources)) ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>           (∀ a∈A,(ordinaryWheelRimGraph (Finset.univ.biUnion C)).degree a≤n*(2*(K+1))) ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>           (∀ a∈A,(Finset.univ.filter (ordinaryPackingSpokes (Finset.univ.biUnion C) a)).card≤n*(K+1)) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>           (∀ u,(Finset.univ.filter (fun a=&gt;ordinaryPackingSpokes (Finset.univ.biUnion C) a u)).card≤n*r)):=by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   obtain ⟨K,hK,θ,ε₀,hθ,hε₀,hcover⟩:=ordinary_small_set_row_covers_from_relative_counts</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     r hr C₀ α ω p₀ (le_trans (by norm_num) hC₀) hα hω hp₀ hp₀1</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   refine ⟨K,hK,θ,ε₀,hθ,hε₀,?_⟩</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   intro d D q₀ hd</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   obtain ⟨N₁,hN₁⟩:=hcover D</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   obtain ⟨N₂,hN₂⟩:=ordinary_neighbourhood_common_event C₀ ω (ε₀/2) hC₀ hω (by positivity) d q₀ hd</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   refine ⟨max N₁ N₂,?_⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   intro V U Γ Color _ _ _ _ _ _ P F π A hn hV hU hωU hF hD hPF hdeg hnoshort</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     pR pH hpR hpR1 hpR0 hpH0 hpH1 q hq hQ s hs hS j hj</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hh:=hN₂ V U Γ Color P F π A (by omega) hV hU hωU hF hnoshort</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     pR hpR hpR1 q hq hQ s hs hS j pH hj</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   apply hh.trans</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   apply finiteLaw_probability_mono</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   intro σ hσ Q H L hL hLa hLb hQP hchangeQ hchangeHr hchangeHc n x hnθ hx hxA hSA hbal</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hcounts:=ordinary_relative_counts_under_changes P (rawWheelGraph P σ) Q F</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (rawWheelSpokes π d σ j) H A pR pH (ε₀/2) ε₀ L hL</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (by linarith only [hLa]) (by linarith only [hLb]) hchangeQ hchangeHr hchangeHc</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       intro S J hSc hJc</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       have ht:=(hσ.1 S J hSc (by omega)).le</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       simpa only [hj,Finset.prod_const] using ht)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (fun S hSc hI=&gt;(hσ.2 S hSc hI).le)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   exact hN₁ V U P Q F H n x A pR pH ε₀ (by omega) hnθ hωU hU hpR0 hpH0 hpH1 hε₀.le le_rfl</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     hx hxA hQP hSA hbal hD (fun i a ha=&gt;hPF (x i) a (hQP ha)) hdeg hcounts.1 hcounts.2</span>
+<span id="L73"><a href="#L73" class="ln">  73</a> </span>
+<span id="L74"><a href="#L74" class="ln">  74</a> end Oberwolfach</span></pre></html>

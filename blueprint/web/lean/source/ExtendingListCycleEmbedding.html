@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ExtendingListCycleEmbedding.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ExtendingListCycleEmbedding.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ExtendingListPathEmbedding</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Embed one directed cycle using an extending list. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {V:Type} [Fintype V] [DecidableEq V]</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> def DirectedCycleThrough (D:V→V→Prop) (F:SimpleGraph V):List V→Prop</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   | []=&gt;False</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   | x::xs=&gt;DirectedPathThrough D F x x xs</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem extending_list_embed_cycle (D:V→V→Prop) (L:Finset V) (β:ℝ)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hext:IsExtendingList D L β) (F:SimpleGraph V) (M:ℝ) (hM:0≤M)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hdeg:∀ v,(F.degree v:ℝ)≤M) (B:Finset V) (ℓ:ℕ) (hℓ:3≤ℓ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hbudget:(B.card:ℝ)+ℓ+2+2*M&lt;β*Fintype.card V):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ xs:List V,xs.length=ℓ ∧ xs.Nodup ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∀ z∈xs,z∈L ∧ z∉B) ∧ DirectedCycleThrough D F xs := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hfree:(B.card:ℝ)&lt;β*Fintype.card V:=by nlinarith</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   obtain ⟨x,hxL,hxB⟩:=extending_list_free_choice D L B β hext hfree</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   let B₀:=insert x B</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hB₀:(B₀.card:ℝ)≤B.card+1:=by exact_mod_cast Finset.card_insert_le x B</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have hchoice:(B₀.card:ℝ)+F.degree x&lt;β*Fintype.card V:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have hx:=hdeg x</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     nlinarith</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨y,hyL,hyB,hdxy,hFxy⟩:=extending_list_one_arc_choice D L B₀ β hext F x true hchoice</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hyB&#x27;:y∉B:=fun h=&gt;hyB (by simp [B₀,h])</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hyx:y≠x:=by intro h;subst y;apply hyB;simp [B₀]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let B&#x27;:=insert x (insert y B)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hB&#x27;:(B&#x27;.card:ℝ)≤B.card+2:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     have h₁:=Finset.card_insert_le x (insert y B)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     have h₂:=Finset.card_insert_le y B</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hh:B&#x27;.card≤B.card+2:=by dsimp [B&#x27;];omega</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     exact_mod_cast hh</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hlen:ℓ-3+1=ℓ-2:=by omega</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hbudget&#x27;:(B&#x27;.card:ℝ)+((ℓ-3)+1:ℕ)+2+2*M&lt;β*Fintype.card V:=by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     have hh:((ℓ-3)+1:ℕ)≤ℓ-2:=by omega</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     have hhR:(((ℓ-3)+1:ℕ):ℝ)≤((ℓ-2:ℕ):ℝ):=by exact_mod_cast hh</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hsub:((ℓ-2:ℕ):ℝ)+2=ℓ:=by exact_mod_cast Nat.sub_add_cancel (by omega:2≤ℓ)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     nlinarith</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   obtain ⟨zs,hzslen,hzsnodup,hzs,hchain⟩:=extending_list_embed_internal_path D L β hext F M hM hdeg (ℓ-3) B&#x27; y x hyx hbudget&#x27;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hzx:x∉zs:=by intro hz;exact (hzs x hz).2.2.2 rfl</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hzy:y∉zs:=by intro hz;exact (hzs y hz).2.2.1 rfl</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   refine ⟨x::y::zs,?_,?_,?_,?_⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   · simp only [List.length_cons,hzslen];omega</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   · exact List.nodup_cons.mpr ⟨by simp [hyx.symm,hzx],List.nodup_cons.mpr ⟨hzy,hzsnodup⟩⟩</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   · intro z hz</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     rcases List.mem_cons.mp hz with rfl | hz</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     · exact ⟨hxL,hxB⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     rcases List.mem_cons.mp hz with rfl | hz</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     · exact ⟨hyL,hyB&#x27;⟩</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     obtain ⟨hzL,hzB&#x27;,_,_⟩:=hzs z hz</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     exact ⟨hzL,fun h=&gt;hzB&#x27; (by simp [B&#x27;,h])⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   · exact ⟨hdxy,hFxy,hchain⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVortexCumulativeProtection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVortexCumulativeProtection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedVortexRestrictionChain</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedReservedResourceGraphs</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedProtectedResourceRestoration</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The physical deletion graphs formed from all covered layers avoid the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> preselected reserve. If each layer avoids the terminal spoke pair, so does</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> the cumulative spoke deletion. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 16000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U:Type} [Fintype V] [Fintype U] [LinearOrder V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem marked_resource_layers_cumulative_deletion_protects</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (B C:ℕ→Finset (Finset V⊕(V×U))) (n:ℕ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (Full Reserve:Finset (Finset V⊕(V×U))) (X:Finset V) (Z:Finset U)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hB:∀ i,i&lt;n→B (i+1)⊆B i)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hC:∀ i,i&lt;n→C i=B i\B (i+1))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hInitial:B 0=Full\Reserve)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hTerminal:∀ i,i&lt;n→∀ v∈X,∀ u∈Z,Sum.inr (v,u)∉C i):</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let Covered:=(Finset.range n).biUnion C</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let DR:=physicalEdgeGraph (markedReservedRimPairs Covered)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let DS:=markedFiniteSpokeGraph (markedReservedSpokePairs Covered);</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (∀ x y,Sum.inl ({x,y}:Finset V)∈Reserve→¬DR.Adj x y)∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀ v u,Sum.inr (v,u)∈Reserve→¬DS.Adj (Sum.inl v) (Sum.inr u))∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (∀ v∈X,∀ u∈Z,¬DS.Adj (Sum.inl v) (Sum.inr u)):=by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   intro Covered DR DS</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hsub:Covered⊆B 0:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     intro z hz</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have hpart:=finite_resource_layers_partition B C n hB hC</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     apply hpart ▸ Finset.mem_union_left (B n) hz</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hdis:Disjoint Reserve Covered:=by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     apply Finset.disjoint_left.mpr</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     intro z hzC hzD</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hz:=hsub hzD</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     rw [hInitial] at hz</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     exact (Finset.mem_sdiff.mp hz).2 hzC</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hgraphs:=marked_reserved_resource_graphs Covered</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   refine ⟨?_,?_,?_⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   · intro x y he hadj</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hh:Sum.inl ({x,y}:Finset V)∈Covered:=(hgraphs.1 x y).mp hadj |&gt;.2</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     exact Finset.disjoint_left.mp hdis he hh</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   · intro v u he hadj</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     have hh:Sum.inr (v,u)∈Covered:=(hgraphs.2.1 v u).mp hadj</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact Finset.disjoint_left.mp hdis he hh</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   · intro v hv u hu hadj</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     have hh:Sum.inr (v,u)∈Covered:=(hgraphs.2.1 v u).mp hadj</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     obtain ⟨i,hi,hz⟩:=Finset.mem_biUnion.mp hh</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     exact hTerminal i (Finset.mem_range.mp hi) v hv u hu hz</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> /-- The first cover-down may use inner spokes only in its specified star.</span>
+<span id="L51"><a href="#L51" class="ln">  51</a> It therefore avoids spokes between vertices in I\T and hubs in J\W. -/</span>
+<span id="L52"><a href="#L52" class="ln">  52</a> theorem marked_cover_down_avoids_deeper_spokes</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (C R:Finset (Finset V⊕(V×U))) (I T X:Finset V) (J W Z:Finset U)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hX:X⊆I\T) (hZ:Z⊆J\W)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hcover:C.filter (markedInnerResource I J)=R.filter (markedStarResource T W)):</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ∀ v∈X,∀ u∈Z,Sum.inr (v,u)∉C:=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   intro v hv u hu hc</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hv&#x27;:=Finset.mem_sdiff.mp (hX hv)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hu&#x27;:=Finset.mem_sdiff.mp (hZ hu)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hi:markedInnerResource I J (Sum.inr (v,u)):=⟨hv&#x27;.1,hu&#x27;.1⟩</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hf:Sum.inr (v,u)∈R.filter (markedStarResource T W):=by</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     rw [←hcover]</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     exact Finset.mem_filter.mpr ⟨hc,hi⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hs:= (Finset.mem_filter.mp hf).2</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   change v∈T∨u∈W at hs</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   exact hs.elim hv&#x27;.2 hu&#x27;.2</span>
+<span id="L67"><a href="#L67" class="ln">  67</a> </span>
+<span id="L68"><a href="#L68" class="ln">  68</a> end Oberwolfach</span></pre></html>

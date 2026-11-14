@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedReservedPackingExclusions.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedReservedPackingExclusions.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPackingExclusionsAcrossResources</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedReservedPackingToReducedHost</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.MarkedSampleDeletionIncidences</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Prescribed exclusions survive transfer of a packing to the host in which</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> reserved physical resources have been removed. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 16000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   [LinearOrder V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_reserved_packing_transfer_preserves_exclusions</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d m:ℕ)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (σ:RawMarkedOutcome V U Γ Color) (H:Bool→V→U→Prop)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (C:Finset (Finset V⊕(V×U))):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     let E:=MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     let K:=MarkedSampleArc P π (3*d) (fun e=&gt;σ (Sum.inl e)) true</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     let tail:=fun e:E=&gt;e.val.1</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let head:=fun e:E=&gt;e.val.2</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let ktail:=fun e:K=&gt;e.val.1</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let khead:=fun e:K=&gt;e.val.2;</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀ M:Finset (MarkedWheel tail head ktail khead m π (3*d) (H false) (H true)),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ A:Finset (E⊕K),∀ S:Finset (V×U),</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (∀ W∈M,∀ Z∈M,W≠Z→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources Z))→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     Disjoint C (M.biUnion markedWheelPhysicalResources)→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     Disjoint A (M.biUnion markedWheelArcs)→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     Disjoint S (M.biUnion markedWheelSpokePairs)→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let DR:=physicalEdgeGraph (markedReservedRimPairs C)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let DS:=markedFiniteSpokeGraph (markedReservedSpokePairs C)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let σ&#x27;:=rawMarkedDeleteRims σ DR.edgeFinset</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let H&#x27;:=markedDeletePhysicalSpokes H DS</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let E&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) false</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let K&#x27;:=MarkedSampleArc P π (3*d) (fun e=&gt;σ&#x27; (Sum.inl e)) true</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let t&#x27;:=fun e:E&#x27;=&gt;e.val.1</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let h&#x27;:=fun e:E&#x27;=&gt;e.val.2</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let kt&#x27;:=fun e:K&#x27;=&gt;e.val.1</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let kh&#x27;:=fun e:K&#x27;=&gt;e.val.2</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let emb:=markedSampleDeletedArcsEmbedding P π d σ DR.edgeFinset</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let A&#x27;:=Finset.univ.filter (fun a:E&#x27;⊕K&#x27;=&gt;emb a∈A);</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     ∃ M&#x27;:Finset (MarkedWheel t&#x27; h&#x27; kt&#x27; kh&#x27; m π (3*d) (H&#x27; false) (H&#x27; true)),</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (∀ W∈M&#x27;,∀ Z∈M&#x27;,W≠Z→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources Z))∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       M&#x27;.biUnion markedWheelPhysicalResources=M.biUnion markedWheelPhysicalResources∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       Disjoint A&#x27; (M&#x27;.biUnion markedWheelArcs) ∧ Disjoint S (M&#x27;.biUnion markedWheelSpokePairs):=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro E K tail head ktail khead M A S hM hC hA hS DR DS σ&#x27; H&#x27; E&#x27; K&#x27; t&#x27; h&#x27; kt&#x27; kh&#x27; emb A&#x27;</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨M&#x27;,hM&#x27;,hres⟩:=marked_disjoint_packing_transfers_to_reserved_deletion P π d m σ H C M hM hC</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hEnds:=markedSampleDeletedArcsEmbedding_endpoints_type P π d σ DR.edgeFinset</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hx:=marked_packing_exclusions_transfer_on_resources</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (markedSampleArc_physical_injective P π (3*d) (fun e=&gt;σ (Sum.inl e))) emb</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (fun a=&gt;(hEnds a).1) (fun a=&gt;(hEnds a).2.1) (fun a=&gt;(hEnds a).2.2)</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     M M&#x27; A A&#x27; S (fun a ha=&gt;(Finset.mem_filter.mp ha).2) hres hA hS</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   exact ⟨M&#x27;,hM&#x27;,hres,hx.1,hx.2⟩</span>
+<span id="L55"><a href="#L55" class="ln">  55</a> end Oberwolfach</span></pre></html>

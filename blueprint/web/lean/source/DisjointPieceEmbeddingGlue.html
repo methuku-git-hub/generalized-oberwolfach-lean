@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>DisjointPieceEmbeddingGlue.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>DisjointPieceEmbeddingGlue.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Mathlib.Combinatorics.SimpleGraph.Finite</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Glue embeddings on disjoint finite pieces, preserving their values and</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> all graph edges lying within one of the pieces. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> </span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem disjoint_piece_embeddings_glue</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     {X V J:Type*} [DecidableEq X] [DecidableEq J]</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (I:Finset J) (S:J→Finset X)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hS:∀i∈I,∀j∈I,i≠j→Disjoint (S i) (S j))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (f:∀i,{x // x∈S i}↪V)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hf:∀i∈I,∀j∈I,i≠j→Disjoint (Set.range (f i)) (Set.range (f j))):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃φ:{x // x∈I.biUnion S}↪V,</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       ∀i (hi:i∈I) (x:X) (hx:x∈S i),</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>         φ ⟨x,Finset.mem_biUnion.mpr ⟨i,hi,hx⟩⟩=f i ⟨x,hx⟩ := by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   classical</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let idx (x:{x // x∈I.biUnion S}):J:=Classical.choose (Finset.mem_biUnion.mp x.property)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hidx (x:{x // x∈I.biUnion S}):idx x∈I ∧ x.val∈S (idx x):=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     Classical.choose_spec (Finset.mem_biUnion.mp x.property)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have map_eq (i j:J) (hij:i=j) (x:X) (hxi:x∈S i) (hxj:x∈S j):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       f i ⟨x,hxi⟩=f j ⟨x,hxj⟩:=by</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     subst j</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     rfl</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let φ (x:{x // x∈I.biUnion S}):V:=f (idx x) ⟨x.val,(hidx x).2⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hinj:Function.Injective φ:=by</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     intro x y hxy</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hij:idx x=idx y:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       by_contra hne</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       have hx:φ x∈Set.range (f (idx x)):=⟨⟨x.val,(hidx x).2⟩,rfl⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       have hy:φ y∈Set.range (f (idx y)):=⟨⟨y.val,(hidx y).2⟩,rfl⟩</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       have hy&#x27;:φ x∈Set.range (f (idx y)):=by rw [hxy];exact hy</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       exact Set.disjoint_left.mp (hf (idx x) (hidx x).1 (idx y) (hidx y).1 hne) hx hy&#x27;</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     apply Subtype.ext</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     have hyx:y.val∈S (idx x):=by simpa only [hij] using (hidx y).2</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     have hy&#x27;:f (idx x) ⟨y.val,hyx⟩=f (idx y) ⟨y.val,(hidx y).2⟩:=</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       map_eq (idx x) (idx y) hij y.val hyx (hidx y).2</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     change f (idx x) ⟨x.val,(hidx x).2⟩=f (idx y) ⟨y.val,(hidx y).2⟩ at hxy</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     have hsub: (⟨x.val,(hidx x).2⟩:{w:X // w∈S (idx x)})=⟨y.val,hyx⟩:=</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (f (idx x)).injective (hxy.trans hy&#x27;.symm)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     exact congrArg (fun (z:{w:X // w∈S (idx x)})=&gt;z.val) hsub</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   refine ⟨⟨φ,hinj⟩,?_⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   intro i hi x hx</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let z:{x // x∈I.biUnion S}:=⟨x,Finset.mem_biUnion.mpr ⟨i,hi,hx⟩⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have heq:idx z=i:=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     by_contra hne</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact Finset.disjoint_left.mp (hS (idx z) (hidx z).1 i hi hne) (hidx z).2 hx</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   change φ z=f i ⟨x,hx⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   exact map_eq (idx z) i heq x (hidx z).2 hx</span>
+<span id="L51"><a href="#L51" class="ln">  51</a> </span>
+<span id="L52"><a href="#L52" class="ln">  52</a> theorem disjoint_piece_graph_embeddings_glue</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     {X V J:Type*} [DecidableEq X] [DecidableEq J]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (I:Finset J) (S:J→Finset X)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hS:∀i∈I,∀j∈I,i≠j→Disjoint (S i) (S j))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (f:∀i,{x // x∈S i}↪V)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (hf:∀i∈I,∀j∈I,i≠j→Disjoint (Set.range (f i)) (Set.range (f j)))</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (G:SimpleGraph X) (H:SimpleGraph V)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (hcover:∀x y,x∈I.biUnion S→y∈I.biUnion S→G.Adj x y→</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       ∃i∈I,x∈S i ∧ y∈S i)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (hlocal:∀i∈I,∀x y (hx:x∈S i) (hy:y∈S i),G.Adj x y→H.Adj (f i ⟨x,hx⟩) (f i ⟨y,hy⟩)):</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     ∃φ:{x // x∈I.biUnion S}↪V,</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (∀i (hi:i∈I) (x:X) (hx:x∈S i),</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         φ ⟨x,Finset.mem_biUnion.mpr ⟨i,hi,hx⟩⟩=f i ⟨x,hx⟩) ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (∀x y,G.Adj x.val y.val→H.Adj (φ x) (φ y)) := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   obtain ⟨φ,hφ⟩:=disjoint_piece_embeddings_glue I S hS f hf</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   refine ⟨φ,hφ,?_⟩</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   intro x y hxy</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   obtain ⟨i,hi,hx,hy⟩:=hcover x.val y.val x.property y.property hxy</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hx&#x27;:φ x=f i ⟨x.val,hx⟩:=by simpa using hφ i hi x.val hx</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hy&#x27;:φ y=f i ⟨y.val,hy⟩:=by simpa using hφ i hi y.val hy</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   rw [hx&#x27;,hy&#x27;]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   exact hlocal i hi x.val y.val hx hy hxy</span>
+<span id="L74"><a href="#L74" class="ln">  74</a> end Oberwolfach</span></pre></html>

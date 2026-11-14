@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>CommonWeightWitnessBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>CommonWeightWitnessBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ThinnedCommonWitnessEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedLoadFailureBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! Explicit exponential failure bounds for the single common-weight</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> witness event. The coefficient function is fixed across all hub pairs,</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> and the exponent does not depend on the actual marginal arrays. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 2300000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> open scoped BigOperators</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> def commonWeightLoadExponent (m d : ℕ) (B ε : ℝ) : ℝ :=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   2*ε^2/((16*(d:ℝ)+14)^2*2*((m:ℝ)+1)^7*B^2)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem commonWeightLoadExponent_pos (m d : ℕ) (B ε : ℝ) (hB : 0&lt;B) (hε : 0&lt;ε) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     0&lt;commonWeightLoadExponent m d B ε := by unfold commonWeightLoadExponent;positivity</span>
+<span id="L21"><a href="#L21" class="ln">  21</a> </span>
+<span id="L22"><a href="#L22" class="ln">  22</a> theorem commonWeightLoad_tail_exponential (m d : ℕ) (B ε n : ℝ) (hn : 0&lt;n) :</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     2*Real.exp (-2*ε^2/((16*(d:ℝ)+14)^2*(((m:ℝ)+1)^4*B/n)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B)))=</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       2*Real.exp (-commonWeightLoadExponent m d B ε*n) := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   congr 2</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   unfold commonWeightLoadExponent</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   field_simp &lt;;&gt; ring</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> </span>
+<span id="L29"><a href="#L29" class="ln">  29</a> theorem rawMarked_common_weight_exponential_event</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     {V U Γ Color : Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     [LinearOrder V] [DecidableEq U]</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (P : SimpleGraph V) (π : Equiv.Perm V)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (p k : ℝ) (hp : 0&lt;p) (hk : 0&lt;k) (hphys : 2*p+2*k≤1) (d : ℕ) (hd : 2≤d)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a))</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hnoshort : ∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (m : ℕ) (hm : 3≤m) (g : Γ) (j : Color) (s₀ D τ A B : ℝ) (hs₀ : 0&lt;s₀) (hB : 0&lt;B)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hq₀ : ∀ u,q u g=s₀/m) (hs₀&#x27; : ∀ u,s u j=s₀)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (weight : (Fin (m+1)→V)→ℝ)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hw : SuccessorSequenceWeightConditions P π (3*d) D τ A B weight)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hn : 0&lt;Fintype.card V) (hu : Fintype.card U≤Fintype.card V)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (hDlo : (Fintype.card V:ℝ)/2≤D) (hDhi : D≤2*Fintype.card V)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (pstar : ℝ) (hpstar : 0&lt;pstar) (hpmin : pstar≤p) (hkmin : pstar≤k) (hsmin : pstar≤s₀*s₀/m)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hp1 : p≤1) (hk1 : k≤1) (hs1 : s₀*s₀/m≤1) (ε : ℝ) (hε : 0&lt;ε) :</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     1-8*(Fintype.card V:ℝ)^4*Real.exp</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (-commonWeightLoadExponent m d (2*B/pstar^(2*m+1)) ε*Fintype.card V)≤</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (FiniteLaw.pi (rawMarkedWheelLaw p k hp.le hk.le hphys d hd q hq hQ s hs hS)).probability</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (fun σ=&gt;∀ u u&#x27;,u≠u&#x27; → ∃ κ,CommonPotentialSpokeLoads P π d m D p k (s₀*s₀/m) weight</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         (τ+ε) σ (rawMarkedPairSpokes π d σ g j) κ u u&#x27;) := by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hh := rawMarked_common_weight_witness_event P π p k hp hk hphys d hd q hq hQ s hs hS hnoshort</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     m hm g j s₀ D τ A B hs₀ hB hq₀ hs₀&#x27; weight hw hn hDlo hDhi</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     pstar hpstar hpmin hkmin hsmin hp1 hk1 hs1 ε hε</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   dsimp only at hh</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   have hnR : (0:ℝ)&lt;Fintype.card V := by exact_mod_cast hn</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   rw [commonWeightLoad_tail_exponential m d (2*B/pstar^(2*m+1)) ε (Fintype.card V) hnR] at hh</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hroots := marked_root_domain_card (V:=V) (U:=Unit) (by simpa only [Fintype.card_unique] using Nat.succ_le_of_lt hn)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hrootsR : (Fintype.card (((V×V)⊕(V×V))⊕(Bool×V×Unit)):ℝ)≤4*(Fintype.card V:ℝ)^2 := by exact_mod_cast hroots</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   have hpairs : (Fintype.card (U×U):ℝ)≤(Fintype.card V:ℝ)^2 := by</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hh&#x27; := Nat.mul_le_mul hu hu</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     simpa only [Fintype.card_prod,Nat.cast_mul,pow_two] using (show (Fintype.card U:ℝ)*Fintype.card U≤(Fintype.card V:ℝ)*Fintype.card V by exact_mod_cast hh&#x27;)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hprod := mul_le_mul hpairs hrootsR (Nat.cast_nonneg _) (by positivity)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have herr := mul_le_mul_of_nonneg_right hprod</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (show 0≤2*Real.exp (-commonWeightLoadExponent m d (2*B/pstar^(2*m+1)) ε*Fintype.card V) by positivity)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   apply le_trans _ hh</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   nlinarith only [herr]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a> </span>
+<span id="L68"><a href="#L68" class="ln">  68</a> end Oberwolfach</span></pre></html>

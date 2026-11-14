@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>StrongSampledColourCuts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>StrongSampledColourCuts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ColourDegreeEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ColourCutEvent</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.StrongRawColourCutBounds</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.ConfigurationFailureMargins</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.GoodPlacementEvents</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> </span>
+<span id="L7"><a href="#L7" class="ln">   7</a> /-! A common large-cut event for independently coloured and oriented</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> physical edges. The cut constants precede the actual colour probabilities. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 1000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem sampledColourOrientation_large_cuts_strong</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (α pstar : ℝ) (hα : 0&lt;α) (hα1 : α≤1/2) (hpstar : 0&lt;pstar)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (k q₀ : ℕ) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∃ N : ℕ,∀ (V : Type) [Fintype V] [LinearOrder V],N≤Fintype.card V →</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     ∀ (P : SimpleGraph V), (∀ v,(1/2+α)*Fintype.card V≤(P.degree v:ℝ)) →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (ρ : Fin k→ℝ) (hρ : ∀ a,0≤ρ a) (hsum : ∑ a,ρ a=1),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     1-1/(Fintype.card V:ℝ)^q₀≤</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (FiniteLaw.pi (fun _ : Sym2 V=&gt;FiniteLaw.categoricalDirection ρ hρ hsum)).probability</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>         (fun σ=&gt;∀ a : Fin k,pstar≤ρ a → ∀ δ : ℝ,δ≤α/32 → δ≤ρ a/64 → ∀ S T : Finset V,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>           (1-2*δ)*Fintype.card V&lt;(S.card:ℝ)+T.card →</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>           (α*ρ a/4)*Fintype.card V*min (S.card:ℝ) T.card≤</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>             (matrixCut (sampledColourOrientation P σ a) S T:ℝ)) := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   let ε : ℝ := pstar/32</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   let q : ℝ := α*pstar^2/1024</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hε : 0&lt;ε := by dsimp [ε];positivity</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hq : 0&lt;q := by dsimp [q];positivity</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   obtain ⟨N₁,hN₁⟩ := linear_deviation_failure_eventually_small (3*k) 1 ε</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (by norm_num) hε 1 (q₀+1)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   obtain ⟨N₂,hN₂⟩ := sampledColourCut_quadratic_event_pow k hq (q₀+1)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   refine ⟨max 2 (max N₁ N₂),?_⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   intro V _ _ hnN P hP ρ hρ hsum</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   let n := Fintype.card V</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hn : 0&lt;n := by dsimp [n];omega</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hn0 : (0:ℝ)&lt;n := by exact_mod_cast hn</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let μ := FiniteLaw.pi (fun _ : Sym2 V=&gt;FiniteLaw.categoricalDirection ρ hρ hsum)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hd := sampledColourDegrees_common_event P P ρ hρ hsum (t:=ε*n) (by positivity)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have ht := hN₁ n (by dsimp [n] at *;omega) (3*k*n) n</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (by positivity) (by simp) hn0 (by simp)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have htail : 6*k*n*Real.exp (-2*(ε*n)^2/n)≤1/(n:ℝ)^(q₀+1) := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     convert ht using 1 &lt;;&gt; ring</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hdegrees : 1-1/(n:ℝ)^(q₀+1)≤μ.probability</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (fun σ=&gt;∀ a v,</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         |((∑ y,sampledColourOrientation P σ a v y:ℕ):ℝ)-ρ a/2*P.degree v|&lt;ε*n ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>         |((∑ y,sampledColourOrientation P σ a y v:ℕ):ℝ)-ρ a/2*P.degree v|&lt;ε*n ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>         |(sampledColourDegree P (fun e=&gt;(σ e).1) a v:ℝ)-ρ a*P.degree v|&lt;ε*n) :=</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (sub_le_sub_left htail 1).trans hd</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   have hcuts := hN₂ V (by dsimp [n] at *;omega) P ρ hρ hsum</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hjoint := finiteLaw_good_intersection μ</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (fun σ=&gt;∀ a v,</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>         |((∑ y,sampledColourOrientation P σ a v y:ℕ):ℝ)-ρ a/2*P.degree v|&lt;ε*n ∧</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>         |((∑ y,sampledColourOrientation P σ a y v:ℕ):ℝ)-ρ a/2*P.degree v|&lt;ε*n ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         |(sampledColourDegree P (fun e=&gt;(σ e).1) a v:ℝ)-ρ a*P.degree v|&lt;ε*n)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     _ (1/(n:ℝ)^(q₀+1)) hcuts</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   have hbase := (sub_le_sub_right hdegrees (1/(n:ℝ)^(q₀+1))).trans hjoint</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hsumerr := scaled_inverse_power_le n q₀ hn 2 (by exact_mod_cast (show 2≤n by dsimp [n];omega))</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hbound : 1-1/(n:ℝ)^q₀≤(1-1/(n:ℝ)^(q₀+1))-1/(n:ℝ)^(q₀+1) := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     convert sub_le_sub_left hsumerr 1 using 1 &lt;;&gt; ring</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   apply (hbound.trans hbase).trans</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   apply finiteLaw_probability_mono</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   intro σ hσ a ha δ hδα hδρ S T hlarge</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hrow (v : V) : ρ a*n/4-ε*n≤((∑ y,sampledColourOrientation P σ a v y:ℕ):ℝ) := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     have hh := (abs_lt.mp (hσ.1 a v).1).1</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     have hdeg := mul_le_mul_of_nonneg_left (hP v) (div_nonneg (hρ a) (by norm_num : (0:ℝ)≤2))</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     have hpos := mul_nonneg (hρ a) (mul_nonneg hα.le hn0.le)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     nlinarith only [hh,hdeg,hpos]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hcol (v : V) : ρ a*n/4-ε*n≤((∑ y,sampledColourOrientation P σ a y v:ℕ):ℝ) := by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have hh := (abs_lt.mp (hσ.1 a v).2.1).1</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     have hdeg := mul_le_mul_of_nonneg_left (hP v) (div_nonneg (hρ a) (by norm_num : (0:ℝ)≤2))</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     have hpos := mul_nonneg (hρ a) (mul_nonneg hα.le hn0.le)</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     nlinarith only [hh,hdeg,hpos]</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have hh := matrixCut_large_of_degree_and_quadratic_strong P (sampledColourOrientation P σ a)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     hα.le hα1 (hρ a) hδα hδρ</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     (by dsimp [ε,n];nlinarith only [mul_le_mul_of_nonneg_right ha hn0.le])</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     (by</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>       have hs : pstar^2≤(ρ a)^2 := by nlinarith only [ha,hpstar,hρ a]</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       dsimp [q]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       nlinarith only [mul_le_mul_of_nonneg_left hs hα.le])</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     (by intro x y;unfold sampledColourOrientation;split_ifs &lt;;&gt; omega)</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     hP hrow hcol (fun X Y=&gt;hσ.2 a X Y) S T hlarge</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   exact hh</span>
+<span id="L87"><a href="#L87" class="ln">  87</a> </span>
+<span id="L88"><a href="#L88" class="ln">  88</a> end Oberwolfach</span></pre></html>

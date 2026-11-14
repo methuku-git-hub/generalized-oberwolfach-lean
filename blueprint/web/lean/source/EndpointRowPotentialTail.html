@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>EndpointRowPotentialTail.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>EndpointRowPotentialTail.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.EndpointRowPatternTail</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.EndpointRowPatternIdentity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.EndpointRowPatternMean</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! A tail estimate for the manuscript&#x27;s original endpoint row potential,</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> with its fixed parent weights and root-omitted target. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 7000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V Γ Color:Type} [Fintype V] [Fintype Γ] [Fintype Color] [DecidableEq V]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem raw_endpoint_row_potential_tail (P F:SimpleGraph V) (A B:Finset V) (x v:V)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hA:0&lt;A.card) (hB:0&lt;B.card) (hAB:Disjoint (insert x A) B)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hv:v∈common A {x} (fun z=&gt;(P\F).neighborFinset z))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (π:Equiv.Perm V) (d:ℕ) (hd:2≤d) (hF:permutationConflictGraph π (3*d)≤F)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hnoshort:∀ z l,0&lt;l→l&lt;2*d+1→(π^l) z≠z)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (p₀ pR pH C:ℝ) (hp₀:0&lt;p₀) (hpR0:p₀≤pR) (hpR1:pR≤1) (hpH0:p₀≤pH) (hC:0&lt;C)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (q:V→Γ→ℝ) (hq:∀ u g,0≤q u g) (hQ:∀ u,∑ g,q u g≤1/8)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (s:V→Color→ℝ) (hs:∀ u j,0≤s u j)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hS:∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ g,q u g))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (j:Color) (hj:∀ u∈B,s u j=pH)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (weight:Sym2 V→ℝ)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hw:∀ w∈A∩P.neighborFinset x,0≤weight s(v,w)∧weight s(v,w)≤C/A.card)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hzero:∀ w∈A∩P.neighborFinset x,¬P.Adj v w→weight s(v,w)=0)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (t:ℝ) (ht:0&lt;t):</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let M:=C/((A.card:ℝ)*B.card*p₀^5)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (FiniteLaw.pi (rawWheelLaw (fun _=&gt;pR) (fun _=&gt;hp₀.le.trans hpR0) (fun _=&gt;hpR1) d hd q hq hQ s hs hS)).probability</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (fun σ=&gt;t≤|endpointRowPotential P (rawWheelGraph P σ)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (bipartiteRelationGraph (insert x A) B hAB (rawWheelSpokes π d σ j)) F A B x v weight (B.card*pR^2*pH^3)-</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         endpointEligibleRowWeight F (A∩P.neighborFinset x) x v (fun v w=&gt;weight s(v,w))|)≤</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       2*Real.exp (-2*t^2/((4*(d:ℝ)+3)^2*((M*(2*B.card+A.card))*5*(M*(B.card*A.card))))):=by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   dsimp only</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hv&#x27; : v∈A ∧ (P\F).Adj x v := by</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     simpa only [mem_common_iff,Finset.mem_singleton,forall_eq,</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       SimpleGraph.mem_neighborFinset] using hv</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hPv:P.Adj x v:=hv&#x27;.2.1</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hFx:¬F.Adj x v:=hv&#x27;.2.2</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have hvPx:v∈A∩P.neighborFinset x:=Finset.mem_inter.mpr ⟨hv&#x27;.1,(P.mem_neighborFinset _ _).mpr hPv⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let E:=endpointEligibleGraph P F (A∩P.neighborFinset x) x</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let D:ℝ:=B.card*pR^2*pH^3</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let M:ℝ:=C/((A.card:ℝ)*B.card*p₀^5)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have ha:(0:ℝ)&lt;A.card:=Nat.cast_pos.mpr hA</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hb:(0:ℝ)&lt;B.card:=Nat.cast_pos.mpr hB</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hpR:0&lt;pR:=hp₀.trans_le hpR0</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   have hpH:0&lt;pH:=hp₀.trans_le hpH0</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hD:0&lt;D:=by dsimp [D];positivity</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hM:0&lt;M:=by dsimp [M];positivity</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hpow:p₀^5≤pR^2*pH^3:=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hh:=mul_le_mul (pow_le_pow_left₀ hp₀.le hpR0 2) (pow_le_pow_left₀ hp₀.le hpH0 3)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (pow_nonneg hp₀.le 3) (pow_nonneg hpR.le 2)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     nlinarith only [hh]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   let w:EndpointRowCandidates E A B v→ℝ:=fun z=&gt;weight s(v,z.val.2)/D</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hw&#x27; (z:EndpointRowCandidates E A B v):0≤w z∧w z≤M:=by</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hwz:=hw z.val.2 z.property.2.2.2.1</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     refine ⟨div_nonneg hwz.1 hD.le,?_⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     calc</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       w z≤(C/A.card)/D:=div_le_div_of_nonneg_right hwz.2 hD.le</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       _≤(C/A.card)/(B.card*p₀^5):=div_le_div_of_nonneg_left (by positivity)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>         (by positivity) (by dsimp [D];simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hpow hb.le)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       _=M:=by dsimp [M];field_simp &lt;;&gt; ring</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hE (z:V) (hz:E.Adj v z):P.Adj x z∧P.Adj v z∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       ∀ a∈({x,v,z}:Finset V),∀ b∈({x,v,z}:Finset V),¬F.Adj a b:=by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     have hPz:P.Adj x z:=(P.mem_neighborFinset _ _).mp (Finset.mem_inter.mp hz.2.1).2</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     refine ⟨hPz,hz.2.2.2.2.1,?_⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     intro a ha b hb</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     have hxz:=hz.2.2.2.1</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have hvz:=hz.2.2.2.2.2</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     simp only [Finset.mem_insert,Finset.mem_singleton] at ha hb</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     rcases ha with rfl|rfl|rfl &lt;;&gt; rcases hb with rfl|rfl|rfl &lt;;&gt;</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       first | exact F.loopless.irrefl _ | exact hFx | exact hxz | exact hvz |</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>         exact fun h=&gt;hFx h.symm | exact fun h=&gt;hxz h.symm | exact fun h=&gt;hvz h.symm</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have hh:=raw_endpoint_row_pattern_tail P E F A B x v hA hB hPv.ne hE π d hd hF hnoshort</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     pR pH hpR.le hpR1 q hq hQ s hs hS j hj w M hM hw&#x27; t ht</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   have he (σ:RawWheelOutcome V V Γ Color):</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       rawOrdinaryPatternSum P π d (fun z:EndpointRowCandidates E A B v=&gt;endpointRowResources x v z.val.2 z.val.1) w j σ=</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       endpointRowPotential P (rawWheelGraph P σ)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>         (bipartiteRelationGraph (insert x A) B hAB (rawWheelSpokes π d σ j)) F A B x v weight D:=by</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     exact endpoint_row_pattern_identity P (rawWheelGraph P σ) F (rawWheelSpokes π d σ j) A B x v hAB hv&#x27;.1 weight D</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   have hm:pR^2*pH^3*(∑ z,w z)=endpointEligibleRowWeight F (A∩P.neighborFinset x) x v (fun v w=&gt;weight s(v,w)):=</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     endpoint_row_pattern_mean P F A B x v hvPx hFx weight hzero pR pH hpR hpH hB</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   simpa only [he,hm] using hh</span>
+<span id="L86"><a href="#L86" class="ln">  86</a> </span>
+<span id="L87"><a href="#L87" class="ln">  87</a> end Oberwolfach</span></pre></html>

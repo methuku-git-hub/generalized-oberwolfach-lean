@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LongReservedPrescribedManuscriptBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>LongReservedPrescribedManuscriptBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.LongReservedPrescribedSubwalks</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.LongReservedManuscriptCapacity</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Express the reserved paths and their extensions as simple graph walks. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 12000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> theorem long_reserved_prescribed_subwalks_of_manuscript_bounds</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     {V I J:Type*} [Fintype V] [DecidableEq V] [Fintype I] [Fintype J]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (G:SimpleGraph V) (hG:G.IsRegularOfDegree 2)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (components:I↪G.ConnectedComponent)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (e:∀i:I,SimpleGraph.cycleGraph (Fintype.card (components i)) ≃g (components i).toSimpleGraph)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (c d:ℕ) (t:J→ℕ) (ht:∀a,t a≤d)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (K n:ℕ) (η:ℝ) (hη:0&lt;η) (hη1:η≤1)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hK:2*((c*d+5:ℕ):ℝ)/η≤K)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hlength:∀i:I,(K:ℝ)≤Fintype.card (components i))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hsum:η*n≤∑i:I,((Fintype.card (components i):ℕ):ℝ))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hrequests:Fintype.card J≤⌊η*n/(2*((c*d+5:ℕ):ℝ))⌋₊):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃index:J↪LongReservedBlockIndex G components c d,</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃ext:∀a:J,Fin (c*t a+5)↪V,</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃inner:∀a:J,Fin (c*t a+1)↪V,</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀a,ext a=longReservedSigmaBlock G components c d e (index a) (t a) (ht a)) ∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀(a:J) (j:Fin (c*t a+1)),inner a j=ext a ⟨j.val+2,by omega⟩) ∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀a j,ext a j∈(components (index a).1).supp) ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀a b:J,a≠b→Disjoint (Finset.univ.image (ext a)) (Finset.univ.image (ext b))) ∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀a:J,∃p:G.Walk (inner a ⟨0,by omega⟩) (inner a ⟨c*t a,by omega⟩),</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         p.IsPath ∧ p.length=c*t a ∧ p.support=List.ofFn (inner a) ∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         ∃q:G.Walk (ext a ⟨0,by omega⟩) (ext a ⟨c*t a+4,by omega⟩),</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>           q.IsPath ∧ q.length=c*t a+4 ∧ q.support=List.ofFn (ext a) ∧ p.IsSubwalk q) := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hcapacity:=long_reserved_manuscript_floor_capacity (c*d+5) n K (Fintype.card J)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (fun i:I=&gt;Fintype.card (components i)) η (by omega) hη hη1 hK hlength hsum hrequests</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   exact long_reserved_prescribed_subwalks G hG components e c d t ht hcapacity</span>
+<span id="L37"><a href="#L37" class="ln">  37</a> end Oberwolfach</span></pre></html>

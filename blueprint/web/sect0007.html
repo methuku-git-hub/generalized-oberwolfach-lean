@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prescribed degrees and the deterministic protected partition</title>
+<link rel="next" href="sect0008.html" title="Finite categorical laws and sampling implications" />
+<link rel="prev" href="sect0006.html" title="Bipartite edge colourings and the last partition step" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000008">6 Prescribed degrees and the deterministic protected partition</h1>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:prescribed-degrees">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">6.1</span>
+    <span class="lemma_thmtitle">Integral prescribed degrees</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0007.html#bp:prescribed-degrees">#</a>
+    
+    <a class="icon proof" href="sect0007.html#a0000000077"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.quotaAssignment" class="lean_decl">Oberwolfach.quotaAssignment</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bipartite_prescribedDegrees" class="lean_decl">Oberwolfach.bipartite_prescribedDegrees</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bipartiteEdges_filter_card" class="lean_decl">Oberwolfach.bipartiteEdges_filter_card</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bipartite_prescribedMultiplicity" class="lean_decl">Oberwolfach.bipartite_prescribedMultiplicity</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   Let \(B\) be a finite bipartite multigraph with parts \(X,Y\), whose parallel edges are distinct elements of a finite set. Let \(f:X\to \mathbb N\) and \(g:Y\to \mathbb N\) have equal totals. If </p>
+<div class="displaymath" id="a0000000078">
+  \[  f(S)\le g(T)+e_B(S,Y\setminus T)\qquad (S\subseteq X,\  T\subseteq Y),  \]
+</div>
+<p> then a subset of the original edges has degrees \(f\) on \(X\) and \(g\) on \(Y\). The equivalent multiplicity-matrix conclusion also retains every capacity. </p>
+<p><i class="itshape">Manuscript label:</i> lem:prelim:prescribed-degrees.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000077">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>For each \(x\), create \(f(x)\) slots adjacent to all edges incident with \(x\). For each \(y\), create \(d_B(y)-g(y)\) additional slots adjacent to all edges incident with \(y\). The cut inequalities imply \(g(y)\le d_B(y)\) and Hall’s condition for these slots. Their total number is \(|E(B)|\), so Hall supplies a bijection to the original edges. Select the edges assigned to \(X\)-slots. The remaining edges at \(y\) are precisely its \(d_B(y)-g(y)\) assigned edges. This proves the integral assertion. The real-valued assertion is proved separately below. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:real-flow">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">6.2</span>
+    <span class="theorem_thmtitle">Real max-flow/min-cut and fractional prescribed degrees</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0007.html#bp:real-flow">#</a>
+    
+    <a class="icon proof" href="sect0007.html#a0000000079"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.real_maxFlow_minCut" class="lean_decl">Oberwolfach.real_maxFlow_minCut</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.networkFlow_cut_bound" class="lean_decl">Oberwolfach.networkFlow_cut_bound</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bipartite_fractionalDegrees_iff" class="lean_decl">Oberwolfach.bipartite_fractionalDegrees_iff</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bipartite_nearUniformFractionalDegrees" class="lean_decl">Oberwolfach.bipartite_nearUniformFractionalDegrees</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Every finite directed network with nonnegative real capacities and distinct source and sink has a flow whose value equals the capacity of a source–sink cut. Consequently the bipartite cut criterion above is also sufficient and necessary for real edge weights \(0\le q_e\le c_e\). With capacities one, this proves the fractional assertion of the prescribed-degree lemma. The real normalized-demand application is proved with the original fixed part sizes. </p>
+<p><i class="itshape">Manuscript label:</i> thm:prelim:max-flow-min-cut, lem:prelim:prescribed-degrees, lem:prelim:normalized-demands.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000079">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The feasible flows form a nonempty compact subset of the capacity box, so net source outflow attains its maximum. For a fixed maximizing flow \(f\), say that \(x\) can transfer to \(y\) if some capacity-bounded \(g\) changes divergence by \(\varepsilon (\mathbf1_x-\mathbf1_y)\) for \(\varepsilon {\gt}0\). This relation is reflexive and transitive: combine transfers of sizes \(u,w\) by the convex coefficients \(w/(u+w),u/(u+w)\). A residual arc gives a transfer. The vertices reachable from the source under this relation form a cut excluding the sink; otherwise the flow value increases. Every outgoing cut arc is saturated, and every incoming cut arc has flow zero. Summing divergence over the cut proves equality of its capacity and the flow value. The three-layer bipartite network then proves the prescribed-degree criterion, including saturation of every source and sink arc. Integer integrality is supplied by the preceding Hall argument rather than assumed for real flows. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:normalized-demands">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">6.3</span>
+    <span class="lemma_thmtitle">Normalized demand cuts and integer subgraphs</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0007.html#bp:normalized-demands">#</a>
+    
+    <a class="icon proof" href="sect0007.html#a0000000080"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0007.html#bp:prescribed-degrees">Lemma 6.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.normalizedDemand_cut" class="lean_decl">Oberwolfach.normalizedDemand_cut</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.nearUniform_cutCondition" class="lean_decl">Oberwolfach.nearUniform_cutCondition</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bipartite_nearUniformDegrees" class="lean_decl">Oberwolfach.bipartite_nearUniformDegrees</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.nearUniformMultiplicity_cut" class="lean_decl">Oberwolfach.nearUniformMultiplicity_cut</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.intervalDemands_cut" class="lean_decl">Oberwolfach.intervalDemands_cut</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Under the normalized large-cut and demand bounds of <span class="ttfamily">lem:prelim:normalized-demands</span>, the required cut inequalities hold. Consequently integer demands admit an integral subgraph. In particular, integer demands in \([q-e,q+e]\), on two equal parts of positive order, have relative error at most \(2e/(q-e)\) provided \(0\le e{\lt}q\). Here \(e\) is real and is not rounded to an integer. </p>
+<p><i class="itshape">Manuscript label:</i> lem:prelim:normalized-demands.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000080">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>For \(s=|S|/|X|\) and \(t=|T|/|Y|\), a positive demand deficit forces \(s+t{\gt}1-2\delta _0\). The deficit is at most \((1+\delta )M\min (s,t)\), which the large-cut estimate bounds by \(e_B(S,T)\). For interval demands, their mean is at least \(q-e\) and their deviation from that mean is at most \(2e\). All these inequalities, their conversion to the integer cut condition, and the prescribed-degree application are checked. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:protected-deterministic">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">6.4</span>
+    <span class="theorem_thmtitle">Deterministic protected partition</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0007.html#bp:protected-deterministic">#</a>
+    
+    <a class="icon proof" href="sect0007.html#a0000000081"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0007.html#bp:normalized-demands">Lemma 6.3</a></li>
+          
+          <li><a href="sect0006.html#bp:partition-grouping">Lemma 5.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.regularPartition_of_orientedMultiplicities" class="lean_decl">Oberwolfach.regularPartition_of_orientedMultiplicities</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.protectedBipartiteRegularPartition" class="lean_decl">Oberwolfach.protectedBipartiteRegularPartition</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.protectedRegularPartition" class="lean_decl">Oberwolfach.protectedRegularPartition</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.protectedRegularPartition_of_largeCuts" class="lean_decl">Oberwolfach.protectedRegularPartition_of_largeCuts</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    Let \((M_a)\) partition the arcs of a balanced orientation of a simple graph, with total indegree and outdegree \(\sum _a m_a\). Suppose every colour has in- and outdegrees \(m_a\pm e\). Let \(L_a\le M_a\) be its available arcs after protected edges have been excluded. Suppose \(L_a\) satisfies the large-cut bound </p>
+<div class="displaymath" id="a0000000082">
+  \[  e_{L_a}(S,T)\ge h_a n^2\min \{ |S|/n,|T|/n\}  \quad \text{if }|S|/n+|T|/n{\gt}1-2\delta _a,  \]
+</div>
+<p> and </p>
+<div class="displaymath" id="a0000000083">
+  \[  0\le e{\lt}q\le \min _a m_a,\quad 0\le \delta _a{\lt}1/4,\quad \frac{2e}{q-e}\le \delta _a,\quad q+e\le h_an/2.  \]
+</div>
+<p> Then the underlying graph has an exact edge partition into \(2m_a\)-regular graphs. Each colour changes at most \(4q+2e\) edges at any vertex. Every edge unavailable for deletion in all colours retains its original colour. </p>
+<p><i class="itshape">Manuscript label:</i> lem:family:partition.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000081">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Use deletion demands \(d^+_{M_a}(v)-(m_a-q)\) and \(d^-_{M_a}(v)-(m_a-q)\) in \(L_a\). Their totals agree and the normalized lemma gives the deletion subgraphs \(T_a\). The cores have in- and outdegree \(m_a-q\). The union of the \(T_a\) has in- and outdegree \(kq\); group its perfect matchings into \(q\) per colour and add them to the cores. The proof checks exact multiplicities, physical edge coverage, both degree identities, protected colours and all four addition/deletion degree bounds. The random orientation is treated below. The complete simultaneous colour-cut event and its assembly with all remaining parameter choices are still open. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:orientation-routing">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">6.5</span>
+    <span class="lemma_thmtitle">Degree correction by directed two-edge paths</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0007.html#bp:orientation-routing">#</a>
+    
+    <a class="icon proof" href="sect0007.html#a0000000084"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.degreeDiscrepancy_requests" class="lean_decl">Oberwolfach.degreeDiscrepancy_requests</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.twoPathPacking_exists" class="lean_decl">Oberwolfach.twoPathPacking_exists</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.orientationRouting" class="lean_decl">Oberwolfach.orientationRouting</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   An orientation matrix \(M\) records exactly one direction of every edge of \(G\). Let prescribed integer outdegrees \(t_v\) have total \(e(G)\) and differ from the current outdegrees by at most \(a\). Suppose every distinct ordered pair has at least \(\beta n\) eligible directed two-edge paths, and a forbidden graph has maximum degree at most \(f\). If \(L{\gt}0\) is integral and </p>
+<div class="displaymath" id="a0000000085">
+  \[  na/L+2a+4L+2f{\lt}\beta n,  \]
+</div>
+<p> then reversing eligible paths outside the forbidden graph gives precisely the prescribed outdegrees. At most \(a+2L\) physical edges change at a vertex. </p>
+<p><i class="itshape">Manuscript label:</i> lem:simp:orientation-routing.</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000084">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>List positive and negative degree discrepancies as paired unit requests. There are at most \(na\) requests and each vertex occurs as an endpoint at most \(a\) times. Greedily choose their middle vertices, using each at most \(L\) times. At a step, saturated middle vertices exclude at most \(na/L\) choices. Used outgoing and incoming arcs exclude at most \(2a+2L\) choices; the forbidden graph excludes at most \(2f\). The displayed stronger margin therefore leaves a choice. The chosen paths have disjoint directed arcs. Since they lie in an orientation, no two use opposite directions of one physical edge. Reversal preserves each physical-edge identity and changes outdegree by exactly the prescribed discrepancy. Counting endpoint and middle occurrences proves the stated physical degree bound. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0006.html" title="Bipartite edge colourings and the last partition step"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0008.html" title="Finite categorical laws and sampling implications"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

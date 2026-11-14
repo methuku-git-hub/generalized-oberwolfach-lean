@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RetainedCommonJointWitness.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>RetainedCommonJointWitness.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.CommonWitnessTransfer</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The complete common witness in the original globally retained sample.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> The raw selector certifies all required quantities at once and is held</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> fixed when the interval family is trimmed. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 3400000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem retainedMarked_common_joint_witness_event</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (r : ℕ) (hr : 1≤r) (α astar pstar B εsize εload pret ζ : ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hα : 0&lt;α) (hα1 : α≤1/2) (hastar : 0&lt;astar) (hpstar : 0&lt;pstar)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hB : 0&lt;B) (hεsize : 0&lt;εsize) (hεload : 0&lt;εload) (hpret : 0&lt;pret) (hζ : 0&lt;ζ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (d Q : ℕ) (hd : 2≤d) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ M N : ℕ,1≤M ∧ 1≤N ∧ ∀ (V U Γ Color : Type)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color] [LinearOrder V] [Nonempty V] [DecidableEq U],</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       N≤Fintype.card V → M≤Fintype.card V → M≤Fintype.card U → Fintype.card U≤Fintype.card V →</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (P : SimpleGraph V) (π : Equiv.Perm V),</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       (∀ x,(1/2+α)*Fintype.card V≤(P.degree x:ℝ)) →</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ x l,0&lt;l → l&lt;2*d+1 → (π^l) x≠x) →</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∀ (p k : ℝ) (hp : 0&lt;p) (hk : 0&lt;k) (hphys : 2*p+2*k≤1),pstar≤p → pstar≤k →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     ∀ (q : U→Γ→ℝ) (hq : ∀ u a,0≤q u a) (hQ : ∀ u,∑ a,q u a≤1/8)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (s : U→Color→ℝ) (hs : ∀ u j,0≤s u j)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (hS : ∀ u,∑ j,s u j≤ intervalUncoveredProbability d (∑ a,q u a))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (g : Γ) (j : Color) (s₀ D τ A : ℝ),0&lt;s₀ →</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ u,q u g=s₀/((r+4:ℕ):ℝ)) → (∀ u,s u j=s₀) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       pstar≤s₀*s₀/((r+4:ℕ):ℝ) → s₀*s₀/((r+4:ℕ):ℝ)≤1 →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       astar≤(s₀/((r+4:ℕ):ℝ))*(s₀/((r+4:ℕ):ℝ)) → astar≤s₀*s₀/((r+4:ℕ):ℝ) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       pret*Fintype.card V≤(s₀/((r+4:ℕ):ℝ))*Fintype.card U →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∀ weight : (Fin (r+4+1)→V)→ℝ,</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       SuccessorSequenceWeightConditions P π (3*d) D τ A B weight →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (Fintype.card V:ℝ)/2≤D → D≤2*Fintype.card V →</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     1-2/(Fintype.card V:ℝ)^Q≤</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (rawMarkedRetentionLaw π d hd g p k hp.le hk.le hphys q hq hQ s hs hS).probability</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (fun z=&gt;∀ u u&#x27;,u≠u&#x27; → ∃ κ,</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>           CommonWitnessEstimates P π d r D p k s₀ (εsize+2*ζ) (4*ζ)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>             (τ+εload+10*((r+4:ℕ)+1:ℝ)^4*(2*B/pstar^(2*(r+4)+1))*ζ)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>             (pstar^(r+5)*(α*(astar/2)/4)^(r+5)/2-2*(r+5:ℕ)*ζ)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>             (pstar^(r+7)*(α*(astar/2)/4)^(r+4)/2-2*(r+4:ℕ)*ζ) weight z.1</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>             (retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) g</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>               (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) g)) z.2 g j) κ u u&#x27;) := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   obtain ⟨N₀,hN₀pos,hN₀⟩ := rawMarked_common_joint_witness_event r hr α astar pstar B εsize εload</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     hα hα1 hastar hpstar hB hεsize hεload d Q hd</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨M,N₁,hM,hN₁,hret⟩ := raw_marked_retention_common_event d hd 0 (Q:ℝ) pret ζ hpret hζ</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   refine ⟨M,max N₀ N₁,hM,hN₀pos.trans (le_max_left _ _),?_⟩</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   intro V U Γ Color _ _ _ _ _ _ _ hn hMV hMU huCard P π hP hnoshort p k hp hk hphys hpmin hkmin q hq hQ s hs hS g j s₀ D τ A hs₀ hq₀ hs₀&#x27; hsmin hs1 hqclass hsclass hmass weight hw hDlo hDhi</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hnpos : 0&lt;Fintype.card V := by omega</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   let E := fun σ : RawMarkedOutcome V U Γ Color=&gt;∀ u u&#x27;,u≠u&#x27; → ∃ κ,</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     RawCommonWitness P π d r α astar pstar D p k s₀ εsize (τ+εload) weight g j u u&#x27; σ κ</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hE : 1-1/(Fintype.card V:ℝ)^Q≤</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (FiniteLaw.pi (rawMarkedWheelLaw p k hp.le hk.le hphys d hd q hq hQ s hs hS)).probability E :=</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     hN₀ V U Γ Color (by omega) huCard P π hP hnoshort p k hp hk hphys hpmin hkmin</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       q hq hQ s hs hS g j s₀ D τ A hs₀ hq₀ hs₀&#x27; hsmin hs1 hqclass hsclass weight hw hDlo hDhi</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hb := hret V U Γ Color Unit (by omega) huCard (by simp)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     π hnoshort p k hp.le hk.le hphys q hq hQ s hs hS g (s₀/((r+4:ℕ):ℝ)) hq₀ hmass</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (fun _=&gt;Finset.univ) (fun _=&gt;Finset.univ) (by simp)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     (by simpa using hMV) (by simpa using hMU) E (1/(Fintype.card V:ℝ)^Q) hE</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have heq : (Fintype.card V:ℝ)^(-(Q:ℝ))=1/(Fintype.card V:ℝ)^Q := by</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     rw [Real.rpow_neg (Nat.cast_nonneg _),Real.rpow_natCast,one_div]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   rw [heq] at hb</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have he : 1-2/(Fintype.card V:ℝ)^Q=1-1/(Fintype.card V:ℝ)^Q-1/(Fintype.card V:ℝ)^Q := by ring</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   rw [he]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   apply hb.trans</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   apply finiteLaw_probability_mono</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   intro z hz u u&#x27; huu</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   obtain ⟨κ,hκ⟩ := hz.1 u u&#x27; huu</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   refine ⟨κ,?_⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hc := (retainedMarkedSpokes_restriction_changes π d (fun e=&gt;z.1 (Sum.inr e)) g</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) g)) z.2</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (fun _ : Unit=&gt;Finset.univ) (fun _ : Unit=&gt;Finset.univ) ζ hz.2.2 g j ()).1</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   apply rawCommonWitness_transfer P π d r hr hnpos α astar pstar D p k s₀ τ A B εsize εload ζ</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     hB.le hζ.le hpstar hpmin hkmin hsmin (by linarith) (by linarith) hs1 weight hw hDlo hDhi</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     g j z.1 _ κ u u&#x27; hκ</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   intro b z&#x27;</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   have hh := hc b z&#x27;</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   simp only [Finset.card_univ] at hh</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   convert hh using 1</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   apply Finset.sum_congr rfl</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   intro x hx</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   simp only [bipAdj,rawMarkedPairSpokes]</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   split_ifs &lt;;&gt; first | rfl | (exfalso;tauto)</span>
+<span id="L86"><a href="#L86" class="ln">  86</a> </span>
+<span id="L87"><a href="#L87" class="ln">  87</a> end Oberwolfach</span></pre></html>

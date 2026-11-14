@@ -1,0 +1,144 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryTransformerEdgeRealization.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryTransformerEdgeRealization.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryTransformerEdgePaths</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryTransformerSpokeSets</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrdinaryActualRimWheels</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.OrdinaryActualSpokeWheels</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Realise the actual incidence choices, all rim/spoke paths, and their</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> edge-wheel pairs from graph-theoretic hypotheses. Paths are chosen before</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> fresh hubs, including the four shifted endpoint adjacencies. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 16000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option synthInstance.maxSize 512</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> open scoped BigOperators</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a>  structure OrdinaryTransformerEdgeData (G Q F:SimpleGraph V) (H₀ H:V→U→Prop)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (φ:V→V) (ψ:U→U) (r:ℕ) (A R W:Finset V) (B:Finset U) where</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   b : ∀ v,G.neighborSet v≃({u:U // H₀ v u}×Fin 2)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   σ : ∀ v,Equiv.Perm (G.neighborSet v)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   shifted : ∀ v w,σ v w≠w</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   path : (G.edgeFinset⊕{e:V×U // H₀ e.1 e.2})→(Σ a:V,Σ c:V,Q.Walk a c)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   isPath : ∀ i,(path i).2.2.IsPath</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   positive : ∀ i,0&lt;(path i).2.2.length</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   spoke_length : ∀ i:{e:V×U // H₀ e.1 e.2},(path (.inr i)).2.2.length=r-2</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   path_location : ∀ i,∀ v∈(path i).2.2.support,v∈A∧v∉W∧v∉R</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   path_disjoint : ∀ i j,i≠j→Disjoint (path i).2.2.support.toFinset (path j).2.2.support.toFinset</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   path_separated : ∀ i j,∀ v∈(path i).2.2.support,∀ w∈(path j).2.2.support,¬F.Adj v w</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   root_separated : ∀ i,∀ v∈(path i).2.2.support,∀ w∈R,¬F.Adj v w</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   rim_ends : ∀ e:G.edgeFinset,Q.Adj e.val.out.1 (path (.inl e)).1∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     Q.Adj (φ e.val.out.1) (path (.inl e)).1∧Q.Adj e.val.out.2 (path (.inl e)).2.1∧</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     Q.Adj (φ e.val.out.2) (path (.inl e)).2.1</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   spoke_ends : ∀ e:{e:V×U // H₀ e.1 e.2},Q.Adj e.val.1 (path (.inr e)).1∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     Q.Adj (φ e.val.1) (path (.inr e)).1∧Q.Adj e.val.1 (path (.inr e)).2.1∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     Q.Adj (φ e.val.1) (path (.inr e)).2.1</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   spoke_hubs : ∀ e:{e:V×U // H₀ e.1 e.2},∀ v∈(path (.inr e)).2.2.support,H v e.val.2∧H v (ψ e.val.2)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   buffer : Finset V</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   contains_old : W⊆buffer</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   contains_paths : ∀ i,∀ v∈(path i).2.2.support,v∈buffer</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   buffer_card : buffer.card≤W.card+(G.edgeFinset.card+Fintype.card {e:V×U // H₀ e.1 e.2})*(r-1)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   rim : OrdinaryActualRimWheels G Q F H₀ H φ r B b σ path</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   spoke : OrdinaryActualSpokeWheels G Q F H₀ H φ ψ r path</span>
+<span id="L45"><a href="#L45" class="ln">  45</a> </span>
+<span id="L46"><a href="#L46" class="ln">  46</a>  theorem ordinary_transformer_edge_realization</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (G Q F:SimpleGraph V) (H₀ H:V→U→Prop) (φ:V→V) (ψ:U→U)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (r:ℕ) (hr:4≤r) (A R W:Finset V) (B:Finset U)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (hbalance:∀ v,G.degree v=2*((Finset.univ:Finset U).filter (H₀ v)).card)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (hroot:∀ v∈G.support,v∈R∧φ v∈R)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hcross:∀ v∈G.support,∀ w∈G.support,φ v≠w)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hQ:G≤Q) (hφQ:∀ v w,G.Adj v w→Q.Adj (φ v) (φ w))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (hφedge:Function.Injective (fun e:G.edgeFinset=&gt;s(φ e.val.out.1,φ e.val.out.2)))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hψedge:Function.Injective (fun e:{e:V×U // H₀ e.1 e.2}=&gt;(φ e.val.1,ψ e.val.2)))</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     (hH:∀ v u,H₀ v u→H v u∧H (φ v) (ψ u))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (hFroots:∀ v w,G.Adj v w→∀ a∈({v,w,φ v,φ w}:Finset V),</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       ∀ c∈({v,w,φ v,φ w}:Finset V),¬F.Adj a c)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (d c cH:ℝ) (hd:0≤d) (hF:∀ v,(F.degree v:ℝ)≤d)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (hcount:∀ v w,c≤((A∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     (hspoke:∀ i:{e:V×U // H₀ e.1 e.2},∀ v w,</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       c≤(((A.filter (fun a=&gt;H a i.val.2∧H a (ψ i.val.2)))∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     (hthree:r=4→∀ v w x,c≤(((A∩Q.neighborFinset v)∩Q.neighborFinset w∩Q.neighborFinset x).card:ℝ))</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (hbudget:W.card+((R.card:ℝ)+(G.edgeFinset.card+Fintype.card {e:V×U // H₀ e.1 e.2})*(r-1:ℕ)+r+7)*(d+1)&lt;c)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (hhubs:∀ T:Finset V,T.card≤r+6→(∀ v∈T,∀ w∈T,¬F.Adj v w)→</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       cH≤((common (Finset.univ:Finset U) T (fun v=&gt;Finset.univ.filter (H v))).card:ℝ))</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (hhbudget:B.card+G.edgeFinset.card&lt;cH):</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     Nonempty (OrdinaryTransformerEdgeData G Q F H₀ H φ ψ r A R W B):=by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   obtain ⟨σ,b,hσ,_⟩:=transformer_endpoint_assignments G H₀ hbalance</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hspRoot (i:{e:V×U // H₀ e.1 e.2}):i.val.1∈R∧φ i.val.1∈R:=</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     hroot _ (balanced_spoke_root_mem_support G H₀ hbalance i)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hspF (i:{e:V×U // H₀ e.1 e.2}):¬F.Adj i.val.1 (φ i.val.1):=by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     apply balanced_spoke_root_separation G F H₀ φ hbalance _ _ _ i.property</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     intro v w hvw</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     exact hFroots v w hvw v (by simp) (φ v) (by simp)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have heRoots (i:G.edgeFinset):i.val.out.1∈R∧i.val.out.2∈R∧φ i.val.out.1∈R∧φ i.val.out.2∈R:=</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     ⟨(hroot _ (edge_out_adj G i).mem_support_left).1,(hroot _ (edge_out_adj G i).mem_support_right).1,</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       (hroot _ (edge_out_adj G i).mem_support_left).2,(hroot _ (edge_out_adj G i).mem_support_right).2⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>   obtain ⟨p,hp,hep,hsp,hsep⟩:=ordinary_transformer_edge_paths Q F H A W R</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     (fun i:G.edgeFinset=&gt;i.val.out.1) (fun i=&gt;i.val.out.2) (fun i=&gt;φ i.val.out.1) (fun i=&gt;φ i.val.out.2)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     (fun i:{e:V×U // H₀ e.1 e.2}=&gt;i.val.1) (fun i=&gt;φ i.val.1) (fun i=&gt;i.val.2) (fun i=&gt;ψ i.val.2)</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     heRoots hspRoot (fun i=&gt;hFroots _ _ (edge_out_adj G i)) hspF r hr d c hd hF hcount hspoke</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     (fun hr4 i v _=&gt;hthree hr4 v i.val.out.2 (φ i.val.out.2))</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     (by simpa only [Fintype.card_coe] using hbudget)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have hFF:∀ i j,∀ v∈(p i).2.2.support,∀ w∈(p j).2.2.support,¬F.Adj v w:=by</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     intro i j</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     by_cases hij:i=j</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     · subst j;exact (hp i).2.2</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     · exact (hsep i j hij).2</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   have hFR:∀ i,∀ v∈(p i).2.2.support,∀ w∈R,¬F.Adj v w:=fun i v hv=&gt;(hp i).2.1 v hv |&gt;.2.2.2</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   have hdis:∀ i j,i≠j→Disjoint (p i).2.2.support.toFinset (p j).2.2.support.toFinset:=fun i j hij=&gt;(hsep i j hij).1</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   obtain ⟨E⟩:=ordinary_actual_rim_wheels G Q F H₀ H φ b σ p r (by omega) R B hroot hQ hφQ hcross hφedge</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     (fun i=&gt;⟨(hp _).1,(hep i).1⟩) (fun i=&gt;(hep i).2) (fun i v hv=&gt;(hp i).2.1 v hv |&gt;.2.2.1)</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     hdis hFF hFR (fun i=&gt;hFroots _ _ (edge_out_adj G i)) cH hhubs hhbudget</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   have hFsp (i:{e:V×U // H₀ e.1 e.2}):</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>       ∀ v∈insert i.val.1 (insert (φ i.val.1) (p (.inr i)).2.2.support.toFinset),</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>       ∀ w∈insert i.val.1 (insert (φ i.val.1) (p (.inr i)).2.2.support.toFinset),¬F.Adj v w:=by</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     intro v hv w hw</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     simp only [Finset.mem_insert,List.mem_toFinset] at hv hw</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     rcases hv with rfl|rfl|hv &lt;;&gt; rcases hw with rfl|rfl|hw</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     · exact F.loopless.irrefl _</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>     · exact hspF i</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     · exact fun h=&gt;hFR _ _ hw _ (hspRoot i).1 h.symm</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     · exact fun h=&gt;hspF i h.symm</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     · exact F.loopless.irrefl _</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     · exact fun h=&gt;hFR _ _ hw _ (hspRoot i).2 h.symm</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     · exact hFR _ _ hv _ (hspRoot i).1</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     · exact hFR _ _ hv _ (hspRoot i).2</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     · exact hFF _ _ _ hv _ hw</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>   obtain ⟨S⟩:=ordinary_actual_spoke_wheels G Q F H₀ H φ ψ r (by omega) p R</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     (fun i=&gt;⟨(hspRoot i).1,(hspRoot i).2,(hcross _ (balanced_spoke_root_mem_support G H₀ hbalance i)</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       _ (balanced_spoke_root_mem_support G H₀ hbalance i)).symm⟩)</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     (fun i=&gt;⟨(hp _).1,(hsp i).1⟩) (fun i=&gt;⟨(hsp i).2.1,(hsp i).2.2.1,(hsp i).2.2.2.1,(hsp i).2.2.2.2.1⟩)</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     (fun i v hv=&gt;(hp i).2.1 v hv |&gt;.2.2.1) hdis hFsp</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     (fun i=&gt;hH _ _ i.property) (fun i=&gt;(hsp i).2.2.2.2.2) hψedge</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>   let W&#x27;:=W∪Finset.univ.biUnion (fun i=&gt;(p i).2.2.support.toFinset)</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>   have hcard (i):(p i).2.2.support.toFinset.card≤r-1:=by</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     have hh:=List.toFinset_card_le (p i).2.2.support</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     rw [(p i).2.2.length_support] at hh</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>     rcases i with i|i</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     · rw [(hep i).1] at hh;omega</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     · rw [(hsp i).1] at hh;omega</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>   have hW&#x27;card:W&#x27;.card≤W.card+(G.edgeFinset.card+Fintype.card {e:V×U // H₀ e.1 e.2})*(r-1):=by</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     have hc:=Finset.card_biUnion_le (s:=(Finset.univ:Finset (G.edgeFinset⊕{e:V×U // H₀ e.1 e.2})))</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>       (t:=fun i=&gt;(p i).2.2.support.toFinset)</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     have hc&#x27;:(∑ i,(p i).2.2.support.toFinset.card)≤</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>         (G.edgeFinset.card+Fintype.card {e:V×U // H₀ e.1 e.2})*(r-1):=by</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>       calc</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>         _≤∑ _i:(G.edgeFinset⊕{e:V×U // H₀ e.1 e.2}),(r-1):=Finset.sum_le_sum (fun i _=&gt;hcard i)</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>         _= _:=by simp only [Finset.sum_const,Finset.card_univ,nsmul_eq_mul,Fintype.card_sum,Fintype.card_coe,Nat.cast_id]</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     exact (Finset.card_union_le _ _).trans (Nat.add_le_add_left (hc.trans hc&#x27;) _)</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>   refine ⟨⟨b,σ,hσ,p,fun i=&gt;(hp i).1,?_,fun i=&gt;(hsp i).1,</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     (fun i v hv=&gt;⟨((hp i).2.1 v hv).1,((hp i).2.1 v hv).2.1,((hp i).2.1 v hv).2.2.1⟩),hdis,hFF,hFR,</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     (fun i=&gt;(hep i).2),(fun i=&gt;⟨(hsp i).2.1,(hsp i).2.2.1,(hsp i).2.2.2.1,(hsp i).2.2.2.2.1⟩),</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     (fun i=&gt;(hsp i).2.2.2.2.2),W&#x27;,Finset.subset_union_left,?_,hW&#x27;card,E,S⟩⟩</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>   · intro i;rcases i with i|i</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     · rw [(hep i).1];omega</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     · rw [(hsp i).1];omega</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>   · intro i v hv</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>     exact Finset.mem_union_right _ (Finset.mem_biUnion.mpr ⟨i,Finset.mem_univ _,List.mem_toFinset.mpr hv⟩)</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a> </span>
+<span id="L141"><a href="#L141" class="ln"> 141</a> end Oberwolfach</span></pre></html>

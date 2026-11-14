@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedRelativeHostAbsorber.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedRelativeHostAbsorber.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedDiagramAbsorber</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedHostTransformerBudgets</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The marked relative absorber constructed from the actual host counts</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> and fixed common-pair profiles. All five graphs and four transformers are</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> constructed. The small tolerance precedes the bounded input sizes and the</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> permutation radius; the absorber size precedes the forbidden allowance. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option synthInstance.maxSize 4096</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 50000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_relative_host_absorber (l:ℕ) (hl:2≤l)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (ρ σ q₀ β blo bhi:ℝ) (hρ:0&lt;ρ) (hσ:0&lt;σ) (hq₀:0&lt;q₀) (hβ:0&lt;β) (hblo:0&lt;blo) (hbhi:0&lt;bhi):</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     ∃ ε:ℝ,0&lt;ε∧∀ s e:ℕ,∃ a₀ b₀:ℕ,∀ f b:ℕ,∀ dF:ℝ,0≤dF→∃ N:ℕ,</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∀ (V₀ U₀ V U E K A S:Type) [Fintype V₀] [Fintype U₀] [Fintype V] [Fintype U] [Fintype A] [Fintype S]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       [DecidableEq V₀] [DecidableEq U₀] [DecidableEq V] [DecidableEq U] [DecidableEq A] [DecidableEq S],</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     N≤Fintype.card V→Fintype.card V₀+Fintype.card U₀≤s→Fintype.card A+Fintype.card S≤e→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     ∀ (tail head:E→V) (ktail khead:K→V) (H₀ HK:V→U→Prop) (π:Equiv.Perm V),1≤b→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∀ (G:IndexedMarkedGraph V₀ U₀ A S),G.IsBalanced (l+4)→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∀ (R:IndexedMarkedHostRealization G tail head ktail khead H₀ HK π b) (W:Finset V) (B:Finset U),</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (∀ u,R.hubs u∈B)→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     MarkedHostExtensionCounts tail head ktail khead H₀ HK π b l (ρ*Fintype.card V) (σ*Fintype.card V)→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     Function.Injective (markedPhysicalEdge tail head ktail khead π)→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (B.card:ℝ)≤ε*Fintype.card V+f→(W.card:ℝ)≤ε*Fintype.card V+f→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     ∀ F:SimpleGraph V,permutationConflictGraph π b≤F→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (∀ v z,HK v z→¬H₀ v z)→(∀ v,(F.degree v:ℝ)≤dF)→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     MarkedCommonPairCycleProfiles tail head ktail khead H₀ HK π b l q₀ β blo bhi ε→</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     ∃ C:MarkedSupportedEdgeSet tail head ktail khead π U,</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       IsResourceAbsorber (fun D:MarkedWheel tail head ktail khead (l+4) π b H₀ HK=&gt;markedWheelPhysicalResources D)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         R.resources C.edges∧C.rows.card≤a₀∧C.hubs.card≤b₀∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (∀ v∈C.rows,v∈W∪R.rowSet→v∈R.rowSet)∧(∀ u∈C.hubs,u∈B→u∈R.hubSet)∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       (∀ e∈C.edges,¬MarkedOldResource tail head ktail khead π (W∪R.rowSet) B e)∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       (∀ v∈C.rows\R.rowSet,∀ w∈C.rows\R.rowSet,v≠w→¬PermutationClose π b v w)∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       ∀ v∈C.rows\R.rowSet,∀ w∈R.rowSet,¬PermutationClose π b v w:=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨ε₀,hε₀,habs⟩:=marked_diagram_absorber l hl ρ σ q₀ β blo bhi hρ hσ hq₀ hβ hblo hbhi</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let ε:=min ε₀ (min (ρ/2) (σ/2))</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   have hε:0&lt;ε:=lt_min hε₀ (lt_min (by positivity) (by positivity))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   have he₀:ε≤ε₀:=min_le_left _ _</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have heρ:ε≤ρ/2:=(min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have heσ:ε≤σ/2:=(min_le_right _ _).trans (min_le_right _ _)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   refine ⟨ε,hε,?_⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro s e</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let M:=markedDiagramSize l s e</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let e&#x27;:=e*(2*(l+5)+1)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   obtain ⟨a₀,b₀,habs⟩:=habs M e&#x27;</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨a₀,b₀,?_⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   intro f b dF hdF</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   obtain ⟨N₀,habs⟩:=habs f b dF hdF</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   obtain ⟨N₁,hN₁,hbudget⟩:=two_linear_exclusion_budgets ρ σ ε</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     ((s+6*(M:ℝ)+l+16)*(2*b+1)) (6*M) hρ hσ heρ heσ (by positivity) (by positivity) f</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   refine ⟨max N₀ N₁,?_⟩</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   intro V₀ U₀ V U E K A S _ _ _ _ _ _ _ _ _ _ _ _ hn hs he tail head ktail khead H₀ HK π hb G hG R W B hRH Q hp hB hW F hconf htypes hF Profiles</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   have hn₁:N₁≤Fintype.card V:=(le_max_right _ _).trans hn</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   have hpos:0&lt;Fintype.card V:=by have hh:=hN₁.trans hn₁;omega</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   haveI:Nonempty V:=Fintype.card_pos_iff.mp hpos</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   let v₀:V:=Classical.arbitrary V</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hRs:R.rowSet.card≤s:=R.rowSet_card.trans (by omega)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hsM:s≤M:=by dsimp [M,markedDiagramSize];omega</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hRM:R.rowSet.card≤M:=hRs.trans hsM</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   obtain ⟨hWbudget,hBbudget⟩:=hbudget (Fintype.card V) hn₁ W.card B.card hW hB</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hrow:(W.card:ℝ)+(R.rowSet.card+6*M+l+16)*(2*b+1)&lt;ρ*Fintype.card V:=by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hh:(R.rowSet.card:ℝ)≤s:=by exact_mod_cast hRs</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     have hmul:=mul_le_mul_of_nonneg_right (show (R.rowSet.card:ℝ)+6*M+l+16≤s+6*M+l+16 by linarith only [hh])</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (show 0≤(2*b+1:ℝ) by positivity)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     linarith only [hmul,hWbudget]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   obtain ⟨D⟩:=marked_host_diagram Q hl G hG R s e hs he v₀ W R.rowSet B R.row_mem hRH hp hrow hBbudget</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have he&#x27;:Fintype.card (A⊕((A⊕S)×Fin (l+5)))+Fintype.card (S⊕((A⊕S)×Fin (l+5)))≤e&#x27;:=by</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     simp only [Fintype.card_sum,Fintype.card_prod,Fintype.card_fin]</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     dsimp only [e&#x27;]</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     nlinarith [Nat.mul_le_mul_right (l+5) he]</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hεn:=mul_le_mul_of_nonneg_right he₀ (Nat.cast_nonneg (Fintype.card V))</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   exact habs V U E K (A⊕((A⊕S)×Fin (l+5))) (S⊕((A⊕S)×Fin (l+5))) ((le_max_left _ _).trans hn)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     tail head ktail khead H₀ HK π hb R.resources W R.rowSet R.rowSet B R.hubSet hRM (by rfl) he&#x27; Q hp</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (by linarith only [hB,hεn]) (by linarith only [hW,hεn]) F hconf htypes hF (Profiles.mono_error he₀) D</span>
+<span id="L79"><a href="#L79" class="ln">  79</a> </span>
+<span id="L80"><a href="#L80" class="ln">  80</a> end Oberwolfach</span></pre></html>

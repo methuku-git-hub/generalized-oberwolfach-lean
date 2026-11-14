@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedBoundaryEndpointSampling.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedBoundaryEndpointSampling.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FreshBipartitePhysicalEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryBoundaryGraph</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The boundary coin attached to an endpoint label is its actual physical</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> edge. In particular an incoming marked arc has physical head pi(root),</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> whereas an outgoing marked arc has physical head pi(label). All five</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> endpoint graphs use the same hub-spoke coin at a fixed outside root. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 6000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V U : Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> def markedBoundaryEndpointResource (π : Equiv.Perm V) (mark incoming : Bool) (x : V) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     V⊕U→Sym2 V⊕(V×U)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   | Sum.inl z=&gt;Sum.inl (if incoming then s(z,if mark then π x else x) else s(x,if mark then π z else z))</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   | Sum.inr u=&gt;Sum.inr (x,u)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem marked_boundary_endpoint_resource_injective (π : Equiv.Perm V) (mark incoming : Bool) (x : V) :</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     Function.Injective (markedBoundaryEndpointResource (U:=U) π mark incoming x) := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   intro a b he</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   cases a with</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   | inl a=&gt;cases b with</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     | inl b=&gt;</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       apply congrArg Sum.inl</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       have hh:=Sum.inl.inj he</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       cases incoming &lt;;&gt; cases mark</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       all_goals simp only [markedBoundaryEndpointResource,Bool.false_eq_true,ite_false,ite_true] at hh</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       all_goals rcases Sym2.eq_iff.mp hh with ⟨h₁,h₂⟩|⟨h₁,h₂⟩</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       all_goals first</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         | exact h₂</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         | exact h₂.trans h₁</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         | exact h₂.symm.trans h₁</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         | exact h₂.trans h₁.symm</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         | exact h₂.symm.trans h₁.symm</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>         | exact π.injective (h₂.trans h₁)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         | exact π.injective (h₂.symm.trans h₁)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         | exact π.injective (h₂.trans h₁.symm)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         | exact π.injective (h₂.symm.trans h₁.symm)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         | exact h₁</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>         | exact h₁.trans h₂</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>         | exact h₁.trans h₂.symm</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>         | exact h₁.symm.trans h₂</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>         | exact h₁.symm.trans h₂.symm</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>         | exact π.injective h₂</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>         | exact π.injective (h₁.trans h₂)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>         | exact π.injective (h₁.symm.trans h₂.symm)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     | inr b=&gt;exact (Sum.inl_ne_inr he).elim</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   | inr a=&gt;cases b with</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     | inl b=&gt;exact (Sum.inr_ne_inl he).elim</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     | inr b=&gt;exact congrArg Sum.inr (congrArg Prod.snd (Sum.inr.inj he))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> </span>
+<span id="L55"><a href="#L55" class="ln">  55</a> def markedBoundaryEndpointCoin (π : Equiv.Perm V) (mark incoming : Bool) (x : V) :</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     V⊕U↪Sym2 (V⊕U) where</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   toFun z:=ordinaryPhysicalResource (markedBoundaryEndpointResource π mark incoming x z)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   inj&#x27;:=ordinaryPhysicalResource_injective.comp (marked_boundary_endpoint_resource_injective π mark incoming x)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a> </span>
+<span id="L60"><a href="#L60" class="ln">  60</a> theorem marked_boundary_endpoint_spoke_coin (π : Equiv.Perm V) (mark incoming : Bool) (x : V) (u : U) :</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     markedBoundaryEndpointCoin π mark incoming x (Sum.inr u)=s(Sum.inl x,Sum.inr u) := rfl</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> </span>
+<span id="L63"><a href="#L63" class="ln">  63</a> theorem marked_boundary_endpoint_rim_coin (π : Equiv.Perm V) (mark incoming : Bool) (x z : V) :</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     markedBoundaryEndpointCoin (U:=U) π mark incoming x (Sum.inl z)=</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       if incoming then s(Sum.inl z,Sum.inl (if mark then π x else x))</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       else s(Sum.inl x,Sum.inl (if mark then π z else z)) := by</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   cases incoming &lt;;&gt; cases mark &lt;;&gt; rfl</span>
+<span id="L68"><a href="#L68" class="ln">  68</a> </span>
+<span id="L69"><a href="#L69" class="ln">  69</a> theorem marked_boundary_endpoint_coordinate_law (π : Equiv.Perm V) (mark incoming : Bool) (x : V)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (ρ : ℝ) (hρ : 0≤ρ) (hρ1 : ρ≤1) :</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (FiniteLaw.pi (fun _:Sym2 (V⊕U)=&gt;FiniteLaw.retentionCoin ρ hρ hρ1)).map</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       (fun σ z=&gt;σ (markedBoundaryEndpointCoin π mark incoming x z))=</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>       FiniteLaw.pi (fun _:V⊕U=&gt;FiniteLaw.retentionCoin ρ hρ hρ1) :=</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   finiteLaw_pi_injective_projection _ _ (markedBoundaryEndpointCoin π mark incoming x).injective</span>
+<span id="L75"><a href="#L75" class="ln">  75</a> </span>
+<span id="L76"><a href="#L76" class="ln">  76</a> end Oberwolfach</span></pre></html>

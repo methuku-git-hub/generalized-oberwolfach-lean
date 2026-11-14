@@ -1,0 +1,98 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ResourceBoundedDeletionLoss.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ResourceBoundedDeletionLoss.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.UniformResourceCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ResourceVertexDeletion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.CandidateResourceRestriction</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! A realised deletion costs the supplied pair weight for each deleted</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> vertex or forbidden endpoint pair. No sampling probability enters this bound. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 4000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> open scoped BigOperators</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> variable {V C : Type*} [Fintype V] [DecidableEq V] [Fintype C] [DecidableEq C]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ambient_resource_pair_weight (R : C → Finset V) (r J : ℕ) (hr : 2≤r)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hR : ∀ C₀,(R C₀).card=r) (hJ : ∀ Y : Finset V,Fintype.card {C₀ : C // R C₀=Y}≤J)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (w : C → ℝ) (B : ℝ) (hB : 0≤B) (hn : 0&lt;Fintype.card V)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hw : ∀ C₀,w C₀≤B/(Fintype.card V:ℝ)^(r-1))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (x y : V) (hxy : x≠y) :</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (∑ C₀,if x∈R C₀ ∧ y∈R C₀ then w C₀ else 0)≤J*B/Fintype.card V := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hc := uniform_resources_pair_count R r J hr hR hJ x y hxy</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hnR : (0:ℝ)&lt;Fintype.card V := Nat.cast_pos.mpr hn</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   calc</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     _ ≤ ∑ C₀,if x∈R C₀ ∧ y∈R C₀ then B/(Fintype.card V:ℝ)^(r-1) else 0 := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       apply Finset.sum_le_sum</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       intro C₀ _;split_ifs &lt;;&gt; first | exact hw C₀ | exact le_rfl</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     _ = (Fintype.card {C₀ : C // x∈R C₀ ∧ y∈R C₀}:ℝ)*(B/(Fintype.card V:ℝ)^(r-1)) := by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       simp only [Fintype.card_subtype,←Finset.sum_filter,Finset.sum_const,nsmul_eq_mul]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     _ ≤ (J*(Fintype.card V:ℝ)^(r-2))*(B/(Fintype.card V:ℝ)^(r-1)) := by</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       apply mul_le_mul_of_nonneg_right _ (by positivity)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       exact_mod_cast hc</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     _ = _ := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       rw [show r-1=(r-2)+1 by omega,pow_succ]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       field_simp</span>
+<span id="L36"><a href="#L36" class="ln">  36</a> </span>
+<span id="L37"><a href="#L37" class="ln">  37</a>  theorem candidate_degree_restriction_loss (R : C → Finset V) (w : C → ℝ)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hw : ∀ C₀,0≤w C₀) (P : C → Prop) [DecidablePred P]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (Z : Finset V) (E : Finset (V×V))</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (hE : ∀ e∈E,e.1≠e.2) (K : ℝ)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hpair : ∀ x y,x≠y→(∑ C₀,if x∈R C₀ ∧ y∈R C₀ then w C₀ else 0)≤K)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hgood : ∀ C₀,Disjoint (R C₀) Z→(∀ e∈E,¬(e.1∈R C₀ ∧ e.2∈R C₀))→P C₀)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (x : V) (hx : x∉Z) :</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     0≤hypergraphWeightedDegree R w x-</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       hypergraphWeightedDegree R (fun C₀=&gt;if P C₀ then w C₀ else 0) x ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     hypergraphWeightedDegree R w x-</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       hypergraphWeightedDegree R (fun C₀=&gt;if P C₀ then w C₀ else 0) x≤(Z.card+E.card:ℕ)*K := by</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   let hit := fun C₀ (j : Z⊕E)=&gt;match j with</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     | .inl z=&gt;z.val∈R C₀</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     | .inr e=&gt;e.val.1∈R C₀ ∧ e.val.2∈R C₀</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have he : hypergraphWeightedDegree R w x-</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       hypergraphWeightedDegree R (fun C₀=&gt;if P C₀ then w C₀ else 0) x=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       ∑ C₀,if x∈R C₀ ∧ ¬P C₀ then w C₀ else 0 := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     unfold hypergraphWeightedDegree</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     rw [←Finset.sum_sub_distrib]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     apply Finset.sum_congr rfl</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     intro C₀ _</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     by_cases hv : x∈R C₀ &lt;;&gt; by_cases hp : P C₀ &lt;;&gt; simp [hv,hp]</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   rw [he]</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   constructor</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   · exact Finset.sum_nonneg (fun C₀ _=&gt;by split_ifs;exact hw C₀;exact le_rfl)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   · have hh := finite_weighted_union_bound w hw (fun C₀=&gt;x∈R C₀) hit</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     calc</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       _ ≤ ∑ C₀,if x∈R C₀ ∧ ∃ j,hit C₀ j then w C₀ else 0 := by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         apply Finset.sum_le_sum</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>         intro C₀ _</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>         by_cases ha : x∈R C₀ ∧ ¬P C₀</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         · have hh&#x27; : ∃ j,hit C₀ j := by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>             by_contra hn</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>             apply ha.2</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>             apply hgood C₀</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>             · apply Finset.disjoint_left.mpr</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>               intro z hz hzZ</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>               exact hn ⟨.inl ⟨z,hzZ⟩,hz⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>             · intro e heE heR</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>               exact hn ⟨.inr ⟨e,heE⟩,heR⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>           rw [if_pos ha,if_pos ⟨ha.1,hh&#x27;⟩]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>         · rw [if_neg ha];split_ifs;exact hw C₀;exact le_rfl</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       _ ≤ ∑ j : Z⊕E,∑ C₀,if x∈R C₀ ∧ hit C₀ j then w C₀ else 0 := by convert hh using 1 &lt;;&gt; congr!</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       _ ≤ ∑ _j : Z⊕E,K := by</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>         apply Finset.sum_le_sum</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>         intro j _</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>         cases j with</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>         | inl z=&gt;</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>           convert hpair x z.val (fun he=&gt;hx (he ▸ z.property)) using 1 &lt;;&gt; congr!</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>         | inr e=&gt;</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>           apply le_trans _ (hpair e.val.1 e.val.2 (hE e.val e.property))</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>           apply Finset.sum_le_sum</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>           intro C₀ _</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>           by_cases hp : e.val.1∈R C₀ ∧ e.val.2∈R C₀</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>           · simp only [hit,hp,and_true,ite_true];split_ifs;exact le_rfl;exact hw C₀</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>           · simp only [hit,hp,and_false,ite_false,le_refl]</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>       _ = _ := by simp only [Finset.sum_const,Finset.card_univ,Fintype.card_sum,Fintype.card_coe,nsmul_eq_mul,Nat.cast_add]</span>
+<span id="L94"><a href="#L94" class="ln">  94</a> </span>
+<span id="L95"><a href="#L95" class="ln">  95</a> end Oberwolfach</span></pre></html>

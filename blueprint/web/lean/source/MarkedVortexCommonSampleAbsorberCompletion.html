@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVortexCommonSampleAbsorberCompletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVortexCommonSampleAbsorberCompletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedVortexSampledOriginalAbsorber</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedVortexSelectedAbsorberCompletion</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The absorber selected before cover-down comes from the actual common</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> retained outcome. The validity of every cover-down step remains an explicit</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> input. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option synthInstance.maxSize 32768</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 30000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [LinearOrder V] [Nonempty V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {G:SimpleGraph V} {D m:ℕ} {β ε:ℝ} (Q:Vortex U G D β ε m)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem marked_vortex_completion_from_common_sample_absorber</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (π:Equiv.Perm V) (hπ:∀ k x,π x∈Q.extendedVertices k↔x∈Q.extendedVertices k)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (d l n:ℕ) (a:Γ) (z:RawMarkedRetainedOutcome (U:=U) (Color:=Color) π d a)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (γ σloss:ℕ→ℝ)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (h L:ℕ) (α βconfig εref δref tol ζActive ζAbs tstar εAbs s₀ p k:ℝ)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (q:U→Γ→ℝ) (s:U→Color→ℝ) (j:Color):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let σ:=z.1</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let H:=retainedRawMarkedSpokes π d (fun e=&gt;z.1 (Sum.inr e)) a</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (startRetentionMinimum (rawStartHubSet π d (fun e=&gt;z.1 (Sum.inr e)) a)) z.2 a j</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let P:=fun i=&gt;G.comap (markedVortexVertexEmbedding Q i)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let ρ:=fun i=&gt;markedVortexPermutation Q π hπ i</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let σi:=fun i=&gt;rawMarkedRestrictPair (markedVortexVertexEmbedding Q i) (markedVortexHubEmbedding Q i) σ</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let Hi:=fun i b (v:markedVortexVertexType Q i) (u:markedVortexHubType Q i)=&gt;H b v.val u.val</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let State:=fun i=&gt;MarkedReferenceDeletion (P i) (ρ i) d (σi i)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let Good:=fun i (T:State i)=&gt;T.Valid (Hi i) (l+4) (markedVortexInnerVertices Q i)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (markedVortexInnerHubs Q i) (γ i) (σloss i)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let F:=fun i=&gt;markedResourceEmbedding (markedVortexVertexEmbedding Q i).toEmbedding (markedVortexHubEmbedding Q i)</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let B:=fun i (T:State i)=&gt;(T.remaining (Hi i)).image (F i)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let E₀:=MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) false</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let K₀:=MarkedSampleArc G π (3*d) (fun e=&gt;σ (Sum.inl e)) true</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let R₀:=fun W:MarkedWheel (fun e:E₀=&gt;e.val.1) (fun e=&gt;e.val.2) (fun e:K₀=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       (l+4) π (3*d) (H false) (H true)=&gt;markedWheelPhysicalResources W</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let S₀:=Finset.univ.filter (fun z:V×U=&gt;H false z.1 z.2∨H true z.1 z.2)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let Full:=markedFiniteResources (fun e:E₀=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (fun e:K₀=&gt;e.val.1) (fun e=&gt;e.val.2) π Finset.univ S₀;</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (∀ i&lt;n,∀ T:State i,Good i T→∃ Tnext:State (i+1),Good (i+1) Tnext ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       B (i+1) Tnext⊆B i T ∧ HasResourceDecomposition R₀ (B i T\B (i+1) Tnext))→</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ∀ (size a₀ b₀ e₀ f:ℕ),</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     0≤ζAbs→</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     MarkedReferenceActiveAbsorberProperty l h d α βconfig εref δref tol ζActive ζAbs tstar εAbs</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       size a₀ b₀ e₀ f G D m β ε Q π hπ L s₀ p k q s a j z→</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     1≤n→(Q.extendedVertices n).card+(Q.extendedIndices n).card≤size→</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     ((Q.extendedVertices 1).card:ℝ)≤εAbs*Fintype.card V+f→</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     ((Q.extendedIndices 1).card:ℝ)≤εAbs*Fintype.card V+f→</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (e₀:ℝ)≤γ 0→(e₀:ℝ)≤σloss 0→</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (∀ v u,¬(H false v u∧H true v u))→</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     MarkedRemainderDivisible (fun e:E₀=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (fun e:K₀=&gt;e.val.1) (fun e=&gt;e.val.2) (H true) Finset.univ S₀ (l+4)→</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     ∀ F₀:Finset (Finset V⊕(V×U)),F₀.card≤f→</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ∃ C:MarkedSupportedEdgeSet (fun e:E₀=&gt;e.val.1) (fun e=&gt;e.val.2)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       (fun e:K₀=&gt;e.val.1) (fun e=&gt;e.val.2) π U,</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       Disjoint C.edges F₀∧C.edges.card≤e₀∧C.rows.card≤a₀∧C.hubs.card≤b₀∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       C.edges.filter (markedInnerResource (Q.extendedVertices 1) (Q.extendedIndices 1))=∅∧</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       HasResourceDecomposition R₀ Full:=by</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   intro σ H P ρ σi Hi State Good F B E₀ K₀ R₀ S₀ Full hstep size a₀ b₀ e₀ f hζ hevent</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hprop:=marked_vortex_sampled_event_original_absorber l h d α βconfig εref δref tol ζActive ζAbs tstar εAbs hζ</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     size a₀ b₀ e₀ f G D m β ε Q π hπ L s₀ p k q s a j z hevent</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   exact marked_vortex_completion_from_selected_absorber Q π hπ d l n σ H γ σloss hstep size a₀ b₀ e₀ f εAbs hprop</span>
+<span id="L65"><a href="#L65" class="ln">  65</a> end Oberwolfach</span></pre></html>

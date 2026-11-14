@@ -1,0 +1,55 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PrescribedPositionsLists.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PrescribedPositionsLists.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.PrescribedPositionOriginalSelection</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.PrescribedPositionInducedArcs</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.PrescribedPositionPairing</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Prescribe an oriented matching and isolated images using explicit lists</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> of target matching arcs and singleton labels. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 3000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> variable {X V:Type} [Fintype X] [Fintype V] [DecidableEq X] [DecidableEq V]</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem prescribed_positions_from_lists (Q:SimpleGraph X) (D:X→X→Prop)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hdeg:∀x,Q.degree x≤2) (hrep:∀x y,Q.Adj x y→D x y ∨ D y x)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hDQ:∀x y,D x y→Q.Adj x y) (horiented:∀x y,D x y→¬D y x)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (A:Finset X) (hA:∀x∈A,∀y∈A,¬Q.Adj x y) (f:X→V) (hinj:Set.InjOn f (↑A:Set X))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (ms:List (V×V)) (zs:List V)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hM:(ms.flatMap prescribedPairVertices).Nodup) (hZ:zs.Nodup)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hMZ:List.Disjoint (ms.flatMap prescribedPairVertices) zs)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hOld:Disjoint (A.image f) (ms.flatMap prescribedPairVertices++zs).toFinset)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hedges:Fintype.card X≤Q.edgeFinset.card+A.card)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hsize:8*A.card+8*ms.length+4*zs.length+10≤Fintype.card X):</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     ∃ (B:Finset X) (g:X→V),A⊆B ∧ Set.InjOn g (↑B:Set X) ∧ (∀x∈A,g x=f x) ∧</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       B.image g=A.image f∪(ms.flatMap prescribedPairVertices).toFinset∪zs.toFinset ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (prescribedInducedArcs D B).image (Prod.map g g)=ms.toFinset := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   obtain ⟨es,vs,heslen,hvslen,he,hpair,hvs,hcross,hsingle,hnodup⟩:=</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     prescribed_position_selection_original Q D hdeg hrep A ms.length zs.length hedges hsize</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have htarget:(ms.flatMap prescribedPairVertices++zs).Nodup:=List.nodup_append&#x27;.mpr ⟨hM,hZ,hMZ⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hdisS:∀ x∈es.flatMap prescribedPairVertices++vs,x∉A:=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     intro x hx</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hout:x∉prescribedClosedNeighbourhoods Q A:=by</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       rcases List.mem_append.mp hx with hx|hx</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       · obtain ⟨e,he&#x27;,hx⟩:=List.mem_flatMap.mp hx</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         simp only [prescribedPairVertices,List.mem_cons,List.not_mem_nil,or_false] at hx</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         rcases hx with hx|hx</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         · subst x;exact (he e he&#x27;).2.2.1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         · subst x;exact (he e he&#x27;).2.2.2</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       · exact hvs x hx</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     exact (prescribed_outside_closed_neighbourhood Q A x hout).1</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hdisT:∀ y∈ms.flatMap prescribedPairVertices++zs,y∉A.image f:=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     intro y hy hOldY</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     exact (Finset.disjoint_left.mp hOld hOldY) (List.mem_toFinset.mpr hy)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hsel:∀e∈es,D e.1 e.2:=by intro e he&#x27;;exact (he e he&#x27;).1</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have he&#x27;:∀e∈es,D e.1 e.2 ∧ e.1∉prescribedClosedNeighbourhoods Q A ∧ e.2∉prescribedClosedNeighbourhoods Q A:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     intro e he&#x27;;exact ⟨(he e he&#x27;).1,(he e he&#x27;).2.2.1,(he e he&#x27;).2.2.2⟩</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have honly:=prescribed_selected_induced_arcs Q D A hDQ horiented hA es vs he&#x27; hpair hvs hcross hsingle</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   let B:=A∪(es.flatMap prescribedPairVertices++vs).toFinset</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   obtain ⟨g,hginj,hgpres,hgimage,hgarcs⟩:=prescribed_position_pairing D A f hinj es ms vs zs</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     heslen hvslen hnodup htarget hdisS hdisT hsel honly</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   refine ⟨B,g,Finset.subset_union_left,hginj,hgpres,?_,hgarcs⟩</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   simpa [B,List.toFinset_append,Finset.union_assoc] using hgimage</span>
+<span id="L52"><a href="#L52" class="ln">  52</a> end Oberwolfach</span></pre></html>

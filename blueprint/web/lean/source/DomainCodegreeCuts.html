@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>DomainCodegreeCuts.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>DomainCodegreeCuts.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.DegreeCodegreeCuts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.NeighbourPairDomains</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Degree/codegree cut estimates on the actual finite endpoint domains. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option maxHeartbeats 4000000</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> open scoped BigOperators</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> variable {V U:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> theorem finite_domain_indicator_sum (B:Finset U) (P:U→Prop) :</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (∑ u:B,if P u.val then (1:ℝ) else 0)=(B.filter P).card := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   rw [←finite_domain_predicate_card B P]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   simp only [Finset.card_filter,Nat.cast_sum,Nat.cast_ite,Nat.cast_one,Nat.cast_zero]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem finite_domain_codegree_sum (B:Finset U) (P Q:U→Prop) :</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (∑ u:B,(if P u.val then (1:ℝ) else 0)*(if Q u.val then 1 else 0))=</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (B.filter (fun u=&gt;P u∧Q u)).card := by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   trans (∑ u:B,if P u.val∧Q u.val then (1:ℝ) else 0)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · apply Finset.sum_congr rfl</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     intro u _</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     by_cases hp:P u.val &lt;;&gt; by_cases hq:Q u.val &lt;;&gt; simp [hp,hq]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · convert finite_domain_indicator_sum B (fun u=&gt;P u∧Q u) using 1 &lt;;&gt; congr!</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> theorem degree_codegree_cuts_on_domains (H:V→U→Prop) (F:SimpleGraph V)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (A:Finset V) (B:Finset U) (p ε η:ℝ) (d:ℕ)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hp:0&lt;p) (hp1:p≤1) (hε:0≤ε) (hη:0&lt;η) (hb:0&lt;B.card)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hF:∀ v,F.degree v≤d)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hrow:∀ x∈A,(p-ε)*B.card≤((B.filter (H x)).card:ℝ))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hcodeg:∀ x∈A,∀ y∈A,x≠y → ¬F.Adj x y →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       ((B.filter (fun u=&gt;H x u∧H y u)).card:ℝ)≤(p^2+ε)*B.card)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hsmall:ε≤p^2*η/24) (hlarge:(d+1:ℝ)≤p^2*η^2*B.card/8)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (S:Finset V) (hSA:S⊆A) (T:Finset U) (hTB:T⊆B)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hS:η*B.card≤(S.card:ℝ)) (hT:η*B.card≤(T.card:ℝ)) :</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     p/2*S.card*T.card≤(bipartiteMatrixCut (fun x u=&gt;if H x u then 1 else 0) S T:ℝ) := by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   let e:A↪V:=⟨Subtype.val,Subtype.val_injective⟩</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   let f:B↪U:=⟨Subtype.val,Subtype.val_injective⟩</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let H&#x27;:A→B→Prop:=fun x u=&gt;H x.val u.val</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let F&#x27;:SimpleGraph A:=F.comap e</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let E:A→Finset A:=fun x=&gt;insert x (F&#x27;.neighborFinset x)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hE (x:A):((E x).card:ℝ)≤d+1:=by</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have hh:(E x).card≤d+1:=by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       have h:=Finset.card_insert_le x (F&#x27;.neighborFinset x)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       rw [SimpleGraph.card_neighborFinset_eq_degree] at h</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       exact h.trans (Nat.add_le_add_right ((embedding_comap_degree_le e F x).trans (hF x.val)) 1)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     exact_mod_cast hh</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hrow&#x27; (x:A):(p-ε)*Fintype.card B≤∑ u,bipAdj H&#x27; x u:=by</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have he:(∑ u:B,bipAdj H&#x27; x u)=(B.filter (H x.val)).card:=finite_domain_indicator_sum B (H x.val)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     rw [he,Fintype.card_coe]</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     exact hrow x.val x.property</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   have hcodeg&#x27; (x y:A) (hy:y∉E x):</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (∑ u,bipAdj H&#x27; x u*bipAdj H&#x27; y u)≤(p^2+ε)*Fintype.card B:=by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hne:x.val≠y.val:=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       intro he;have he&#x27;:x=y:=Subtype.ext he;apply hy;simp [E,he&#x27;]</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hxy:¬F.Adj x.val y.val:=by</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       intro ha;apply hy</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       exact Finset.mem_insert_of_mem ((F&#x27;.mem_neighborFinset x y).mpr ha)</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have he:(∑ u:B,bipAdj H&#x27; x u*bipAdj H&#x27; y u)=(B.filter (fun u=&gt;H x.val u∧H y.val u)).card:=</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       finite_domain_codegree_sum B (H x.val) (H y.val)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     rw [he,Fintype.card_coe]</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     exact hcodeg x.val x.property y.val y.property hne hxy</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   let S&#x27;:=embeddingPullFinset e S</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   let T&#x27;:=embeddingPullFinset f T</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hSc:S&#x27;.card=S.card:=embeddingPullFinset_card e S (fun x hx=&gt;⟨⟨x,hSA hx⟩,rfl⟩)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hTc:T&#x27;.card=T.card:=embeddingPullFinset_card f T (fun u hu=&gt;⟨⟨u,hTB hu⟩,rfl⟩)</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hSi:S&#x27;.image e=S:=embeddingPullFinset_image e S (fun x hx=&gt;⟨⟨x,hSA hx⟩,rfl⟩)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hTi:T&#x27;.image f=T:=embeddingPullFinset_image f T (fun u hu=&gt;⟨⟨u,hTB hu⟩,rfl⟩)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hh:=bipartite_cuts_from_degrees_and_codegrees H&#x27; p ε (d+1) η hp hp1 hε hη</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (by simpa only [Fintype.card_coe] using hb) E hE hrow&#x27; hcodeg&#x27; hsmall</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     (by simpa only [Fintype.card_coe] using hlarge) S&#x27; T&#x27;</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     (by simpa only [Fintype.card_coe,hSc] using hS) (by simpa only [Fintype.card_coe,hTc] using hT)</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   have hcut:bipartiteMatrixCut (fun x u=&gt;if H&#x27; x u then 1 else 0) S&#x27; T&#x27;=</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>       bipartiteMatrixCut (fun x u=&gt;if H x u then 1 else 0) S T:=by</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     rw [←hSi,←hTi]</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     simp only [bipartiteMatrixCut]</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     rw [Finset.sum_image (by intros a ha b hb he;exact e.injective he)]</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     apply Finset.sum_congr rfl</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     intro a ha</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     rw [Finset.sum_image (by intros u hu v hv he;exact f.injective he)]</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     rfl</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   rw [hSc,hTc,hcut] at hh</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   exact hh</span>
+<span id="L86"><a href="#L86" class="ln">  86</a> </span>
+<span id="L87"><a href="#L87" class="ln">  87</a> end Oberwolfach</span></pre></html>

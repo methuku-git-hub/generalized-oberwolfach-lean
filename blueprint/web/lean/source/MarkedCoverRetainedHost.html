@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedCoverRetainedHost.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedCoverRetainedHost.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedBoundaryRetainedHost</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedBoundaryHubRetention</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! The cover host also keeps outside edges. Its constructed packing later</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> uses only prescribed outside resources; all other resources lie inside</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> the inner pair or in the retained boundary.</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> The same physical coin is used for every test of an edge. Parent occurrence</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> identities, directions and marked heads are preserved by subtype restriction. -/</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option autoImplicit false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 4000000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> noncomputable section</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> namespace Oberwolfach</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> variable {V U E K:Type} [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U]</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> def markedCoverRimAllowed (π:Equiv.Perm V) (X:Finset V) (σ:Sym2 (V⊕U)→Bool)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (j:Bool) (x y:V):Prop:=</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   (x∉X∧y∉X)∨markedBoundaryRimAllowed π X σ j x y</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> def markedCoverSpokeAllowed (X:Finset V) (Z:Finset U) (σ:Sym2 (V⊕U)→Bool)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (x:V) (u:U):Prop:=</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   (x∉X∧u∉Z)∨markedBoundarySpokeAllowed X Z σ x u</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem marked_retained_cover_free_counts</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (tail head:E→V) (ktail khead:K→V) (H₀ HK:V→U→Prop)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (π:Equiv.Perm V) (X:Finset V) (Z:Finset U) (σ:Sym2 (V⊕U)→Bool) (c:ℝ)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hstep:∀ j x u,c≤((retainedPatternSet (X.filter (fun z=&gt;markedArcPresent tail head ktail khead j x z∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (if j then HK z u else H₀ z u))) (markedBoundaryStepCoins π j x u) σ).card:ℝ))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hjoin:∀ j x y u,x≠(if j then π y else y)→c≤</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       ((retainedPatternSet (X.filter (fun z=&gt;markedArcPresent tail head ktail khead false x z∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         markedArcPresent tail head ktail khead j z y∧H₀ z u))</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         (markedBoundaryJoinCoins x (if j then π y else y) u) σ).card:ℝ)):</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     let P₀:=markedCoverRimAllowed π X σ false</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let P₁:=markedCoverRimAllowed π X σ true</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let E&#x27;:={e:E//P₀ (tail e) (head e)}</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let K&#x27;:={e:K//P₁ (ktail e) (khead e)}</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     let t&#x27;:=fun e:E&#x27;=&gt;tail e.val</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     let h&#x27;:=fun e:E&#x27;=&gt;head e.val</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     let kt&#x27;:=fun e:K&#x27;=&gt;ktail e.val</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     let kh&#x27;:=fun e:K&#x27;=&gt;khead e.val</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     let H₀&#x27;:=fun x u=&gt;H₀ x u∧markedCoverSpokeAllowed X Z σ x u</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     let HK&#x27;:=fun x u=&gt;HK x u∧markedCoverSpokeAllowed X Z σ x u;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (∀ j x u,c≤((X.filter (fun z=&gt;markedArcPresent t&#x27; h&#x27; kt&#x27; kh&#x27; j x z∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (if j then HK&#x27; z u else H₀&#x27; z u))).card:ℝ))∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (∀ j x y u,x≠(if j then π y else y)→c≤((X.filter (fun z=&gt;markedArcPresent t&#x27; h&#x27; kt&#x27; kh&#x27; false x z∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       markedArcPresent t&#x27; h&#x27; kt&#x27; kh&#x27; j z y∧H₀&#x27; z u)).card:ℝ)):=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   intro P₀ P₁ E&#x27; K&#x27; t&#x27; h&#x27; kt&#x27; kh&#x27; H₀&#x27; HK&#x27;</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have harc (j:Bool) (x y:V):markedArcPresent t&#x27; h&#x27; kt&#x27; kh&#x27; j x y↔</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       markedArcPresent tail head ktail khead j x y∧markedCoverRimAllowed π X σ j x y:=by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have h:=marked_arc_pair_restriction tail head ktail khead P₀ P₁ j x y</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     cases j &lt;;&gt; exact h</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   constructor</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   · intro j x u</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     apply (hstep j x u).trans</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     apply Nat.cast_le.mpr</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     apply Finset.card_le_card</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     intro z hz</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     obtain ⟨hz,hcoins⟩:=Finset.mem_filter.mp hz</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     obtain ⟨hzX,hr,hs⟩:=Finset.mem_filter.mp hz</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have he:σ s(Sum.inl x,Sum.inl (if j then π z else z))=true:=hcoins _ (by simp [markedBoundaryStepCoins])</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hf:σ s(Sum.inl z,Sum.inr u)=true:=hcoins _ (by simp [markedBoundaryStepCoins])</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have ha:markedCoverRimAllowed π X σ j x z:=Or.inr (Or.inr ⟨Or.inr hzX,he⟩)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     have hb:markedCoverSpokeAllowed X Z σ z u:=Or.inr (Or.inr ⟨Or.inl hzX,hf⟩)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     refine Finset.mem_filter.mpr ⟨hzX,(harc j x z).mpr ⟨hr,ha⟩,?_⟩</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     cases j &lt;;&gt; exact ⟨hs,hb⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   · intro j x y u hxy</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     apply (hjoin j x y u hxy).trans</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     apply Nat.cast_le.mpr</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     apply Finset.card_le_card</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     intro z hz</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     obtain ⟨hz,hcoins⟩:=Finset.mem_filter.mp hz</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     obtain ⟨hzX,hr₀,hr₁,hs⟩:=Finset.mem_filter.mp hz</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have he:σ s(Sum.inl x,Sum.inl z)=true:=hcoins _ (by simp [markedBoundaryJoinCoins])</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>     have hf:σ s(Sum.inl z,Sum.inl (if j then π y else y))=true:=hcoins _ (by simp [markedBoundaryJoinCoins])</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     have hg:σ s(Sum.inl z,Sum.inr u)=true:=hcoins _ (by simp [markedBoundaryJoinCoins])</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     have ha:markedCoverRimAllowed π X σ false x z:=Or.inr (Or.inr ⟨Or.inr hzX,he⟩)</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     have hb:markedCoverRimAllowed π X σ j z y:=Or.inr (Or.inr ⟨Or.inl hzX,hf⟩)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hc:markedCoverSpokeAllowed X Z σ z u:=Or.inr (Or.inr ⟨Or.inl hzX,hg⟩)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     exact Finset.mem_filter.mpr ⟨hzX,(harc false x z).mpr ⟨hr₀,ha⟩,(harc j z y).mpr ⟨hr₁,hb⟩,hs,hc⟩</span>
+<span id="L80"><a href="#L80" class="ln">  80</a> </span>
+<span id="L81"><a href="#L81" class="ln">  81</a> theorem marked_retained_cover_hub_counts</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     (H₀ HK:V→U→Prop) (X:Finset V) (Z:Finset U) (σ:Sym2 (V⊕U)→Bool)</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     (j:Bool) (x y:V) (c:ℝ)</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     (h:c≤((retainedPatternSet (Z.filter (fun u=&gt;H₀ x u∧(if j then HK y u else H₀ y u)))</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       (markedBoundaryHubCoins x y) σ).card:ℝ)):</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     c≤((Z.filter (fun u=&gt;(H₀ x u∧markedCoverSpokeAllowed X Z σ x u)∧</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       (if j then HK y u∧markedCoverSpokeAllowed X Z σ y u</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>         else H₀ y u∧markedCoverSpokeAllowed X Z σ y u))).card:ℝ):=by</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   apply h.trans</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   apply Nat.cast_le.mpr</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>   apply Finset.card_le_card</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   intro u hu</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   obtain ⟨hu,hcoins⟩:=Finset.mem_filter.mp hu</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   obtain ⟨huZ,hx,hy⟩:=Finset.mem_filter.mp hu</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   have hxu:markedCoverSpokeAllowed X Z σ x u:=</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     Or.inr (Or.inr ⟨Or.inr huZ,hcoins _ (by simp [markedBoundaryHubCoins])⟩)</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   have hyu:markedCoverSpokeAllowed X Z σ y u:=</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     Or.inr (Or.inr ⟨Or.inr huZ,hcoins _ (by simp [markedBoundaryHubCoins])⟩)</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>   refine Finset.mem_filter.mpr ⟨huZ,⟨hx,hxu⟩,?_⟩</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>   cases j &lt;;&gt; exact ⟨hy,hyu⟩</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a> end Oberwolfach</span></pre></html>

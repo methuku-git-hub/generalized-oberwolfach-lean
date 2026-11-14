@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ProfileHostAbsorberTail.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ProfileHostAbsorberTail.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ConditionalSamplingMeanBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ProfileSampleEligibility</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.FixedSizeAbsorberSampling</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! An eligible root&#x27;s absorber count is large with a conditional</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> probability bound derived from the original host abundance. All</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> labelled absorber identifiers and the original sample law are retained. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency true</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option synthInstance.maxSize 256</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option maxHeartbeats 4400000</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> variable {s : ℕ} {V : Fin s → Type*} [∀ i,Fintype (V i)] [∀ i,DecidableEq (V i)]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     {C Tpl : Type*} [Fintype C] [DecidableEq C] [Fintype Tpl] [DecidableEq Tpl]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem profile_host_absorber_tail</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (a : Fin s → ℕ) (ha : ∀ i,1≤a i) (c J : ℕ) (hc : 1≤c) (hs : ∑ i,a i=c)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (R : C → Finset (Σ i,V i)) (S : Tpl → VertexAbsorberTemplate c)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hR : ∀ C₀ i,(Finset.univ.filter (fun v : V i =&gt; (⟨i,v⟩ : Σ i,V i)∈R C₀)).card=a i)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hJ : ∀ Y : Finset (Σ i,V i),Fintype.card {C₀ : C // R C₀=Y}≤J)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (k F₀ α : ℝ) (hk : 0&lt;k) (hα : 0≤α)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hn : ∀ i,(Fintype.card (V i):ℝ)=a i*k)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (F Z X : Finset (Σ i,V i)) (hF : (F.card:ℝ)≤F₀) (hX : X.card=c)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hcount : α*k^(c*c)≤Fintype.card (LabelledAbsorberFamily R S X))</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (t : ℕ) (ht : c+c*c≤t)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     [∀ i,Nonempty (FixedSubset (ProfileRemainingClass F i) (a i*t))]</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hm : ∀ i,a i*t≤Fintype.card (ProfileRemainingClass F i))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hlarge : 2*(c*c:ℕ)*(F₀+c+(c*c:ℕ))≤k)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hratio : 2*(c*c:ℕ)*(((c:ℝ)+(c*c:ℕ))/t+(F₀+c+(c*c:ℕ))/k)≤1/4)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hloss : 4*(F₀+c)*absorberVertexDeletionCoefficient c J (Fintype.card Tpl)≤α*k) :</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     let μ := FiniteLaw.pi (fun i =&gt; FiniteLaw.uniform (FixedSubset (ProfileRemainingClass F i) (a i*t)))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     let K := ((c*c)*Fintype.card Tpl*c^c*J^(2*c+1):ℕ)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     let L := 1+2*(K:ℝ)*((c:ℝ)+1)^(c*c-1)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     μ.probability (fun τ =&gt; X⊆(profileRootSet τ).map (profileComplementEmbedding F)∪Z ∧</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       absorberGroundCount R S X ((profileRootSet τ).map (profileComplementEmbedding F))&lt;(α/4)*(t:ℝ)^(c*c))≤</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (2*Real.exp (-(2*(α/4)^2/((c:ℝ)*L^2))*(t:ℝ)))*</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         μ.probability (fun τ =&gt; X⊆(profileRootSet τ).map (profileComplementEmbedding F)∪Z) := by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let μ := FiniteLaw.pi (fun i =&gt; FiniteLaw.uniform (FixedSubset (ProfileRemainingClass F i) (a i*t)))</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let f := fun τ : ∀ i,FixedSubset (ProfileRemainingClass F i) (a i*t) =&gt;</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     absorberGroundCount R S X ((profileRootSet τ).map (profileComplementEmbedding F))/(t:ℝ)^(c*c)</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let K := ((c*c)*Fintype.card Tpl*c^c*J^(2*c+1):ℕ)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let L := 1+2*(K:ℝ)*((c:ℝ)+1)^(c*c-1)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   let Y := fun τ : ∀ i,FixedSubset (ProfileRemainingClass F i) (a i*t) =&gt;</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (profileRootSet τ).map (profileComplementEmbedding F)∪Z</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   change μ.probability (fun τ =&gt; X⊆Y τ ∧ _)&lt;=(2*Real.exp _)*μ.probability (fun τ =&gt; X⊆Y τ)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>   by_cases hcompat : X∩F⊆Z</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   · let T := profileRequiredRoots F Z X</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have hT (i) : (T i).card≤c := (profileRequiredRoots_card F Z X i).trans_eq hX</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     obtain ⟨hTm,hm&#x27;⟩ := profile_conditioned_sample_feasible a ha c t (by omega) F T hT hm</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     letI : ∀ i,Nonempty (FixedSubset {u : ProfileRemainingClass F i // u∉T i} (a i*t-(T i).card)) := fun i =&gt; fixedSubset_nonempty (hm&#x27; i)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     let ν := FiniteLaw.pi (fun i =&gt; FiniteLaw.uniform</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       (FixedSubset {u : ProfileRemainingClass F i // u∉T i} (a i*t-(T i).card)))</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     let mean := ν.expectation (fun σ =&gt; f (fillProfileRootsAtSize T (fun i =&gt; a i*t) hTm σ))</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have helig (τ : ∀ i,FixedSubset (ProfileRemainingClass F i) (a i*t)) :</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>         X⊆Y τ ↔ ∀ i,T i⊆(τ i).val :=</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       profileRequiredRoots_eligibility F Z X hcompat (fun i =&gt; a i*t) τ</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hroot := profileRequiredRoots_map_subset F Z X</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have htR : (1:ℝ)≤t := by exact_mod_cast (show 1≤t by omega)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     have htpos : (0:ℝ)&lt;t := by linarith</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     have hmean : α/2≤mean := by</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       have hh := conditional_absorber_mean_lower_from_host a ha c J hc hs R S hR hJ k F₀ α hk hα hn</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         F X hF hX hcount T t hT ht hlarge hTm hm&#x27; hroot hratio hloss</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       have hid : mean=ν.expectation (fun σ =&gt; absorberGroundCount R S X</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>           ((profileRootSet (fillProfileRootsAtSize T (fun i =&gt; a i*t) hTm σ)).map (profileComplementEmbedding F)))/(t:ℝ)^(c*c) := by</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>         simp only [mean,f,FiniteLaw.expectation,mul_div_assoc,Finset.sum_div]</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>       rw [hid]</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       exact (le_div_iff₀ (pow_pos htpos _)).mpr hh</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     have htail := profile_fixed_size_absorber_linear_tail (profileComplementEmbedding F) R S hc X hX.le J hJ</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       T (fun i =&gt; a i*t) hTm hm&#x27; t (α/4) htR (by positivity) (profile_conditioned_sample_steps a c t hs F T) hroot</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>     have htail&#x27; : μ.probability (fun τ =&gt; (∀ i,T i⊆(τ i).val) ∧ α/4≤|f τ-mean|)≤</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         μ.probability (fun τ =&gt; ∀ i,T i⊆(τ i).val)*(2*Real.exp (-(2*(α/4)^2/((c:ℝ)*L^2))*(t:ℝ))) := htail</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     apply (finiteLaw_probability_mono μ _ _ ?_).trans htail&#x27; |&gt;.trans_eq ?_</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     · intro τ hτ</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       refine ⟨(helig τ).mp hτ.1,?_⟩</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       have hf : f τ&lt;α/4 := (div_lt_iff₀ (pow_pos htpos _)).mpr hτ.2</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>       have hh := neg_le_abs (f τ-mean)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       linarith</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     · rw [mul_comm]</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       congr 1</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       apply congrArg μ.probability</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       funext τ</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>       exact propext (helig τ).symm</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   · have hnone (τ : ∀ i,FixedSubset (ProfileRemainingClass F i) (a i*t)) : ¬X⊆Y τ := by</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       intro hXτ</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       exact hcompat (profile_eligible_root_compatible F Z X (fun i =&gt; a i*t) τ hXτ)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     simp only [Y] at hnone</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     simp only [FiniteLaw.probability,Y,hnone,false_and,ite_false,Finset.sum_const_zero,mul_zero,le_refl]</span>
+<span id="L91"><a href="#L91" class="ln">  91</a> </span>
+<span id="L92"><a href="#L92" class="ln">  92</a> end Oberwolfach</span></pre></html>

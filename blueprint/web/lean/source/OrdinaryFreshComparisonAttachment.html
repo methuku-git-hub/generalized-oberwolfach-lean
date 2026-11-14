@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryFreshComparisonAttachment.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryFreshComparisonAttachment.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryFreshComparisonEmbedding</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryRelativeAttachmentRealization</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Embed the decomposable end of the ordinary absorber diagram. Both the</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> comparison wheels and their attached wheels are constructed in the actual host;</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> the result is wholly fresh and has an actual host-wheel decomposition. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 14000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U I:Type} [Fintype V] [Fintype U] [Fintype I]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     [DecidableEq V] [DecidableEq U] [DecidableEq I]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem ordinary_fresh_comparison_attachment (Q F:SimpleGraph V) (H:V→U→Prop)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (A W R:Finset V) (B:Finset U) (r k:ℕ) (hr:3≤r)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (ρ:I→OrdinaryComparisonRows r k) (d c cH:ℝ) (hd:0≤d)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hF:∀ v,(F.degree v:ℝ)≤d) (hA:c≤(A.card:ℝ))</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hcount:∀ v w,c≤((A∩Q.neighborFinset v∩Q.neighborFinset w).card:ℝ))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hhub:∀ T:Finset V,T.card≤r→(∀ v∈T,∀ w∈T,¬F.Adj v w)→</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       cH≤((common Finset.univ T (fun v=&gt;Finset.univ.filter (H v))).card:ℝ))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hbudget:W.card+((R.card:ℝ)+k+k*r+Fintype.card I*r+r+6)*(d+1)&lt;c)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hB:(B.card:ℝ)+k+Fintype.card I&lt;cH) :</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ (f:OrdinaryComparisonRows r k⊕(I×Fin r)↪V) (g:OrdinaryComparisonHubs k⊕I↪U),</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ a,f a∈A∧f a∉W∧f a∉R∧∀ z∈R,¬F.Adj (f a) z)∧</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ a,g a∉B)∧(∀ a b,¬F.Adj (f a) (f b))∧</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ a b,(ordinaryAttachmentRim (ordinaryComparisonRim r k (by omega))</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         (SimpleGraph.cycleGraph r) ⟨0,by omega⟩ ρ).Adj a b→Q.Adj (f a) (f b))∧</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ a b,ordinaryAttachmentSpokes (ordinaryComparisonSpokes r k (by omega))</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>         ⟨0,by omega⟩ ρ a b→H (f a) (g b))∧</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       HasResourceDecomposition (ordinaryWheelResources (P:=Q) (F:=F) (Hbase:=H) (r:=r))</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>         (ordinaryHostResources ((ordinaryAttachmentRim (ordinaryComparisonRim r k (by omega))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>           (SimpleGraph.cycleGraph r) ⟨0,by omega⟩ ρ).map f)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>           (ordinaryMappedSpokes (ordinaryAttachmentSpokes (ordinaryComparisonSpokes r k (by omega))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>             ⟨0,by omega⟩ ρ) f g)) := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hd1:0≤d+1:=by linarith</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   obtain ⟨φ,ψ,hφ,hψ,hφF,hG,hH,hdec⟩:=ordinary_fresh_comparison_embedding Q F H A W R B r k hr d c cH hd hF hA hcount hhub</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (by have hpos:0≤(Fintype.card I:ℝ)*r*(d+1):=by positivity</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         nlinarith only [hbudget,hpos])</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (by have hpos:0≤(Fintype.card I:ℝ):=by positivity</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>         linarith only [hB,hpos])</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let R&#x27;:=R∪Finset.univ.image φ</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   let B&#x27;:=B∪Finset.univ.image ψ</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hRc:(R&#x27;.card:ℝ)≤R.card+k+k*r:=by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have hcard:(Finset.univ.image φ).card≤k+k*r:=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       apply Finset.card_image_le.trans</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       simp [OrdinaryComparisonRows]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hsum: R&#x27;.card≤R.card+(k+k*r):=(Finset.card_union_le _ _).trans (Nat.add_le_add_left hcard _)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     exact_mod_cast (by omega : R&#x27;.card≤R.card+k+k*r)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   have hBc:(B&#x27;.card:ℝ)≤B.card+k:=by</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have hcard:(Finset.univ.image ψ).card≤k:=by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       apply Finset.card_image_le.trans</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       simp [OrdinaryComparisonHubs]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     exact_mod_cast (Finset.card_union_le _ _).trans (Nat.add_le_add_left hcard _)</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   obtain ⟨f,g,hf,hg,hpriv,hnewhub,hprivF,hQ,hH&#x27;,he,hd&#x27;,hextra⟩:=</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     ordinary_relative_attachment_realization Q F H A W R&#x27; B&#x27; φ ψ</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       (ordinaryComparisonRim r k (by omega)) (ordinaryComparisonSpokes r k (by omega)) ρ</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       (fun a=&gt;Finset.mem_union_right _ (Finset.mem_image.mpr ⟨a,Finset.mem_univ _,rfl⟩))</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       (fun a=&gt;Finset.mem_union_right _ (Finset.mem_image.mpr ⟨a,Finset.mem_univ _,rfl⟩))</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       hG hH r hr d c cH hd hF hcount hhub</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (by have hm:=mul_le_mul_of_nonneg_right hRc hd1;nlinarith only [hbudget,hm])</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (by linarith only [hB,hBc])</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hcross:∀ i w a,¬F.Adj (f (.inr (i,w))) (f (.inl a)):=by</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     intro i w a</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     rw [hf]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     exact (hpriv i w).2.2.2 (φ a) (Finset.mem_union_right _ (Finset.mem_image.mpr ⟨a,Finset.mem_univ _,rfl⟩))</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   refine ⟨f,g,?_,?_,?_,hQ,hH&#x27;,?_⟩</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   · intro a</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     cases a with</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     | inl a=&gt;rw [hf];exact hφ a</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     | inr p=&gt;exact ⟨(hpriv p.1 p.2).1,(hpriv p.1 p.2).2.1,</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>         fun h=&gt;(hpriv p.1 p.2).2.2.1 (Finset.mem_union_left _ h),</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>         fun z hz=&gt;(hpriv p.1 p.2).2.2.2 z (Finset.mem_union_left _ hz)⟩</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · intro a</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     cases a with</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     | inl a=&gt;rw [hg];exact hψ a</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     | inr i=&gt;exact fun h=&gt;hnewhub i (Finset.mem_union_left _ h)</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   · intro a b</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     cases a with</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     | inl a=&gt;</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>       cases b with</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>       | inl b=&gt;rw [hf,hf];exact hφF a b</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>       | inr p=&gt;exact fun h=&gt;hcross p.1 p.2 a h.symm</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>     | inr p=&gt;</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>       cases b with</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>       | inl b=&gt;exact hcross p.1 p.2 b</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>       | inr q=&gt;exact hprivF p.1 q.1 p.2 q.2</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   · rw [he]</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     exact resource_decomposition_union _ _ _ hdec hextra hd&#x27;</span>
+<span id="L91"><a href="#L91" class="ln">  91</a> </span>
+<span id="L92"><a href="#L92" class="ln">  92</a> end Oberwolfach</span></pre></html>

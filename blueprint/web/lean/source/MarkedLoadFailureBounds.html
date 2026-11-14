@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedLoadFailureBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedLoadFailureBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.RawMarkedSeedLoadEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Explicit exponential failure estimates. The locality and coefficient</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> bounds are fixed before the graph order and the root domains are chosen. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 1000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> def markedLoadExponent (m d : ℕ) (B η : ℝ) : ℝ :=</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   2*η^2/((8*(d:ℝ)+6)^2*2*((m:ℝ)+1)^7*B^2)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem markedLoadExponent_pos (m d : ℕ) (B η : ℝ) (hB : 0&lt;B) (hη : 0&lt;η) :</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     0&lt;markedLoadExponent m d B η := by unfold markedLoadExponent;positivity</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem marked_load_tail_exponential (m d : ℕ) (B η n : ℝ) (hn : 0&lt;n) :</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     2*Real.exp (-2*η^2/((8*(d:ℝ)+6)^2*(((m:ℝ)+1)^4*B/n)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B)))=</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       2*Real.exp (-markedLoadExponent m d B η*n) := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   congr 2</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   unfold markedLoadExponent</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   field_simp</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   &lt;;&gt; ring</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> theorem marked_root_domain_card {V U : Type} [Fintype V] [Fintype U]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (hu : Fintype.card U≤Fintype.card V) :</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     Fintype.card (((V×V)⊕(V×V))⊕(Bool×V×U))≤4*(Fintype.card V)^2 := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   simp only [Fintype.card_sum,Fintype.card_prod,Fintype.card_bool]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   nlinarith [Nat.mul_le_mul_left (Fintype.card V) hu]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a> theorem marked_external_spoke_domain_card {V U : Type} [Fintype V] [Fintype U]</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (K : ℝ) (hu : (Fintype.card U:ℝ)≤K*Fintype.card V) :</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (Fintype.card (Bool×V×U):ℝ)≤2*K*(Fintype.card V:ℝ)^2 := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   simp only [Fintype.card_prod,Fintype.card_bool,Nat.cast_mul,Nat.cast_ofNat]</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   nlinarith [mul_le_mul_of_nonneg_left hu (Nat.cast_nonneg (α:=ℝ) (Fintype.card V))]</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> </span>
+<span id="L36"><a href="#L36" class="ln">  36</a> theorem marked_load_failure_bound (m d : ℕ) (B η n J K : ℝ) (hn : 0&lt;n)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hJ : J≤K*n^2) :</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     J*(2*Real.exp (-2*η^2/((8*(d:ℝ)+6)^2*(((m:ℝ)+1)^4*B/n)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B))))≤</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       2*K*n^2*Real.exp (-markedLoadExponent m d B η*n) := by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   rw [marked_load_tail_exponential m d B η n hn]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   nlinarith [mul_le_mul_of_nonneg_right hJ (by positivity : 0≤2*Real.exp (-markedLoadExponent m d B η*n))]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> </span>
+<span id="L43"><a href="#L43" class="ln">  43</a> end Oberwolfach</span></pre></html>

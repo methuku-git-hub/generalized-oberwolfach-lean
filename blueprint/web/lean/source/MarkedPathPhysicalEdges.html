@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedPathPhysicalEdges.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedPathPhysicalEdges.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedPathParentCounts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedPhysicalLaw</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Distinct physical requests for a common marked path. Roots may be</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> close to one another; only their inequality and their separation from the</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> free labels are used. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 2200000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> </span>
+<span id="L14"><a href="#L14" class="ln">  14</a> def optionalSuccessor {V : Type*} (π : Equiv.Perm V) (a : Bool) (x : V) : V := if a then π x else x</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> theorem separated_optionalSuccessor_index {I V : Type*}</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (π : Equiv.Perm V) (b : ℕ) (hb : 1≤b) (f : I→V) (hf : PermutationSeparated π b f)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (a c : Bool) (i j : I) (he : optionalSuccessor π a (f i)=optionalSuccessor π c (f j)) : i=j := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   by_contra hij</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   cases a &lt;;&gt; cases c</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   · exact hf i j hij (Or.inl he)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · exact (permutationSeparated_successor_avoid π b hb f hf j i (Ne.symm hij)) he.symm</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   · exact (permutationSeparated_successor_avoid π b hb f hf i j hij) he</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   · exact hf i j hij (Or.inl (π.injective he))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem separated_root_optionalSuccessor_ne {V : Type*} {m : ℕ}</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (π : Equiv.Perm V) (b : ℕ) (hb : 1≤b) (v : V) (f : Fin m→V)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hf : PermutationSeparated π b (Fin.cons v f)) (a c : Bool) (i : Fin m) :</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     optionalSuccessor π a v≠optionalSuccessor π c (f i) := by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro he</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hh := separated_optionalSuccessor_index π b hb (Fin.cons v f) hf a c 0 i.succ he</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   exact Fin.succ_ne_zero i hh.symm</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> </span>
+<span id="L34"><a href="#L34" class="ln">  34</a> def pathInternalType (j : Bool) {m : ℕ} (i : Fin m) : Bool := decide (j=false ∧ i.val=1)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a> </span>
+<span id="L36"><a href="#L36" class="ln">  36</a> def pathPhysicalTail {V : Type*} {m : ℕ} (v v&#x27; : V) (z : Fin (m+1)→V) : Fin m⊕(Bool×Bool)→V</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   | Sum.inl i=&gt;z i.castSucc</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   | Sum.inr (closing,side)=&gt;if closing then z (Fin.last m) else if side then v&#x27; else v</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> def pathPhysicalHead {V : Type*} {m : ℕ} (π : Equiv.Perm V) (j : Bool)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (v v&#x27; : V) (z : Fin (m+1)→V) : Fin m⊕(Bool×Bool)→V</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   | Sum.inl i=&gt;optionalSuccessor π (pathInternalType j i) (z i.succ)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   | Sum.inr (closing,side)=&gt;if closing then optionalSuccessor π j (if side then v&#x27; else v) else z 0</span>
+<span id="L44"><a href="#L44" class="ln">  44</a> </span>
+<span id="L45"><a href="#L45" class="ln">  45</a> def pathPhysicalEdge {V : Type*} {m : ℕ} (π : Equiv.Perm V) (j : Bool)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (v v&#x27; : V) (z : Fin (m+1)→V) (i : Fin m⊕(Bool×Bool)) : Sym2 V :=</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   s(pathPhysicalTail v v&#x27; z i,pathPhysicalHead π j v v&#x27; z i)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> theorem pathPhysicalEdge_internal_injective {V : Type*} {m : ℕ}</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (π : Equiv.Perm V) (b : ℕ) (hb : 1≤b) (j : Bool) (v v&#x27; : V) (z : Fin (m+1)→V)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (hz : PermutationSeparated π b z) :</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     Function.Injective (fun i : Fin m=&gt;pathPhysicalEdge π j v v&#x27; z (Sum.inl i)) := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   intro i k he</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   change s(z i.castSucc,optionalSuccessor π (pathInternalType j i) (z i.succ))=</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     s(z k.castSucc,optionalSuccessor π (pathInternalType j k) (z k.succ)) at he</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   rcases Sym2.eq_iff.mp he with ⟨ht,_⟩|⟨h₁,h₂⟩</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   · exact Fin.castSucc_injective m (permutationSeparated_injective π b z hz ht)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   · have h₁&#x27; := separated_optionalSuccessor_index π b hb z hz false (pathInternalType j k) i.castSucc k.succ h₁</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have h₂&#x27; := separated_optionalSuccessor_index π b hb z hz (pathInternalType j i) false i.succ k.castSucc h₂</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     have hv₁:=congrArg Fin.val h₁&#x27;</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     have hv₂:=congrArg Fin.val h₂&#x27;</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     simp only [Fin.val_castSucc,Fin.val_succ] at hv₁ hv₂</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     omega</span>
+<span id="L64"><a href="#L64" class="ln">  64</a> </span>
+<span id="L65"><a href="#L65" class="ln">  65</a> theorem pathPhysicalEdge_internal_ne_root {V : Type*} {m : ℕ}</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (π : Equiv.Perm V) (b : ℕ) (hb : 1≤b) (j : Bool) (v v&#x27; : V) (z : Fin (m+1)→V)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (hv : PermutationSeparated π b (Fin.cons v z)) (hv&#x27; : PermutationSeparated π b (Fin.cons v&#x27; z))</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (i : Fin m) (closing side : Bool) :</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     pathPhysicalEdge π j v v&#x27; z (Sum.inl i)≠pathPhysicalEdge π j v v&#x27; z (Sum.inr (closing,side)) := by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   let w := if side then v&#x27; else v</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   have hw : PermutationSeparated π b (Fin.cons w z) := by dsimp [w];cases side &lt;;&gt; assumption</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   have hroot (a c : Bool) (l : Fin (m+1)) := separated_root_optionalSuccessor_ne π b hb w z hw a c l</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   intro he</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   cases closing</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>   · change s(z i.castSucc,optionalSuccessor π (pathInternalType j i) (z i.succ))=s(w,z 0) at he</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     rcases Sym2.eq_iff.mp he with ⟨ht,_⟩|⟨_,hh⟩</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     · exact hroot false false i.castSucc ht.symm</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     · exact hroot false (pathInternalType j i) i.succ hh.symm</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>   · change s(z i.castSucc,optionalSuccessor π (pathInternalType j i) (z i.succ))=</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>       s(z (Fin.last m),optionalSuccessor π j w) at he</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     rcases Sym2.eq_iff.mp he with ⟨_,hh⟩|⟨ht,_⟩</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>     · exact hroot j (pathInternalType j i) i.succ hh.symm</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     · exact hroot j false i.castSucc ht.symm</span>
+<span id="L84"><a href="#L84" class="ln">  84</a> </span>
+<span id="L85"><a href="#L85" class="ln">  85</a> theorem pathPhysicalEdge_root_injective {V : Type*} {m : ℕ}</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>     (π : Equiv.Perm V) (b : ℕ) (hb : 1≤b) (hm : 1≤m) (j : Bool) (v v&#x27; : V) (hvv&#x27; : v≠v&#x27;)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (z : Fin (m+1)→V) (hz : PermutationSeparated π b z)</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     (hv : PermutationSeparated π b (Fin.cons v z)) (hv&#x27; : PermutationSeparated π b (Fin.cons v&#x27; z)) :</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     Function.Injective (fun i : Bool×Bool=&gt;pathPhysicalEdge π j v v&#x27; z (Sum.inr i)) := by</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>   have hside : Function.Injective (fun a : Bool=&gt;if a then v&#x27; else v) := by</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     intro a c he;cases a &lt;;&gt; cases c &lt;;&gt; simp_all</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   have hsucc : Function.Injective (optionalSuccessor π j) := by</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     cases j</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     · exact Function.injective_id</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     · exact π.injective</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   have hne : z 0≠z (Fin.last m) := by</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     intro he</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>     have hh:=congrArg Fin.val (permutationSeparated_injective π b z hz he)</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     simp only [Fin.val_zero,Fin.val_last] at hh</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     omega</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   have hroot (side a c : Bool) (i : Fin (m+1)) :</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>       optionalSuccessor π a (if side then v&#x27; else v)≠optionalSuccessor π c (z i) := by</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     apply separated_root_optionalSuccessor_ne π b hb _ z _ a c i</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     cases side &lt;;&gt; assumption</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   rintro ⟨a,c⟩ ⟨a&#x27;,c&#x27;⟩ he</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>   cases a &lt;;&gt; cases a&#x27;</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>   · change s((if c then v&#x27; else v),z 0)=s((if c&#x27; then v&#x27; else v),z 0) at he</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>     rcases Sym2.eq_iff.mp he with ⟨hr,_⟩|⟨hr,_⟩</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     · exact congrArg (fun a=&gt;(false,a)) (hside hr)</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>     · exact (hroot c false false 0 hr).elim</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>   · change s((if c then v&#x27; else v),z 0)=s(z (Fin.last m),optionalSuccessor π j (if c&#x27; then v&#x27; else v)) at he</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>     rcases Sym2.eq_iff.mp he with ⟨hr,_⟩|⟨_,hh⟩</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     · exact (hroot c false false (Fin.last m) hr).elim</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     · exact (hne hh).elim</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>   · change s(z (Fin.last m),optionalSuccessor π j (if c then v&#x27; else v))=s((if c&#x27; then v&#x27; else v),z 0) at he</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     rcases Sym2.eq_iff.mp he with ⟨hr,_⟩|⟨hh,_⟩</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>     · exact (hroot c&#x27; false false (Fin.last m) hr.symm).elim</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>     · exact (hne hh.symm).elim</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>   · change s(z (Fin.last m),optionalSuccessor π j (if c then v&#x27; else v))=</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>       s(z (Fin.last m),optionalSuccessor π j (if c&#x27; then v&#x27; else v)) at he</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     rcases Sym2.eq_iff.mp he with ⟨_,hh⟩|⟨hh,_⟩</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     · exact congrArg (fun a=&gt;(true,a)) (hside (hsucc hh))</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     · exact (hroot c&#x27; j false (Fin.last m) hh.symm).elim</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a> </span>
+<span id="L125"><a href="#L125" class="ln"> 125</a> theorem pathPhysicalEdge_injective {V : Type*} {m : ℕ}</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     (π : Equiv.Perm V) (b : ℕ) (hb : 1≤b) (hm : 1≤m) (j : Bool) (v v&#x27; : V) (hvv&#x27; : v≠v&#x27;)</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     (z : Fin (m+1)→V) (hz : PermutationSeparated π b z)</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     (hv : PermutationSeparated π b (Fin.cons v z)) (hv&#x27; : PermutationSeparated π b (Fin.cons v&#x27; z)) :</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>     Function.Injective (pathPhysicalEdge π j v v&#x27; z) := by</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>   intro i k he</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>   cases i with</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>   | inl i=&gt;cases k with</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>     | inl k=&gt;exact congrArg Sum.inl (pathPhysicalEdge_internal_injective π b hb j v v&#x27; z hz he)</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     | inr k=&gt;exact (pathPhysicalEdge_internal_ne_root π b hb j v v&#x27; z hv hv&#x27; i k.1 k.2 he).elim</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>   | inr i=&gt;cases k with</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>     | inl k=&gt;exact (pathPhysicalEdge_internal_ne_root π b hb j v v&#x27; z hv hv&#x27; k i.1 i.2 he.symm).elim</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     | inr k=&gt;exact congrArg Sum.inr (pathPhysicalEdge_root_injective π b hb hm j v v&#x27; hvv&#x27; z hz hv hv&#x27; he)</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a> </span>
+<span id="L139"><a href="#L139" class="ln"> 139</a> end Oberwolfach</span></pre></html>

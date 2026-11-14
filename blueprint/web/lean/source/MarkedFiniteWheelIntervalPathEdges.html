@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedFiniteWheelIntervalPathEdges.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedFiniteWheelIntervalPathEdges.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SimpleWalkFiniteEdgeConcatenation</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedWheelWalkPhysicalEdgeSet</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.WalkPhysicalEdgeUnion</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! A finite successor-linked family of disjoint marked wheels reconstructs</span>
+<span id="L5"><a href="#L5" class="ln">   5</a>  a simple physical path, with its exact length and vertex support. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 20000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> noncomputable section</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> namespace Oberwolfach</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> </span>
+<span id="L13"><a href="#L13" class="ln">  13</a> theorem marked_finite_wheel_interval_path_with_edges</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     {V E K:Type*} {n:ℕ} (G:SimpleGraph V) (tail head:E→V) (ktail khead:K→V)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (m b:ℕ) (π:Equiv.Perm V) (hb:1≤b) (v:Fin (n+1)→V)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (C:Fin n→MarkedCycleTuple tail head ktail khead m π b)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (hroot:∀i,(C i).val 0=v i.castSucc)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (hsucc:∀i,π ((C i).val 0)=v i.succ)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hnofixed:∀i,π ((C i).val 0)≠(C i).val 0)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hE:∀e:E,G.Adj (tail e) (head e))</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hK:∀e:K,G.Adj (ktail e) (π (khead e)))</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hdis:∀i j:Fin n,i≠j→∀a b:Fin (m+1),(C i).val a≠(C j).val b)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hend:∀i:Fin n,∀a:Fin (m+1),v (Fin.last n)≠(C i).val a):</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     ∃q:G.Walk (v 0) (v (Fin.last n)),q.IsPath ∧ q.length=n*(m+1) ∧</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀x,x∈q.support ↔ x=v (Fin.last n) ∨ ∃i:Fin n,∃a:Fin (m+1),(C i).val a=x) ∧</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       walkPhysicalEdges q=Finset.univ.biUnion (fun i=&gt;markedCyclePhysicalEdges tail head ktail khead m π b (C i)) := by</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hexist:∀i:Fin n,∃p:G.Walk (v i.castSucc) (v i.succ),</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       p.IsPath ∧ p.length=m+1 ∧ p.support.dropLast=List.ofFn (C i).val ∧</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>         walkPhysicalEdges p=markedCyclePhysicalEdges tail head ktail khead m π b (C i):=by</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     intro i</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     obtain ⟨p,hp,hlen,hsupport,hedges⟩:=marked_wheel_walk_physical_edge_set G tail head ktail khead m b π hb (C i) (hnofixed i) hE hK</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     rw [←hsucc i,←hroot i]</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     exact ⟨p,hp,hlen,hsupport,hedges⟩</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let p:∀i:Fin n,G.Walk (v i.castSucc) (v i.succ):=fun i=&gt;Classical.choose (hexist i)</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   have hp:∀i,(p i).IsPath:=fun i=&gt;(Classical.choose_spec (hexist i)).1</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hlen:∀i,(p i).length=m+1:=fun i=&gt;(Classical.choose_spec (hexist i)).2.1</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hsupport:∀i,(p i).support.dropLast=List.ofFn (C i).val:=fun i=&gt;(Classical.choose_spec (hexist i)).2.2.1</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hedges:∀i,walkPhysicalEdges (p i)=markedCyclePhysicalEdges tail head ktail khead m π b (C i):=fun i=&gt;(Classical.choose_spec (hexist i)).2.2.2</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hdis&#x27;:∀i j:Fin n,i≠j→∀x∈(p i).support.dropLast,x∉(p j).support.dropLast:=by</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     intro i j hij x hx hy</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     rw [hsupport i] at hx</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     rw [hsupport j] at hy</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     obtain ⟨a,ha⟩:=List.mem_ofFn.mp hx</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     obtain ⟨b,hb⟩:=List.mem_ofFn.mp hy</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact hdis i j hij a b (ha.trans hb.symm)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hend&#x27;:∀i:Fin n,v (Fin.last n)∉(p i).support.dropLast:=by</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     intro i hx</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     rw [hsupport i] at hx</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     obtain ⟨a,ha⟩:=List.mem_ofFn.mp hx</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     exact hend i a ha.symm</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   obtain ⟨q,hq,hqlen,hqmem,hqedges⟩:=simple_walk_finite_concatenation_edges G v p (m+1) hp hlen hdis&#x27; hend&#x27;</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   refine ⟨q,hq,hqlen,?_,?_⟩</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>   · intro x</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     rw [hqmem]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     constructor</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     · rintro (h|⟨i,hx⟩)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       · exact Or.inl h</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       · right;refine ⟨i,?_⟩</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         rw [hsupport i] at hx</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         exact List.mem_ofFn.mp hx</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     · rintro (h|⟨i,a,ha⟩)</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       · exact Or.inl h</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       · right;refine ⟨i,?_⟩</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>         rw [hsupport i]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>         exact List.mem_ofFn.mpr ⟨a,ha⟩</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>   · have hh:=walk_physical_edges_of_union q (fun i:Fin n=&gt;⟨v i.castSucc,v i.succ,p i⟩) hqedges</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     rw [hh]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     apply Finset.biUnion_congr rfl</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     intro i hi</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     exact hedges i</span>
+<span id="L71"><a href="#L71" class="ln">  71</a> </span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedFiniteActiveRemainderBalance.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedFiniteActiveRemainderBalance.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedFiniteActiveStarBalance</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedFiniteDomainBalanceBounds</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Exact full and inner balance of the host left by the prescribed</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> packing and deep-star packing. The reserved star is restored only later;</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> its balance is not assumed to vanish. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 8000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U E K:Type} [DecidableEq V] [DecidableEq U] [DecidableEq E] [DecidableEq K]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_finite_active_remainder_balances</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (tail head:E→V) (ktail khead:K→V) (HK:V→U→Prop)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     (A C EA DA:Finset (E⊕K)) (S CS ES DS:Finset (V×U)) (m:ℕ)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (X T:Finset V) (Z W:Finset U) (hT:T⊆X) (hW:W⊆Z)</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     (hC:C⊆A) (hCS:CS⊆S)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (hdiv:MarkedRemainderDivisible tail head ktail khead HK A S m)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hE:MarkedRemainderDivisible tail head ktail khead HK EA ES m)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (hD:MarkedRemainderDivisible tail head ktail khead HK DA DS m)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (hDA:∀ a∈DA,Sum.elim tail ktail a∉X\T∧Sum.elim head khead a∉X\T)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hDS:∀ s∈DS,s.1∉X\T∧s.2∉Z\W):</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let KA:=C.filter (fun a=&gt;Sum.elim tail ktail a∈T∨Sum.elim head khead a∈T)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let KS:=CS.filter (fun s=&gt;s.1∈T∨s.2∈W);</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     EA⊆A\KA→ES⊆S\KS→DA⊆(A\KA)\EA→DS⊆(S\KS)\ES→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     ∀ (z:V⊕U),Sum.elim (fun v=&gt;v∉T) (fun u=&gt;u∉W) z→∀ i:Fin 4,</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     markedFiniteBalance tail head ktail khead HK (((A\KA)\EA)\DA) (((S\KS)\ES)\DS) m z i=</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       -markedFiniteDomainBalance tail head ktail khead HK C CS m T W z i∧</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     markedFiniteDomainBalance tail head ktail khead HK (((A\KA)\EA)\DA) (((S\KS)\ES)\DS) m (X\T) (Z\W) z i=</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       markedFiniteDomainBalance tail head ktail khead HK A S m X Z z i-</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       markedFiniteDomainBalance tail head ktail khead HK A S m T W z i-</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       markedFiniteDomainBalance tail head ktail khead HK EA ES m (X\T) (Z\W) z i:=by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro KA KS hEA hES hDAsub hDSsub z hz i</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   have hKA:KA⊆A:=(Finset.filter_subset _ _).trans hC</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have hKS:KS⊆S:=(Finset.filter_subset _ _).trans hCS</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hKzero:=markedFiniteDomainBalance_star_active_zero tail head ktail khead HK C CS m X T Z W z hz i</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have hDzero:=markedFiniteDomainBalance_zero_of_avoids tail head ktail khead HK DA DS m (X\T) (Z\W) hDA hDS z i</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   constructor</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   · rw [markedFiniteBalance_subtract_divisible _ _ _ _ _ _ _ _ _ _ hDAsub hDSsub hD,</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       markedFiniteBalance_subtract_divisible _ _ _ _ _ _ _ _ _ _ hEA hES hE,</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       markedFiniteBalance_sdiff _ _ _ _ _ _ _ _ _ _ hKA hKS,</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (markedFiniteBalance_eq_zero_iff _ _ _ _ _ _ _ _).mpr hdiv z i,zero_sub]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     exact congrArg Neg.neg (markedFiniteBalance_star_outside tail head ktail khead HK C CS m T W z hz i)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   · rw [markedFiniteDomainBalance_sdiff _ _ _ _ _ _ _ _ _ _ _ _ hDAsub hDSsub,</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       markedFiniteDomainBalance_sdiff _ _ _ _ _ _ _ _ _ _ _ _ hEA hES,</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       markedFiniteDomainBalance_sdiff _ _ _ _ _ _ _ _ _ _ _ _ hKA hKS]</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     change _-markedFiniteDomainBalance tail head ktail khead HK</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (C.filter (fun a=&gt;Sum.elim tail ktail a∈T∨Sum.elim head khead a∈T))</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (CS.filter (fun s=&gt;s.1∈T∨s.2∈W)) m (X\T) (Z\W) z i-_-_=_</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     rw [hKzero,hDzero,sub_zero,sub_zero,</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       markedFiniteDomainBalance_domain_sdiff _ _ _ _ _ _ _ _ X T Z W hT hW]</span>
+<span id="L54"><a href="#L54" class="ln">  54</a> </span>
+<span id="L55"><a href="#L55" class="ln">  55</a> theorem marked_finite_active_inner_error</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     (tail head:E→V) (ktail khead:K→V) (HK:V→U→Prop)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     (A EA R:Finset (E⊕K)) (S ES RS:Finset (V×U)) (m:ℕ)</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (X T:Finset V) (Z W:Finset U) (z:V⊕U) (i:Fin 4)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     (hidentity:markedFiniteDomainBalance tail head ktail khead HK R RS m (X\T) (Z\W) z i=</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       markedFiniteDomainBalance tail head ktail khead HK A S m X Z z i-</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       markedFiniteDomainBalance tail head ktail khead HK A S m T W z i-</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       markedFiniteDomainBalance tail head ktail khead HK EA ES m (X\T) (Z\W) z i)</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>     (εX εT δ:ℝ) (hδ:0≤δ)</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     (hX:|markedFiniteDomainBalance tail head ktail khead HK A S m X Z z i|≤εX)</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     (hT:|markedFiniteDomainBalance tail head ktail khead HK A S m T W z i|≤εT)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     (hEA:∀ v,((EA.filter (fun a=&gt;Sum.elim tail ktail a=v∨Sum.elim head khead a=v)).card:ℝ)≤δ)</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     (hER:∀ v,((ES.filter (fun s=&gt;s.1=v)).card:ℝ)≤δ)</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (hEC:∀ u,((ES.filter (fun s=&gt;s.2=u)).card:ℝ)≤δ):</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     |markedFiniteDomainBalance tail head ktail khead HK R RS m (X\T) (Z\W) z i|≤εX+εT+(m+2)*δ:=by</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have he:=markedFiniteDomainBalance_bound tail head ktail khead HK EA ES m (X\T) (Z\W) δ hδ hEA hER hEC z i</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   rw [hidentity]</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   exact (abs_sub _ _).trans (add_le_add ((abs_sub _ _).trans (add_le_add hX hT)) he)</span>
+<span id="L73"><a href="#L73" class="ln">  73</a> </span>
+<span id="L74"><a href="#L74" class="ln">  74</a> end Oberwolfach</span></pre></html>

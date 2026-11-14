@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedHubCoverFromWeights.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedHubCoverFromWeights.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSequentialHubCover</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedDeletionRobustHubFactor</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Cover every spoke at the prescribed distinct marked hubs. The factors</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> are constructed from fixed weights and original cycle/path counts; the</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> previously selected physical rim edges are a bounded-degree deletion. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option synthInstance.maxSize 4096</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 22000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> noncomputable section</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> namespace Oberwolfach</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem marked_hub_cover_from_fixed_weights (m:ℕ) (hm:3≤m) (β bLo B:ℝ)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hβ:0&lt;β) (hbLo:0&lt;bLo) (hB:0≤B):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∃ θ:ℝ,0&lt;θ∧∃ N:ℕ,1≤N∧∀ (V U E K:Type)</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       [Fintype V] [Fintype E] [Fintype K] [DecidableEq V] [DecidableEq U],</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       N≤Fintype.card V→∀ (n:ℕ) (u:Fin n→U),Function.Injective u→</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (2*n:ℝ)≤θ*Fintype.card V→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       ∀ (tail head:E→V) (ktail khead:K→V) (π:Equiv.Perm V)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>       (b:ℕ) (H₀ Hₖ:V→U→Prop),1≤b→</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>       Function.Injective (markedPhysicalEdge tail head ktail khead π)→</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       (∀ i v,¬(H₀ v (u i)∧Hₖ v (u i)))→</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>       (∀ i v z,H₀ v (u i)→Hₖ z (u i)→v≠π z)→</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       (∀ i,β*Fintype.card V≤Fintype.card (hubNeighbourClass H₀ Hₖ (u i) true))→</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>       (∀ i,Fintype.card (hubNeighbourClass H₀ Hₖ (u i) false)=m*Fintype.card (hubNeighbourClass H₀ Hₖ (u i) true))→</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ i,β*(Fintype.card V:ℝ)^(m+1)≤Fintype.card (HubMarkedCycle tail head ktail khead m π b H₀ Hₖ (u i)))→</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       (∀ i j,∀ v v&#x27;:V,v≠v&#x27;→(if j then Hₖ v (u i) else H₀ v (u i))→(if j then Hₖ v&#x27; (u i) else H₀ v&#x27; (u i))→</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>         β*(Fintype.card V:ℝ)^m≤Fintype.card (RootFirstCommonMarkedPath tail head ktail khead m π b H₀ Hₖ j v v&#x27; (u i) (u i)))→</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       ∀ w:Fin n→MarkedCycleTuple tail head ktail khead m π b→ℝ,</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ i C,bLo/(Fintype.card V:ℝ)^m≤w i C∧w i C≤B/(Fintype.card V:ℝ)^m)→</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ i v,H₀ v (u i)∨Hₖ v (u i)→|1-hypergraphWeightedDegree (hubMarkedCycleVertices (H₀:=H₀) (Hₖ:=Hₖ) (u i))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>         (fun C=&gt;w i (hubCycleAsMarked (u i) C)) v|≤θ)→</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       ∃ M:Finset (MarkedWheel tail head ktail khead m π b H₀ Hₖ),</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         (∀ W∈M,∀ Z∈M,W≠Z→Disjoint (markedWheelPhysicalResources W) (markedWheelPhysicalResources Z))∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>         M.biUnion markedWheelPhysicalResources=(markedPackingRims M).image Sum.inl∪</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>           Finset.univ.biUnion (fun i=&gt;(Finset.univ.filter (fun v=&gt;H₀ v (u i)∨Hₖ v (u i))).image (fun v=&gt;Sum.inr (v,u i)))∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>         (∀ v,(markedPackingRimGraph M).degree v≤2*n)∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>         (∀ i v,H₀ v (u i)∨Hₖ v (u i)→∃! W:M,Sum.inr (v,u i)∈markedWheelPhysicalResources W.val)∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>         (∀ e∈markedPackingRims M,e.card=2):=by</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   obtain ⟨θ,hθ,N,hN,hfactor⟩:=marked_deletion_robust_hub_factor m hm β bLo B hβ hbLo hB</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   refine ⟨θ,hθ,N,hN,?_⟩</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   intro V U E K _ _ _ _ _ hn n u hu hnθ tail head ktail khead π b H₀ Hₖ hb hp hdis hsep hsize hratio hbase hpath w hw herr</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   apply sequential_marked_hub_wheels (by omega) hb hp u hu hsep</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   intro i D hD</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   exact hfactor V U E K hn tail head ktail khead π b H₀ Hₖ (u i) hb hp (hdis i) (hsep i)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hsize i) (hratio i) (hbase i) (hpath i) (w i) (hw i) (herr i) D (fun v=&gt;</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (show (D.degree v:ℝ)≤2*(n:ℝ) by exact_mod_cast hD v).trans hnθ)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a> </span>
+<span id="L51"><a href="#L51" class="ln">  51</a> end Oberwolfach</span></pre></html>

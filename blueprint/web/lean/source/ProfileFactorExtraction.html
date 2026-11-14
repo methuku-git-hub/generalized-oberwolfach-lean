@@ -1,0 +1,149 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ProfileFactorExtraction.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ProfileFactorExtraction.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ProfileAbsorberReservoir</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.ProfileMarginalCorrection</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.ProfileFractionalFactor</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.ProfileRestrictionCounts</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.AbsorberRestrictionScales</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> import Oberwolfach.ResourceAbsorptionCompletion</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> </span>
+<span id="L8"><a href="#L8" class="ln">   8</a> /-! Exact factor extraction from the original class-profile weights and</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> labelled absorbers. The error tolerance is fixed before the reservoir</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> and matching accuracies; no factor-existence input is assumed. -/</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option autoImplicit false</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> set_option synthInstance.maxSize 256</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> set_option maxHeartbeats 4800000</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> open scoped BigOperators</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> noncomputable section</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> namespace Oberwolfach</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L19"><a href="#L19" class="ln">  19</a> variable {I T : Type} [Fintype I] [DecidableEq I] [Nonempty I] [Fintype T] [DecidableEq T]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> </span>
+<span id="L21"><a href="#L21" class="ln">  21</a> theorem profile_factor_extraction (a : I → ℕ) (c J : ℕ) (hc : 3 ≤ c)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (ha : ∀ i,1 ≤ a i) (hsize : ∑ i,a i=c)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (S : T → VertexAbsorberTemplate c) (a₀ b B : ℝ)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (ha₀ : 0 &lt; a₀) (hb : 0 &lt; b) (hB : 0 ≤ B) :</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     ∃ η : ℝ,0 &lt; η ∧ ∃ k₀ : ℕ,∀ k : ℕ,k₀ ≤ k →</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       ∀ (V : I → Type) [∀ i,Fintype (V i)] [∀ i,DecidableEq (V i)]</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         (C : Type) [Fintype C] [DecidableEq C],</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>       (∀ i,Fintype.card (V i)=a i*k) →</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>       ∀ (R : C → Finset (Σ i,V i)) (w : C → ℝ),</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>       (∀ C₀ i,(Finset.univ.filter (fun v : V i =&gt; (⟨i,v⟩ : Σ i,V i)∈R C₀)).card=a i) →</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>       (∀ Y : Finset (Σ i,V i),Fintype.card {C₀ : C // R C₀=Y} ≤ J) →</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ C₀,b/(k:ℝ)^(c-1) ≤ w C₀ ∧ w C₀ ≤ B/(k:ℝ)^(c-1)) →</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ v,|1-hypergraphWeightedDegree R w v| ≤ η) →</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>       (∀ σ : ∀ i,FixedSubset (V i) (a i),</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         a₀*(k:ℝ)^(c*c) ≤ Fintype.card (LabelledAbsorberFamily R S (profileRootSet σ))) →</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       HasResourceDecomposition R Finset.univ := by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let b&#x27; := b/(2:ℝ)^(c-1)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hb&#x27; : 0 &lt; b&#x27; := by dsimp [b&#x27;];positivity</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   obtain ⟨ηcor,hηcor,hcor⟩ := profile_marginal_correction a c J (by omega) ha hsize S</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (a₀/2) b&#x27; B (by positivity) hb&#x27;</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   let D := absorberVertexDeletionCoefficient c J (Fintype.card T)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>   let K := B*J*(c:ℝ)^(c-2)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   have hD : 0 ≤ D := by dsimp [D,absorberVertexDeletionCoefficient];positivity</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   have hK : 0 ≤ K := by dsimp [K];positivity</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   let δ := min (1/4:ℝ) (min (a₀/(4*(D+1))) (ηcor/(4*(K+1))))</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have hδ : 0 &lt; δ := by dsimp [δ];positivity</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   have hδ1 : δ ≤ 1/4 := min_le_left _ _</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have hδD : δ*D ≤ a₀/2 := by</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     have hh : δ ≤ a₀/(4*(D+1)) := (min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     have hh&#x27; := (le_div_iff₀ (by positivity : (0:ℝ)&lt;4*(D+1))).mp hh</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     nlinarith</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   have hδK : δ*K ≤ ηcor/4 := by</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     have hh : δ ≤ ηcor/(4*(K+1)) := (min_le_right _ _).trans (min_le_right _ _)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have hh&#x27; := (le_div_iff₀ (by positivity : (0:ℝ)&lt;4*(K+1))).mp hh</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     nlinarith</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   obtain ⟨γ,hγ,n₁,hn₁⟩ := profile_absorber_reservoir a c J (by omega) hsize S a₀ δ ha₀ hδ</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   obtain ⟨n₂,hn₂⟩ := profile_fractional_factor a c J (by omega) ha hsize</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     (B+b&#x27;/2) γ (by positivity) hγ</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   refine ⟨ηcor/4,by positivity,max n₁ (2*max n₂ 2),?_⟩</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   intro k hk V _ _ C _ _ hn R w hR hJ hw herr habs</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   have hkn₁ : n₁ ≤ k := (le_max_left _ _).trans hk</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   have hkN : 2*max n₂ 2 ≤ k := (le_max_right _ _).trans hk</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hk0 : 0 &lt; k := by omega</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hkR : (0:ℝ)&lt;k := by exact_mod_cast hk0</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hnall : Fintype.card (Σ i,V i)=c*k := by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     simp only [Fintype.card_sigma,hn,← Finset.sum_mul,hsize]</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>   have hRC (C₀ : C) : (R C₀).card=c := by rw [sigma_finset_card];simp only [hR];exact hsize</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hw0 (C₀ : C) : 0 ≤ w C₀ := (by positivity : (0:ℝ) ≤ b/(k:ℝ)^(c-1)).trans (hw C₀).1</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   have hpair (u v : Σ i,V i) (huv : u≠v) :</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>       (∑ C₀,if u∈R C₀ ∧ v∈R C₀ then w C₀ else 0) ≤ K/k :=</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     uniform_resource_pair_weight R c J (by omega) hRC hJ w B k hB hkR</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>       (by exact_mod_cast hnall) (fun C₀ =&gt; (hw C₀).2) u v huv</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   obtain ⟨Z,q₀,hZ,hZprofile,_,habsZ⟩ := hn₁ k hkn₁ V C hn R hR hJ habs</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   have hZcard : Z.card=c*q₀ := by</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     rw [sigma_finset_card];simp only [hZprofile,← Finset.sum_mul,hsize]</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   have hq₀ : q₀ ≤ Z.card := by rw [hZcard];nlinarith</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>   have hqhalf : 2*q₀ ≤ k := by</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     have hh : (q₀:ℝ) ≤ Z.card := by exact_mod_cast hq₀</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     have hkδ : δ*k ≤ (k:ℝ)/4 := by nlinarith</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     have hhalf : (2:ℝ)*q₀ ≤ k := by linarith</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>     exact_mod_cast hhalf</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   have hqk : q₀ ≤ k := by omega</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   let k&#x27; := k-q₀</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   have hk&#x27;2 : 2 ≤ k&#x27; := by dsimp [k&#x27;];omega</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   have hk&#x27;n₂ : n₂ ≤ k&#x27; := by dsimp [k&#x27;];omega</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   have hk&#x27;0 : (0:ℝ)&lt;k&#x27; := by exact_mod_cast (show 0&lt;k&#x27; by omega)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   have hk&#x27;k : k&#x27; ≤ k := Nat.sub_le _ _</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hk&#x27;kR : (k&#x27;:ℝ) ≤ k := by exact_mod_cast hk&#x27;k</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>   have hhalfR : (k:ℝ) ≤ 2*k&#x27; := by</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     have hh : k ≤ 2*k&#x27; := by dsimp [k&#x27;];omega</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     exact_mod_cast hh</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>   let V&#x27; := ProfileRemainingClass Z</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   let e := profileComplementEmbedding Z</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   let C&#x27; := RestrictedResource R e</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>   let R&#x27; := restrictedResourceSet R e</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   let w&#x27; (D : C&#x27;) := w D.val</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   have hn&#x27; (i) : Fintype.card (V&#x27; i)=a i*k&#x27; := profileRemainingClass_profile a k q₀ Z hn hZprofile i</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have hR&#x27; (D : C&#x27;) (i) :</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>       (Finset.univ.filter (fun v : V&#x27; i =&gt; (⟨i,v⟩ : Σ i,V&#x27; i)∈R&#x27; D)).card=a i :=</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     (profile_restricted_resource_class_card R Z D i).trans (hR D.val i)</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   have hJ&#x27; : ∀ Y : Finset (Σ i,V&#x27; i),Fintype.card {D : C&#x27; // R&#x27; D=Y} ≤ J :=</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     restricted_resource_multiplicity R e J hJ</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>   have hw&#x27; (D : C&#x27;) : b&#x27;/(k&#x27;:ℝ)^(c-1) ≤ w&#x27; D ∧ w&#x27; D ≤ B/(k&#x27;:ℝ)^(c-1) :=</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     restricted_individual_weight_scale (c-1) b B k k&#x27; (w D.val) hb.le hB hk&#x27;0 hk&#x27;kR hhalfR (hw D.val)</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>   have herr&#x27; (i) (v : V&#x27; i) : |1-hypergraphWeightedDegree R&#x27; w&#x27; ⟨i,v⟩| ≤ ηcor := by</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>     have hx : e ⟨i,v⟩∉Z := (profileComplementEmbedding_range Z _).mp ⟨⟨i,v⟩,rfl⟩</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     have hh := resource_vertex_deletion_load_error R w hw0 (K/k) (ηcor/4)</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>       (by positivity) hpair herr Z (e ⟨i,v⟩) hx</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>     have hZK : (Z.card:ℝ)*(K/k) ≤ δ*K := by</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       have hl := mul_le_mul_of_nonneg_right hZ (show 0 ≤ K/k by positivity)</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       have heq : (δ*k)*(K/k)=δ*K := by field_simp</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>       rwa [heq] at hl</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>     change |1-hypergraphWeightedDegree (restrictedResourceSet R (profileComplementEmbedding Z))</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>       (fun D =&gt; w D.val) ⟨i,v⟩| ≤ ηcor</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     rw [profile_restricted_resource_degree]</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     linarith</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>   have habs&#x27; (σ : ∀ i,FixedSubset (V&#x27; i) (a i)) :</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>       ∃ A : Finset (LabelledAbsorberFamily R&#x27; S (profileRootSet σ)),</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>         (a₀/2)*(k&#x27;:ℝ)^(c*c) ≤ A.card := by</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     let X := profileRootSet σ</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     have hX : X.card=c := (profileRootSet_card σ).trans hsize</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     have hXold (i : I) : (Finset.univ.filter (fun v : V i =&gt; (⟨i,v⟩ : Σ i,V i)∈X.image e)).card=a i :=</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>       (profileComplementEmbedding_class_card Z X i).trans (profileRootSet_class_card σ i)</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     obtain ⟨τ,hτ⟩ := exists_profile_root_of_class_sizes a (X.image e) hXold</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>     have hparent : a₀*(k:ℝ)^(c*c) ≤ Fintype.card (LabelledAbsorberFamily R S (X.image e)) := by</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>       simpa only [hτ] using habs τ</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>     have hh := restricted_absorber_abundance (by omega : 1≤c) R e S X Z</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>       (profileComplementEmbedding_range Z) J hJ k k&#x27; a₀ δ hkR hk&#x27;0.le hk&#x27;kR ha₀.le</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>       (by exact_mod_cast hnall) hX hZ hδD hparent</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>     exact ⟨Finset.univ,by simpa only [Finset.card_univ] using hh⟩</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>   obtain ⟨ψ,hψ,hψbounds⟩ := hcor V&#x27; C&#x27; k&#x27; ηcor (by exact_mod_cast hk&#x27;2) hηcor.le le_rfl</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     (fun i =&gt; by exact_mod_cast hn&#x27; i) R&#x27; w&#x27; hR&#x27; hJ&#x27; hw&#x27; herr&#x27; habs&#x27;</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>   obtain ⟨M,hMM,hleft,hMcard,hleftprofile⟩ := hn₂ k&#x27; hk&#x27;n₂ V&#x27; C&#x27; hn&#x27; R&#x27; ψ hR&#x27; hJ&#x27;</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     (fun D =&gt; ⟨(by positivity : (0:ℝ) ≤ (b&#x27;/2)/(k&#x27;:ℝ)^(c-1)).trans (hψbounds D).1,(hψbounds D).2⟩) hψ</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>   let W := Finset.univ\M.biUnion R&#x27;</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>   have hW : ((W.image e).card:ℝ) ≤ γ*k := by</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     rw [Finset.card_image_of_injective _ e.injective]</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     exact hleft.trans (mul_le_mul_of_nonneg_left hk&#x27;kR hγ.le)</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>   have hWZ : Disjoint (W.image e) Z := profileComplementEmbedding_image_disjoint Z W</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>   have hWp (i : I) :</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>       (Finset.univ.filter (fun v : V i =&gt; (⟨i,v⟩ : Σ i,V i)∈W.image e)).card=a i*(k&#x27;-M.card) :=</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>     (profileComplementEmbedding_class_card Z W i).trans (hleftprofile i)</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>   have hfinish := habsZ (W.image e) (k&#x27;-M.card) hW hWZ hWp</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>   exact resource_restriction_absorption_completion R e Z (profileComplementEmbedding_range Z) M hMM hfinish</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a> </span>
+<span id="L146"><a href="#L146" class="ln"> 146</a> end Oberwolfach</span></pre></html>

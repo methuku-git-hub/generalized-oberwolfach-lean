@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Further checked matching ingredients</title>
+<link rel="next" href="sect0017.html" title="Completed colouring iteration and finite weighted matching" />
+<link rel="prev" href="sect0015.html" title="Marked capacities and the ordinary fractional-threshold bridge" />
+<link rel="up" href="index.html" title="Oberwolfach formalisation: blueprint and partial verification" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Oberwolfach formalisation: blueprint and partial verification</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref"></span> <span class="toc_entry">Verification status</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1</span> <span class="toc_entry">The target and its mathematical representation</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">2</span> <span class="toc_entry">A checked conditional reduction to the fixed-set theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">3</span> <span class="toc_entry">Checked finite stability arguments</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">4</span> <span class="toc_entry">Checked transfers used in iteration</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">5</span> <span class="toc_entry">Bipartite edge colourings and the last partition step</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">6</span> <span class="toc_entry">Prescribed degrees and the deterministic protected partition</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">7</span> <span class="toc_entry">Finite categorical laws and sampling implications</span></a>
+ </li>
+<li class="">
+  <a href="sect0009.html"><span class="toc_ref">8</span> <span class="toc_entry">Uniform fixed-size subsets and partitions</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">9</span> <span class="toc_entry">The vortex construction</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">10</span> <span class="toc_entry">Cyclic-partite fractional decompositions</span></a>
+ </li>
+<li class="">
+  <a href="sect0012.html"><span class="toc_ref">11</span> <span class="toc_entry">The remaining main-proof dependencies</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">12</span> <span class="toc_entry">Release criteria and scope</span></a>
+ </li>
+<li class="">
+  <a href="sect0014.html"><span class="toc_ref">A</span> <span class="toc_entry">Whole-manuscript statement inventory</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">B</span> <span class="toc_entry">Marked capacities and the ordinary fractional-threshold bridge</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0016.html"><span class="toc_ref">C</span> <span class="toc_entry">Further checked matching ingredients</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">D</span> <span class="toc_entry">Completed colouring iteration and finite weighted matching</span></a>
+ </li>
+<li class="">
+  <a href="sect0018.html"><span class="toc_ref">E</span> <span class="toc_entry">Uniform weighted matching and support reduction</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0019.html"><span class="toc_ref">E.1</span> <span class="toc_entry">Relative ordinary transformer from the original profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0020.html"><span class="toc_ref">E.2</span> <span class="toc_entry">Actual marked balance events and local iteration profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0021.html"><span class="toc_ref">E.3</span> <span class="toc_entry">Reindexing the marked remainder and preserving iteration margins</span></a>
+ </li>
+<li class="">
+  <a href="sect0022.html"><span class="toc_ref">E.4</span> <span class="toc_entry">The marked cover-down step from fixed reference estimates</span></a>
+ </li>
+<li class="">
+  <a href="sect0023.html"><span class="toc_ref">E.5</span> <span class="toc_entry">Exact typed host encoding and the first cover-down step</span></a>
+ </li>
+<li class="">
+  <a href="sect0024.html"><span class="toc_ref">E.6</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0025.html"><span class="toc_ref">E.7</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0026.html"><span class="toc_ref">E.8</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0027.html"><span class="toc_ref">E.9</span> <span class="toc_entry">Reference states, reindexing and bounded cycle weights</span></a>
+ </li>
+<li class="">
+  <a href="sect0028.html"><span class="toc_ref">E.10</span> <span class="toc_entry">Local configurations and full-hub potential loads</span></a>
+ </li>
+<li class="">
+  <a href="sect0029.html"><span class="toc_ref">E.11</span> <span class="toc_entry">Protected absorber inputs after physical deletion</span></a>
+ </li>
+<li class="">
+  <a href="sect0030.html"><span class="toc_ref">E.12</span> <span class="toc_entry">Adaptive absorber and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0031.html"><span class="toc_ref">E.13</span> <span class="toc_entry">Ordinary cycle profiles from neighbourhoods</span></a>
+ </li>
+<li class="">
+  <a href="sect0032.html"><span class="toc_ref">E.14</span> <span class="toc_entry">Restricted hosts and ordinary pair profiles</span></a>
+ </li>
+<li class="">
+  <a href="sect0033.html"><span class="toc_ref">E.15</span> <span class="toc_entry">Ordinary absorber callers and marked retained agreement</span></a>
+ </li>
+<li class="">
+  <a href="sect0034.html"><span class="toc_ref">E.16</span> <span class="toc_entry">Physical-rim completion and exact encoding criteria</span></a>
+ </li>
+<li class="">
+  <a href="sect0035.html"><span class="toc_ref">E.17</span> <span class="toc_entry">Typed subhosts and protected completion</span></a>
+ </li>
+<li class="">
+  <a href="sect0036.html"><span class="toc_ref">E.18</span> <span class="toc_entry">A fixed absorber in a changed host</span></a>
+ </li>
+<li class="">
+  <a href="sect0037.html"><span class="toc_ref">E.19</span> <span class="toc_entry">Encoded completion from the original reservoir</span></a>
+ </li>
+<li class="">
+  <a href="sect0038.html"><span class="toc_ref">E.20</span> <span class="toc_entry">Two-hub weights on the original sample</span></a>
+ </li>
+<li class="">
+  <a href="sect0039.html"><span class="toc_ref">E.21</span> <span class="toc_entry">Degree-normalized two-hub mean and concentration</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000017">C Further checked matching ingredients</h1>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:colour-round-realization">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">C.1</span>
+    <span class="lemma_thmtitle">One common colouring outcome</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0016.html#bp:colour-round-realization">#</a>
+    
+    <a class="icon proof" href="sect0016.html#a0000000134"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0002.html#bp:tentative-colouring-counts">Lemma 1.7</a></li>
+          
+          <li><a href="sect0002.html#bp:colouring-certificate-concentration">Lemma 1.6</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.colour_round_realization" class="lean_decl">Oberwolfach.colour_round_realization</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.colour_round_common_concentration" class="lean_decl">Oberwolfach.colour_round_common_concentration</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.hypergraph_remaining_colour_expectation_equal_degrees" class="lean_decl">Oberwolfach.hypergraph_remaining_colour_expectation_equal_degrees</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.paddedColourClique_card_original" class="lean_decl">Oberwolfach.paddedColourClique_card_original</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.paddedResources_codegree" class="lean_decl">Oberwolfach.paddedResources_codegree</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Let indexed edges have at most \(k\) resources and lists of size \(l\), and let the designated real edges have exactly \(k\) resources. Suppose each resource–colour degree is at most \(s\le l\), with equality for every colour in a real edge’s list at each of its resources. Write </p>
+<div class="displaymath" id="a0000000135">
+  \[  \rho =(1-1/l)^{ks},\qquad \kappa =1-s\rho /l.  \]
+</div>
+<p> Under the explicit codegree and exponential-tail inequalities in the Lean statement, one outcome of the original product experiment simultaneously approximates every real available-list size by \(l\kappa ^k\) and every root-omitted remaining colour degree by \(|U|(1-\rho )\kappa ^{k-1}\). The error is the stated expectation error plus \(6(k+1)t\). The retained colours belong to their supplied lists. Finite padding equalizes the original resource–colour degrees without increasing codegrees between distinct resources. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000134">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The exact product law supplies all expectations and tails. Each test uses only two successive closed neighbourhoods of a specified base set. Bounding base-set sizes and their coordinate incidence gives one application of the finite local lemma. The same positive-mass outcome works for all tests. The proof retains the omitted resource in every remaining-degree test. </p>
+
+  </div>
+</div>
+<p> The finite iteration and its assembly into near-optimal hypergraph colouring are now proved below. The uniform choices for the fixed-error weighted theorem and its fractional-resource rounding application are also proved below. </p>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:cycle-vertex-matching-weights">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">C.2</span>
+    <span class="lemma_thmtitle">Cycle weights for vertex-disjoint packing</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0016.html#bp:cycle-vertex-matching-weights">#</a>
+    
+    <a class="icon proof" href="sect0016.html#a0000000136"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0015.html#bp:positive-ordinary-cycle-weights">Theorem B.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinaryCycleVertices_card" class="lean_decl">Oberwolfach.ordinaryCycleVertices_card</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinary_cycle_vertex_weight_identity" class="lean_decl">Oberwolfach.ordinary_cycle_vertex_weight_identity</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.ordinary_cycle_vertex_matching_weights" class="lean_decl">Oberwolfach.ordinary_cycle_vertex_matching_weights</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    Suppose \(a_C\ge 0\) is an edge-fractional \(C_r\)-decomposition of \(Q\) with \(a_C\le B n^{2-r}\). The hyperedge indexed by \(C\) has resource set \(V(C)\), which has size \(r\). If \(d\ge n/2\) and \((1-\eta )d\le d_Q(v)\le d\), then \(b_C=2a_C/d\) satisfies </p>
+<div class="displaymath" id="a0000000137">
+  \[  1-\eta \le \sum _{C\ni v}b_C\le 1,\qquad \sum _{C\ni x,y}b_C\le \frac{4r^2B}{n}\quad (x\ne y).  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000136">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Summing the edge equations at \(v\) counts each cycle containing \(v\) twice, so \(2\sum _{C\ni v}a_C=d_Q(v)\). Counting actual cycle subgraphs through two fixed vertices bounds their total \(a\)-weight by \(r^2B\). Rescaling and \(d\ge n/2\) give the assertions. </p>
+
+  </div>
+</div>
+<p> The almost-regular hypothesis is not supplied by every current application of the manuscript’s cycle-factor theorem. This lemma therefore does not by itself replace that theorem or establish the required absorber construction. </p>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:bounded-perfect-fractional-matching">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">C.3</span>
+    <span class="lemma_thmtitle">Bounded perfect fractional matchings</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0016.html#bp:bounded-perfect-fractional-matching">#</a>
+    
+    <a class="icon proof" href="sect0016.html#a0000000138"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bounded_bipartite_fractional_matching" class="lean_decl">Oberwolfach.bounded_bipartite_fractional_matching</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.bounded_perfect_fractional_matching" class="lean_decl">Oberwolfach.bounded_perfect_fractional_matching</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   If \(0{\lt}\beta {\lt}1/2\), \(m\ge 4/\beta \), and \(Q\) is an \(m\)-vertex graph with minimum degree at least \((1/2+\beta )m\), then \(Q\) has a perfect fractional matching with every edge coefficient in \([\beta /(5m),5/(\beta m)]\). </p>
+<p><i class="itshape">Manuscript label:</i> lem:selection:bounded-fractional-matching (live-source amendment).</p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000138">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The Lean proof uses the previously proved real-flow cut criterion on the bipartite double cover. A baseline \(\beta /(5m)\) is placed on every edge; the remaining row and column demands lie in \([1-\beta /5,1]\). The dense cut inequalities give an additional coefficient at most \(4/(\beta m)\) on each edge. Symmetrisation gives vertex sums one in \(Q\). The live manuscript instead contains the authors’ shorter Hall proof. Both proofs establish the same statement, without the cited literature lemma. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:fractional-almost-perfect-matching">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">C.4</span>
+    <span class="theorem_thmtitle">Fractional almost-perfect matching</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0016.html#bp:fractional-almost-perfect-matching">#</a>
+    
+    <a class="icon proof" href="sect0016.html#a0000000139"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.almost_perfect_matching_of_fractional_weights" class="lean_decl">Oberwolfach.almost_perfect_matching_of_fractional_weights</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Let \(r\ge 2\), \(0{\lt}\xi \le 1\), and \(\mu =(\xi /(100r))^{20r}\). For a finite indexed \(r\)-uniform hypergraph, suppose nonnegative edge weights have vertex loads in \([1-\mu /4,1]\) and pair loads at most \(\mu /4\). Then a matching covers at least \((1-\xi )|V|\) vertices. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000139">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Replace edge \(e\) by \(\lfloor Tw_e\rfloor \) separately indexed copies, where \(\mu T{\gt}4(|E|+1)\). The degree rounding loss is at most \(|E|\). With \(D_0=T\) and \(B=\lceil \mu T/2\rceil \), the checked matching theorem of Norin and Steiner applies. Its six-file dependency closure is included, with licence, pinned revision, and the compatibility patch recorded. Projection back to original indices preserves disjointness and coverage. The displayed constant is the one in the formal development, with an additional margin for rounding; it is not the larger paper constant. This theorem alone does not control several prescribed weight sums. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="bp:almost-spanning-cycle-packing">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">C.5</span>
+    <span class="theorem_thmtitle">Almost-spanning cycle packing</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0016.html#bp:almost-spanning-cycle-packing">#</a>
+    
+    <a class="icon proof" href="sect0016.html#a0000000140"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0015.html#bp:positive-ordinary-cycle-weights">Theorem B.5</a></li>
+          
+          <li><a href="sect0016.html#bp:cycle-vertex-matching-weights">Lemma C.2</a></li>
+          
+          <li><a href="sect0016.html#bp:fractional-almost-perfect-matching">Theorem C.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.almost_spanning_cycle_packing" class="lean_decl">Oberwolfach.almost_spanning_cycle_packing</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    For \(r\ge 3\), \(\alpha {\gt}0\) and \(0{\lt}\xi \le 1\), there are \(\eta {\gt}0\) and \(N\) such that every graph \(Q\) of order \(n\ge N\) with \(\delta (Q)\ge (\delta _{C_r}+\alpha )n\) and \((1-\eta )d\le d_Q(v)\le d\) for all \(v\) has vertex-disjoint \(r\)-cycles covering at least \((1-\xi )n\) vertices. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000140">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Use positive bounded fractional cycle weights, convert edge loads to vertex loads, and apply the preceding theorem. The order threshold bounds \(4r^2B/n\) by \(\mu /4\). All constants precede the graph and the degree scale. The conclusion is an approximate factor, not an exact factor or an absorber. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="bp:colour-round-numerics">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">C.6</span>
+    <span class="lemma_thmtitle">Uniform numerical conditions for a colouring round</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0016.html#bp:colour-round-numerics">#</a>
+    
+    <a class="icon proof" href="sect0016.html#a0000000141"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="sect0016.html#bp:colour-round-realization">Lemma C.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="lean/find/#doc/Oberwolfach.colouring_round_eventually_valid" class="lean_decl">Oberwolfach.colouring_round_eventually_valid</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.colouring_round_ratio_progress" class="lean_decl">Oberwolfach.colouring_round_ratio_progress</a></li>
+          
+          <li><a href="lean/find/#doc/Oberwolfach.colouring_round_list_lower" class="lean_decl">Oberwolfach.colouring_round_list_lower</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>    For fixed \(k,K,\delta ,\tau {\gt}0\) with \(K\ge 1\) and \(\delta \le 1\), one order threshold ensures all the explicit concentration conditions for every \(l\) above that threshold, every \(0{\lt}s\le l\), every codegree bound \(B\le K l^{1-\delta }\), and every dependency-degree bound \(d\le K l^2\). The robust ratio-progress and list-size inequalities are proved separately. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000141">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>The concentration denominator is at most \(A_k l(B+1)\) and the dependency factor is at most \((k+1)(K+1)^4l^{10}\). A stretched exponential in \(l^\delta \) dominates this polynomial uniformly over all supplied choices. </p>
+
+  </div>
+</div>
+<p> The finite iteration and its fixed-error prescribed-weight application are proved below. </p>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0015.html" title="Marked capacities and the ordinary fractional-threshold bridge"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Oberwolfach formalisation: blueprint and partial verification"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0017.html" title="Completed colouring iteration and finite weighted matching"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TriangleVertexStageCompletion.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>TriangleVertexStageCompletion.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.TriangleSelectedTradeAssembly</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.TriangleTransformerVertexStage</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.OrdinaryTransformerRowBuffer</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> import Oberwolfach.OrdinaryTransformerRootRestriction</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> import Oberwolfach.OrdinaryTransformerVertexAvoidance</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> /-! Connect the actual triangle vertex wheels to the near-complete hub</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> trades and their signed-resource assembly. -/</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option autoImplicit false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> set_option maxHeartbeats 22000000</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> set_option synthInstance.maxSize 2048</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> open scoped BigOperators</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> noncomputable section</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> namespace Oberwolfach</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L16"><a href="#L16" class="ln">  16</a> </span>
+<span id="L17"><a href="#L17" class="ln">  17</a> theorem triangle_vertex_wheels_and_hub_trades_complete</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     (K₀ L:ℕ) (β:ℝ) (hβ:0&lt;β) (hβ1:β≤1):</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     ∃ s₀:ℕ,∀ s:ℕ,s₀≤s→3∣s→∃ N₀:ℕ,</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     ∀ (V U:Type) [Fintype V] [Fintype U] [DecidableEq V] [DecidableEq U],</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     N₀≤Fintype.card V→∀ (G Q:SimpleGraph V) (H₀ H:V→U→Prop) (φ:V→V) (ψ:U→U)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (b:∀ v,G.neighborSet v≃({u:U // H₀ v u}×Fin 2))</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     (σ:∀ v,Equiv.Perm (G.neighborSet v)) (hσ:∀ v w,σ v w≠w)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (p:(G.edgeFinset⊕{e:V×U // H₀ e.1 e.2})→(Σ a:V,Σ c:V,Q.Walk a c))</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (R W:Finset V) (B:Finset U) (hRW:R⊆W)</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (hbalance:∀ v,G.degree v=2*((Finset.univ:Finset U).filter (H₀ v)).card)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (hdiv:∀ u,3∣((Finset.univ:Finset V).filter (fun v=&gt;H₀ v u)).card)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (hsize:∀ u,2*((Finset.univ:Finset V).filter (fun v=&gt;H₀ v u)).card≤L)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hactive:Fintype.card {u:U // ∃v,H₀ v u}≤K₀)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (hroot:∀ v∈G.support,v∈R∧φ v∈R)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (hcross:∀ v∈G.support,∀ w∈G.support,φ v≠w)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (hu:∀ u,(∃v,H₀ v u)→u≠ψ u)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     (hφQ:∀ v w,G.Adj v w→Q.Adj (φ v) (φ w))</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (hφedge:Function.Injective (fun i:G.edgeFinset=&gt;s(φ i.val.out.1,φ i.val.out.2)))</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (hψedge:Function.Injective (fun i:{e:V×U // H₀ e.1 e.2}=&gt;(φ i.val.1,ψ i.val.2)))</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (hB:∀ e:{e:V×U // H₀ e.1 e.2},e.val.2∈B∧ψ e.val.2∈B)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (hrim:∀ e:G.edgeFinset,(p (.inl e)).2.2.length=0)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (hsp:∀ e:{e:V×U // H₀ e.1 e.2},(p (.inr e)).2.2.IsPath∧(p (.inr e)).2.2.length=1)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     (hpW:∀ i,∀ v∈(p i).2.2.support,v∈W∧v∉R)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     (W₀:Finset V) (hW₀:W₀⊆W) (hp₀:∀ i,∀ v∈(p i).2.2.support,v∉W₀)</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (hdis:∀ i j,i≠j→Disjoint (p i).2.2.support.toFinset (p j).2.2.support.toFinset)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (hends:∀ e:G.edgeFinset,Q.Adj e.val.out.1 (p (.inl e)).1 ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       Q.Adj (φ e.val.out.1) (p (.inl e)).1 ∧ Q.Adj e.val.out.2 (p (.inl e)).2.1 ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       Q.Adj (φ e.val.out.2) (p (.inl e)).2.1)</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hspends:∀ e:{e:V×U // H₀ e.1 e.2},Q.Adj e.val.1 (p (.inr e)).1 ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       Q.Adj (φ e.val.1) (p (.inr e)).1 ∧ Q.Adj e.val.1 (p (.inr e)).2.1 ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       Q.Adj (φ e.val.1) (p (.inr e)).2.1)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hab:∀ d:Σ v,G.neighborSet v,Q.Adj</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (transformerRimEndpoint G Q H₀ p d) (transformerSpokeEndpoint G Q H₀ b p d))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>     (E:OrdinaryActualRimWheels G Q ⊥ H₀ H φ 3 B b σ p)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     (S:OrdinaryActualSpokeWheels G Q ⊥ H₀ H φ ψ 3 p)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     (hdeg:∀ v,(3/4+β)*(Fintype.card V:ℝ)≤(Q.degree v:ℝ))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     (ε:ℝ) (hnear:∀ u,(((Finset.univ:Finset V).filter (fun v=&gt;¬H v u)).card:ℝ)≤ε*(Fintype.card V:ℝ))</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     (hbudget:2*ε*(Fintype.card V:ℝ)+((W.card+6*Fintype.card (Σ v,G.neighborSet v):ℕ):ℝ)</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       ≤(β/4)*(Fintype.card V:ℝ)),</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     ∃ W&#x27; N:Finset V,∃ T:Finset (Sym2 V⊕(V×U)),</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       W⊆W&#x27; ∧ W&#x27;.card≤W.card+6*Fintype.card (Σ v,G.neighborSet v) ∧</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       Disjoint N W&#x27; ∧ N.card≤K₀*s ∧</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>       IsResourceTransformer (ordinaryWheelResources (P:=Q) (F:=⊥) (Hbase:=H) (r:=3))</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>         (ordinaryHostResources G H₀) (transformerImageResources G H₀ φ ψ) T ∧</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>       (∀ v w,Sum.inl s(v,w)∈T→v∈W&#x27;∪N∧w∈W&#x27;∪N) ∧</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>       (∀ v z,Sum.inr (v,z)∈T→v∈W&#x27;∪N) ∧</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>       (∀ v∈R,∀ w∈R,Sum.inl s(v,w)∉T) ∧</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>       (∀ v∈R,∀ z∈B,Sum.inr (v,z)∉T) ∧</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>       (∀ v∈W₀,∀ w,Sum.inl s(v,w)∈T→v∈R) ∧</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>       (∀ v∈W₀,∀ z,Sum.inr (v,z)∈T→v∈R) ∧</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>       (∀ v z,z∈B→Sum.inr (v,z)∈T→∃ u,(∃x,H₀ x u) ∧ (z=u∨z=ψ u)) ∧</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>       (∀ v z,Sum.inr (v,z)∈T→(∃ e:G.edgeFinset,z=E.hub e)∨∃ u,(∃x,H₀ x u) ∧ (z=u∨z=ψ u)) :=by</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   obtain ⟨s₀,hs⟩:=triangular_transformer_simultaneous_wheel_trades K₀ L β hβ hβ1</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   refine ⟨s₀,?_⟩</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   intro s hs₀ hsdiv</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>   obtain ⟨N₀,hN₀⟩:=hs s hs₀ hsdiv</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   refine ⟨N₀,?_⟩</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>   intro V U _ _ _ _ hn G Q H₀ H φ ψ b σ hσ p R W B hRW hbalance hdiv hsize hactive</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>     hroot hcross hu hφQ hφedge hψedge hB hrim hsp hpW W₀ hW₀ hp₀ hdis hends hspends hab E S hdeg ε hnear hbudget</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>   obtain ⟨D,hD,hPlus,hMinus,_,_,hid⟩:=triangular_transformer_vertex_stage_realization G Q ⊥ H₀ H φ ψ b σ hσ p R W B hRW</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>     hbalance hroot hcross hφQ hφedge hψedge hB hrim</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>     (by intro e;exact ⟨(hsp e).1,by rw [(hsp e).2];norm_num⟩) hpW hdis</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     (by intro i j v hv w hw;simp) (by intro i v hv w hw;simp) hends hspends hab E S</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>   let Plus:=Sum.elim E.first (Sum.elim S.first (fun d=&gt;(D d).second))</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   let Minus:=Sum.elim E.second (Sum.elim S.second (fun d=&gt;(D d).first))</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   obtain ⟨W&#x27;,hWW&#x27;,hW&#x27;card,hPW,hMW⟩:=ordinary_transformer_row_buffer G Q ⊥ H₀ H φ ψ 3 R W B hRW b σ p</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>     hbalance hroot (fun i v hv=&gt;(hpW i v hv).1) E S D</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>   let I:Type:={u:U // ∃v,H₀ v u}</span>
+<span id="L85"><a href="#L85" class="ln">  85</a>   let ι:I↪U:=⟨Subtype.val,Subtype.val_injective⟩</span>
+<span id="L86"><a href="#L86" class="ln">  86</a>   let ps: {e:V×U // H₀ e.1 e.2}→(Σ a:V,Σ c:V,Q.Walk a c):=fun i=&gt;p (.inr i)</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>   let Z:U→Finset V:=transformerSpokeRows Q H₀ ps</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>   have hHp (i:{e:V×U // H₀ e.1 e.2}) (v:V) (hv:v∈(ps i).2.2.support):H v i.val.2∧H v (ψ i.val.2):=by</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     have h₁:H v (ordinaryWheelHub (S.first i)):=(S.first i).property.1 v ((S.first_support i v).mpr (Or.inr hv))</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     have h₂:H v (ordinaryWheelHub (S.second i)):=(S.second i).property.1 v ((S.second_support i v).mpr (Or.inr hv))</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     rw [S.first_hub] at h₁</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     rw [S.second_hub] at h₂</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>     exact ⟨h₁,h₂⟩</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>   have hZW (i:I):Z i.val⊆W&#x27;:=by</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     intro v hv</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>     obtain ⟨e,_,he⟩:=(transformerSpokeRows_mem Q H₀ ps i.val v).mp hv</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>     exact hWW&#x27; (hpW _ _ he).1</span>
+<span id="L98"><a href="#L98" class="ln">  98</a>   have hbudget&#x27;:2*ε*(Fintype.card V:ℝ)+(W&#x27;.card:ℝ)≤(β/4)*(Fintype.card V:ℝ):=by</span>
+<span id="L99"><a href="#L99" class="ln">  99</a>     have hc:(W&#x27;.card:ℝ)≤((W.card+6*Fintype.card (Σ v,G.neighborSet v):ℕ):ℝ):=by exact_mod_cast hW&#x27;card</span>
+<span id="L100"><a href="#L100" class="ln"> 100</a>     linarith</span>
+<span id="L101"><a href="#L101" class="ln"> 101</a>   obtain ⟨A,RR,hA,hpair,_,_⟩:=hN₀ V U I hn hactive ι Q Q ⊥ H₀ H ψ ps</span>
+<span id="L102"><a href="#L102" class="ln"> 102</a>     (by intro i;simpa [ps] using hsp i)</span>
+<span id="L103"><a href="#L103" class="ln"> 103</a>     (by intro i j hij;exact hdis (.inr i) (.inr j) (fun h=&gt;hij (Sum.inr.inj h)))</span>
+<span id="L104"><a href="#L104" class="ln"> 104</a>     (by intro i j v hv w hw;simp) hHp hdiv hsize hdeg W&#x27; ε hnear hbudget&#x27;</span>
+<span id="L105"><a href="#L105" class="ln"> 105</a>     (by intro i;exact hZW i) (by intro i;exact hu i.val i.property)</span>
+<span id="L106"><a href="#L106" class="ln"> 106</a>   have hspokes:=ordinary_transformer_hub_trade_spoke_avoidance G Q ⊥ H₀ H φ ψ 3 R B b σ p</span>
+<span id="L107"><a href="#L107" class="ln"> 107</a>     hbalance hroot (fun i v hv=&gt;(hpW i v hv).2) hdis hB hu E S D</span>
+<span id="L108"><a href="#L108" class="ln"> 108</a>   have hidentity:∀ e,</span>
+<span id="L109"><a href="#L109" class="ln"> 109</a>       (if e∈ordinaryHostResources (wheelFamilyRim Plus) (wheelFamilySpokes Plus) then (1:ℤ) else 0)-</span>
+<span id="L110"><a href="#L110" class="ln"> 110</a>       (if e∈ordinaryHostResources (wheelFamilyRim Minus) (wheelFamilySpokes Minus) then 1 else 0)=</span>
+<span id="L111"><a href="#L111" class="ln"> 111</a>       (if e∈ordinaryHostResources G H₀ then 1 else 0)-(if e∈transformerImageResources G H₀ φ ψ then 1 else 0)+</span>
+<span id="L112"><a href="#L112" class="ln"> 112</a>       ∑ i:I,((if e∈(Z i.val).image (fun v=&gt;Sum.inr (v,i.val)) then 1 else 0)-</span>
+<span id="L113"><a href="#L113" class="ln"> 113</a>         (if e∈(Z i.val).image (fun v=&gt;Sum.inr (v,ψ i.val)) then 1 else 0)):=by</span>
+<span id="L114"><a href="#L114" class="ln"> 114</a>     intro e</span>
+<span id="L115"><a href="#L115" class="ln"> 115</a>     rw [hid e]</span>
+<span id="L116"><a href="#L116" class="ln"> 116</a>     exact congrArg ((if e∈ordinaryHostResources G H₀ then (1:ℤ) else 0)-</span>
+<span id="L117"><a href="#L117" class="ln"> 117</a>       (if e∈transformerImageResources G H₀ φ ψ then 1 else 0)+·)</span>
+<span id="L118"><a href="#L118" class="ln"> 118</a>       (transformerSpokeRows_active_sum Q H₀ ψ ps e)</span>
+<span id="L119"><a href="#L119" class="ln"> 119</a>   obtain ⟨N,T,hNW,hNcard,hT,hRsupport,hSsupport,hnewR,hnewS,hExactR,hHub⟩:=triangle_selected_hub_trades_finish Q H A</span>
+<span id="L120"><a href="#L120" class="ln"> 120</a>     (fun i:I=&gt;Z i.val) (fun i=&gt;i.val) (fun i=&gt;ψ i.val) RR W&#x27; s K₀ hactive</span>
+<span id="L121"><a href="#L121" class="ln"> 121</a>     (fun i=&gt;⟨(hA i).1,(hA i).2.1⟩) hZW hpair (fun i=&gt;(hA i).2.2.2)</span>
+<span id="L122"><a href="#L122" class="ln"> 122</a>     Plus Minus hPlus hMinus hPW hMW (fun i=&gt;hspokes i.val)</span>
+<span id="L123"><a href="#L123" class="ln"> 123</a>     (ordinaryHostResources G H₀) (transformerImageResources G H₀ φ ψ)</span>
+<span id="L124"><a href="#L124" class="ln"> 124</a>     (transformer_root_resources_disjoint G H₀ φ ψ hbalance hcross) hidentity</span>
+<span id="L125"><a href="#L125" class="ln"> 125</a>   have hold:=ordinary_transformer_positive_root_restriction G Q ⊥ H₀ H φ ψ 3 R W B hRW b σ p</span>
+<span id="L126"><a href="#L126" class="ln"> 126</a>     (fun i v hv=&gt;(hpW i v hv).2) E S D (fun i v hv=&gt;(hD i v hv).elim)</span>
+<span id="L127"><a href="#L127" class="ln"> 127</a>   have hpositive:=ordinary_transformer_positive_row_avoidance G Q ⊥ H₀ H φ ψ 3 R W W₀ B hW₀ b σ p</span>
+<span id="L128"><a href="#L128" class="ln"> 128</a>     hbalance hroot hp₀ E S D (fun i v hv=&gt;(hD i v hv).elim)</span>
+<span id="L129"><a href="#L129" class="ln"> 129</a>   refine ⟨W&#x27;,N,T,hWW&#x27;,by simpa using hW&#x27;card,hNW,hNcard,hT,hRsupport,hSsupport,?_,?_,?_,?_,?_,?_⟩</span>
+<span id="L130"><a href="#L130" class="ln"> 130</a>   · intro v hv w hw he</span>
+<span id="L131"><a href="#L131" class="ln"> 131</a>     rcases hnewR v w he with heP|hn|hn</span>
+<span id="L132"><a href="#L132" class="ln"> 132</a>     · have hG:=hold.1 v hv w hw ((ordinaryHostResources_rim _ _ _).mp heP)</span>
+<span id="L133"><a href="#L133" class="ln"> 133</a>       exact Finset.disjoint_left.mp hT.1 he ((ordinaryHostResources_rim G H₀ _).mpr hG)</span>
+<span id="L134"><a href="#L134" class="ln"> 134</a>     · exact Finset.disjoint_left.mp hNW hn (hWW&#x27; (hRW hv))</span>
+<span id="L135"><a href="#L135" class="ln"> 135</a>     · exact Finset.disjoint_left.mp hNW hn (hWW&#x27; (hRW hw))</span>
+<span id="L136"><a href="#L136" class="ln"> 136</a>   · intro v hv z hz he</span>
+<span id="L137"><a href="#L137" class="ln"> 137</a>     rcases hnewS v z he with heP|hn|⟨i,hi⟩</span>
+<span id="L138"><a href="#L138" class="ln"> 138</a>     · have hH:=hold.2 v hv z hz ((ordinaryHostResources_spoke _ _ _ _).mp heP)</span>
+<span id="L139"><a href="#L139" class="ln"> 139</a>       exact Finset.disjoint_left.mp hT.1 he ((ordinaryHostResources_spoke G H₀ v z).mpr hH)</span>
+<span id="L140"><a href="#L140" class="ln"> 140</a>     · exact Finset.disjoint_left.mp hNW hn (hWW&#x27; (hRW hv))</span>
+<span id="L141"><a href="#L141" class="ln"> 141</a>     · obtain ⟨j,_,hj⟩:=(transformerSpokeRows_mem Q H₀ ps i.val v).mp hi</span>
+<span id="L142"><a href="#L142" class="ln"> 142</a>       exact (hpW _ _ hj).2 hv</span>
+<span id="L143"><a href="#L143" class="ln"> 143</a>   · intro v hv w he</span>
+<span id="L144"><a href="#L144" class="ln"> 144</a>     rcases (hExactR v w he).1 with heP|hn|⟨i,hi⟩</span>
+<span id="L145"><a href="#L145" class="ln"> 145</a>     · obtain ⟨w&#x27;,hw&#x27;⟩:=Set.mem_toFinset.mp heP</span>
+<span id="L146"><a href="#L146" class="ln"> 146</a>       obtain ⟨j,hj⟩:=SimpleGraph.iSup_adj.mp hw&#x27;</span>
+<span id="L147"><a href="#L147" class="ln"> 147</a>       exact hpositive j v hj.mem_support_left hv</span>
+<span id="L148"><a href="#L148" class="ln"> 148</a>     · exact (Finset.disjoint_left.mp hNW hn (hWW&#x27; (hW₀ hv))).elim</span>
+<span id="L149"><a href="#L149" class="ln"> 149</a>     · obtain ⟨j,_,hj⟩:=(transformerSpokeRows_mem Q H₀ ps i.val v).mp hi</span>
+<span id="L150"><a href="#L150" class="ln"> 150</a>       exact (hp₀ _ _ hj hv).elim</span>
+<span id="L151"><a href="#L151" class="ln"> 151</a>   · intro v hv z he</span>
+<span id="L152"><a href="#L152" class="ln"> 152</a>     rcases hnewS v z he with heP|hn|⟨i,hi⟩</span>
+<span id="L153"><a href="#L153" class="ln"> 153</a>     · obtain ⟨j,_,hj⟩:=(ordinaryHostResources_spoke _ _ _ _).mp heP</span>
+<span id="L154"><a href="#L154" class="ln"> 154</a>       exact hpositive j v hj hv</span>
+<span id="L155"><a href="#L155" class="ln"> 155</a>     · exact (Finset.disjoint_left.mp hNW hn (hWW&#x27; (hW₀ hv))).elim</span>
+<span id="L156"><a href="#L156" class="ln"> 156</a>     · obtain ⟨j,_,hj⟩:=(transformerSpokeRows_mem Q H₀ ps i.val v).mp hi</span>
+<span id="L157"><a href="#L157" class="ln"> 157</a>       exact (hp₀ _ _ hj hv).elim</span>
+<span id="L158"><a href="#L158" class="ln"> 158</a>   · intro v z hz he</span>
+<span id="L159"><a href="#L159" class="ln"> 159</a>     rcases hHub v z he with heP|⟨i,hi⟩</span>
+<span id="L160"><a href="#L160" class="ln"> 160</a>     · obtain ⟨j,hj,_⟩:=heP</span>
+<span id="L161"><a href="#L161" class="ln"> 161</a>       rcases j with j|(j|j)</span>
+<span id="L162"><a href="#L162" class="ln"> 162</a>       · change ordinaryWheelHub (E.first j)=z at hj</span>
+<span id="L163"><a href="#L163" class="ln"> 163</a>         rw [E.first_hub] at hj</span>
+<span id="L164"><a href="#L164" class="ln"> 164</a>         exact (E.hub_avoid j (hj.symm ▸ hz)).elim</span>
+<span id="L165"><a href="#L165" class="ln"> 165</a>       · change ordinaryWheelHub (S.first j)=z at hj</span>
+<span id="L166"><a href="#L166" class="ln"> 166</a>         rw [S.first_hub] at hj</span>
+<span id="L167"><a href="#L167" class="ln"> 167</a>         exact ⟨j.val.2,⟨j.val.1,j.property⟩,Or.inl hj.symm⟩</span>
+<span id="L168"><a href="#L168" class="ln"> 168</a>       · change ordinaryWheelHub (D j).second=z at hj</span>
+<span id="L169"><a href="#L169" class="ln"> 169</a>         rw [(D j).second_hub] at hj</span>
+<span id="L170"><a href="#L170" class="ln"> 170</a>         exact (E.hub_avoid _ (hj.symm ▸ hz)).elim</span>
+<span id="L171"><a href="#L171" class="ln"> 171</a>     · exact ⟨i.val,i.property,hi⟩</span>
+<span id="L172"><a href="#L172" class="ln"> 172</a>   · intro v z he</span>
+<span id="L173"><a href="#L173" class="ln"> 173</a>     rcases hHub v z he with heP|⟨i,hi⟩</span>
+<span id="L174"><a href="#L174" class="ln"> 174</a>     · obtain ⟨j,hj,_⟩:=heP</span>
+<span id="L175"><a href="#L175" class="ln"> 175</a>       rcases j with j|(j|j)</span>
+<span id="L176"><a href="#L176" class="ln"> 176</a>       · change ordinaryWheelHub (E.first j)=z at hj</span>
+<span id="L177"><a href="#L177" class="ln"> 177</a>         rw [E.first_hub] at hj</span>
+<span id="L178"><a href="#L178" class="ln"> 178</a>         exact Or.inl ⟨j,hj.symm⟩</span>
+<span id="L179"><a href="#L179" class="ln"> 179</a>       · change ordinaryWheelHub (S.first j)=z at hj</span>
+<span id="L180"><a href="#L180" class="ln"> 180</a>         rw [S.first_hub] at hj</span>
+<span id="L181"><a href="#L181" class="ln"> 181</a>         exact Or.inr ⟨j.val.2,⟨j.val.1,j.property⟩,Or.inl hj.symm⟩</span>
+<span id="L182"><a href="#L182" class="ln"> 182</a>       · change ordinaryWheelHub (D j).second=z at hj</span>
+<span id="L183"><a href="#L183" class="ln"> 183</a>         rw [(D j).second_hub] at hj</span>
+<span id="L184"><a href="#L184" class="ln"> 184</a>         exact Or.inl ⟨(shiftedIncidenceEquiv G σ j).1,hj.symm⟩</span>
+<span id="L185"><a href="#L185" class="ln"> 185</a>     · exact Or.inr ⟨i.val,i.property,hi⟩</span>
+<span id="L186"><a href="#L186" class="ln"> 186</a> end Oberwolfach</span></pre></html>

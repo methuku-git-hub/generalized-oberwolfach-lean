@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>DirectedCutBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>DirectedCutBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.GraphCuts</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Directed cuts on the original labels. Bounds use row and column sums,</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> including cuts whose two sides overlap. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> open scoped BigOperators</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> noncomputable section</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> namespace Oberwolfach</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> </span>
+<span id="L12"><a href="#L12" class="ln">  12</a> def matrixCut {V : Type*} (M : V → V → ℕ) (S T : Finset V) : ℕ :=</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   ∑ x ∈ S, ∑ y ∈ T, M x y</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> theorem matrixCut_transpose {V : Type*} (M : V → V → ℕ) (S T : Finset V) :</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     matrixCut M S T = matrixCut (fun x y =&gt; M y x) T S := by</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   exact Finset.sum_comm</span>
+<span id="L18"><a href="#L18" class="ln">  18</a> </span>
+<span id="L19"><a href="#L19" class="ln">  19</a> theorem matrixCut_row_lower {V : Type*} [Fintype V]</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     (M : V → V → ℕ) (hM : ∀ x y, M x y ≤ 1) (S T : Finset V) {d : ℝ}</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     (hrow : ∀ x ∈ S, d ≤ ((∑ y, M x y : ℕ) : ℝ)) :</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     (S.card : ℝ) * (d + T.card - Fintype.card V) ≤ (matrixCut M S T : ℝ) := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hpoint (x : V) (hx : x ∈ S) :</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>       d + T.card - Fintype.card V ≤ ((∑ y ∈ T, M x y : ℕ) : ℝ) := by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     have hc : ∑ y ∈ Finset.univ \ T, M x y ≤ Fintype.card V - T.card := by</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>       calc</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>         _ ≤ ∑ _y ∈ Finset.univ \ T, 1 := Finset.sum_le_sum (fun y _ =&gt; hM x y)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>         _ = _ := by simp [Finset.card_sdiff_of_subset (Finset.subset_univ T)]</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     have hs := Finset.sum_sdiff (f := fun y =&gt; M x y) (Finset.subset_univ T)</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have ht := Finset.card_le_univ T</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     have hcr : ((∑ y ∈ Finset.univ \ T, M x y : ℕ) : ℝ) ≤</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>         (Fintype.card V : ℝ) - T.card := by</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       exact_mod_cast hc</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     have hsr : ((∑ y ∈ Finset.univ \ T, M x y : ℕ) : ℝ) +</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>         ((∑ y ∈ T, M x y : ℕ) : ℝ) = ((∑ y, M x y : ℕ) : ℝ) := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>       exact_mod_cast hs</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     linarith [hrow x hx]</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   simpa only [matrixCut, Nat.cast_sum, Finset.sum_const, nsmul_eq_mul] using</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     Finset.sum_le_sum hpoint</span>
+<span id="L40"><a href="#L40" class="ln">  40</a> </span>
+<span id="L41"><a href="#L41" class="ln">  41</a> theorem matrixCut_small_side {V : Type*} [Fintype V]</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (M : V → V → ℕ) (hM : ∀ x y, M x y ≤ 1)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     {d c δ s : ℝ} (hrow : ∀ x, d ≤ ((∑ y, M x y : ℕ) : ℝ))</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     (hcol : ∀ y, d ≤ ((∑ x, M x y : ℕ) : ℝ))</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     (hmargin : c ≤ d - s - 2 * δ * Fintype.card V)</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     (S T : Finset V)</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (hlarge : (1 - 2 * δ) * Fintype.card V &lt; (S.card : ℝ) + T.card)</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     (hsmall : min (S.card : ℝ) T.card ≤ s) :</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     c * min (S.card : ℝ) T.card ≤ (matrixCut M S T : ℝ) := by</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   have hle (A B : Finset V) (N : V → V → ℕ)</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       (hN : ∀ x y, N x y ≤ 1)</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (hdeg : ∀ x, d ≤ ((∑ y, N x y : ℕ) : ℝ))</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (hA : (A.card : ℝ) ≤ s)</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       (hab : (1 - 2 * δ) * Fintype.card V &lt; (A.card : ℝ) + B.card) :</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       c * A.card ≤ (matrixCut N A B : ℝ) := by</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have hh := matrixCut_row_lower N hN A B (fun x _ =&gt; hdeg x)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>     have hb : c ≤ d + B.card - Fintype.card V := by linarith</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hm := mul_le_mul_of_nonneg_left hb (show (0 : ℝ) ≤ A.card by positivity)</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     nlinarith</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   rcases le_total (S.card : ℝ) T.card with h | h</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   · rw [min_eq_left h] at *</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>     exact hle S T M hM hrow hsmall hlarge</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   · rw [min_eq_right h] at *</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>     rw [matrixCut_transpose]</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>     exact hle T S (fun x y =&gt; M y x) (fun x y =&gt; hM y x) hcol hsmall (by linarith)</span>
+<span id="L66"><a href="#L66" class="ln">  66</a> </span>
+<span id="L67"><a href="#L67" class="ln">  67</a> theorem matrixCut_upper_of_degrees {V : Type*} [Fintype V]</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>     (M : V → V → ℕ) {b : ℝ}</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>     (hrow : ∀ x, ((∑ y, M x y : ℕ) : ℝ) ≤ b)</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>     (hcol : ∀ y, ((∑ x, M x y : ℕ) : ℝ) ≤ b)</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>     (S T : Finset V) :</span>
+<span id="L72"><a href="#L72" class="ln">  72</a>     (matrixCut M S T : ℝ) ≤ b * min (S.card : ℝ) T.card := by</span>
+<span id="L73"><a href="#L73" class="ln">  73</a>   have hle (N : V → V → ℕ) (A B : Finset V)</span>
+<span id="L74"><a href="#L74" class="ln">  74</a>       (h : ∀ x, ((∑ y, N x y : ℕ) : ℝ) ≤ b) :</span>
+<span id="L75"><a href="#L75" class="ln">  75</a>       (matrixCut N A B : ℝ) ≤ b * A.card := by</span>
+<span id="L76"><a href="#L76" class="ln">  76</a>     have hh (x : V) : ((∑ y ∈ B, N x y : ℕ) : ℝ) ≤ b := by</span>
+<span id="L77"><a href="#L77" class="ln">  77</a>       apply le_trans _ (h x)</span>
+<span id="L78"><a href="#L78" class="ln">  78</a>       exact_mod_cast Finset.sum_le_univ_sum_of_nonneg (fun y =&gt; Nat.zero_le (N x y))</span>
+<span id="L79"><a href="#L79" class="ln">  79</a>     have hs := Finset.sum_le_sum (fun x (_ : x ∈ A) =&gt; hh x)</span>
+<span id="L80"><a href="#L80" class="ln">  80</a>     simpa only [matrixCut, Nat.cast_sum, Finset.sum_const, nsmul_eq_mul, mul_comm] using hs</span>
+<span id="L81"><a href="#L81" class="ln">  81</a>   rcases le_total (S.card : ℝ) T.card with h | h</span>
+<span id="L82"><a href="#L82" class="ln">  82</a>   · rw [min_eq_left h]; exact hle M S T hrow</span>
+<span id="L83"><a href="#L83" class="ln">  83</a>   · rw [min_eq_right h, matrixCut_transpose]</span>
+<span id="L84"><a href="#L84" class="ln">  84</a>     exact hle (fun x y =&gt; M y x) T S hcol</span>
+<span id="L85"><a href="#L85" class="ln">  85</a> </span>
+<span id="L86"><a href="#L86" class="ln">  86</a> theorem matrixCut_loss_bound {V : Type*} [Fintype V]</span>
+<span id="L87"><a href="#L87" class="ln">  87</a>     (M L W : V → V → ℕ) {b : ℝ}</span>
+<span id="L88"><a href="#L88" class="ln">  88</a>     (hpoint : ∀ x y, M x y ≤ L x y + W x y)</span>
+<span id="L89"><a href="#L89" class="ln">  89</a>     (hrow : ∀ x, ((∑ y, W x y : ℕ) : ℝ) ≤ b)</span>
+<span id="L90"><a href="#L90" class="ln">  90</a>     (hcol : ∀ y, ((∑ x, W x y : ℕ) : ℝ) ≤ b)</span>
+<span id="L91"><a href="#L91" class="ln">  91</a>     (S T : Finset V) :</span>
+<span id="L92"><a href="#L92" class="ln">  92</a>     (matrixCut M S T : ℝ) - b * min (S.card : ℝ) T.card ≤ (matrixCut L S T : ℝ) := by</span>
+<span id="L93"><a href="#L93" class="ln">  93</a>   have hh : matrixCut M S T ≤ matrixCut L S T + matrixCut W S T := by</span>
+<span id="L94"><a href="#L94" class="ln">  94</a>     simp only [matrixCut, ← Finset.sum_add_distrib]</span>
+<span id="L95"><a href="#L95" class="ln">  95</a>     exact Finset.sum_le_sum (fun x _ =&gt; Finset.sum_le_sum (fun y _ =&gt; hpoint x y))</span>
+<span id="L96"><a href="#L96" class="ln">  96</a>   have hr : (matrixCut M S T : ℝ) ≤ (matrixCut L S T : ℝ) + matrixCut W S T := by exact_mod_cast hh</span>
+<span id="L97"><a href="#L97" class="ln">  97</a>   linarith [matrixCut_upper_of_degrees W hrow hcol S T]</span>
+<span id="L98"><a href="#L98" class="ln">  98</a> </span>
+<span id="L99"><a href="#L99" class="ln">  99</a> end Oberwolfach</span></pre></html>

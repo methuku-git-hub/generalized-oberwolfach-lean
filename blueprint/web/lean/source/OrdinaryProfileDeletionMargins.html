@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryProfileDeletionMargins.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryProfileDeletionMargins.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AbsorberRestrictionScales</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! The deletion tolerance precedes the bounded forbidden-edge allowance.</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> Only the ambient order threshold is allowed to depend on that allowance. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 2000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem ordinary_profile_deletion_margins (β a τ K L : ℝ)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (hβ : 0&lt;β) (ha : 0&lt;a) (hτ : 0&lt;τ) (hK : 0≤K) (hL : 0≤L) :</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∃ ε : ℝ,0&lt;ε ∧ ε≤β/2 ∧ ∀ f : ℕ,∃ N : ℕ,1≤N ∧</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>       ∀ n : ℕ,N≤n → ∀ z e : ℕ,(z:ℝ)≤ε*n → e≤f →</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>         ((z+e:ℕ):ℝ)*K/n≤τ/2 ∧</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>         ((z+e:ℕ):ℝ)*L≤(a/2)*n := by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   let ε := min (β/2) (min (τ/(4*(K+1))) (a/(4*(L+1))))</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hε : 0&lt;ε := by dsimp [ε];positivity</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   have hεK : 2*ε*K≤τ/2 := by</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     have hh : ε≤τ/(4*(K+1)) := (min_le_right _ _).trans (min_le_left _ _)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     have ht := (le_div_iff₀ (by positivity : (0:ℝ)&lt;4*(K+1))).mp hh</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     nlinarith only [ht,hε]</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hεL : 2*ε*L≤a/2 := by</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     have hh : ε≤a/(4*(L+1)) := (min_le_right _ _).trans (min_le_right _ _)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     have ht := (le_div_iff₀ (by positivity : (0:ℝ)&lt;4*(L+1))).mp hh</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     nlinarith only [ht,hε]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   refine ⟨ε,hε,min_le_left _ _,?_⟩</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   intro f</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   obtain ⟨N,hN⟩ := exists_nat_gt ((f:ℝ)/ε)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   refine ⟨max 1 N,le_max_left _ _,?_⟩</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   intro n hn z e hz he</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hn1 : 1≤n := (le_max_left 1 N).trans hn</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have hnR : (0:ℝ)&lt;n := by exact_mod_cast (show 0&lt;n by omega)</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   have hNn : (N:ℝ)≤n := by exact_mod_cast (le_max_right 1 N).trans hn</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   have hf : (f:ℝ)≤ε*n := by</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     have hh := (div_lt_iff₀ hε).mp (lt_of_lt_of_le hN hNn)</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     linarith</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   have heR : (e:ℝ)≤ε*n := (Nat.cast_le.mpr he).trans hf</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hsum : ((z+e:ℕ):ℝ)≤2*ε*n := by push_cast;linarith only [hz,heR]</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   constructor</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   · apply (div_le_iff₀ hnR).mpr</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     have hh := mul_le_mul_of_nonneg_right hsum hK</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     have ht := mul_le_mul_of_nonneg_right hεK hnR.le</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     nlinarith only [hh,ht]</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   · have hh := mul_le_mul_of_nonneg_right hsum hL</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>     have ht := mul_le_mul_of_nonneg_right hεL hnR.le</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     nlinarith only [hh,ht]</span>
+<span id="L47"><a href="#L47" class="ln">  47</a> </span>
+<span id="L48"><a href="#L48" class="ln">  48</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedApproximatePotentialFailure.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedApproximatePotentialFailure.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrientationMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Uniform exponential failure budget for the marked potential event. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 3000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> open scoped BigOperators</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem marked_approximate_potential_failure_small (d m:ℕ) (B t:ℝ) (hB:0&lt;B) (ht:0&lt;t):</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     ∃ N:ℕ,∀ n:ℕ,N≤n→</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>       8*(n:ℝ)^2*Real.exp (-2*t^2/((8*(d:ℝ)+6)^2*(((m:ℝ)+1)^4*B/n)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B)))≤1/1000:=by</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   let K:ℝ:=(8*(d:ℝ)+6)^2*(((m:ℝ)+1)^4*B)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hK:0&lt;K:=by dsimp [K];positivity</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   let c:ℝ:=2*t^2/K</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hc:0&lt;c:=by dsimp [c];positivity</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   obtain ⟨N,hN⟩:=eventually_stretchedExp_le_inv_pow (8:ℝ) 2 (c:=c) (p:=1) hc (by norm_num) 1</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   refine ⟨max N 1000,?_⟩</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   intro n hn</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   have hn1000:1000≤n:=le_trans (le_max_right _ _) hn</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have hnpos:(0:ℝ)&lt;n:=by exact_mod_cast (show 0&lt;n by omega)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have hb:=hN n (le_trans (le_max_left _ _) hn)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   simp only [Real.rpow_one,Real.rpow_two,pow_one] at hb</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   have harg:-2*t^2/((8*(d:ℝ)+6)^2*(((m:ℝ)+1)^4*B/n)*(2*((m:ℝ)+1))*(((m:ℝ)+1)^2*B)) = -c*(n:ℝ):=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     dsimp [c,K]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     field_simp</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   rw [harg]</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hsmall:(1:ℝ)/(n:ℝ)≤1/1000:=by</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     apply (div_le_iff₀ hnpos).2</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     have :(1000:ℝ)≤n:=by exact_mod_cast hn1000</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     linarith</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   exact hb.trans hsmall</span>
+<span id="L33"><a href="#L33" class="ln">  33</a> end Oberwolfach</span></pre></html>

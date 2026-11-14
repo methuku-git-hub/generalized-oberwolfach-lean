@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>FactorOrientationAlignment.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>FactorOrientationAlignment.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.FactorOrientationOrbit</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.DirectedCycleOrientationPropagation</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! A single consistently oriented edge per factor component determines the</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> orientation of every edge in that component. -/</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option autoImplicit false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem factor_orientation_aligns_from_component_edges</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     {X:Type*} [Fintype X] [DecidableEq X] (G:SimpleGraph X) (hG:G.IsRegularOfDegree 2)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (e:∀C:G.ConnectedComponent,SimpleGraph.cycleGraph (Fintype.card C) ≃g C.toSimpleGraph)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (D:X→X→Prop)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hcover:∀x y,G.Adj x y→D x y ∨ D y x)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     (hin:∀x y z,D y x→D z x→y=z)</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     (hbase:∀C:G.ConnectedComponent,∃a:C,D a.val (factorCycleOrientation G e a.val)):</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>     ∀x,D x (factorCycleOrientation G e x):=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   intro x</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   let C:=G.connectedComponentMk x</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let b:C:=⟨x,(SimpleGraph.ConnectedComponent.mem_supp_iff _ _).mpr rfl⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   obtain ⟨a,ha⟩:=hbase C</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   obtain ⟨n,hn⟩:=factor_cycle_orientation_reaches_component G hG e C a b</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have hσcover:∀y,D y (factorCycleOrientation G e y) ∨ D (factorCycleOrientation G e y) y:=</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     fun y=&gt;hcover y _ (factor_cycle_orientation_adj G hG e y)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   have hh:=directed_orientation_propagates_on_orbit (factorCycleOrientation G e) D hσcover hin</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     (factor_orientation_no_two_cycles G hG e) a.val ha n</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   simpa [hn,b] using hh</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> end Oberwolfach</span></pre></html>

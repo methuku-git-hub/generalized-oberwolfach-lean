@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ResidualDependentFamilyModel.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>ResidualDependentFamilyModel.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.ResidualDependentModel</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Construct the embedding theorem&#x27;s source pieces for an arbitrary</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> family of separately typed two-factor subgraphs. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> noncomputable section</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> namespace Oberwolfach</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> variable {I:Type} [Fintype I] [DecidableEq I] {X:I→Type}</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>   [∀i,Fintype (X i)] [∀i,DecidableEq (X i)]</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem two_factor_family_subgraph_dependent_models</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (F H:∀i,SimpleGraph (X i)) (R:∀i,Finset (X i))</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     (hF:∀i,(F i).IsRegularOfDegree 2) (hHF:∀i,H i≤F i)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     (hisol:∀i x,x∉R i→∀y,¬(H i).Adj x y):</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∃ (D:∀i,X i→X i→Prop) (pieces:∀i,List (PrescribedSourcePiece (X i))),</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (∀i,(pieces i).Pairwise (fun p q=&gt;Disjoint p.vertices.toFinset q.vertices.toFinset)) ∧</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (∀i p,p∈pieces i→p.Shape ∧ p.OriginalValid (D i)) ∧</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (∀i,prescribedDependentVertices pieces i=R i) ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∀i,prescribedDependentGraph pieces i=H i) ∧</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (∀i x y,D i x y→(F i).Adj x y) := by</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   choose D pieces hpair hvalid hvertices hgraph hD using</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     fun i=&gt;two_factor_subgraph_dependent_model (F i) (H i) (hF i) (hHF i) (R i) (hisol i)</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   refine ⟨D,pieces,hpair,hvalid,?_,?_,hD⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   · intro i</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     exact hvertices i</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   · intro i</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     exact hgraph i</span>
+<span id="L28"><a href="#L28" class="ln">  28</a> end Oberwolfach</span></pre></html>

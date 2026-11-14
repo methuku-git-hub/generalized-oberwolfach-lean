@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>SparseAlternatingCorrection.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>SparseAlternatingCorrection.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.SparseErrorContraction</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.SecondOrderInverse</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> import Oberwolfach.AlternatingCoefficientLoads</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> </span>
+<span id="L5"><a href="#L5" class="ln">   5</a> /-! The complete deterministic alternating-correction theorem with</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> explicit constants and actual ordered four-cycle coefficients. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 2200000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {A B : Type*} [Fintype A] [Fintype B] [DecidableEq A] [DecidableEq B]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a> def FourCycleIncident {H : A → B → Prop} (Q : BipartiteFourCycle H) (e : A×B) : Prop :=</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   (e.1=Q.val.1.1 ∨ e.1=Q.val.1.2) ∧ (e.2=Q.val.2.1 ∨ e.2=Q.val.2.2)</span>
+<span id="L17"><a href="#L17" class="ln">  17</a> </span>
+<span id="L18"><a href="#L18" class="ln">  18</a> theorem bipartiteFourCycleVector_abs {H : A → B → Prop} (Q : BipartiteFourCycle H) (e : A×B) :</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     |bipartiteFourCycleVector Q e|=(if FourCycleIncident Q e then (1:ℝ) else 0) := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   rcases Q with ⟨⟨⟨x,y⟩,⟨u,v⟩⟩,hxy,huv,hxu,hyu,hyv,hxv⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   rcases e with ⟨a,b⟩</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   unfold bipartiteFourCycleVector alternatingRectangle FourCycleIncident</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   dsimp only</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   split_ifs &lt;;&gt; simp_all</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> </span>
+<span id="L26"><a href="#L26" class="ln">  26</a> theorem sparse_alternating_correction_inverse_profile (H : A → B → Prop) (p q : B → ℝ)</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     (L δ D : ℝ) (h : SparseIntersectionData H p q L δ D)</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     (ha : 0&lt;Fintype.card A) (hb : 0&lt;Fintype.card B)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (hsmall : δ+D/(Fintype.card A:ℝ)+1/(Fintype.card B:ℝ)≤1/(200*L^6))</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     (z : A×B → ℝ) (hz : z∈zeroMarginalSpace H) :</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     ∃ t : BipartiteFourCycle H → ℝ,</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>       (∀ e,z e=∑ Q,t Q*bipartiteFourCycleVector Q e) ∧</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (∀ e,(∑ Q,if FourCycleIncident Q e then |t Q| else 0)≤8*L^3*(1+9*L^3)*‖z‖) := by</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   let S := zeroMarginalSpace H</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   let T : S →ₗ[ℝ] S :=</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     { toFun := fun w=&gt;⟨sparseAlternatingMap H q w.val,sparseAlternatingMap_zero_marginals H q w.val⟩</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>       map_add&#x27; := by intro w w&#x27;;apply Subtype.ext;exact (sparseAlternatingMap H q).map_add w.val w&#x27;.val</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       map_smul&#x27; := by intro c w;apply Subtype.ext;exact (sparseAlternatingMap H q).map_smul c w.val }</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>   have herror (w : S) : ‖w-T w‖≤9*L^3*‖w‖ ∧ ‖(w-T w)-T (w-T w)‖≤(1/2:ℝ)*‖w‖ :=</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     sparse_error_contraction H p q L δ D h ha hb hsmall w.val w.property</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   obtain ⟨w,hw,hnorm⟩ := second_order_inverse T (9*L^3) (1/2) (by norm_num)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (fun w=&gt;(herror w).1) (fun w=&gt;(herror w).2) ⟨z,hz⟩</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>   let t (Q : BipartiteFourCycle H) := sparseRectangleCoefficient H q w.val Q.val.1.1 Q.val.1.2 Q.val.2.1 Q.val.2.2</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>   refine ⟨t,?_,?_⟩</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   · intro e</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>     have he : sparseAlternatingMap H q w.val e=z e := congrFun (congrArg Subtype.val hw) e</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     rw [← he]</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>     exact rectangleCombination_fourCycles H (sparseRectangleCoefficient H q w.val)</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (sparseRectangleCoefficient_supported H q w.val) e</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   · intro e</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>     have hload := sparseAlternating_coefficient_load H q w.val L h.L_nonneg h.inverse_bounds ha hb e</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>     have he : (∑ Q,if FourCycleIncident Q e then |t Q| else 0)=</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>         (∑ Q,|t Q| * |bipartiteFourCycleVector Q e|) := by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>       simp only [bipartiteFourCycleVector_abs,mul_ite,mul_one,mul_zero]</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>     rw [he]</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     calc</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       _ ≤ 4*L^3*‖w.val‖ := hload</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>       _ ≤ 4*L^3*(((1+9*L^3)/(1-(1/2:ℝ)))*‖z‖) :=</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>         mul_le_mul_of_nonneg_left hnorm (by have := h.L_nonneg;positivity)</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>       _ = _ := by ring</span>
+<span id="L61"><a href="#L61" class="ln">  61</a> </span>
+<span id="L62"><a href="#L62" class="ln">  62</a> end Oberwolfach</span></pre></html>

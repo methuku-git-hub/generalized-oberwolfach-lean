@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryPairHubCoordinateGeometry.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryPairHubCoordinateGeometry.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.DualCoordinateSupport</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.OrdinaryRawIntervalGeometry</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> </span>
+<span id="L4"><a href="#L4" class="ln">   4</a> /-! Coordinate locality for a spoke relation requiring two given hubs.</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> The relation is defined on the original raw sampling space, not by treating</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> its outcome-dependent common neighbourhood as a predetermined set. -/</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option autoImplicit false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> set_option maxHeartbeats 12000000</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U Γ Color:Type} [Fintype V] [Fintype U] [Fintype Γ] [Fintype Color]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   [DecidableEq V] [DecidableEq U]</span>
+<span id="L15"><a href="#L15" class="ln">  15</a> </span>
+<span id="L16"><a href="#L16" class="ln">  16</a> def ordinaryPairHubEmbedding (u:U):(Sym2 V⊕(V×Unit))↪(Sym2 V⊕(V×U)):=</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   Function.Embedding.sumMap (Function.Embedding.refl _) ⟨fun a=&gt;(a.1,u),by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     intro a b h</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     rcases a with ⟨a,⟨⟩⟩</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     rcases b with ⟨b,⟨⟩⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>     simp only [Prod.mk.injEq] at h</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     simp [h]⟩</span>
+<span id="L23"><a href="#L23" class="ln">  23</a> </span>
+<span id="L24"><a href="#L24" class="ln">  24</a> def ordinaryPairHubSpokes (π:Equiv.Perm V) (d:ℕ)</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     (σ:RawWheelOutcome V U Γ Color) (j:Color) (u u&#x27;:U):V→Unit→Prop:=</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   fun v _=&gt;rawWheelSpokes π d σ j v u∧rawWheelSpokes π d σ j v u&#x27;</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> </span>
+<span id="L28"><a href="#L28" class="ln">  28</a> def ordinaryPairHubCoordinates (π:Equiv.Perm V) (d:ℕ) (u u&#x27;:U)</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     (a:Sym2 V⊕(V×Unit)):Finset (RawWheelCoordinate V U):=</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   rawWheelResourceCoordinates π d (ordinaryPairHubEmbedding u a)∪</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     rawWheelResourceCoordinates π d (ordinaryPairHubEmbedding u&#x27; a)</span>
+<span id="L32"><a href="#L32" class="ln">  32</a> </span>
+<span id="L33"><a href="#L33" class="ln">  33</a> theorem ordinary_pair_hub_coordinates_bounds (π:Equiv.Perm V) (d:ℕ) (u u&#x27;:U):</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀ a,(ordinaryPairHubCoordinates π d u u&#x27; a).card≤2*(4*d+3)) ∧</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>     (∀ e,(Finset.univ.filter (fun a=&gt;e∈ordinaryPairHubCoordinates π d u u&#x27; a)).card≤2*(4*d+3)) := by</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   exact paired_coordinate_support_bounds (rawWheelResourceCoordinates π d)</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     (ordinaryPairHubEmbedding u) (ordinaryPairHubEmbedding u&#x27;) (4*d+3)</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (rawWheelResourceCoordinates_card π d) (rawWheelResourceCoordinates_reverse_card π d)</span>
+<span id="L39"><a href="#L39" class="ln">  39</a> </span>
+<span id="L40"><a href="#L40" class="ln">  40</a> theorem ordinary_pair_hub_resource_supported</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     (P:SimpleGraph V) (π:Equiv.Perm V) (d:ℕ) (j:Color) (u u&#x27;:U)</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     (a:Sym2 V⊕(V×Unit)) (σ τ:RawWheelOutcome V U Γ Color)</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     (ha:∀ e∈ordinaryPairHubCoordinates π d u u&#x27; a,σ e=τ e):</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>     ordinaryResourceState (rawWheelGraph P σ) (ordinaryPairHubSpokes π d σ j u u&#x27;) a=</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       ordinaryResourceState (rawWheelGraph P τ) (ordinaryPairHubSpokes π d τ j u u&#x27;) a := by</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   have h₁:=rawWheelResourceState_supported P π d j (ordinaryPairHubEmbedding u a) σ τ</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>     (fun e he=&gt;ha e (Finset.mem_union_left _ he))</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>   have h₂:=rawWheelResourceState_supported P π d j (ordinaryPairHubEmbedding u&#x27; a) σ τ</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>     (fun e he=&gt;ha e (Finset.mem_union_right _ he))</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>   cases a with</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>   | inl e=&gt;simpa [ordinaryPairHubEmbedding,ordinaryResourceState] using h₁</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>   | inr a=&gt;</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>     rcases a with ⟨v,⟨⟩⟩</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>     have he₁:decide (rawWheelSpokes π d σ j v u)=decide (rawWheelSpokes π d τ j v u):=by</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>       simpa [ordinaryPairHubEmbedding,ordinaryResourceState] using h₁</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>     have he₂:decide (rawWheelSpokes π d σ j v u&#x27;)=decide (rawWheelSpokes π d τ j v u&#x27;):=by</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>       simpa [ordinaryPairHubEmbedding,ordinaryResourceState] using h₂</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>     have hh₁:(rawWheelSpokes π d σ j v u↔rawWheelSpokes π d τ j v u):=by simpa only [decide_eq_decide] using he₁</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>     have hh₂:(rawWheelSpokes π d σ j v u&#x27;↔rawWheelSpokes π d τ j v u&#x27;):=by simpa only [decide_eq_decide] using he₂</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>     simp only [ordinaryResourceState,Sum.elim_inr,ordinaryPairHubSpokes,decide_eq_decide]</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>     exact and_congr hh₁ hh₂</span>
+<span id="L62"><a href="#L62" class="ln">  62</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,8 @@
+{
+  "description": "Final manuscript source supplied by Abhishek Methuku on 14 November 2026",
+  "path": "source/manuscript.tex",
+  "sha256": "5f9cef1149b88a3680cc5ccf193b7a68a18fd12105ab6c495f4f23d893e772d9",
+  "source_main_theorem_label": "thm:new:prescribed-factor",
+  "earlier_development_manuscript_sha256": "ffe45b31bcfbd933828da22a9becb6aea23a642d5ffe7abf09d29f45d9d8a201",
+  "comparison": "The main-theorem statement matches the earlier development snapshot after normalization of LaTeX math delimiters. The full manuscript files differ."
+}

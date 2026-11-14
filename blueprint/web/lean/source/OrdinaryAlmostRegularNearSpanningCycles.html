@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>OrdinaryAlmostRegularNearSpanningCycles.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>OrdinaryAlmostRegularNearSpanningCycles.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.OrdinaryAboveThresholdAlmostRegularCyclePacking</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Arbitrarily small uncovered fraction, with the allowed regularity error</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> and graph order chosen before the graph. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 12000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> </span>
+<span id="L10"><a href="#L10" class="ln">  10</a> theorem ordinary_above_threshold_almost_regular_near_spanning_cycles</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (r:ℕ) (hr:3≤r) (α ε:ℝ) (hα:0&lt;α) (hε:0&lt;ε):</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     ∃ η:ℝ,0&lt;η ∧ ∃ N:ℕ,</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∀ (V:Type) [Fintype V] [DecidableEq V] (G:SimpleGraph V),</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       N≤Fintype.card V→∀ d:ℝ,(Fintype.card V:ℝ)/2≤d→d≤Fintype.card V→</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       (∀ v,(cycleThreshold r+α)*Fintype.card V≤(G.degree v:ℝ))→</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (∀ v,|(G.degree v:ℝ)-d|≤η*(Fintype.card V:ℝ))→</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       ∃ M:Finset (OrdinaryCycle G r),</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>         (∀ C∈M,∀ C&#x27;∈M,C≠C&#x27;→Disjoint C.val.val.support.toFinset C&#x27;.val.val.support.toFinset) ∧</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>         (1-ε)*Fintype.card V≤(r:ℝ)*M.card := by</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   let ε₀:=min ε 1</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   have he0:0&lt;ε₀:=by dsimp [ε₀];positivity</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   have he1:ε₀≤1:=min_le_right _ _</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   have heε:ε₀≤ε:=min_le_left _ _</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   let θ:=ε₀/40</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   let γ:=ε₀/2</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   let η:=ε₀/160</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   have hθ:0&lt;θ:=by dsimp [θ];positivity</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   have hθsmall:θ≤1/20:=by dsimp [θ];linarith</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>   have hγ:0&lt;γ:=by dsimp [γ];positivity</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>   have hγ1:γ≤1:=by dsimp [γ];linarith</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>   have hη:0&lt;η:=by dsimp [η];positivity</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>   have heq:η=θ/4:=by dsimp [η,θ];ring</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>   obtain ⟨N,hpack⟩:=ordinary_above_threshold_almost_regular_cycle_packing r hr α θ γ hα hθ hθsmall hγ hγ1</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>   refine ⟨η,hη,N,?_⟩</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>   intro V _ _ G hn d hdlo hdhi hdeg hreg</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>   obtain ⟨M,hdisj,hcover⟩:=hpack V G hn d hdlo hdhi hdeg (fun v=&gt;by have hh:=hreg v; rw [heq] at hh; nlinarith only [hh])</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   refine ⟨M,hdisj,?_⟩</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>   have hcoeff:1-ε≤(1-γ)*(1-10*θ):=by</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>     dsimp [γ,θ]</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>     nlinarith [sq_nonneg ε₀]</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>   exact (mul_le_mul_of_nonneg_right hcoeff (Nat.cast_nonneg _)).trans hcover</span>
+<span id="L42"><a href="#L42" class="ln">  42</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedActiveHubLoads.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedActiveHubLoads.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedSpokeLoadGrouping</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> </span>
+<span id="L3"><a href="#L3" class="ln">   3</a> /-! Restrict the residual spoke load to hubs incident with an original</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> spoke. The number of switches is bounded by the original number of spokes,</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> not by the order of the host hub class. -/</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option autoImplicit false</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> set_option maxHeartbeats 10000000</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> open scoped BigOperators</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> noncomputable section</span>
+<span id="L11"><a href="#L11" class="ln">  11</a> namespace Oberwolfach</span>
+<span id="L12"><a href="#L12" class="ln">  12</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L13"><a href="#L13" class="ln">  13</a> variable {V U S:Type} [Fintype S] [Fintype U] [DecidableEq S] [DecidableEq V] [DecidableEq U]</span>
+<span id="L14"><a href="#L14" class="ln">  14</a> </span>
+<span id="L15"><a href="#L15" class="ln">  15</a>  theorem marked_active_hub_card (hub:S→U):Fintype.card {u:U // ∃ s:S,hub s=u}≤Fintype.card S:=by</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   let f:S→{u:U // ∃ s:S,hub s=u}:=fun s=&gt;⟨hub s,s,rfl⟩</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hf:Function.Surjective f:=by</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>     intro u</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>     obtain ⟨s,hs⟩:=u.property</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>     exact ⟨s,Subtype.ext hs⟩</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   exact Fintype.card_le_of_surjective f hf</span>
+<span id="L22"><a href="#L22" class="ln">  22</a> </span>
+<span id="L23"><a href="#L23" class="ln">  23</a>  theorem spokePathHubVertices_empty (m:ℕ) (p:S→(Fin m↪V)) (hub:S→U) (u:U)</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     (hu:¬∃ s:S,hub s=u):spokePathHubVertices m p hub u=∅:=by</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   apply Finset.eq_empty_iff_forall_notMem.mpr</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   intro v hv</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>   obtain ⟨s,_,_⟩:=Finset.mem_biUnion.mp hv</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>   exact hu ⟨s.val,s.property⟩</span>
+<span id="L29"><a href="#L29" class="ln">  29</a> </span>
+<span id="L30"><a href="#L30" class="ln">  30</a>  theorem marked_spoke_path_active_load (m:ℕ) (p:S→(Fin m↪V)) (hub:S→U) (ψ:U→U)</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     (e:Finset V⊕(V×U)):</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     (∑ u:U,((if e∈(spokePathHubVertices m p hub u).image (fun v=&gt;Sum.inr (v,u)) then (1:ℤ) else 0)-</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>       (if e∈(spokePathHubVertices m p hub u).image (fun v=&gt;Sum.inr (v,ψ u)) then 1 else 0)))=</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     ∑ u:{u:U // ∃ s:S,hub s=u},</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       ((if e∈(spokePathHubVertices m p hub u.val).image (fun v=&gt;Sum.inr (v,u.val)) then (1:ℤ) else 0)-</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>         (if e∈(spokePathHubVertices m p hub u.val).image (fun v=&gt;Sum.inr (v,ψ u.val)) then 1 else 0)):=by</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>   let f:U→ℤ:=fun u=&gt;</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>     (if e∈(spokePathHubVertices m p hub u).image (fun v=&gt;Sum.inr (v,u)) then 1 else 0)-</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (if e∈(spokePathHubVertices m p hub u).image (fun v=&gt;Sum.inr (v,ψ u)) then 1 else 0)</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>   have hz:(∑ u:{u:U // ¬∃ s:S,hub s=u},f u.val)=0:=by</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>     apply Finset.sum_eq_zero</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>     intro u _</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>     simp only [f,spokePathHubVertices_empty m p hub u.val u.property,Finset.image_empty,</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       Finset.notMem_empty,ite_false,sub_self]</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>   have hh:=Fintype.sum_subtype_add_sum_subtype (fun u=&gt;∃ s:S,hub s=u) f</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>   rw [hz,add_zero] at hh</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>   exact hh.symm</span>
+<span id="L48"><a href="#L48" class="ln">  48</a> </span>
+<span id="L49"><a href="#L49" class="ln">  49</a> end Oberwolfach</span></pre></html>

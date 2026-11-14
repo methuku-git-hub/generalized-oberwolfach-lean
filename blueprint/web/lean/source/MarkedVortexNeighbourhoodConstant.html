@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVortexNeighbourhoodConstant.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVortexNeighbourhoodConstant.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.AsymptoticMargins</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A single positive level constant handles both inner vertex and hub sizes. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> namespace Oberwolfach</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> </span>
+<span id="L6"><a href="#L6" class="ln">   6</a> theorem marked_vortex_neighbourhood_constant_exists</span>
+<span id="L7"><a href="#L7" class="ln">   7</a>     (ε ρ₀:ℝ) (he:0&lt;ε) (hρ:0&lt;ρ₀):</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     ∃K:ℝ,1≤K ∧ 1≤K*(ε/2) ∧ 1≤K*(ρ₀/8)*(ε/2) := by</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>   let K:=max 1 (max (2/ε) (16/(ρ₀*ε)))</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>   have hK1:1≤K:=le_max_left _ _</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>   have hKI:2/ε≤K:=(le_max_left _ _).trans (le_max_right _ _)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hKJ:16/(ρ₀*ε)≤K:=(le_max_right _ _).trans (le_max_right _ _)</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hscaleI:=mul_le_mul_of_nonneg_right hKI (show 0≤ε/2 by positivity)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hscaleJ:=mul_le_mul_of_nonneg_right hKJ (show 0≤(ρ₀/8)*(ε/2) by positivity)</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hEI:(2/ε)*(ε/2)=1:=by field_simp</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hEJ:(16/(ρ₀*ε))*((ρ₀/8)*(ε/2))=1:=by field_simp; norm_num</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   refine ⟨K,hK1,?_,?_⟩</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   · linarith</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   · nlinarith</span>
+<span id="L20"><a href="#L20" class="ln">  20</a> end Oberwolfach</span></pre></html>

@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>PairHubDensityBounds.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>PairHubDensityBounds.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.NormalizedCycleWeightBounds</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! Fixed lower and upper bounds for the two-hub density product. -/</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> noncomputable section</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> namespace Oberwolfach</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> theorem pair_hub_density_bounds (r:ℕ) (p pmin s₁ s₂ smin:ℝ)</span>
+<span id="L7"><a href="#L7" class="ln">   7</a>     (hpmin:0&lt;pmin) (hp:pmin≤p) (hp1:p≤1)</span>
+<span id="L8"><a href="#L8" class="ln">   8</a>     (hsmin:0&lt;smin) (hs₁:smin≤s₁) (hs₂:smin≤s₂) (hs₁1:s₁≤1) (hs₂1:s₂≤1):</span>
+<span id="L9"><a href="#L9" class="ln">   9</a>     0&lt;pmin^r*(smin*smin)^(r-1) ∧</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>       pmin^r*(smin*smin)^(r-1)≤p^r*(s₁*s₂)^(r-1) ∧</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>       p^r*(s₁*s₂)^(r-1)≤1 := by</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>   have hp0:0≤p:=le_trans hpmin.le hp</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>   have hs10:0≤s₁:=le_trans hsmin.le hs₁</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>   have hs20:0≤s₂:=le_trans hsmin.le hs₂</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>   have hsm:0≤smin*smin:=mul_nonneg hsmin.le hsmin.le</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>   have hsprod:smin*smin≤s₁*s₂:=mul_le_mul hs₁ hs₂ hsmin.le hs10</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>   have hsprod1:s₁*s₂≤1:=by nlinarith [mul_nonneg hs10 (sub_nonneg.mpr hs₂1)]</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>   constructor</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>   · positivity</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>   constructor</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>   · exact mul_le_mul (pow_le_pow_left₀ hpmin.le hp _) (pow_le_pow_left₀ hsm hsprod _) (pow_nonneg hsm _) (pow_nonneg hp0 _)</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   · have hpbound:p^r≤1:=by simpa using pow_le_one₀ hp0 hp1</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     have hsbound:(s₁*s₂)^(r-1)≤1:=by simpa using pow_le_one₀ (mul_nonneg hs10 hs20) hsprod1</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     nlinarith [mul_nonneg (pow_nonneg hp0 r) (sub_nonneg.mpr hsbound)]</span>
+<span id="L25"><a href="#L25" class="ln">  25</a> end Oberwolfach</span></pre></html>

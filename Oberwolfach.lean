@@ -1,0 +1,6 @@
+module
+
+public import Oberwolfach.PalomarAggregate0001
+public import Oberwolfach.PalomarAggregate0002
+public import Oberwolfach.PalomarAggregate0003
+public import Oberwolfach.PalomarAggregate0004

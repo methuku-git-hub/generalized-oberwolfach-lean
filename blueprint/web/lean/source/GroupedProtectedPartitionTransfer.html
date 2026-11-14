@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>GroupedProtectedPartitionTransfer.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>GroupedProtectedPartitionTransfer.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.GroupedProtectedPartitionEvent</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> /-! A protected binary partition transfers along any exact colour-law</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> projection, including a dependent retained experiment. -/</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option autoImplicit false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> set_option maxHeartbeats 1000000</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> noncomputable section</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> namespace Oberwolfach</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L10"><a href="#L10" class="ln">  10</a> </span>
+<span id="L11"><a href="#L11" class="ln">  11</a> theorem grouped_protected_partition_transfer</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (α r ξ:ℝ) (hα:0&lt;α) (hr:0&lt;r) (hξ:0&lt;ξ) (B:ℕ):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃N:ℕ,∀n:ℕ,N≤n→∀(P Z:SimpleGraph (Fin n)) (D:ℕ) (m:Fin 2→ℕ)</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>       (ρ:Fin 2→ℝ) (hρ:∀a,0≤ρ a) (ht:∑a,ρ a=1),</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>       P.IsRegularOfDegree D→Even D→(1/2+α)*n≤(D:ℝ)→</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>       (∑a,m a)=D/2→(∀a,ρ a/2*D=(m a:ℝ))→(∀a,r≤ρ a)→</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (∀v,(Z.degree v:ℝ)≤α/100000*n)→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       ∀{Ω:Type} [Fintype Ω] (μ:FiniteLaw Ω) (col:Ω→Sym2 (Fin n)→Fin 2),</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       (∀E:(Sym2 (Fin n)→Fin 2)→Prop,μ.probability (fun z=&gt;E (col z))=</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>         (FiniteLaw.pi (fun _:Sym2 (Fin n)=&gt;FiniteLaw.categorical ρ hρ ht)).probability E)→</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       1-1/(n:ℝ)^10≤μ.probability (fun z=&gt;GroupedProtectedPartitionEvent P Z m B ξ (col z)):=by</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>   obtain ⟨N,hN⟩:=protectedRegularPartition_highProbability 2 hα hr hξ B</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>   refine ⟨N,?_⟩</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>   intro n hn P Z D m ρ hρ ht hreg heven hmin hsum hm hrho hZ Ω _ μ col hproj</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>   rw [hproj]</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>   exact hN n hn P Z D m ρ hρ ht hreg heven hmin hsum hm hrho hZ</span>
+<span id="L27"><a href="#L27" class="ln">  27</a> end Oberwolfach</span></pre></html>

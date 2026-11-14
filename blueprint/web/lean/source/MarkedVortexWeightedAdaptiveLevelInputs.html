@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>MarkedVortexWeightedAdaptiveLevelInputs.lean — Lean source</title>
+<style>body{margin:2rem;font-family:system-ui}pre{line-height:1.55;white-space:pre-wrap}.ln{color:#777;text-decoration:none}span:target{background:#fff1a6}.status{padding:1rem;background:#fff3db}</style>
+<p><a href="../../index.html">Blueprint</a> · <a href="../../dep_graph_document.html">Dependency graph</a></p>
+<h1>MarkedVortexWeightedAdaptiveLevelInputs.lean</h1><p class="status">Formalisation in progress. Theorem 1.1 is not yet proved in Lean. This page displays saved source; it is not a certificate of the main theorem.</p><pre><span id="L1"><a href="#L1" class="ln">   1</a> import Oberwolfach.MarkedVortexAdaptiveLevelInputs</span>
+<span id="L2"><a href="#L2" class="ln">   2</a> import Oberwolfach.MarkedFixedVortexSuccessorWeights</span>
+<span id="L3"><a href="#L3" class="ln">   3</a> set_option autoImplicit false</span>
+<span id="L4"><a href="#L4" class="ln">   4</a> set_option backward.isDefEq.respectTransparency false</span>
+<span id="L5"><a href="#L5" class="ln">   5</a> set_option maxHeartbeats 15000000</span>
+<span id="L6"><a href="#L6" class="ln">   6</a> noncomputable section</span>
+<span id="L7"><a href="#L7" class="ln">   7</a> namespace Oberwolfach</span>
+<span id="L8"><a href="#L8" class="ln">   8</a> attribute [local instance] Classical.propDecidable</span>
+<span id="L9"><a href="#L9" class="ln">   9</a> theorem marked_fixed_vortex_weighted_adaptive_level_inputs</span>
+<span id="L10"><a href="#L10" class="ln">  10</a>     (k₀ r d:ℕ) (hlen:r+4+1=(k₀+2)*2)</span>
+<span id="L11"><a href="#L11" class="ln">  11</a>     (ε ρ₀ α τ:ℝ) (he:0&lt;ε) (he1:ε&lt;1/4) (hρ₀:0&lt;ρ₀) (hα:0&lt;α) (hτ:0&lt;τ)</span>
+<span id="L12"><a href="#L12" class="ln">  12</a>     (hmargin:successorCycleRatio k₀+α/4≤1/2+α/2):</span>
+<span id="L13"><a href="#L13" class="ln">  13</a>     ∃K:ℝ,1≤K ∧ ∃βmax:ℝ,0&lt;βmax ∧ ∀ (β γ δPbal δP:ℝ),</span>
+<span id="L14"><a href="#L14" class="ln">  14</a>     0≤β → β≤1/4 → β≤α/8 → β≤βmax → 0≤γ → γ≤α/2 → β≤δPbal → β≤δP →</span>
+<span id="L15"><a href="#L15" class="ln">  15</a>     ∀M:ℕ,∃m₀:ℕ,1≤m₀ ∧</span>
+<span id="L16"><a href="#L16" class="ln">  16</a>     ∀ (V U:Type) [Fintype V] [Fintype U] [LinearOrder V] [DecidableEq U]</span>
+<span id="L17"><a href="#L17" class="ln">  17</a>       (G:SimpleGraph V) (D m:ℕ),G.IsRegularOfDegree D→0&lt;Fintype.card V→</span>
+<span id="L18"><a href="#L18" class="ln">  18</a>       (1/2+α)*Fintype.card V≤(D:ℝ)→ρ₀ ≤ initialIndexDensity U D→initialIndexDensity U D≤1→</span>
+<span id="L19"><a href="#L19" class="ln">  19</a>       m₀≤m→∀(Q:Vortex U G D β ε m) (π:Equiv.Perm V)</span>
+<span id="L20"><a href="#L20" class="ln">  20</a>       (hpres:∀i x,π x∈Q.extendedVertices i↔x∈Q.extendedVertices i)</span>
+<span id="L21"><a href="#L21" class="ln">  21</a>       (L:ℕ),L&lt;Q.length→∀ s₀:ℝ,</span>
+<span id="L22"><a href="#L22" class="ln">  22</a>     let W:=markedVortexVertexType Q</span>
+<span id="L23"><a href="#L23" class="ln">  23</a>     let Z:=markedVortexHubType Q</span>
+<span id="L24"><a href="#L24" class="ln">  24</a>     let f:=markedVortexVertexEmbedding Q</span>
+<span id="L25"><a href="#L25" class="ln">  25</a>     let ρi:=markedVortexPermutation Q π hpres</span>
+<span id="L26"><a href="#L26" class="ln">  26</a>     let I:=markedVortexInnerVertices Q</span>
+<span id="L27"><a href="#L27" class="ln">  27</a>     let J:=markedVortexInnerHubs Q</span>
+<span id="L28"><a href="#L28" class="ln">  28</a>     let dens:=initialIndexDensity U D</span>
+<span id="L29"><a href="#L29" class="ln">  29</a>     let p:=dens*s₀/2</span>
+<span id="L30"><a href="#L30" class="ln">  30</a>     let k:=dens*(s₀/((r+4:ℕ):ℝ))/2</span>
+<span id="L31"><a href="#L31" class="ln">  31</a>     let Dbal:=fun i=&gt;2*((J i).card:ℝ)/dens</span>
+<span id="L32"><a href="#L32" class="ln">  32</a>     let Dlevel:=fun i=&gt;2*(Fintype.card (Z i):ℝ)/dens</span>
+<span id="L33"><a href="#L33" class="ln">  33</a>     ∃weight:∀i,(Fin (r+4+1)→W i)→ℝ,</span>
+<span id="L34"><a href="#L34" class="ln">  34</a>     (∀i≤L,SuccessorSequenceWeightConditions (G.comap (f i)) (ρi i) (3*d) (Dlevel i) τ</span>
+<span id="L35"><a href="#L35" class="ln">  35</a>       (successorWeightLower k₀ (α/4)) (successorWeightUpper k₀ (α/4)) (weight i)) ∧</span>
+<span id="L36"><a href="#L36" class="ln">  36</a>     (∀i x,f i (ρi i x)=π (f i x)) ∧</span>
+<span id="L37"><a href="#L37" class="ln">  37</a>     ∀i≤L,</span>
+<span id="L38"><a href="#L38" class="ln">  38</a>       M≤(I i).card ∧ M≤(J i).card ∧ M≤Fintype.card (W i) ∧ M≤Fintype.card (Z i) ∧</span>
+<span id="L39"><a href="#L39" class="ln">  39</a>       (ρ₀/8)*(Fintype.card (W i):ℝ)≤Fintype.card (Z i) ∧ Fintype.card (Z i)≤Fintype.card (W i) ∧</span>
+<span id="L40"><a href="#L40" class="ln">  40</a>       (I i).card≤Fintype.card (W i) ∧ (J i).card≤Fintype.card (W i) ∧</span>
+<span id="L41"><a href="#L41" class="ln">  41</a>       (Fintype.card (W (i+1)):ℝ)≤ε*Fintype.card (W i) ∧</span>
+<span id="L42"><a href="#L42" class="ln">  42</a>       (((I (i+1)).card:ℝ)≤ε*(I i).card) ∧ (((J (i+1)).card:ℝ)≤ε*(J i).card) ∧</span>
+<span id="L43"><a href="#L43" class="ln">  43</a>       (∀x,ρi i x∈I i↔x∈I i) ∧</span>
+<span id="L44"><a href="#L44" class="ln">  44</a>       (Fintype.card (W i):ℝ)≤K*(I i).card ∧ (Fintype.card (Z i):ℝ)≤K*(I i).card ∧</span>
+<span id="L45"><a href="#L45" class="ln">  45</a>       (Fintype.card (W i):ℝ)≤K*(J i).card ∧</span>
+<span id="L46"><a href="#L46" class="ln">  46</a>       (∀x:W i,|(((G.comap (f i)).neighborFinset x∩I i).card:ℝ)-Dbal i|≤δPbal*Fintype.card (W i)) ∧</span>
+<span id="L47"><a href="#L47" class="ln">  47</a>       (∀x:W i,(1/2+γ)*(I i).card≤(((G.comap (f i)).neighborFinset x∩I i).card:ℝ)) ∧</span>
+<span id="L48"><a href="#L48" class="ln">  48</a>       (∀x:W i,|((G.comap (f i)).degree x:ℝ)-Dlevel i|≤δP*Fintype.card (W i)) ∧</span>
+<span id="L49"><a href="#L49" class="ln">  49</a>       (∀x:W i,(1/2+γ)*Fintype.card (W i)≤((G.comap (f i)).degree x:ℝ)) ∧</span>
+<span id="L50"><a href="#L50" class="ln">  50</a>       (Fintype.card (W i):ℝ)/2≤Dlevel i ∧ Dlevel i≤2*Fintype.card (W i) ∧</span>
+<span id="L51"><a href="#L51" class="ln">  51</a>       p*Dbal i=s₀*(J i).card ∧ k*Dbal i=(s₀/((r+4:ℕ):ℝ))*(J i).card ∧</span>
+<span id="L52"><a href="#L52" class="ln">  52</a>       (Fintype.card (Z i):ℝ)*(s₀/((r+4:ℕ):ℝ))=Dlevel i*k ∧</span>
+<span id="L53"><a href="#L53" class="ln">  53</a>       (Fintype.card (Z i):ℝ)*(s₀/((r+4:ℕ):ℝ))*((r+4:ℕ):ℝ)=Dlevel i*p :=by</span>
+<span id="L54"><a href="#L54" class="ln">  54</a>   obtain ⟨K,hK,hlevels⟩:=marked_fixed_vortex_adaptive_level_inputs ε ρ₀ he he1 hρ₀</span>
+<span id="L55"><a href="#L55" class="ln">  55</a>   obtain ⟨βmax,hβmax,hweights⟩:=marked_fixed_vortex_successor_weight_families k₀ (r+4) hlen α τ hα hτ hmargin</span>
+<span id="L56"><a href="#L56" class="ln">  56</a>   obtain ⟨Nw,hNw,hweights⟩:=hweights (3*d)</span>
+<span id="L57"><a href="#L57" class="ln">  57</a>   refine ⟨K,hK,βmax,hβmax,?_⟩</span>
+<span id="L58"><a href="#L58" class="ln">  58</a>   intro β γ δPbal δP hb hb1 hbα hbmax hγ hγα hβbal hβP M</span>
+<span id="L59"><a href="#L59" class="ln">  59</a>   obtain ⟨Mlevel,hMlevel,hlevels⟩:=hlevels β α γ δPbal δP r hb hb1 hα hbα hγ hγα hβbal hβP M</span>
+<span id="L60"><a href="#L60" class="ln">  60</a>   let m₀:=max Mlevel ⌈2*(Nw:ℝ)/ε⌉₊</span>
+<span id="L61"><a href="#L61" class="ln">  61</a>   refine ⟨m₀,by dsimp [m₀];omega,?_⟩</span>
+<span id="L62"><a href="#L62" class="ln">  62</a>   intro V U _ _ _ _ G D m hreg hn hD hρlo hρhi hm Q π hpres L hL s₀ W Z f ρi I J dens p k Dbal Dlevel</span>
+<span id="L63"><a href="#L63" class="ln">  63</a>   have hmLevel:Mlevel≤m:=(le_max_left _ _).trans hm</span>
+<span id="L64"><a href="#L64" class="ln">  64</a>   have hceil:2*(Nw:ℝ)/ε≤m:=(Nat.le_ceil _).trans (by exact_mod_cast (show ⌈2*(Nw:ℝ)/ε⌉₊≤m from (le_max_right _ _).trans hm))</span>
+<span id="L65"><a href="#L65" class="ln">  65</a>   have hsize:(Nw:ℝ)≤ε*m/2:=by</span>
+<span id="L66"><a href="#L66" class="ln">  66</a>     have hh:2*(Nw:ℝ)≤(m:ℝ)*ε:=(div_le_iff₀ he).mp hceil</span>
+<span id="L67"><a href="#L67" class="ln">  67</a>     nlinarith</span>
+<span id="L68"><a href="#L68" class="ln">  68</a>   have hρ:0 &lt; initialIndexDensity U D:=hρ₀.trans_le hρlo</span>
+<span id="L69"><a href="#L69" class="ln">  69</a>   obtain ⟨weight,hweight⟩:=hweights V U G D m β ε Q hreg hn hD hρ hb hbmax he hsize π hpres L hL</span>
+<span id="L70"><a href="#L70" class="ln">  70</a>   have hgeom:=hlevels V U G D m hreg hn hD hρlo hρhi hmLevel Q π hpres L hL s₀</span>
+<span id="L71"><a href="#L71" class="ln">  71</a>   exact ⟨weight,hweight,hgeom⟩</span>
+<span id="L72"><a href="#L72" class="ln">  72</a> end Oberwolfach</span></pre></html>
