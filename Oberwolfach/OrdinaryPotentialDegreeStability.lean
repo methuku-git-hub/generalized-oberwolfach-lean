@@ -62,7 +62,7 @@ theorem ordinaryPotentialLoad_rim_degree_stability (x y : V) (hxy : x≠y) :
         by_cases h : Dq z t
         · dsimp only [Dq,Dh] at h ⊢
           simp only [h,ite_true,ite_false]
-          exact ordinaryOmittedPairLoad_rim_cost P F Hbase r hr hn hu w B hB hw x y z t hxy
+          apply ordinaryOmittedPairLoad_rim_cost P F Hbase r hr hn hu w B hB hw x y z t hxy
         · dsimp only [Dq,Dh] at h ⊢
           simp only [h,ite_true,ite_false,le_refl]
       · apply Finset.sum_le_sum
@@ -72,7 +72,7 @@ theorem ordinaryPotentialLoad_rim_degree_stability (x y : V) (hxy : x≠y) :
         by_cases h : Dh z u
         · dsimp only [Dq,Dh] at h ⊢
           simp only [h,ite_true,ite_false]
-          exact ordinaryOmittedPairLoad_rim_spoke_cost P F Hbase r hr hn hu w B hB hw x y z u hxy
+          apply ordinaryOmittedPairLoad_rim_spoke_cost P F Hbase r hr hn hu w B hB hw x y z u hxy
         · dsimp only [Dq,Dh] at h ⊢
           simp only [h,ite_true,ite_false,le_refl]
     _ ≤ d*((2+2)*M+n*N)+d*(2*M+n*N) := by
@@ -117,7 +117,7 @@ theorem ordinaryPotentialLoad_spoke_degree_stability (v : V) (u : U) :
         by_cases h : Dq x y
         · dsimp only [Dq,Dh] at h ⊢
           simp only [h,ite_true,ite_false]
-          exact ordinaryOmittedPairLoad_spoke_rim_cost P F Hbase r hr hn hu w B hB hw v x y u
+          apply ordinaryOmittedPairLoad_spoke_rim_cost P F Hbase r hr hn hu w B hB hw v x y u
         · dsimp only [Dq,Dh] at h ⊢
           simp only [h,ite_true,ite_false,le_refl]
       · apply Finset.sum_le_sum
@@ -127,7 +127,7 @@ theorem ordinaryPotentialLoad_spoke_degree_stability (v : V) (u : U) :
         by_cases h : Dh x t
         · dsimp only [Dq,Dh] at h ⊢
           simp only [h,ite_true,ite_false]
-          exact ordinaryOmittedPairLoad_spokes_cost P F Hbase r hr hn hu w B hB hw v x u t
+          apply ordinaryOmittedPairLoad_spokes_cost P F Hbase r hr hn hu w B hB hw v x u t
         · dsimp only [Dq,Dh] at h ⊢
           simp only [h,ite_true,ite_false,le_refl]
     _ ≤ d*((1+1)*M+n*N)+d*M := by
