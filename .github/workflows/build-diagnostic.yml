@@ -11,18 +11,18 @@ jobs:
   sample-build:
     name: Diagnostic sample — no theorem verdict
     runs-on: ubuntu-24.04
-    timeout-minutes: 130
+    timeout-minutes: 320
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          fetch-depth: 2
+          fetch-depth: 3
           persist-credentials: false
       - name: Confirm proof source matches the failed preflight
         shell: bash
         run: |
-          test "$(git rev-parse HEAD^)" = '5d242b7a7ecc79c47dfafb9d1ecdfecc6127dc6c'
+          git cat-file -e 5d242b7a7ecc79c47dfafb9d1ecdfecc6127dc6c^{commit}
           expected=$(printf '%s\n' '.github/scripts/profile_lake_build.py' '.github/workflows/build-diagnostic.yml')
-          actual=$(git diff --name-only HEAD^ HEAD | LC_ALL=C sort)
+          actual=$(git diff --name-only 5d242b7a7ecc79c47dfafb9d1ecdfecc6127dc6c HEAD | LC_ALL=C sort)
           test "$actual" = "$expected"
           echo '## Diagnostic only — not Palomar verification' >> "$GITHUB_STEP_SUMMARY"
           echo 'This job samples build progress and memory; a successful diagnostic is not a theorem verdict.' >> "$GITHUB_STEP_SUMMARY"
@@ -53,6 +53,7 @@ jobs:
       - name: Sample build progress and memory
         env:
           DIAGNOSTIC_SOURCE_COMMIT: 5d242b7a7ecc79c47dfafb9d1ecdfecc6127dc6c
+          DIAGNOSTIC_MAX_SECONDS: 16200
         run: python3 .github/scripts/profile_lake_build.py
       - name: Preserve diagnostic measurements
         if: always()

@@ -17,7 +17,7 @@ duration = int(os.environ.get('DIAGNOSTIC_MAX_SECONDS', '3600'))
 sample_interval = float(os.environ.get('DIAGNOSTIC_SAMPLE_SECONDS', '5'))
 proc_root = Path(os.environ.get('DIAGNOSTIC_PROC_ROOT', '/proc'))
 cgroup_path = Path(os.environ.get('DIAGNOSTIC_CGROUP_MEMORY', '/sys/fs/cgroup/memory.current'))
-if not (1 <= duration <= 7200 and 0.1 <= sample_interval <= 60):
+if not (1 <= duration <= 18000 and 0.1 <= sample_interval <= 60):
     raise ValueError('Invalid diagnostic sampling limits')
 minimum_available = 2 * 1024 * 1024 * 1024
 started = time.monotonic()
@@ -89,7 +89,7 @@ proc = subprocess.Popen(['lake', '--no-ansi', '-v', 'build', 'Solution'], stdout
 reader = threading.Thread(target=consume, args=(proc.stdout,), daemon=True)
 reader.start()
 reason = None
-peak_group = 0
+peak_group = None
 try:
     with (out / 'resource-samples.csv').open('w', newline='') as f:
         writer = csv.writer(f)
@@ -99,7 +99,8 @@ try:
         while proc.poll() is None:
             available = mem_available()
             group = cgroup_memory()
-            peak_group = max(peak_group, group or 0)
+            if group is not None:
+                peak_group = max(peak_group or 0, group)
             lean_count, rss_sum, largest, top_modules = process_snapshot(proc.pid)
             writer.writerow([round(time.monotonic()-started, 1), available, group, lean_count,
                              rss_sum, largest, top_modules, counts['completed_modules'], counts['latest_module']])
