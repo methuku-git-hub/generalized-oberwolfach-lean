@@ -49,7 +49,8 @@ theorem ordinary_pair_hub_pattern_load_common_event_ext
       (ordinaryPairHubCoordinates π d a.1 a.2)
       (ordinary_pair_hub_resource_supported P π d j a.1 a.2) C hC hB
       (by intro z;dsimp [C];exact_mod_cast hread z) (by intro z;dsimp [C];exact_mod_cast haffect z) t ht
-    convert hh using 1 <;> congr!
+    set_option backward.isDefEq.respectTransparency true in
+      convert hh using 1 <;> congr!
   have hh:=finiteLaw_common_event_lower μ Finset.univ (fun a σ=>¬Good a σ) (fun _=>err) (by
     intro a ha
     have hc:=finiteLaw_probability_compl μ (Good a)
