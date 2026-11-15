@@ -302,7 +302,7 @@ theorem long_assigned_adaptive_vortex_deeper_weighted_with_extra
   have hDmin':(1/2+2*αRef)*Fintype.card (Fin n)≤(Dnat:ℝ):=by simpa [hDeq] using hDmin
   have hDhalf:(Fintype.card (Fin n):ℝ)/2≤(Dnat:ℝ):=by
     have hn0:(0:ℝ)≤Fintype.card (Fin n):=Nat.cast_nonneg _
-    nlinarith [mul_nonneg hαRef.le hn0]
+    nlinarith only [hDmin', mul_nonneg hαRef.le hn0]
   have hρlo':ρ₀ ≤ initialIndexDensity U Dnat:=by simpa [hρeq] using hρlo
   have hρhi':initialIndexDensity U Dnat≤1:=by simpa [hρeq] using hρ1
   have hρpos:0 < initialIndexDensity U Dnat:=hρ₀.trans_le hρlo'
@@ -312,7 +312,7 @@ theorem long_assigned_adaptive_vortex_deeper_weighted_with_extra
   have hceil:2*(Nw:ℝ)/εQ≤vsize:=(Nat.le_ceil _).trans (by exact_mod_cast (show ⌈2*(Nw:ℝ)/εQ⌉₊≤vsize from (le_max_right _ _).trans ((le_max_left _ _).trans hmLevel)))
   have hweightSize:(Nw:ℝ)≤εQ*vsize/2:=by
     have hh:2*(Nw:ℝ)≤(vsize:ℝ)*εQ:=(div_le_iff₀ hεQ).mp hceil
-    nlinarith
+    nlinarith only [hh]
   obtain ⟨levelWeight,hWeight⟩:=hweights (Fin n) U P Dnat vsize βQ εQ Q hreg (by simpa using hnpos) hDmin' hρpos hβQ hβWeight' hεQ hweightSize π hpres L hL
   have hGeometry:=hGeom (Fin n) U P Dnat vsize hreg (by simpa using hnpos) hDhalf hρlo' hρhi' hmGeom' Q π hpres L hL
   have hSizes:=marked_vortex_neighbourhood_size_inputs Q hreg (by simpa using hnpos) hDhalf hρ₀ hρlo' hρhi' hβQ hβQ1 hεQ (by linarith) hmpos Knbr (by linarith) hKI hKJ L hL
@@ -325,7 +325,8 @@ theorem long_assigned_adaptive_vortex_deeper_weighted_with_extra
     intro v
     rw [hreg v]
     have hn0:(0:ℝ)≤n:=Nat.cast_nonneg _
-    nlinarith [mul_nonneg hαRef.le hn0]
+    have hmin : (1/2+2*αRef)*(n:ℝ)≤(Dnat:ℝ) := by simpa only [Fintype.card_fin] using hDmin'
+    nlinarith only [hmin, mul_nonneg hαRef.le hn0]
   have hWsize:∀i≤L,MLevel≤Fintype.card (W i):=fun i hi=>(hGeometry.2 i hi).2.2.1
   have hZsize:∀i≤L,MLevel≤Fintype.card (Z i):=fun i hi=>(hGeometry.2 i hi).2.2.2.1
   have hWstep:∀i<L,(Fintype.card (W (i+1)):ℝ)≤εQ*Fintype.card (W i):=fun i hi=>(hGeometry.2 i (by omega)).2.2.2.2.2.2.2.2.1
