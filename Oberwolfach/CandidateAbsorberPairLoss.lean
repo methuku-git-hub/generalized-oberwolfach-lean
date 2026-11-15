@@ -35,8 +35,13 @@ theorem candidate_absorber_pair_loss (hc : 2≤c) (hn : 1≤Fintype.card V)
         ¬∀ o,∀ e:E,¬(e.val.1∈R (D.2.2 o).val ∧ e.val.2∈R (D.2.2 o).val))↔
       (labelledAbsorberFree R (S D.1) X D.2⊆Finset.univ ∧
         ∃ e∈E,∃ o,e.1∈R (D.2.2 o).val ∧ e.2∈R (D.2.2 o).val) := by
-    simp only [Finset.subset_univ,true_and,not_forall,not_not,Subtype.exists]
-    aesop
+    constructor
+    · rintro ⟨_, h⟩
+      obtain ⟨o, ho⟩ := not_forall.mp h
+      obtain ⟨e, he⟩ := not_forall.mp ho
+      exact ⟨Finset.subset_univ _, e.val, e.property, o, not_not.mp he⟩
+    · rintro ⟨_, e, he, o, hp⟩
+      exact ⟨Finset.subset_univ _, fun hf => hf o ⟨e, he⟩ hp⟩
   rw [Fintype.card_congr (Equiv.subtypeEquivRight he)] at hh
   rw [absorberGroundCount_univ,absorberGroundCount_univ] at hh
   have hb := labelled_absorber_forbidden_pairs_count R S X Finset.univ J hJ E hE
