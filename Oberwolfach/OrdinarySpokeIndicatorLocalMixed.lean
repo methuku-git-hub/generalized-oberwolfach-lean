@@ -41,5 +41,5 @@ theorem ordinary_spoke_indicator_sum_eq_local_mixed (P Q F:SimpleGraph V) (H:Vâ†
   intro C _
   dsimp only [f]
   simp only [Finset.sum_ite_eq',Finset.mem_univ,ite_true,Finset.mem_filter,true_and]
-  split_ifs <;> first | rfl | tauto
+  split_ifs <;> simp_all
 end Oberwolfach
