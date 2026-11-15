@@ -62,14 +62,7 @@ theorem ordinary_triangle_feasible_preparation_optimized
   have hεearlyρ:εearly≤ρ₀/16:=hearlyCap.trans (hPlaceCap.trans hερ)
   have hεearlyVortex:εearly≤εvortex:=hearlyCap.trans (hPlaceCap.trans hεvortexCap)
   have hm:7≤m:=hAt.2.1
-  obtain ⟨rateParent,ζcert,δDeep,rate,hrate,hrateRoot,hrateInner,hrateEnd,hscale',hζ,hζrate,hζcap,hζlimit',
-    hδDeep,hδα,hrateDeep,p,εsup,capSmall,δsample,ν,hp,hp1,hpθ,hsqrt,hεsup,hεsupCap,hcapSmall,hcapOther,hcapEll,
-    hδsample,hν,hνcap,Norder,hNorder,τcover,hτeq,hτ,hτcap,hτ1,hsafe1,hsafe2,hsafe3,hfinish,hbudgetE,hbudgetH,
-    eps,γgeo,aLoad,ξroot,η₀,ηbal,ηInitial,heps,heps1,hγ,hgeometry,hcover,ha,ha1,hacapSmall,haκ,haγ,haedit,hξeq,hξ,hξγ,hξcap,
-    hηeq,hη₀,hη,hη₀cap,hηγ,hηI,hηIcap,hsmall,hsmall',hellBound,δInitial,hδInitial,hδIα,hδIη,hcallbacks,
-    δedit,ηedit,ηBudget,capChosen,hδedit,hδαedit,hδbal,hηedit,hBudget,hBudgetη,hsmallBudget,hChosen,hChosen1,hChosenBudget,
-    d,hd,hmargins,bHub,Bweight,ξdeep,tOuter,ζouter,δOuter,δcap,rateOuter,ξedit,ξAbs,
-    hb,hbc,hB,hBbound,hξdeep,hξdeepcap,hβchoose,htOuter,hζouter,hζlimitOuter,hδOuter,hδαOuter,hδcap,hδζ,hrateOuter,htrace,houterChoice,hjoint,hAfterLosses⟩:=
+  have hPreHostChunks :=
     ordinary_triangle_pre_host_wheel_and_matching_thresholds (α/2) ρ₀ (ρ₀*(βfreq/200)/2) cInner CInner ηhub eParent hParent (ρ₀/8) ηend εf εrows 1
       ξInner Kdom BInner tHub eEvent hEvent capInner γold κold δInner tpot lamInner bold Bold βcap ε 1 cBoundary
       hselected hdeep (by norm_num) βH ηH Bparent (ρ₀/16) (βH/2) (2*ηH) ζroot rateRoot N₀ hN₀ hrateRoot hscale ζlimit hζlimit
@@ -82,6 +75,17 @@ theorem ordinary_triangle_feasible_preparation_optimized
       βP 1 cParent (2*δref) href (by omega) hηH hselection
       hrefLocal ζcut εcut εvortex (min ((α/2)/4) (1/4:ℝ)) hnum hδsmall hεearlyVortex hξGeo hζcut.le hεcut.le hδcutBound hhrefcap
       hρ₀1 hθhalf hm le_rfl (hearlyCap.trans hAbsCap) (hearlyCap.trans hVCap) hEarly
+  obtain ⟨rateParent,ζcert,δDeep,rate,hrate,hrateRoot,hrateInner,hrateEnd,hscale',hζ,hζrate,hζcap,hPreHostChunksRest1⟩:=hPreHostChunks
+  obtain ⟨hζlimit',hδDeep,hδα,hrateDeep,p,εsup,capSmall,δsample,ν,hp,hp1,hpθ,hPreHostChunksRest2⟩:=hPreHostChunksRest1
+  obtain ⟨hsqrt,hεsup,hεsupCap,hcapSmall,hcapOther,hcapEll,hδsample,hν,hνcap,Norder,hNorder,τcover,hPreHostChunksRest3⟩:=hPreHostChunksRest2
+  obtain ⟨hτeq,hτ,hτcap,hτ1,hsafe1,hsafe2,hsafe3,hfinish,hbudgetE,hbudgetH,eps,γgeo,hPreHostChunksRest4⟩:=hPreHostChunksRest3
+  obtain ⟨aLoad,ξroot,η₀,ηbal,ηInitial,heps,heps1,hγ,hgeometry,hcover,ha,ha1,hPreHostChunksRest5⟩:=hPreHostChunksRest4
+  obtain ⟨hacapSmall,haκ,haγ,haedit,hξeq,hξ,hξγ,hξcap,hηeq,hη₀,hη,hη₀cap,hPreHostChunksRest6⟩:=hPreHostChunksRest5
+  obtain ⟨hηγ,hηI,hηIcap,hsmall,hsmall',hellBound,δInitial,hδInitial,hδIα,hδIη,hcallbacks,δedit,hPreHostChunksRest7⟩:=hPreHostChunksRest6
+  obtain ⟨ηedit,ηBudget,capChosen,hδedit,hδαedit,hδbal,hηedit,hBudget,hBudgetη,hsmallBudget,hChosen,hChosen1,hPreHostChunksRest8⟩:=hPreHostChunksRest7
+  obtain ⟨hChosenBudget,d,hd,hmargins,bHub,Bweight,ξdeep,tOuter,ζouter,δOuter,δcap,rateOuter,hPreHostChunksRest9⟩:=hPreHostChunksRest8
+  obtain ⟨ξedit,ξAbs,hb,hbc,hB,hBbound,hξdeep,hξdeepcap,hβchoose,htOuter,hζouter,hζlimitOuter,hPreHostChunksRest10⟩:=hPreHostChunksRest9
+  obtain ⟨hδOuter,hδαOuter,hδcap,hδζ,hrateOuter,htrace,houterChoice,hjoint,hAfterLosses⟩:=hPreHostChunksRest10
   have hjointKeep:=hjoint
   obtain ⟨δ,θmatch',κplace,bplace,zplace,matchErr,σbal,κprime,dNeed,hStage,βSel,lamSel,ζSel,smin,K,rank,hSpacing,
     ζret,Nplace,lamMatch,aRow,γrow,BO,hPlacementAfter,hMatching,hBO,hd',hSelect,τmatch,tMatch,ξMatch,bMatch,hChoice,hColumns,
@@ -92,14 +96,17 @@ theorem ordinary_triangle_feasible_preparation_optimized
   let t:ℝ:=capFailure/2
   have ht:0<t:=by dsimp [t];positivity
   have htCap:t≤capFailure:=by dsimp [t];linarith only [hcapFailure]
-  obtain ⟨βsmall,r,hβsmall,hβold,hr,hrI,hrD,hrE,hrS,hrG,hrEnd,hrRows,hselected',
-    εTri,β,hεTri,hβ,hβone,hβα8,hβα4,hβκ,hβcap,hβδ,hβtri,hβcert,hβI,hβD,hβE,hβG,hgapOuter,hgapInner,hβbalance,
-    v₀,Mhost,Mcut,hv₀,hMhost,hMcut,hafter,hselector,hcuts,vInner,hvInner,hInner,
-    Msmall,vCert,vCommon,hMsmall,hvCert,hvouter,hvinner,hvcert,hcert,
-    mInitial,mBalance,mEdit,Nedit,mFineInitial,mFineLater,mGeom,mAll,hmI,hmB,hmEdit,hmGeom,hI,hB',hE',hFI,hFL,hG,
-    hInitAt,hBalance,hMargins,hFine,hLater,hGeom,M,vCommon',mVortex,mv,hM,hSmall,hN₀',hNcert,hNedit,htwo,hmatchBound,hvCert',hvOuter,hvInner',hmAll,
-    hmv,hCommon,hVortexSize,hterm,hhostSize,hcutSize,hlook,hcert',hThresholds⟩:=
+  have hAfterLossesChunks :=
       hAfterLosses t t t t t t t t t ht ht ht ht ht ht ht ht ht
+  obtain ⟨βsmall,r,hβsmall,hβold,hr,hrI,hrD,hrE,hrS,hrG,hrEnd,hrRows,hAfterLossesChunksRest1⟩:=hAfterLossesChunks
+  obtain ⟨hselected',εTri,β,hεTri,hβ,hβone,hβα8,hβα4,hβκ,hβcap,hβδ,hβtri,hAfterLossesChunksRest2⟩:=hAfterLossesChunksRest1
+  obtain ⟨hβcert,hβI,hβD,hβE,hβG,hgapOuter,hgapInner,hβbalance,v₀,Mhost,Mcut,hv₀,hAfterLossesChunksRest3⟩:=hAfterLossesChunksRest2
+  obtain ⟨hMhost,hMcut,hafter,hselector,hcuts,vInner,hvInner,hInner,Msmall,vCert,vCommon,hMsmall,hAfterLossesChunksRest4⟩:=hAfterLossesChunksRest3
+  obtain ⟨hvCert,hvouter,hvinner,hvcert,hcert,mInitial,mBalance,mEdit,Nedit,mFineInitial,mFineLater,mGeom,hAfterLossesChunksRest5⟩:=hAfterLossesChunksRest4
+  obtain ⟨mAll,hmI,hmB,hmEdit,hmGeom,hI,hB',hE',hFI,hFL,hG,hInitAt,hAfterLossesChunksRest6⟩:=hAfterLossesChunksRest5
+  obtain ⟨hBalance,hMargins,hFine,hLater,hGeom,M,vCommon',mVortex,mv,hM,hSmall,hN₀',hAfterLossesChunksRest7⟩:=hAfterLossesChunksRest6
+  obtain ⟨hNcert,hNedit,htwo,hmatchBound,hvCert',hvOuter,hvInner',hmAll,hmv,hCommon,hVortexSize,hterm,hAfterLossesChunksRest8⟩:=hAfterLossesChunksRest7
+  obtain ⟨hhostSize,hcutSize,hlook,hcert',hThresholds⟩:=hAfterLossesChunksRest8
   have hThreshold:=hThresholds t t t t t t t t t t t t ht ht ht ht ht ht ht ht ht ht ht ht
   obtain ⟨δ,θmatch',κplace,bplace,zplace,matchErr,σbal,κprime,dNeed,hStage,βSel,lamSel,ζSel,smin,K,rank,hSpacing,
     ζret,Nplace,lamMatch,aRow,γrow,BO,hPlacementAfter,hMatching,hBO,hd',hSelect,τmatch,tMatch,ξMatch,bMatch,hChoice,hColumns,
