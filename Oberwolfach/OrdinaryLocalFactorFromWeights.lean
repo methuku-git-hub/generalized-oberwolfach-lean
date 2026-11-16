@@ -81,6 +81,7 @@ theorem ordinary_local_factor_from_fixed_weights (m : ℕ) (hm : 2≤m) (α p cL
   have he : (m+1:ℝ)=((m+1:ℕ):ℝ) := by norm_cast
   rw [← he] at ht
   have hfinal := htriangle.trans ((add_le_add hpot ht).trans (show ξ+(2*δ+12*(m+1:ℝ)^4*cHi*L/Fintype.card V)≤η by linarith only [herr]))
-  convert hfinal using 1 <;> congr!
+  set_option backward.isDefEq.respectTransparency true in
+    convert hfinal using 1 <;> congr!
 
 end Oberwolfach
