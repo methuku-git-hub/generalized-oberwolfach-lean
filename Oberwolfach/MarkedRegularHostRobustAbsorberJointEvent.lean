@@ -65,7 +65,7 @@ theorem marked_regular_host_robust_absorber_with_existing_event
   intro V U Γ Color _ _ _ _ _ _ _ hn hnpos G D hreg hD hrlo hrhi π hπ s₀ hslo hshi ρ densities p k
   have hhalf:(Fintype.card V:ℝ)/2≤D:=by
     have hn0:(0:ℝ)≤Fintype.card V:=Nat.cast_nonneg _
-    nlinarith [mul_nonneg hα.le hn0]
+    nlinarith only [hD, mul_nonneg hα.le hn0]
   have hDhi:(D:ℝ)≤2*Fintype.card V:=by
     have hh:D≤Fintype.card V:=regular_degree_le_card hreg hnpos
     have hh':(D:ℝ)≤Fintype.card V:=by exact_mod_cast hh

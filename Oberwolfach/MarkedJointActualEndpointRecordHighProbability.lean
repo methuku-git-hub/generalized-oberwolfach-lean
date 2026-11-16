@@ -388,7 +388,7 @@ theorem marked_joint_actual_reference_all_levels_endpoint_record_high_probabilit
               · intro i hi
                 have hDhalf:(Fintype.card V:ℝ)/2≤D:=by
                   have hn0:(0:ℝ)≤Fintype.card V:=Nat.cast_nonneg _
-                  nlinarith [mul_nonneg hα.le hn0]
+                  nlinarith only [hD, mul_nonneg hα.le hn0]
                 have hmpos:0<m:=lt_of_lt_of_le (by omega) hm
                 obtain ⟨hnI,huI⟩:=marked_vortex_inner_domains_nonempty Q hreg hn hDhalf hρ₀ hρlo hb hbquarter he hmpos i (by omega)
                 exact marked_vortex_inner_cut_fields_uniform_densities Q π hpres d i a j z

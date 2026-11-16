@@ -53,7 +53,7 @@ theorem marked_actual_parent_cuts_target_event
   have hρ:0 < initialIndexDensity U D:=hρ₀.trans_le hρlo
   have hhalf:(Fintype.card V:ℝ)/2≤D:=by
     have hn0:(0:ℝ)≤Fintype.card V:=Nat.cast_nonneg _
-    nlinarith [mul_nonneg hα.le hn0]
+    nlinarith only [hD, mul_nonneg hα.le hn0]
   have hgeom:=hgeo V U G D m hreg hn hhalf hρlo hρhi hm Q π hpres L hL
   have hfield (i:ℕ) (hi:i≤L):=marked_vortex_fixed_parent_degree_fields Q hreg hn hD hα hρ hb hbα hb1 he hmpos i (by omega)
   have hmin (i:ℕ) (hi:i≤L):M≤Fintype.card (W i):=(hgeom.2 i hi).2.2.1

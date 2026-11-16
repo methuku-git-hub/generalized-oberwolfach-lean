@@ -24,6 +24,7 @@ namespace Oberwolfach
 attribute [local instance] Classical.propDecidable
 attribute [local instance 100000] Finset.decidableDforallFinset
 
+set_option backward.isDefEq.respectTransparency true in
 theorem ordinary_assigned_matching_after_deletion_support_candidate
     (r K m d:ℕ) (hr:2≤r) (hK3:3≤K) (hm:7≤m) (hd:2≤d)
     (hrM:2*(m+1)≤r) (hrO:∀i:Fin K,2*(longPaddedSeedExponent i+2)≤r)

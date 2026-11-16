@@ -340,7 +340,7 @@ theorem marked_joint_reference_all_levels_uniform_failure
     dsimp [errRow];linarith only [hRowProb']
   have hDhalf:(Fintype.card V:ℝ)/2≤D:=by
     have hn0:(0:ℝ)≤Fintype.card V:=Nat.cast_nonneg _
-    nlinarith [mul_nonneg hα.le hn0]
+    nlinarith only [hD, mul_nonneg hα.le hn0]
   have hmass:=marked_active_seed_mass_bound D ρ₀ tstar (s₀/((r+4:ℕ):ℝ)) pstarRef hρ₀ htstar hn hDhalf hρlo htlo hpstarRefBound
   have hFullProb:=hfull V U Γ Color G D m hreg hn hDhalf hρlo hρhi hmFull' hmn Q π hpres hshort L hL
     p kval (densities.1.trans_le densities.2.1).le (densities.1.trans_le densities.2.2.1).le densities.2.2.2.2.2.2.2.2
@@ -367,7 +367,7 @@ theorem marked_joint_reference_all_levels_uniform_failure
   have hs0pos:0<s₀:=hsstar.trans_le hslo
   have hts:s₀/((r+4:ℕ):ℝ)≤s₀:=by
     apply (div_le_iff₀ hcpos).2
-    nlinarith
+    nlinarith only [mul_nonneg (sub_nonneg.mpr hc) hs0pos.le]
   have htone:s₀/((r+4:ℕ):ℝ)≤1:=by linarith
   have hActualProb:=hactual V U Γ Color G D m hreg hn hD hρlo hρhi hmActual' Q π hpres hshort L hL
     p kval (densities.1.trans_le densities.2.1).le (densities.1.trans_le densities.2.2.1).le densities.2.2.2.2.2.2.2.2

@@ -17,6 +17,7 @@ noncomputable section
 namespace Oberwolfach
 attribute [local instance] Classical.propDecidable
 
+set_option backward.isDefEq.respectTransparency true in
 theorem ordinary_robust_local_factor (m : ℕ) (hm : 2≤m) (α p b B : ℝ)
     (hα : 0<α) (hp : 0<p) (hp1 : p≤1) (hb : 0<b) (hB : 0≤B) :
     ∃ θ : ℝ,0<θ ∧ ∃ N : ℕ,

@@ -86,7 +86,7 @@ theorem marked_fixed_vortex_reference_and_active_event_ordered
   intro V U Γ Color _ _ _ _ _ _ _ G D m hreg hn hD hrlo hrhi hm hmn Q π hpres hnoshort L hL W Z f g ρ Dload I T J Wrem
   have hhalf:(Fintype.card V:ℝ)/2≤D:=by
     have hn0:(0:ℝ)≤Fintype.card V:=Nat.cast_nonneg _
-    nlinarith [mul_nonneg hα.le hn0]
+    nlinarith only [hD, mul_nonneg hα.le hn0]
   intro p k hp hk hsum hpmin hkmin q hq hQ s hs hS a j s₀ t₀ hq₀ hs₀ hslo htlo
   have hmass:=marked_vortex_retention_mass hreg hn hhalf ρ₀ tstar pstar t₀ hρ₀ htstar hpstar.le hrlo hpstarBound htlo
   have hRef:=href V U Γ Color G D m hreg hn hD hrlo hrhi ((le_max_left _ _).trans hm) Q π hpres hnoshort L hL

@@ -15,6 +15,7 @@ noncomputable section
 namespace Oberwolfach
 attribute [local instance] Classical.propDecidable
 
+set_option backward.isDefEq.respectTransparency true in
 theorem ordinary_reserved_completion_tests_on_prior
     (d:ℕ) (hd:2≤d) (smin χnbr χpair χpath:ℝ)
     (hsmin:0≤smin) (hχnbr:0<χnbr) (hχpair:0<χpair) (hχpath:0<χpath):

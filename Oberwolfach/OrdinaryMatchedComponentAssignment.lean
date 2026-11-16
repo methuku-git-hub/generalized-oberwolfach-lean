@@ -17,6 +17,7 @@ namespace Oberwolfach
 attribute [local instance] Classical.propDecidable
 variable {n K:ℕ} {U:Type} [Fintype U] [DecidableEq U]
 
+set_option backward.isDefEq.respectTransparency true in
 theorem ordinary_matched_component_assignment
     (hn:0<n) (F:U→SimpleGraph (Fin n)) (hF:∀u,(F u).IsRegularOfDegree 2)
     (Allowed:Set ℕ) (hAllowed:∀u,AllowedCycleLengths (F u) Allowed)

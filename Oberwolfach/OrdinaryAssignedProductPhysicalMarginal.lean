@@ -15,6 +15,7 @@ noncomputable section
 namespace Oberwolfach
 attribute [local instance] Classical.propDecidable
 
+set_option backward.isDefEq.respectTransparency true in
 theorem ordinary_assigned_product_physical_marginal
     {n D:ℕ} {U:Type} [Fintype U] [DecidableEq U]
     (F:U→SimpleGraph (Fin n)) (hF:∀w,(F w).IsRegularOfDegree 2)

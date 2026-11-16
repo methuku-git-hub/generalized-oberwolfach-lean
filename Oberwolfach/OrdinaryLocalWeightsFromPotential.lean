@@ -13,6 +13,7 @@ namespace Oberwolfach
 attribute [local instance] Classical.propDecidable
 variable {V:Type} [Fintype V] [DecidableEq V]
 
+set_option backward.isDefEq.respectTransparency true in
 theorem ordinary_local_weights_from_potential (m:ℕ) (hm:2≤m)
     (P Q F:SimpleGraph V) (T:Finset V) (j:ℕ) (p q s D δ ξ L cLo cHi:ℝ)
     (hn:0<Fintype.card V) (hQP:Q≤P) (hj:j≤2) (hp:0<p) (hp1:p≤1)

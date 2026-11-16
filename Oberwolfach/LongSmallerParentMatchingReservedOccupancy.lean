@@ -544,7 +544,7 @@ theorem long_assigned_vortex_matching_with_smaller_reference_parent_occupancy_an
     hεRef hδRef hεQ hεQ1 hεQAbs hχ hχCommon hpstarRef hζ hεBal hζBal hχBal hεNbr hζNbr hχNbr hεLoad hζLoad hχLoad hζLocal hχLocal hζConfig hχConfig hτLevel hQreal hNbr hpstarBound hgap
   intro δparent hδparent
   have hpstar:0<ρ₀*tstar/8:=by positivity
-  have hpstarCap:ρ₀*tstar/8≤ρ₀*tstar/4:=by nlinarith [mul_pos hρ₀ htstar]
+  have hpstarCap:ρ₀*tstar/8≤ρ₀*tstar/4:=by nlinarith only [mul_pos hρ₀ htstar]
   obtain ⟨βParent,hβParent,hP⟩:=hP δparent (ρ₀*tstar/8) δparent δparent δparent δparent δparent δparent δparent εBal ζBal δparent δparent δparent
     hδparent hpstar hpstarCap hδparent hδparent hδparent hδparent hδparent hδparent hδparent hεBal hζBal hδparent hδparent hδparent
   refine ⟨min βMatch βParent,by positivity,?_⟩
@@ -831,7 +831,7 @@ theorem long_assigned_vortex_matching_with_smaller_reference_parent_occupancy_an
     simpa only [Base,ParentGood, AP, BP, XP, fActiveP, gActiveP, ρActiveP, DactiveP, pstarLocalP, fParentP, gParentP, gWideP, ρParentP, DparentP, GP, αP, Color, aP, jP, sParent, pParent, kParent, weightParentP, weightActiveP, q, s, W, Z, ←hρeq, hkEq] using hPprob
   have hUpos:0<Fintype.card U:=by
     have hρ:0<ρ:=lt_of_lt_of_le hρ₀ hρlo
-    have hh:0<(Fintype.card U:ℝ):=by nlinarith [mul_pos hρ hD]
+    have hh:0<(Fintype.card U:ℝ):=by nlinarith only [hsize, mul_pos hρ hD]
     exact_mod_cast hh
   have hOccProb:1-εExtra/3≤Base.probability Occ:=by
     have h:=hOcc (Fin n) (by simpa using (show Nocc≤n by omega)) U Bool hUpos (by simpa using huv)

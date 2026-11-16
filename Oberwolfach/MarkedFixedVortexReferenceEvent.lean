@@ -64,7 +64,7 @@ theorem marked_fixed_vortex_reference_event
   have hρ:0 < initialIndexDensity U D:=hρ₀.trans_le hρlo
   have hhalf:(Fintype.card V:ℝ)/2≤D:=by
     have hn0:(0:ℝ)≤Fintype.card V:=Nat.cast_nonneg _
-    nlinarith [mul_nonneg hα.le hn0]
+    nlinarith only [hD, mul_nonneg hα.le hn0]
   have hgeom:=hgeo V U G D m hreg hn hhalf hρlo hρhi hm Q π hpres L hL
   have hcomm:∀ i x,f i (ρ i x)=π (f i x):=hgeom.1
   have hfield (i:ℕ) (hi:i≤L):=marked_vortex_fixed_parent_degree_fields Q hreg hn hD hα hρ hb hbα hb1 he hmpos i (by omega)

@@ -14,6 +14,7 @@ noncomputable section
 namespace Oberwolfach
 attribute [local instance] Classical.propDecidable
 
+set_option backward.isDefEq.respectTransparency true in
 theorem ordinary_expanded_boundary_on_prior
     (d:ℕ) (hd:2≤d) (χ:ℝ) (hχ:0<χ):
     ∃N:ℕ,∀n:ℕ,N≤n→∀(U:Type) [Fintype U] [DecidableEq U],
