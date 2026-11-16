@@ -54,14 +54,17 @@ theorem first_vortex_named_tail_at_matching_actual_host_high_probability_no_comp
   obtain ⟨ε₀,ηEvent,hε₀,hε₀one,hηEvent,hprob,hχBudget,hRest⟩:=hRest χTarget hχTarget
   refine ⟨ε₀,ηEvent,hε₀,hε₀one,hηEvent,hprob,hχBudget,?_⟩
   intro rPart hrPart
-  obtain ⟨εExtra,hExtra,hExtraBound,gammaLoss,sigmaLoss,extra,hγLoss,hσLoss,hextra,hγOrd,hγBudget,hσBudget,
-    ζCorr,ξCorr,η₀,κ,εRef,εNbr,hζCorr,hζRob,hζCap,hξCorr,hξCorrRate,hbudget,
-    hη₀,hκ,hκmax',hκaux',hεRefEq,hεRefMax,hεRef,hεNbr,hεNbrCap,
-    χ,χCommon,χBal,χNbr,χLoad,χLocal,χConfig,hχ,hχCommon,hχBal,hχNbr,hχLoad,hχLocal,hχConfig,hgap,
-    βmax,hβmax,βQ,hβQ,hβquarter,hβα4,hβmax',hβbal,hβref,mGeom,hmGeom,MLevel,hMLevel,mLevel,hmLevel,η,hη,t₀,τ₀,Δ,ξ,ht₀,hτ₀,hτ₀cap,hΔ,hξ,hξrate,
-    vsize,hvsize,hmLevelSize,hmGeomSize,τHost,hτHost,hτHostBound,NHostGeom,hNHostGeom,hHost,
-    ξResidual,hξResidual,hξResidualBound,hζOrdResidual,hξResidualBound2,hξSeedResidual,hResidualScales,
-    ζList,hζList,hζListCap,N,a₀,b₀,e₀,aRob,bRob,eRob,aParent,bParent,eParent,aStable,bStable,eStable,Nchain,hChain,Nprep,hPrep,hRest⟩:=hRest rPart hrPart
+  have hPreparedBulkChunks1 :=hRest rPart hrPart
+  obtain ⟨εExtra,hExtra,hExtraBound,gammaLoss,sigmaLoss,extra,hγLoss,hσLoss,hextra,hγOrd,hγBudget,hσBudget,hPreparedBulkChunks1Rest1⟩:=hPreparedBulkChunks1
+  obtain ⟨ζCorr,ξCorr,η₀,κ,εRef,εNbr,hζCorr,hζRob,hζCap,hξCorr,hξCorrRate,hbudget,hPreparedBulkChunks1Rest2⟩:=hPreparedBulkChunks1Rest1
+  obtain ⟨hη₀,hκ,hκmax',hκaux',hεRefEq,hεRefMax,hεRef,hεNbr,hεNbrCap,χ,χCommon,χBal,hPreparedBulkChunks1Rest3⟩:=hPreparedBulkChunks1Rest2
+  obtain ⟨χNbr,χLoad,χLocal,χConfig,hχ,hχCommon,hχBal,hχNbr,hχLoad,hχLocal,hχConfig,hgap,hPreparedBulkChunks1Rest4⟩:=hPreparedBulkChunks1Rest3
+  obtain ⟨βmax,hβmax,βQ,hβQ,hβquarter,hβα4,hβmax',hβbal,hβref,mGeom,hmGeom,MLevel,hPreparedBulkChunks1Rest5⟩:=hPreparedBulkChunks1Rest4
+  obtain ⟨hMLevel,mLevel,hmLevel,η,hη,t₀,τ₀,Δ,ξ,ht₀,hτ₀,hτ₀cap,hPreparedBulkChunks1Rest6⟩:=hPreparedBulkChunks1Rest5
+  obtain ⟨hΔ,hξ,hξrate,vsize,hvsize,hmLevelSize,hmGeomSize,τHost,hτHost,hτHostBound,NHostGeom,hNHostGeom,hPreparedBulkChunks1Rest7⟩:=hPreparedBulkChunks1Rest6
+  obtain ⟨hHost,ξResidual,hξResidual,hξResidualBound,hζOrdResidual,hξResidualBound2,hξSeedResidual,hResidualScales,ζList,hζList,hζListCap,N,hPreparedBulkChunks1Rest8⟩:=hPreparedBulkChunks1Rest7
+  obtain ⟨a₀,b₀,e₀,aRob,bRob,eRob,aParent,bParent,eParent,aStable,bStable,eStable,hPreparedBulkChunks1Rest9⟩:=hPreparedBulkChunks1Rest8
+  obtain ⟨Nchain,hChain,Nprep,hPrep,hRest⟩:=hPreparedBulkChunks1Rest9
   refine ⟨εExtra,hExtra,hExtraBound,gammaLoss,sigmaLoss,extra,hγLoss,hσLoss,hextra,hγOrd,hγBudget,hσBudget,
     ζCorr,ξCorr,η₀,κ,εRef,εNbr,hζCorr,hζRob,hζCap,hξCorr,hξCorrRate,hbudget,
     hη₀,hκ,hκmax',hκaux',hεRefEq,hεRefMax,hεRef,hεNbr,hεNbrCap,

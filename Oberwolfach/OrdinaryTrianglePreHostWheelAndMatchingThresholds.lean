@@ -156,14 +156,7 @@ theorem ordinary_triangle_pre_host_wheel_and_matching_thresholds
         mv (2*mv) 10 ζevent χpair χlist χbal χbd χnbr χpairR χpath χlocal χglobal χhub χcol ξedit ξAbs β)) :=by
   subst κe
   subst γbase
-  obtain ⟨rateParent,ζcert,δDeep,rate,hrate,hrateRoot,hrateInner,hrateEnd,hscale',hζ,hζrate,hζcap,hζlimit,
-    hδDeep,hδα,hrateDeep,p,εsup,capSmall,δsample,ν,hp,hp1,hpθ,hsqrt,hεsup,hεsupCap,hcapSmall,hcapOther,hcapEll,
-    hδsample,hν,hνcap,Norder,hNorder,τ,hτeq,hτ,hτcap,hτ1,hsafe1,hsafe2,hsafe3,hfinish,hbudgetE,hbudgetH,
-    eps,γgeo,aLoad,ξroot,η₀,ηbal,ηInitial,heps,heps1,hγ,hgeometry,hcover,ha,ha1,hacapSmall,haκ,haγ,haedit,hξeq,hξ,hξγ,hξcap,
-    hηeq,hη₀,hη,hη₀cap,hηγ,hηI,hηIcap,hsmall,hsmall',hellBound,δInitial,hδInitial,hδIα,hδIη,hcallbacks,
-    δedit,ηedit,ηBudget,capChosen,hδedit,hδαedit,hδbal,hηedit,hBudget,hBudgetη,hsmallBudget,hChosen,hChosen1,hChosenBudget,
-    d,hd,hmargins,bHub,Bweight,ξdeep,t,ζ,δOuter,δcap,rateOuter,ξedit,ξAbs,
-    hb,hbc,hB,hBbound,hξdeep,hξdeepcap,hβchoose,ht,hζouter,hζlimitOuter,hδOuter,hδαOuter,hδcap,hδζ,hrateOuter,htrace,houter,hjoint⟩:=
+  have hPreparedPreHostChunks1 :=
     ordinary_triangle_protected_fine_matching_separate_geometry α ρ₀ pmin cInner CInner ηhub eParent hParent (ρ₀/8) ηend εf εrows othercap
       ξInner Kdom BInner tHub eEvent hEvent capInner γold κold δInner tpot lamInner bold Bold βcap ε ηProfile cBoundary
       hselected hDeep hηProfile βH ηH Bparent ω βparent εparent ζparent rateRoot N₀ hN₀ hroot hscale ζlimit hLimit
@@ -172,6 +165,17 @@ theorem ordinary_triangle_pre_host_wheel_and_matching_thresholds
       hVortex hchoice hρ₀ hδcut hedit hκhub hα hpmin hεcapκ hεcapρ cOuter COuter cInitial hcOuter hCOuter htri hInitial
       L m kMatch dMin βfreq αOriginal γList capPlace θhost hβfreq hβ1 hαOriginal βPlace lamPlace ζPlace εearly hTail
       δAbs hAbs εabs εv hcorr
+  obtain ⟨rateParent,ζcert,δDeep,rate,hrate,hrateRoot,hrateInner,hrateEnd,hscale',hζ,hζrate,hζcap,hPreparedPreHostChunks1Rest1⟩:=hPreparedPreHostChunks1
+  obtain ⟨hζlimit,hδDeep,hδα,hrateDeep,p,εsup,capSmall,δsample,ν,hp,hp1,hpθ,hPreparedPreHostChunks1Rest2⟩:=hPreparedPreHostChunks1Rest1
+  obtain ⟨hsqrt,hεsup,hεsupCap,hcapSmall,hcapOther,hcapEll,hδsample,hν,hνcap,Norder,hNorder,τ,hPreparedPreHostChunks1Rest3⟩:=hPreparedPreHostChunks1Rest2
+  obtain ⟨hτeq,hτ,hτcap,hτ1,hsafe1,hsafe2,hsafe3,hfinish,hbudgetE,hbudgetH,eps,γgeo,hPreparedPreHostChunks1Rest4⟩:=hPreparedPreHostChunks1Rest3
+  obtain ⟨aLoad,ξroot,η₀,ηbal,ηInitial,heps,heps1,hγ,hgeometry,hcover,ha,ha1,hPreparedPreHostChunks1Rest5⟩:=hPreparedPreHostChunks1Rest4
+  obtain ⟨hacapSmall,haκ,haγ,haedit,hξeq,hξ,hξγ,hξcap,hηeq,hη₀,hη,hη₀cap,hPreparedPreHostChunks1Rest6⟩:=hPreparedPreHostChunks1Rest5
+  obtain ⟨hηγ,hηI,hηIcap,hsmall,hsmall',hellBound,δInitial,hδInitial,hδIα,hδIη,hcallbacks,δedit,hPreparedPreHostChunks1Rest7⟩:=hPreparedPreHostChunks1Rest6
+  obtain ⟨ηedit,ηBudget,capChosen,hδedit,hδαedit,hδbal,hηedit,hBudget,hBudgetη,hsmallBudget,hChosen,hChosen1,hPreparedPreHostChunks1Rest8⟩:=hPreparedPreHostChunks1Rest7
+  obtain ⟨hChosenBudget,d,hd,hmargins,bHub,Bweight,ξdeep,t,ζ,δOuter,δcap,rateOuter,hPreparedPreHostChunks1Rest9⟩:=hPreparedPreHostChunks1Rest8
+  obtain ⟨ξedit,ξAbs,hb,hbc,hB,hBbound,hξdeep,hξdeepcap,hβchoose,ht,hζouter,hζlimitOuter,hPreparedPreHostChunks1Rest10⟩:=hPreparedPreHostChunks1Rest9
+  obtain ⟨hδOuter,hδαOuter,hδcap,hδζ,hrateOuter,htrace,houter,hjoint⟩:=hPreparedPreHostChunks1Rest10
   have hε:0<ε:=hVortex.1
   have hεsmall:ε<1/4:=hVortex.2.2.1
   have hpκ:p≤4*(ζfresh*(min (pmin^4/32) (endpointCountCoefficient pmin (ρ₀/8)/4)/4)*ε):=by nlinarith only [hpθ]
@@ -185,10 +189,7 @@ theorem ordinary_triangle_pre_host_wheel_and_matching_thresholds
     hb,hbc,hB,hBbound,hξdeep,hξdeepcap,hβchoose,ht,hζouter,hζlimitOuter,hδOuter,hδαOuter,hδcap,hδζ,hrateOuter,htrace,houter,hjoint,?_⟩
   intro χhost χref χdeep χHub χone χtwo χcut χinner χendpoint hχhost hχref hχdeep hχHub hχone hχtwo hχcut hχinner hχendpoint
   have hparentSelected:=fun (d:ℕ) (hd:2≤d)=>hparentFamily d hd ηH ε χhost χref hηH hε (by linarith) hχhost hχref
-  obtain ⟨βsmall,r,hβsmall,hβold,hr,hrI,hrD,hrE,hrS,hrG,hrEnd,hrRows,hselected',
-    εTri,β,hεTri,hβ,hβone,hβα8,hβα4,hβκ,hβcap,hβδ,hβtri,hβcert,hβI,hβD,hβE,hβG,hgapOuter,hgapInner,hβbalance,
-    v₀,Mhost,Mcut,hv₀,hMhost,hMcut,hafter,hselector,hcuts,vInner,hvInner,hInner,
-    Msmall,vCert,vCommon,hMsmall,hvCert,hvouter,hvinner,hvcert,hcert⟩:=
+  have hPreparedPreHostChunks2 :=
     ordinary_triangle_common_tolerance_spacing_certificates k d hd α ρ₀ pmin κhub aLoad ε ξdeep bHub Bweight ηhub δOuter δcap 1
       βP ηP ηH βH cParent Bparent χhost δrefParent hrefParent χref βcap hpmin hδOuter hα
       cInner CInner ηhub eParent hParent ηend εf εrows othercap
@@ -199,15 +200,18 @@ theorem ordinary_triangle_pre_host_wheel_and_matching_thresholds
       p βe βh ν capSmall εsup δsample τ eps ellCap hcover heps hp hp1 hτ.le hζfresh hεsupCap hsafe1
       (by simpa only [mul_assoc] using hsafe2) (by simpa only [mul_assoc] using hsafe3) hpκ
       (by simpa only [mul_assoc] using hsqrt) Norder (by intro n hn; simpa only [mul_assoc] using hNorder n hn)
+  obtain ⟨βsmall,r,hβsmall,hβold,hr,hrI,hrD,hrE,hrS,hrG,hrEnd,hrRows,hPreparedPreHostChunks2Rest1⟩:=hPreparedPreHostChunks2
+  obtain ⟨hselected',εTri,β,hεTri,hβ,hβone,hβα8,hβα4,hβκ,hβcap,hβδ,hβtri,hPreparedPreHostChunks2Rest2⟩:=hPreparedPreHostChunks2Rest1
+  obtain ⟨hβcert,hβI,hβD,hβE,hβG,hgapOuter,hgapInner,hβbalance,v₀,Mhost,Mcut,hv₀,hPreparedPreHostChunks2Rest3⟩:=hPreparedPreHostChunks2Rest2
+  obtain ⟨hMhost,hMcut,hafter,hselector,hcuts,vInner,hvInner,hInner,Msmall,vCert,vCommon,hMsmall,hPreparedPreHostChunks2Rest4⟩:=hPreparedPreHostChunks2Rest3
+  obtain ⟨hvCert,hvouter,hvinner,hvcert,hcert⟩:=hPreparedPreHostChunks2Rest4
   obtain ⟨_,hεcap',_,hεξ,hερ,hlamEq,hlamPos,hlamRoot,hlam1,hlamρ,hβe,hβh,hlamE,hlamH,hrow,hlevel,_⟩:=hVortex
   have hbalcap:ηbal≤δcut*(ρ₀/8)*ξroot/1000:=by simpa only [hηeq] using hη₀cap
   refine ⟨βsmall,r,hβsmall,hβold,hr,hrI,hrD,hrE,hrS,hrG,hrEnd,hrRows,hselected',
     εTri,β,hεTri,hβ,hβone,hβα8,hβα4,hβκ,hβcap,hβδ,hβtri,hβcert,hβI,hβD,hβE,hβG,hgapOuter,hgapInner,hβbalance,
     v₀,Mhost,Mcut,hv₀,hMhost,hMcut,hafter,hselector,hcuts,vInner,hvInner,hInner,
     Msmall,vCert,vCommon,hMsmall,hvCert,hvouter,hvinner,hvcert,hcert,?_⟩
-  obtain ⟨mInitial,mBalance,mEdit,Nedit,mFineInitial,mFineLater,mGeom,mAll,hmI,hmB,hmEdit,hmGeom,hI,hB,hE,hFI,hFL,hG,
-    hInitial,hBalance,hMargins,hFine,hLater,hGeom,M,vCommon',mVortex,mv,hM,hSmall,hN₀',hNcert,hNedit,htwo,hmatch,hvCert',hvOuter,hvInner',hmAll,
-    hmv,hCommon,hVortex,hterm,hhost',hcut,hlook,hcert'⟩:=
+  have hPreparedPreHostChunks3 :=
     ordinary_triangle_local_thresholds_and_vortex_choice d k ρ₀ α pmin hrefLocal κhub δcut ζcut εcut ζlimit εsample εvortex ε
     ξroot aLoad ηbal αcut pmin β ηProfile ζcert cBoundary δDeep rate ηInitial δInitial cInitial δedit ηedit
     hcallbacks hmargins hnum hρ₀ hε hεsmall (hεcap'.trans hεcapVortex) hδcut hδsmall hξ hξeq ha ha1 hη hbalcap hηI hηIcap
@@ -216,6 +220,10 @@ theorem ordinary_triangle_pre_host_wheel_and_matching_thresholds
     hβe.le hβh.le hp.le hr.le hedit hβG hrG hξγ haγ hηγ hrow hlevel haedit hlamE hlamH
     εrows tpot lamInner ω hpack δref εstar cLinear cInner (4*CInner/pmin^7) ηhub ν capSmall τ ellCap ηBudget
     Msmall vCert N₀ 1 v₀ vInner Mhost Mcut hβ hBudget hcert
+  obtain ⟨mInitial,mBalance,mEdit,Nedit,mFineInitial,mFineLater,mGeom,mAll,hmI,hmB,hmEdit,hmGeom,hPreparedPreHostChunks3Rest1⟩:=hPreparedPreHostChunks3
+  obtain ⟨hI,hB,hE,hFI,hFL,hG,hInitial,hBalance,hMargins,hFine,hLater,hGeom,hPreparedPreHostChunks3Rest2⟩:=hPreparedPreHostChunks3Rest1
+  obtain ⟨M,vCommon',mVortex,mv,hM,hSmall,hN₀',hNcert,hNedit,htwo,hmatch,hvCert',hPreparedPreHostChunks3Rest3⟩:=hPreparedPreHostChunks3Rest2
+  obtain ⟨hvOuter,hvInner',hmAll,hmv,hCommon,hVortex,hterm,hhost',hcut,hlook,hcert'⟩:=hPreparedPreHostChunks3Rest3
   refine ⟨mInitial,mBalance,mEdit,Nedit,mFineInitial,mFineLater,mGeom,mAll,hmI,hmB,hmEdit,hmGeom,hI,hB,hE,hFI,hFL,hG,
     hInitial,hBalance,hMargins,hFine,hLater,hGeom,M,vCommon',mVortex,mv,hM,hSmall,hN₀',hNcert,hNedit,htwo,hmatch,hvCert',hvOuter,hvInner',hmAll,
     hmv,hCommon,hVortex,hterm,hhost',hcut,hlook,hcert',?_⟩

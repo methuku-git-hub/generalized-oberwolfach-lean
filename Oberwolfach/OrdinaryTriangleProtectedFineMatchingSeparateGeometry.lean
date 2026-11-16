@@ -90,16 +90,19 @@ theorem ordinary_triangle_protected_fine_matching_separate_geometry
       OrdinaryTriangleHubAfterCapBeforeFailure d hd α ρ₀ pmin κhub aLoad ε ξdeep bHub Bweight ηhub δOuter δcap ∧
       OrdinaryOriginalPreSampleFixedJointRatesAt L 3 d m kMatch dMin βfreq ρ₀ αOriginal γList capPlace capChosen θhost
         (by omega) hβfreq hβ1 hρ₀ hαOriginal βPlace lamPlace ζPlace εearly ε δcap ηBudget α pmin (ρ₀/4) δAbs hAbs εabs εv ξedit ξAbs :=by
-  obtain ⟨rateParent,ζcert,δDeep,rate,hrate,hrateRoot,hrateInner,hrateEnd,hscale',hζ,hζrate,hζcap,hζlimit,
-    hδDeep,hδα,hrateDeep,p,εsup,capSmall,δsample,ν,hp,hp1,hpθ,hsqrt,hεsup,hεsupCap,hcapSmall,hcapOther,hcapEll,
-    hδsample,hν,hνcap,Norder,hNorder,τ,hτeq,hτ,hτcap,hτ1,hsafe1,hsafe2,hsafe3,hfinish,hbudgetE,hbudgetH,
-    eps,γgeo,aLoad,ξroot,η₀,ηbal,ηInitial,heps,heps1,hγ,hgeometry,hcover,ha,ha1,hacapSmall,haκ,haγ,haedit,hξeq,hξ,hξγ,hξcap,
-    hηeq,hη₀,hη,hη₀cap,hηγ,hηI,hηIcap,hsmall,hsmall',hellBound,δInitial,hδInitial,hδIα,hδIη,hcallbacks⟩:=
+  have hPreparedBulkChunks1 :=
     ordinary_triangle_protected_fine_separate_geometry α ρ₀ pmin cInner CInner ηhub eParent hParent κe ηend εf εrows othercap
       ξInner Kdom BInner tHub eEvent hEvent capInner γold κold δInner tpot lamInner bold Bold βcap ε ηProfile cBoundary
       hselected hDeep hηProfile βH ηH Bparent ω βparent εparent ζparent rateRoot N₀ hN₀ hroot hscale ζlimit hLimit
       k βout b B hpack δref εstar cLinear ζfresh βgeo εgeo gap ξreserve ζout edit γbase βe βh ellCap lam lamRoot δcut εcap θmatch κhub
       hVortex hchoice hρ₀ hδcut hedit hκhub
+  obtain ⟨rateParent,ζcert,δDeep,rate,hrate,hrateRoot,hrateInner,hrateEnd,hscale',hζ,hζrate,hζcap,hPreparedBulkChunks1Rest1⟩:=hPreparedBulkChunks1
+  obtain ⟨hζlimit,hδDeep,hδα,hrateDeep,p,εsup,capSmall,δsample,ν,hp,hp1,hpθ,hPreparedBulkChunks1Rest2⟩:=hPreparedBulkChunks1Rest1
+  obtain ⟨hsqrt,hεsup,hεsupCap,hcapSmall,hcapOther,hcapEll,hδsample,hν,hνcap,Norder,hNorder,τ,hPreparedBulkChunks1Rest3⟩:=hPreparedBulkChunks1Rest2
+  obtain ⟨hτeq,hτ,hτcap,hτ1,hsafe1,hsafe2,hsafe3,hfinish,hbudgetE,hbudgetH,eps,γgeo,hPreparedBulkChunks1Rest4⟩:=hPreparedBulkChunks1Rest3
+  obtain ⟨aLoad,ξroot,η₀,ηbal,ηInitial,heps,heps1,hγ,hgeometry,hcover,ha,ha1,hPreparedBulkChunks1Rest5⟩:=hPreparedBulkChunks1Rest4
+  obtain ⟨hacapSmall,haκ,haγ,haedit,hξeq,hξ,hξγ,hξcap,hηeq,hη₀,hη,hη₀cap,hPreparedBulkChunks1Rest6⟩:=hPreparedBulkChunks1Rest5
+  obtain ⟨hηγ,hηI,hηIcap,hsmall,hsmall',hellBound,δInitial,hδInitial,hδIα,hδIη,hcallbacks⟩:=hPreparedBulkChunks1Rest6
   have hε:0<ε:=hVortex.1
   have hεcap:ε≤εcap:=hVortex.2.1
   have hεsmall:ε<1/4:=hVortex.2.2.1

@@ -40,19 +40,24 @@ theorem ordinary_triangle_feasible_preparation_optimized
         (fun σ=>ProtectedFactorPreparation P (retainedGraph P σ) I ξ B F)
  :=by
   let L:ℕ:=1
-  obtain ⟨hpstar,hpstar1,α,cInner,CInner,κ,cOuter,COuter,hrefLocal,δcut,ζcut,εcut,ζlimit,εsample,εvortex,cBoundary,cInitial,εcap,eParent,hParent,
-    hα,hαsub,hα1,hmargin,hc,hC,hinner,hroot,hκ,hκ1,hκcap,hcOuter,hCOuter,houter,
-    hhref,hhrefcap,hδcut,hδsmall,hδcutBound,hζcut,hεcut,hζlimit,hεsample,hεvortex,hεvsmall,hnum,hBoundary,hInitial,hdeep,hmatch,
-    hεcap,hεmax',hεvortexCap,hεκ,hερ,he,heB,heI,hh,hhB,hhI,
-    δAbs,hAbs,εabs,εv,capPlace,hCorr,hPlace,hPlaceCap,hAbsCap,hVCap,m,kMatch,βPlace,lamPlace,ζPlace,εearly,dMin,
-    hearly,hearlyCap,hAt,hEarly,hTail,hReference⟩:=
+  have hPreparedBulkChunks1 :=
       ordinary_triangle_original_ordered_selected_setup L θ α₀ εmax ρ₀ βfreq hθhalf hθcycle hθ1 hα₀ hεmax hρ₀ hρ₀1 hβfreq hβfreq1
-  obtain ⟨δref,href,βP,hδref,hδrefSmall,hhrefRef,hβP,kParent,βH,cParent,Bparent,hkParent,hβH,hcParent,hBparent,hselection,
-    εstar,cLinear,εf,ηhub,ηend,ζfresh,εrows,hεstar,hlinear,hεf,hηhub,hηend,hζfresh,hrows,hrowsGeom,hfamily,
-    ηH,gapRoot,ζroot,rateRoot,lamRoot,hηH,hgapRoot,hfit,hζroot,hζcap,hrateRoot,hlamRoot,N₀,hN₀,hscale,hrefRoot,
-    lamFine,hlamFine,hfine,ξGeo,ζGeo,edit,hξGeo,hζGeo,hedit,hξcap,hζgeocap,hξζ,hpack,
-    lam,ε,βe,βh,θmatch,ellCap,hVortex,hlamFineBound,
-    ξInner,Kdom,BInner,tHub,eEvent,hEvent,capInner,γold,κold,δInner,tpot,lamInner,bold,Bold,βcap,hselected,hchoice⟩:=hReference
+  obtain ⟨hpstar,hpstar1,α,cInner,CInner,κ,cOuter,COuter,hrefLocal,δcut,ζcut,εcut,hPreparedBulkChunks1Rest1⟩:=hPreparedBulkChunks1
+  obtain ⟨ζlimit,εsample,εvortex,cBoundary,cInitial,εcap,eParent,hParent,hα,hαsub,hα1,hmargin,hPreparedBulkChunks1Rest2⟩:=hPreparedBulkChunks1Rest1
+  obtain ⟨hc,hC,hinner,hroot,hκ,hκ1,hκcap,hcOuter,hCOuter,houter,hhref,hhrefcap,hPreparedBulkChunks1Rest3⟩:=hPreparedBulkChunks1Rest2
+  obtain ⟨hδcut,hδsmall,hδcutBound,hζcut,hεcut,hζlimit,hεsample,hεvortex,hεvsmall,hnum,hBoundary,hInitial,hPreparedBulkChunks1Rest4⟩:=hPreparedBulkChunks1Rest3
+  obtain ⟨hdeep,hmatch,hεcap,hεmax',hεvortexCap,hεκ,hερ,he,heB,heI,hh,hhB,hPreparedBulkChunks1Rest5⟩:=hPreparedBulkChunks1Rest4
+  obtain ⟨hhI,δAbs,hAbs,εabs,εv,capPlace,hCorr,hPlace,hPlaceCap,hAbsCap,hVCap,m,hPreparedBulkChunks1Rest6⟩:=hPreparedBulkChunks1Rest5
+  obtain ⟨kMatch,βPlace,lamPlace,ζPlace,εearly,dMin,hearly,hearlyCap,hAt,hEarly,hTail,hReference⟩:=hPreparedBulkChunks1Rest6
+  have hPreparedBulkChunks2 :=hReference
+  obtain ⟨δref,href,βP,hδref,hδrefSmall,hhrefRef,hβP,kParent,βH,cParent,Bparent,hkParent,hPreparedBulkChunks2Rest1⟩:=hPreparedBulkChunks2
+  obtain ⟨hβH,hcParent,hBparent,hselection,εstar,cLinear,εf,ηhub,ηend,ζfresh,εrows,hεstar,hPreparedBulkChunks2Rest2⟩:=hPreparedBulkChunks2Rest1
+  obtain ⟨hlinear,hεf,hηhub,hηend,hζfresh,hrows,hrowsGeom,hfamily,ηH,gapRoot,ζroot,rateRoot,hPreparedBulkChunks2Rest3⟩:=hPreparedBulkChunks2Rest2
+  obtain ⟨lamRoot,hηH,hgapRoot,hfit,hζroot,hζcap,hrateRoot,hlamRoot,N₀,hN₀,hscale,hrefRoot,hPreparedBulkChunks2Rest4⟩:=hPreparedBulkChunks2Rest3
+  obtain ⟨lamFine,hlamFine,hfine,ξGeo,ζGeo,edit,hξGeo,hζGeo,hedit,hξcap,hζgeocap,hξζ,hPreparedBulkChunks2Rest5⟩:=hPreparedBulkChunks2Rest4
+  obtain ⟨hpack,lam,ε,βe,βh,θmatch,ellCap,hVortex,hlamFineBound,ξInner,Kdom,BInner,hPreparedBulkChunks2Rest6⟩:=hPreparedBulkChunks2Rest5
+  obtain ⟨tHub,eEvent,hEvent,capInner,γold,κold,δInner,tpot,lamInner,bold,Bold,βcap,hPreparedBulkChunks2Rest7⟩:=hPreparedBulkChunks2Rest6
+  obtain ⟨hselected,hchoice⟩:=hPreparedBulkChunks2Rest7
   have hε:0<ε:=hVortex.1
   have hεearly:ε≤εearly:=hVortex.2.1
   have hVortexKeep:=hVortex

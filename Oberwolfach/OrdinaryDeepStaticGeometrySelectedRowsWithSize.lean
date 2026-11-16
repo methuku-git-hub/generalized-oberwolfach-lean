@@ -77,15 +77,16 @@ theorem ordinary_deep_static_geometry_selected_rows_with_size
       root εmax εearly capInner capξ capWeight parentRate pcap
       L rstar m k dMin hr αOriginal γList θhost hβfreq hβ1 hρ₀ hαOriginal
       βPlace lamPlace ζPlace αcorr pcorr ωcorr δAbs hAbs εabs εv capOriginal Nextra :=by
-  obtain ⟨δcut,ζcut,εcut,ζlimit,εsample,εvortex,cBoundary,cInitial,βout,ξreserve,ζout,edit,
-    hδcut,hδquarter,hδlimit,hζcut,hεcut,hζlimit,hεsample,hεvortex,hεvquarter,hBoundary,hInitial,hNumeric,
-    hβout,hβeq,hξreserve,hζout,hedit,hξcap,hζcap,
-    γ,eParent,hParent,κ,hγ,heParent,hhParent,hγe,heBoundary,hhBoundary,heInitial,hhInitial,hκ,hκ1,hκρ,hpstar,hpstar1,
-    ηhub,ζhub,aEnd,ηend,ζlocal,δend,hηhub,hζhub,haEnd,haEnd1,hηend,hζlocal,hδend,
-    εcap,hεcap,hεmax,hεearly,hεinner,hεhub,hεa,hερ,
-    cMatch,eCleanup,hCleanup,lam,ε,βe,βh,θmatch,hcMatch,heCleanup,hhCleanup,hcMatchcap,
-    hβeeq,hβheq,hβe,hβh,hlam,hlamroot,hlamquarter,hlamρ,hlamβe,hlamβh,hrow,hlevel,
-    hε,hεcap',hεvortex',hεquarter,hεξ,hεξρ,hεroot,hθeq,hθ,hEvent⟩:=hselected
+  have hPreparedBulkChunks :=hselected
+  obtain ⟨δcut,ζcut,εcut,ζlimit,εsample,εvortex,cBoundary,cInitial,βout,ξreserve,ζout,edit,hPreparedBulkChunksRest1⟩:=hPreparedBulkChunks
+  obtain ⟨hδcut,hδquarter,hδlimit,hζcut,hεcut,hζlimit,hεsample,hεvortex,hεvquarter,hBoundary,hInitial,hNumeric,hPreparedBulkChunksRest2⟩:=hPreparedBulkChunksRest1
+  obtain ⟨hβout,hβeq,hξreserve,hζout,hedit,hξcap,hζcap,γ,eParent,hParent,κ,hγ,hPreparedBulkChunksRest3⟩:=hPreparedBulkChunksRest2
+  obtain ⟨heParent,hhParent,hγe,heBoundary,hhBoundary,heInitial,hhInitial,hκ,hκ1,hκρ,hpstar,hpstar1,hPreparedBulkChunksRest4⟩:=hPreparedBulkChunksRest3
+  obtain ⟨ηhub,ζhub,aEnd,ηend,ζlocal,δend,hηhub,hζhub,haEnd,haEnd1,hηend,hζlocal,hPreparedBulkChunksRest5⟩:=hPreparedBulkChunksRest4
+  obtain ⟨hδend,εcap,hεcap,hεmax,hεearly,hεinner,hεhub,hεa,hερ,cMatch,eCleanup,hCleanup,hPreparedBulkChunksRest6⟩:=hPreparedBulkChunksRest5
+  obtain ⟨lam,ε,βe,βh,θmatch,hcMatch,heCleanup,hhCleanup,hcMatchcap,hβeeq,hβheq,hβe,hPreparedBulkChunksRest7⟩:=hPreparedBulkChunksRest6
+  obtain ⟨hβh,hlam,hlamroot,hlamquarter,hlamρ,hlamβe,hlamβh,hrow,hlevel,hε,hεcap',hεvortex',hPreparedBulkChunksRest8⟩:=hPreparedBulkChunksRest7
+  obtain ⟨hεquarter,hεξ,hεξρ,hεroot,hθeq,hθ,hEvent⟩:=hPreparedBulkChunksRest8
   have hEventMatch:=ordinary_deep_static_event_selected_rows_with_size mWheel Kdeep kcert hm α ρ₀ (ρ₀*(βfreq/200)/2) αcut c C a ε₀ ρ θdeep
     ε ηhub eParent hParent capξ capWeight βparent ωcert bRoot BRoot hpack δparent εstar cLinear (ρ₀*(βfreq/200)/2) href ηProfile bParent BParent εparent gap
     δcut ζcut εcut ζlimit εsample εvortex cBoundary cInitial βout ξreserve ζout edit

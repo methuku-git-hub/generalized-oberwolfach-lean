@@ -118,13 +118,16 @@ theorem first_vortex_level_matched_geometry
   refine ⟨betaExt,epsilonExt,betaRec,zetaCommon,hbe,hee,hbr,hzc,hzck,hbre,hbra,hbrt,hbrc,hbrp,gammaMax,hgm,?_⟩
   obtain ⟨gammaStep,hgs,hgmax,hgcap,η,ηEnd,ζ,ζD,pmax,hη,hηEnd,hζ0,hζD,hpmax,hpmax8,θ,hθ,delta,hδ,hx,hxδ,h⟩:=h
   refine ⟨gammaStep,hgs,hgmax,hgcap,η,ηEnd,ζ,ζD,pmax,hη,hηEnd,hζ0,hζD,hpmax,hpmax8,θ,hθ,delta,hδ,hx,hxδ,?_⟩
-  obtain ⟨sigmaMax,hsmax,sigmaStep,gammaLoss,sigmaLoss,extra,ζCorr,hs,hsle,hg,hgle,hsl,hextra,hgeq,hseq,hcorr,hcorrRob,hbudget,hhost,etaBal,hηBal,δSelected,εSelected,ζSelected,hδsel,hεsel,hζsel,hReady,NI,
-    tolRef,ζActive,τParent,tolParent,ζParent,τ,tolLocal,ζLocal,rowErr,ζRow,epsBal,ζBal,
-    htolRef,htolRef1,hζActive,hζActive1,hRefκ,hRefx,hActiveκ,
-    hτParent,hτParent1,htolParent,htolParent1,hζParent,hζParent1,hParentκ,hParentDeep,
-    hτ,hτ1,htolLocal,htolLocal1,hτlocal,hζLocal,hζLocal1,hLocal,
-    hrowErr,hrowErr1,hζRow,hζRow1,hRow,hεBal,hεBal1,hζBal,hζBal1,hBal,hMargin,hWide,
-    ζWide,δparent,hζWide,hζWide1,hδparent,hδcfg,hδcommon,hδcut,hδκ,hcycle,hpath,hδref,hδendpoint,hδparentκ,hδparentDeep,hδlocal,hδwide,hδrow,hδcutBound,hParent,hActual,hActualSelected,hAt,hSteps⟩:=h
+  have hPreparedBulkChunks1 :=h
+  obtain ⟨sigmaMax,hsmax,sigmaStep,gammaLoss,sigmaLoss,extra,ζCorr,hs,hsle,hg,hgle,hsl,hPreparedBulkChunks1Rest1⟩:=hPreparedBulkChunks1
+  obtain ⟨hextra,hgeq,hseq,hcorr,hcorrRob,hbudget,hhost,etaBal,hηBal,δSelected,εSelected,ζSelected,hPreparedBulkChunks1Rest2⟩:=hPreparedBulkChunks1Rest1
+  obtain ⟨hδsel,hεsel,hζsel,hReady,NI,tolRef,ζActive,τParent,tolParent,ζParent,τ,tolLocal,hPreparedBulkChunks1Rest3⟩:=hPreparedBulkChunks1Rest2
+  obtain ⟨ζLocal,rowErr,ζRow,epsBal,ζBal,htolRef,htolRef1,hζActive,hζActive1,hRefκ,hRefx,hActiveκ,hPreparedBulkChunks1Rest4⟩:=hPreparedBulkChunks1Rest3
+  obtain ⟨hτParent,hτParent1,htolParent,htolParent1,hζParent,hζParent1,hParentκ,hParentDeep,hτ,hτ1,htolLocal,htolLocal1,hPreparedBulkChunks1Rest5⟩:=hPreparedBulkChunks1Rest4
+  obtain ⟨hτlocal,hζLocal,hζLocal1,hLocal,hrowErr,hrowErr1,hζRow,hζRow1,hRow,hεBal,hεBal1,hζBal,hPreparedBulkChunks1Rest6⟩:=hPreparedBulkChunks1Rest5
+  obtain ⟨hζBal1,hBal,hMargin,hWide,ζWide,δparent,hζWide,hζWide1,hδparent,hδcfg,hδcommon,hδcut,hPreparedBulkChunks1Rest7⟩:=hPreparedBulkChunks1Rest6
+  obtain ⟨hδκ,hcycle,hpath,hδref,hδendpoint,hδparentκ,hδparentDeep,hδlocal,hδwide,hδrow,hδcutBound,hParent,hPreparedBulkChunks1Rest8⟩:=hPreparedBulkChunks1Rest7
+  obtain ⟨hActual,hActualSelected,hAt,hSteps⟩:=hPreparedBulkChunks1Rest8
   let NGeom:ℕ→ℕ:=fun d=>if hd:1≤d then Classical.choose (hSteps d hd) else Classical.choose (hSteps 1 (by omega))
   have hNGeom:∀d,1≤d→1≤NGeom d:=by
     intro d hd

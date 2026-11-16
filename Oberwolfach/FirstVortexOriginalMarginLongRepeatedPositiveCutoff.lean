@@ -28,17 +28,16 @@ theorem first_vortex_original_margin_long_repeated_factor_positive_cutoff (α:�
   obtain ⟨αRef,κL,ρ₀,href,hρ,hrefCap,hrefAlpha,hκL,hκLcap,hρone,hρκ,hmargin,hOuter⟩:=
     first_vortex_original_margin_selector_universal_matched_geometry_factor_seed α hα
   obtain ⟨m,r,k₀,hm,hL,heven,hr,hrm,hlen,hcycle,htrim,A,BM,hA,hBM,hHostCont,hm',htstar,hTail⟩:=hOuter 0
-  obtain ⟨β,βCommon,εAbs,εRob,ζRob,δAbs,hβ,hβCommon,hεAbs,hεRob,hζRob,hδAbs,
-    εAbsP,ζAbsP,δAbsP,βconfigP,βCommonP,hεAbsP,hζAbsP,hδAbsP,hβconfigP,hβCommonP,
-    εStable,ζStable,capStable,hεStable,hζStable,hcapStable,hSelector,hBA,
-    βfinal,ρreserve,hβfinal,hβone,hβlist,hρreserve,hreserveList,hreserveSize,
-    zetaCfg,betaA,hzeta,hbetaA,hbetaCfg,hbetaCommon,hcycleFixed,hpathFixed,
-    Kgeom,hKgeom,kappa0,ξ,thetaDeep,kappa,hkappa0,hξ,hthetaDeep,hkappa,hkappaLe,
-    ζCut,hIcut,εLevel,deltaI,hζcut,hζcut1,hζcutT,hIcut0,hIcutA,hIcutT,
-    hεLevel,hεCut,hεξ,hεκ,hεα,hεone,hδI,hδIone,hδIα,hδIk,hδIt,
-    cap,hcap,hcapStable',hChosen,
-    rho,eta,ζmax,Δmax,δLoss,εInner,δglobal,θmax,globalRate,hGlobal,
-    bmatch,αMatch,ε,hInitial,hεStable',hεHost,hLevel,hSelectorNumeric⟩:=hTail
+  have hPreparedBulkChunks1 :=hTail
+  obtain ⟨β,βCommon,εAbs,εRob,ζRob,δAbs,hβ,hβCommon,hεAbs,hεRob,hζRob,hδAbs,hPreparedBulkChunks1Rest1⟩:=hPreparedBulkChunks1
+  obtain ⟨εAbsP,ζAbsP,δAbsP,βconfigP,βCommonP,hεAbsP,hζAbsP,hδAbsP,hβconfigP,hβCommonP,εStable,ζStable,hPreparedBulkChunks1Rest2⟩:=hPreparedBulkChunks1Rest1
+  obtain ⟨capStable,hεStable,hζStable,hcapStable,hSelector,hBA,βfinal,ρreserve,hβfinal,hβone,hβlist,hρreserve,hPreparedBulkChunks1Rest3⟩:=hPreparedBulkChunks1Rest2
+  obtain ⟨hreserveList,hreserveSize,zetaCfg,betaA,hzeta,hbetaA,hbetaCfg,hbetaCommon,hcycleFixed,hpathFixed,Kgeom,hKgeom,hPreparedBulkChunks1Rest4⟩:=hPreparedBulkChunks1Rest3
+  obtain ⟨kappa0,ξ,thetaDeep,kappa,hkappa0,hξ,hthetaDeep,hkappa,hkappaLe,ζCut,hIcut,εLevel,hPreparedBulkChunks1Rest5⟩:=hPreparedBulkChunks1Rest4
+  obtain ⟨deltaI,hζcut,hζcut1,hζcutT,hIcut0,hIcutA,hIcutT,hεLevel,hεCut,hεξ,hεκ,hεα,hPreparedBulkChunks1Rest6⟩:=hPreparedBulkChunks1Rest5
+  obtain ⟨hεone,hδI,hδIone,hδIα,hδIk,hδIt,cap,hcap,hcapStable',hChosen,rho,eta,hPreparedBulkChunks1Rest7⟩:=hPreparedBulkChunks1Rest6
+  obtain ⟨ζmax,Δmax,δLoss,εInner,δglobal,θmax,globalRate,hGlobal,bmatch,αMatch,ε,hInitial,hPreparedBulkChunks1Rest8⟩:=hPreparedBulkChunks1Rest7
+  obtain ⟨hεStable',hεHost,hLevel,hSelectorNumeric⟩:=hPreparedBulkChunks1Rest8
   obtain ⟨hbmatch,hbmatchCap,hαMatch,hmatch,hmglobal,hε,hε1,hεLevel',hεInner',hεAbs',hεRob',hεcap,hεsmall,hεMatch,hεαMatch,hερ,hερ2,hεδ,hβsum⟩:=hInitial
   have heLevel:ε≤εLevel:=hεLevel'.trans (min_le_left _ _)
   have he8:ε≤1/8:=heLevel.trans hεone
@@ -46,17 +45,20 @@ theorem first_vortex_original_margin_long_repeated_factor_positive_cutoff (α:�
   have heκ:ε≤kappa:=heLevel.trans hεκ
   have hecut:ε≤hIcut:=heLevel.trans hεCut
   have heξ:4*ε≤ξ:=by nlinarith
-  obtain ⟨omegaInner,xiDeep,hω,hωone,hxi,hωε,hωρ,hεxi,hxiξ,hxiκ,hDeepSource,
-    betaExt,epsilonExt,betaRec,zetaCommon,hbe,hee,hbr,hzc,hzck,hbre,hbra,hbrt,hbrc,hbrp,gammaMax,hgm,
-    gammaStep,hgs,hgmax,hgcap,etaLevel,ηEnd,ζ,ζD,pmax,heta,hηEnd,hζ0,hζD,hpmax,hpmax8,θLevel,hθLevel,delta,hδ,hx,hxδ,
-    sigmaMax,hsmax,sigmaStep,gammaLoss,sigmaLoss,extra,ζCorr,hs,hsle,hg,hgle,hsl,hextra,hgeq,hseq,hcorr,hcorrRob,hbudget,hhost,
-    etaBal,hηBal,δSelected,εSelected,ζSelected,hδsel,hεsel,hζsel,NI,NGeom,hNGeom,hReady,
-    tolRef,ζActive,τParent,tolParent,ζParent,τ,tolLocal,ζLocal,rowErr,ζRow,epsBal,ζBal,
-    htolRef,htolRef1,hζActive,hζActive1,hRefκ,hRefx,hActiveκ,
-    hτParent,hτParent1,htolParent,htolParent1,hζParent,hζParent1,hParentκ,hParentDeep,
-    hτ,hτ1,htolLocal,htolLocal1,hτlocal,hζLocal,hζLocal1,hLocal,
-    hrowErr,hrowErr1,hζRow,hζRow1,hRow,hεBal,hεBal1,hζBal,hζBal1,hBal,hMargin,hWide,
-    ζWide,δparent,hζWide,hζWide1,hδparent,hδcfg,hδcommon,hδcut,hδκ,hcycle,hpath,hδref,hδendpoint,hδparentκ,hδparentDeep,hδlocal,hδwide,hδrow,hδcutBound,hParent,hActual,hActualSelected,hAt,hSteps⟩:=hLevel
+  have hPreparedBulkChunks2 :=hLevel
+  obtain ⟨omegaInner,xiDeep,hω,hωone,hxi,hωε,hωρ,hεxi,hxiξ,hxiκ,hDeepSource,betaExt,hPreparedBulkChunks2Rest1⟩:=hPreparedBulkChunks2
+  obtain ⟨epsilonExt,betaRec,zetaCommon,hbe,hee,hbr,hzc,hzck,hbre,hbra,hbrt,hbrc,hPreparedBulkChunks2Rest2⟩:=hPreparedBulkChunks2Rest1
+  obtain ⟨hbrp,gammaMax,hgm,gammaStep,hgs,hgmax,hgcap,etaLevel,ηEnd,ζ,ζD,pmax,hPreparedBulkChunks2Rest3⟩:=hPreparedBulkChunks2Rest2
+  obtain ⟨heta,hηEnd,hζ0,hζD,hpmax,hpmax8,θLevel,hθLevel,delta,hδ,hx,hxδ,hPreparedBulkChunks2Rest4⟩:=hPreparedBulkChunks2Rest3
+  obtain ⟨sigmaMax,hsmax,sigmaStep,gammaLoss,sigmaLoss,extra,ζCorr,hs,hsle,hg,hgle,hsl,hPreparedBulkChunks2Rest5⟩:=hPreparedBulkChunks2Rest4
+  obtain ⟨hextra,hgeq,hseq,hcorr,hcorrRob,hbudget,hhost,etaBal,hηBal,δSelected,εSelected,ζSelected,hPreparedBulkChunks2Rest6⟩:=hPreparedBulkChunks2Rest5
+  obtain ⟨hδsel,hεsel,hζsel,NI,NGeom,hNGeom,hReady,tolRef,ζActive,τParent,tolParent,ζParent,hPreparedBulkChunks2Rest7⟩:=hPreparedBulkChunks2Rest6
+  obtain ⟨τ,tolLocal,ζLocal,rowErr,ζRow,epsBal,ζBal,htolRef,htolRef1,hζActive,hζActive1,hRefκ,hPreparedBulkChunks2Rest8⟩:=hPreparedBulkChunks2Rest7
+  obtain ⟨hRefx,hActiveκ,hτParent,hτParent1,htolParent,htolParent1,hζParent,hζParent1,hParentκ,hParentDeep,hτ,hτ1,hPreparedBulkChunks2Rest9⟩:=hPreparedBulkChunks2Rest8
+  obtain ⟨htolLocal,htolLocal1,hτlocal,hζLocal,hζLocal1,hLocal,hrowErr,hrowErr1,hζRow,hζRow1,hRow,hεBal,hPreparedBulkChunks2Rest10⟩:=hPreparedBulkChunks2Rest9
+  obtain ⟨hεBal1,hζBal,hζBal1,hBal,hMargin,hWide,ζWide,δparent,hζWide,hζWide1,hδparent,hδcfg,hPreparedBulkChunks2Rest11⟩:=hPreparedBulkChunks2Rest10
+  obtain ⟨hδcommon,hδcut,hδκ,hcycle,hpath,hδref,hδendpoint,hδparentκ,hδparentDeep,hδlocal,hδwide,hδrow,hPreparedBulkChunks2Rest12⟩:=hPreparedBulkChunks2Rest11
+  obtain ⟨hδcutBound,hParent,hActual,hActualSelected,hAt,hSteps⟩:=hPreparedBulkChunks2Rest12
   obtain ⟨δold,δlocal,hold,hold1,hgap,hδlocalGlobal,hchosen,hchosenCap,hc,hactive,hactiveLocal,hactiveTransfer,hactiveGlobal,
     hθcap,hθup,hθmax,hθold,hθold32,hθglobal,hθ100,hκcap,hlamcap,hCaller⟩:=hReady
   obtain ⟨t,s,lamAssign,θ,lam,ξCap,κPack,ht,htCap,hs0,hAssign,hAssignCap,hθ,hθs,hθCap,

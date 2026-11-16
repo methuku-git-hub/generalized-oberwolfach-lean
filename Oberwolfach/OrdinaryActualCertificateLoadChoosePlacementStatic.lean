@@ -38,15 +38,16 @@ theorem ordinary_actual_certificate_load_choose_placement_static
       γ bHub BHub p₀ κ ηhub ζhub ζlocal δend eParent hParent lam ε βe βh θmatch rateParent ζ δDeep rate pcap
       L rstar mEarly kEarly dMin βfreq αOriginal γList capInner θhost capOriginal
       hr hβfreq hβ1 hρ₀ hαOriginal βPlace lamPlace ζPlace εearly :=by
-  obtain ⟨ellCap,kcap,pbound,p,εsup,finishCap,δsample,loadCap,ν,cap,
-    hellEq,hell,hkcap,hpbound,hpcap',hp,hpp,hp1,hpθ,hsqrt,hεsup,hεsupcap,hfinish,hfinishA,hfinishell,
-    hδsample,hload,hload1,hloadfinish,hν,hcap,hνfinish,hcapfinish,
-    Nfinish,hschedule,τ,ηpack,hτeq,hτ,hτcap,hτ1,hηpack,hlinear,
-    n₀,εout,γgeom,aLoad,ξroot,η₀,ηbal,ηInitial,βcap,δcap,δInitial,δedit,ηedit,
-    hεout,hεout1,hγgeom,haLoad,haLoad1,haLoadCap,haLoadA,haLoadγ,haLoadEdit,hξeq,hξ,hξε,hξγ,hξsq,
-    hellRate,hcoverRate,hηeq,hη₀,hηbal,hηbal₀,hηbalγ,hηInitial,hηInitialBal,hβcap,hβcap1,hβcapγ,
-    hδcap,hδcapγ,hδInitial,hδInitialα,hδInitialη,hδedit,hδeditα,hδeditη,hηedit,hstatic,hremain⟩:=
+  have hPreparedBulkChunks :=
     hload
+  obtain ⟨ellCap,kcap,pbound,p,εsup,finishCap,δsample,loadCap,ν,cap,hellEq,hell,hPreparedBulkChunksRest1⟩:=hPreparedBulkChunks
+  obtain ⟨hkcap,hpbound,hpcap',hp,hpp,hp1,hpθ,hsqrt,hεsup,hεsupcap,hfinish,hfinishA,hPreparedBulkChunksRest2⟩:=hPreparedBulkChunksRest1
+  obtain ⟨hfinishell,hδsample,hload,hload1,hloadfinish,hν,hcap,hνfinish,hcapfinish,Nfinish,hschedule,τ,hPreparedBulkChunksRest3⟩:=hPreparedBulkChunksRest2
+  obtain ⟨ηpack,hτeq,hτ,hτcap,hτ1,hηpack,hlinear,n₀,εout,γgeom,aLoad,ξroot,hPreparedBulkChunksRest4⟩:=hPreparedBulkChunksRest3
+  obtain ⟨η₀,ηbal,ηInitial,βcap,δcap,δInitial,δedit,ηedit,hεout,hεout1,hγgeom,haLoad,hPreparedBulkChunksRest5⟩:=hPreparedBulkChunksRest4
+  obtain ⟨haLoad1,haLoadCap,haLoadA,haLoadγ,haLoadEdit,hξeq,hξ,hξε,hξγ,hξsq,hellRate,hcoverRate,hPreparedBulkChunksRest6⟩:=hPreparedBulkChunksRest5
+  obtain ⟨hηeq,hη₀,hηbal,hηbal₀,hηbalγ,hηInitial,hηInitialBal,hβcap,hβcap1,hβcapγ,hδcap,hδcapγ,hPreparedBulkChunksRest7⟩:=hPreparedBulkChunksRest6
+  obtain ⟨hδInitial,hδInitialα,hδInitialη,hδedit,hδeditα,hδeditη,hηedit,hstatic,hremain⟩:=hPreparedBulkChunksRest7
   obtain ⟨ηBudget,capChosen,hBudget,hBudgetη,hsmall,hChosen,hOriginal,hCap,dSelected,hdSelected,hplacement⟩:=
     ordinary_presample_for_initial_placement_budget L rstar mEarly kEarly dMin βfreq ρ₀ αOriginal γList capInner θhost
       hr hβfreq hβ1 hρ₀ hαOriginal βPlace lamPlace ζPlace εearly hTail capOriginal ηedit ζ ε hcapOriginal hηedit hζ hε

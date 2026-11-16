@@ -37,28 +37,30 @@ theorem ordinary_nontriangle_feasible_preparation_from_original : OrdinaryNontri
     hrefCut,δlimit,geomCap,hhrefCut,hhrefcap,hδlimit,hδlimitcap,hgeomCap,hgeomCapBound,hGeometry,
     ζparent,rateParent,lamroot,hζparent,hrateParent,hlamroot,hζparentcap,
     N₀,hN₀,hScale,hRoot,hScaleMono,hEvent,hHost⟩:=hparent
-  obtain ⟨δcut,ζcut,εcut,ζlimit,εsample,εvortex,cBoundary,cInitial,βout,ξreserve,ζout,edit,
-    hδcut,hδquarter,hδcutlimit,hζcut,hεcut,hζlimit',hεsample,hεvortex,hεvquarter,hBoundary,hInitial,hNumeric,
-    hβout,hβeq,hξreserve,hζout,hedit,hξcap,hζcap',
-    γcert,eParent,hParent,κ,hγcert,heParent,hhParent,hγe,heBoundary,hhBoundary,heInitial,hhInitial,hκ,hκ1,hκρ,hpstar,hpstar1,
-    ηhub,ζhub,aEnd,ηend,ζlocal,δend,hηhub,hζhub,haEnd,haEnd1,hηend,hζlocal,hδend,
-    εcap,hεcap,hεmaxCap,hεearlyCap,hεinnerCap,hεhubCap,hεaCap,hερCap,
-    cMatch,eCleanup,hCleanup,lam,ε,βe,βh,θmatch,hcMatch,heCleanup,hhCleanup,hcMatchcap,
-    hβeeq,hβheq,hβe,hβh,hlam,hlamroot,hlamquarter,hlamρ,hlamβe,hlamβh,hrow,hlevel,
-    hε,hεcap',hεvortex',hεquarter,hεξ,hεξρ,hεroot,hθeq,hθ,hEventDeep⟩:=hEvent
+  have hPreparedBulkChunks1 :=hEvent
+  obtain ⟨δcut,ζcut,εcut,ζlimit,εsample,εvortex,cBoundary,cInitial,βout,ξreserve,ζout,edit,hPreparedBulkChunks1Rest1⟩:=hPreparedBulkChunks1
+  obtain ⟨hδcut,hδquarter,hδcutlimit,hζcut,hεcut,hζlimit',hεsample,hεvortex,hεvquarter,hBoundary,hInitial,hNumeric,hPreparedBulkChunks1Rest2⟩:=hPreparedBulkChunks1Rest1
+  obtain ⟨hβout,hβeq,hξreserve,hζout,hedit,hξcap,hζcap',γcert,eParent,hParent,κ,hγcert,hPreparedBulkChunks1Rest3⟩:=hPreparedBulkChunks1Rest2
+  obtain ⟨heParent,hhParent,hγe,heBoundary,hhBoundary,heInitial,hhInitial,hκ,hκ1,hκρ,hpstar,hpstar1,hPreparedBulkChunks1Rest4⟩:=hPreparedBulkChunks1Rest3
+  obtain ⟨ηhub,ζhub,aEnd,ηend,ζlocal,δend,hηhub,hζhub,haEnd,haEnd1,hηend,hζlocal,hPreparedBulkChunks1Rest5⟩:=hPreparedBulkChunks1Rest4
+  obtain ⟨hδend,εcap,hεcap,hεmaxCap,hεearlyCap,hεinnerCap,hεhubCap,hεaCap,hερCap,cMatch,eCleanup,hCleanup,hPreparedBulkChunks1Rest6⟩:=hPreparedBulkChunks1Rest5
+  obtain ⟨lam,ε,βe,βh,θmatch,hcMatch,heCleanup,hhCleanup,hcMatchcap,hβeeq,hβheq,hβe,hPreparedBulkChunks1Rest7⟩:=hPreparedBulkChunks1Rest6
+  obtain ⟨hβh,hlam,hlamroot,hlamquarter,hlamρ,hlamβe,hlamβh,hrow,hlevel,hε,hεcap',hεvortex',hPreparedBulkChunks1Rest8⟩:=hPreparedBulkChunks1Rest7
+  obtain ⟨hεquarter,hεξ,hεξρ,hεroot,hθeq,hθ,hEventDeep⟩:=hPreparedBulkChunks1Rest8
   obtain ⟨ξdeep,bDeep,Kdom,Bweight,hξdeep,hξdeepcap,hbDeep,hbDeepc,hbDeepcap,hKdom,hBweight,hKdom1,hKdom2,hWeight,hβchoose,
     tHub,eEvent,hEvent,capHub,costRate,htHub,heEvent,hhEvent,hcapHub,hebound,hhbound,hcostRate,hcostAt,
     rateLocal,ζ,δDeep,rate,hrateLocal,hrateEnd,hrateLocalParent,hζ,hζlim,hζrate,hζcapHub,hδDeep,hδDeepα,hrate,hratecost,hselected,hDeepSelect⟩:=hEventDeep
-  obtain ⟨ellCap,kcap,pbound,p,εsup,finishCap,δsample,loadCap,ν,cap,
-    hellEq,hell,hkcap,hpbound,hpcap',hp,hpp,hp1,hpθ,hsqrt,hεsup,hεsupcap,hfinish,hfinishA,hfinishell,
-    hδsample,hload,hload1,hloadfinish,hν,hcap,hνfinish,hcapfinish,
-    Nfinish,hschedule,τcover,ηpack,hτeq,hτ,hτcap,hτ1,hηpack,hlinear,
-    n₀,εout,γgeom,aLoad,ξroot,η₀,ηbal,ηInitial,βcap,δcap,δInitial,δedit,ηedit,
-    hεout,hεout1,hγgeom,haLoad,haLoad1,haLoadCap,haLoadA,haLoadγ,haLoadEdit,hξeq,hξroot,hξε,hξγ,hξsq,
-    hellRate,hcoverRate,hηeq,hη₀,hηbal,hηbal₀,hηbalγ,hηInitial,hηInitialBal,hβcap,hβcap1,hβcapγ,
-    hδcap,hδcapγ,hδInitial,hδInitialα,hδInitialη,hδedit,hδeditα,hδeditη,hηedit,hstatic,
-    ηBudget,capChosen,hBudget,hBudgetη,hsmall,hChosen,hOriginal,hCap,d,hd,ξedit,ξAbs,hξcapEdit,hξcapAbs,hjoint,hthresholds,
-    rowTolerance,hrowTolerance,hrowInitial,hrowDeep,hrowEdit,hrowSample,hrowGeom,hrowEnd,hrowCap,hremain⟩:=hselected
+  have hPreparedBulkChunks2 :=hselected
+  obtain ⟨ellCap,kcap,pbound,p,εsup,finishCap,δsample,loadCap,ν,cap,hellEq,hell,hPreparedBulkChunks2Rest1⟩:=hPreparedBulkChunks2
+  obtain ⟨hkcap,hpbound,hpcap',hp,hpp,hp1,hpθ,hsqrt,hεsup,hεsupcap,hfinish,hfinishA,hPreparedBulkChunks2Rest2⟩:=hPreparedBulkChunks2Rest1
+  obtain ⟨hfinishell,hδsample,hload,hload1,hloadfinish,hν,hcap,hνfinish,hcapfinish,Nfinish,hschedule,τcover,hPreparedBulkChunks2Rest3⟩:=hPreparedBulkChunks2Rest2
+  obtain ⟨ηpack,hτeq,hτ,hτcap,hτ1,hηpack,hlinear,n₀,εout,γgeom,aLoad,ξroot,hPreparedBulkChunks2Rest4⟩:=hPreparedBulkChunks2Rest3
+  obtain ⟨η₀,ηbal,ηInitial,βcap,δcap,δInitial,δedit,ηedit,hεout,hεout1,hγgeom,haLoad,hPreparedBulkChunks2Rest5⟩:=hPreparedBulkChunks2Rest4
+  obtain ⟨haLoad1,haLoadCap,haLoadA,haLoadγ,haLoadEdit,hξeq,hξroot,hξε,hξγ,hξsq,hellRate,hcoverRate,hPreparedBulkChunks2Rest6⟩:=hPreparedBulkChunks2Rest5
+  obtain ⟨hηeq,hη₀,hηbal,hηbal₀,hηbalγ,hηInitial,hηInitialBal,hβcap,hβcap1,hβcapγ,hδcap,hδcapγ,hPreparedBulkChunks2Rest7⟩:=hPreparedBulkChunks2Rest6
+  obtain ⟨hδInitial,hδInitialα,hδInitialη,hδedit,hδeditα,hδeditη,hηedit,hstatic,ηBudget,capChosen,hBudget,hBudgetη,hPreparedBulkChunks2Rest8⟩:=hPreparedBulkChunks2Rest7
+  obtain ⟨hsmall,hChosen,hOriginal,hCap,d,hd,ξedit,ξAbs,hξcapEdit,hξcapAbs,hjoint,hthresholds,hPreparedBulkChunks2Rest9⟩:=hPreparedBulkChunks2Rest8
+  obtain ⟨rowTolerance,hrowTolerance,hrowInitial,hrowDeep,hrowEdit,hrowSample,hrowGeom,hrowEnd,hrowCap,hremain⟩:=hPreparedBulkChunks2Rest9
   have hjointKeep:=hjoint
   obtain ⟨δ,θ,κplace,bplace,zplace,matchErr,σbal,κprime,dNeed,hStage,βSel,lamSel,ζSel,smin,K,rank,hSpacing,
     ζret,Nplace,lamMatch,aRow,γrow,BO,hPlacementAfter,hMatching,hBO,hd',hSelect,τmatch,tMatch,ξMatch,bMatch,hChoice,hColumns,

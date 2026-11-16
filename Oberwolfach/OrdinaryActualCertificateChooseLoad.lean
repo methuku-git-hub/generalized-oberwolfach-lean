@@ -29,15 +29,16 @@ theorem ordinary_actual_certificate_choose_load
       ρ₀ hmin href a ρ θ pmin ηProfile b B εparent gap
       δcut ζcut εcut ζlimit εsample εvortex cBoundary cInitial βout ξreserve ζout edit
       γ bHub BHub p₀ κ ηhub ζhub ζlocal δend eParent hParent lam ε βe βh θmatch rateParent ζ δDeep rate pcap :=by
-  obtain ⟨ellCap,kcap,pbound,p,εsup,finishCap,δsample,loadCap,ν,cap,
-    hellEq,hell,hkcap,hpbound,hpcap',hp,hpp,hp1,hpθ,hsqrt,hεsup,hεsupcap,hfinish,hfinishA,hfinishell,
-    hδsample,hload,hload1,hloadfinish,hν,hcap,hνfinish,hcapfinish,
-    Nfinish,hschedule,τ,ηpack,hτeq,hτ,hτcap,hτ1,hηpack,hlinear,
-    n₀,εout,γgeom,aLoad,ξroot,η₀,ηbal,ηInitial,βcap,δcap,δInitial,δedit,ηedit,
-    hεout,hεout1,hγgeom,haLoad,haLoad1,haLoadCap,haLoadγ,haLoadEdit,hξeq,hξ,hξε,hξγ,hξsq,
-    hellRate,hcoverRate,hηeq,hη₀,hηbal,hηbal₀,hηbalγ,hηInitial,hηInitialBal,hβcap,hβcap1,hβcapγ,
-    hδcap,hδcapγ,hδInitial,hδInitialα,hδInitialη,hδedit,hδeditα,hδeditη,hηedit,hremain⟩:=
+  have hPreparedBulkChunks :=
     hafter pcap a hpcap ha
+  obtain ⟨ellCap,kcap,pbound,p,εsup,finishCap,δsample,loadCap,ν,cap,hellEq,hell,hPreparedBulkChunksRest1⟩:=hPreparedBulkChunks
+  obtain ⟨hkcap,hpbound,hpcap',hp,hpp,hp1,hpθ,hsqrt,hεsup,hεsupcap,hfinish,hfinishA,hPreparedBulkChunksRest2⟩:=hPreparedBulkChunksRest1
+  obtain ⟨hfinishell,hδsample,hload,hload1,hloadfinish,hν,hcap,hνfinish,hcapfinish,Nfinish,hschedule,τ,hPreparedBulkChunksRest3⟩:=hPreparedBulkChunksRest2
+  obtain ⟨ηpack,hτeq,hτ,hτcap,hτ1,hηpack,hlinear,n₀,εout,γgeom,aLoad,ξroot,hPreparedBulkChunksRest4⟩:=hPreparedBulkChunksRest3
+  obtain ⟨η₀,ηbal,ηInitial,βcap,δcap,δInitial,δedit,ηedit,hεout,hεout1,hγgeom,haLoad,hPreparedBulkChunksRest5⟩:=hPreparedBulkChunksRest4
+  obtain ⟨haLoad1,haLoadCap,haLoadγ,haLoadEdit,hξeq,hξ,hξε,hξγ,hξsq,hellRate,hcoverRate,hηeq,hPreparedBulkChunksRest6⟩:=hPreparedBulkChunksRest5
+  obtain ⟨hη₀,hηbal,hηbal₀,hηbalγ,hηInitial,hηInitialBal,hβcap,hβcap1,hβcapγ,hδcap,hδcapγ,hδInitial,hPreparedBulkChunksRest7⟩:=hPreparedBulkChunksRest6
+  obtain ⟨hδInitialα,hδInitialη,hδedit,hδeditα,hδeditη,hηedit,hremain⟩:=hPreparedBulkChunksRest7
   have haLoadA:aLoad≤a:=haLoadCap.trans (hloadfinish.trans hfinishA)
   exact ⟨ellCap,kcap,pbound,p,εsup,finishCap,δsample,loadCap,ν,cap,
     hellEq,hell,hkcap,hpbound,hpcap',hp,hpp,hp1,hpθ,hsqrt,hεsup,hεsupcap,hfinish,hfinishA,hfinishell,
