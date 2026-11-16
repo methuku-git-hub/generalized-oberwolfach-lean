@@ -73,7 +73,7 @@ theorem disjoint_simple_walk_families_match
       Finset.univ.biUnion (fun i=>(p i).support.toFinset):=by simp only [hsource]
   let embed' : {x // x∈Finset.univ.biUnion (fun i=>(p i).support.toFinset)}↪
       {x // x∈Finset.univ.biUnion (fun i=>Finset.univ.image (source i))}:=
-    ⟨fun x=>⟨x.val,by rw [hunion];exact x.property⟩,by intro x y h;apply Subtype.ext;exact congrArg (fun (z:{x // x∈Finset.univ.biUnion (fun i=>Finset.univ.image (source i))})=>z.val) h⟩
+    ⟨fun x=>⟨x.val,by rw [hunion];exact x.property⟩,by intro x y h;apply Subtype.ext;have hv := congrArg Subtype.val h; exact hv⟩
   refine ⟨embed'.trans φ,?_⟩
   intro i k
   have hm:source i k∈Finset.univ.image (source i):=Finset.mem_image.mpr ⟨k,Finset.mem_univ _,rfl⟩
