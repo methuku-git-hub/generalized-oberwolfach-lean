@@ -60,17 +60,16 @@ theorem first_vortex_shared_vortex_selected_ready
     (r k₀:ℕ) (αRef ρ₀:ℝ) (hα:0<αRef) (hρ₀:0<ρ₀)
     (h:FirstVortexSharedVortexTailExplicitReady r k₀ αRef ρ₀ hα hρ₀):
     FirstVortexSharedVortexTailSelectedReady r k₀ αRef ρ₀ hα hρ₀ :=by
-  obtain ⟨β,βCommon,εAbs,εRob,ζRob,δAbs,hβ,hβCommon,hεAbs,hεRob,hζRob,hδAbs,
-    εAbsP,ζAbsP,δAbsP,βconfigP,βCommonP,hεAbsP,hζAbsP,hδAbsP,hβconfigP,hβCommonP,
-    εStable,ζStable,capStable,hεStable,hζStable,hcapStable,hSelector,hBA,
-    βfinal,ρreserve,hβfinal,hβone,hβlist,hρreserve,hreserveList,hreserveSize,
-    zetaCfg,betaA,hzeta,hbetaA,hbetaCfg,hbetaCommon,hcycle,hpath,
-    Kgeom,hKgeom,kappa0,ξ,thetaDeep,kappa,hkappa0,hξ,htheta,hkappa,hkappaLe,
-    ζCut,hIcut,εLevel,deltaI,hζcut,hζcut1,hζcutT,hIcut0,hIcutA,hIcutT,
-    hεLevel,hεCut,hεξ,hεκ,hεα,hεone,hδI,hδIone,hδIα,hδIk,hδIt,
-    cap,hcap,hcapStable',hparent,
-    rho,eta,ζmax,Δmax,δLoss,εInner,δglobal,θmax,globalRate,hGlobal,
-    bmatch,αMatch,ε,hInitial,hεStable',hεHost,hCombined⟩:=h
+  have hPreparedBulkChunks1 :=h
+  obtain ⟨β,βCommon,εAbs,εRob,ζRob,δAbs,hβ,hβCommon,hεAbs,hεRob,hζRob,hδAbs,hPreparedBulkChunks1Rest1⟩:=hPreparedBulkChunks1
+  obtain ⟨εAbsP,ζAbsP,δAbsP,βconfigP,βCommonP,hεAbsP,hζAbsP,hδAbsP,hβconfigP,hβCommonP,εStable,ζStable,hPreparedBulkChunks1Rest2⟩:=hPreparedBulkChunks1Rest1
+  obtain ⟨capStable,hεStable,hζStable,hcapStable,hSelector,hBA,βfinal,ρreserve,hβfinal,hβone,hβlist,hρreserve,hPreparedBulkChunks1Rest3⟩:=hPreparedBulkChunks1Rest2
+  obtain ⟨hreserveList,hreserveSize,zetaCfg,betaA,hzeta,hbetaA,hbetaCfg,hbetaCommon,hcycle,hpath,Kgeom,hKgeom,hPreparedBulkChunks1Rest4⟩:=hPreparedBulkChunks1Rest3
+  obtain ⟨kappa0,ξ,thetaDeep,kappa,hkappa0,hξ,htheta,hkappa,hkappaLe,ζCut,hIcut,εLevel,hPreparedBulkChunks1Rest5⟩:=hPreparedBulkChunks1Rest4
+  obtain ⟨deltaI,hζcut,hζcut1,hζcutT,hIcut0,hIcutA,hIcutT,hεLevel,hεCut,hεξ,hεκ,hεα,hPreparedBulkChunks1Rest6⟩:=hPreparedBulkChunks1Rest5
+  obtain ⟨hεone,hδI,hδIone,hδIα,hδIk,hδIt,cap,hcap,hcapStable',hparent,rho,eta,hPreparedBulkChunks1Rest7⟩:=hPreparedBulkChunks1Rest6
+  obtain ⟨ζmax,Δmax,δLoss,εInner,δglobal,θmax,globalRate,hGlobal,bmatch,αMatch,ε,hInitial,hPreparedBulkChunks1Rest8⟩:=hPreparedBulkChunks1Rest7
+  obtain ⟨hεStable',hεHost,hCombined⟩:=hPreparedBulkChunks1Rest8
   have hSelected:=first_vortex_level_with_selected_caller r k₀ Kgeom αRef ρ₀ zetaCfg betaA ξ thetaDeep kappa ζCut hIcut deltaI
     (successorWeightLower k₀ (αRef/4)) (successorWeightUpper k₀ (αRef/4)) ε ζRob hα hρ₀ hzeta
     cap βfinal rho eta ζmax Δmax δLoss εInner δglobal θmax globalRate αMatch hCombined
