@@ -107,17 +107,16 @@ theorem ordinary_static_selected_rows_with_size
       γ bHub BHub p₀ κ ηhub ζhub ζlocal δend eParent hParent lam ε βe βh θmatch rateParent ζ δDeep rate pcap
       L rstar mEarly kEarly dMin βfreq αOriginal γList capInner θhost capOriginal
       hr hβfreq hβ1 hρ₀ hαOriginal βPlace lamPlace ζPlace εearly capHub αcorr pstar ωcorr δAbs hAbs εabs εv Nextra :=by
-  obtain ⟨ellCap,kcap,pbound,p,εsup,finishCap,δsample,loadCap,ν,cap,
-    hellEq,hell,hkcap,hpbound,hpcap',hp,hpp,hp1,hpθ,hsqrt,hεsup,hεsupcap,hfinish,hfinishA,hfinishell,
-    hδsample,hload,hload1,hloadfinish,hν,hcap,hνfinish,hcapfinish,
-    Nfinish,hschedule,τ,ηpack,hτeq,hτ,hτcap,hτ1,hηpack,hlinear,
-    n₀,εout,γgeom,aLoad,ξroot,η₀,ηbal,ηInitial,βcap,δcap,δInitial,δedit,ηedit,
-    hεout,hεout1,hγgeom,haLoad,haLoad1,haLoadCap,haLoadA,haLoadγ,haLoadEdit,hξeq,hξ,hξε,hξγ,hξsq,
-    hellRate,hcoverRate,hηeq,hη₀,hηbal,hηbal₀,hηbalγ,hηInitial,hηInitialBal,hβcap,hβcap1,hβcapγ,
-    hδcap,hδcapγ,hδInitial,hδInitialα,hδInitialη,hδedit,hδeditα,hδeditη,hηedit,hstatic,
-    ηBudget,capChosen,hBudget,hBudgetη,hsmall,hChosen,hOriginal,hCap,dSelected,hdSelected,ξedit,ξAbs,hξcap,hξAbscap,hjoint,hthresholds,
-    rowTolerance,hrow,hrowInitial,hrowDeep,hrowEdit,hrowSample,hrowGeom,hrowEnd,hrowCap,hremain⟩:=
-    h
+  obtain ⟨ellCap,kcap,pbound,p,εsup,finishCap,δsample,loadCap,ν,cap,hellEq,hell,hStaticChunksRest1⟩:=h
+  obtain ⟨hkcap,hpbound,hpcap',hp,hpp,hp1,hpθ,hsqrt,hεsup,hεsupcap,hfinish,hfinishA,hStaticChunksRest2⟩:=hStaticChunksRest1
+  obtain ⟨hfinishell,hδsample,hload,hload1,hloadfinish,hν,hcap,hνfinish,hcapfinish,Nfinish,hschedule,τ,hStaticChunksRest3⟩:=hStaticChunksRest2
+  obtain ⟨ηpack,hτeq,hτ,hτcap,hτ1,hηpack,hlinear,n₀,εout,γgeom,aLoad,ξroot,hStaticChunksRest4⟩:=hStaticChunksRest3
+  obtain ⟨η₀,ηbal,ηInitial,βcap,δcap,δInitial,δedit,ηedit,hεout,hεout1,hγgeom,haLoad,hStaticChunksRest5⟩:=hStaticChunksRest4
+  obtain ⟨haLoad1,haLoadCap,haLoadA,haLoadγ,haLoadEdit,hξeq,hξ,hξε,hξγ,hξsq,hellRate,hcoverRate,hStaticChunksRest6⟩:=hStaticChunksRest5
+  obtain ⟨hηeq,hη₀,hηbal,hηbal₀,hηbalγ,hηInitial,hηInitialBal,hβcap,hβcap1,hβcapγ,hδcap,hδcapγ,hStaticChunksRest7⟩:=hStaticChunksRest6
+  obtain ⟨hδInitial,hδInitialα,hδInitialη,hδedit,hδeditα,hδeditη,hηedit,hstatic,ηBudget,capChosen,hBudget,hBudgetη,hStaticChunksRest8⟩:=hStaticChunksRest7
+  obtain ⟨hsmall,hChosen,hOriginal,hCap,dSelected,hdSelected,ξedit,ξAbs,hξcap,hξAbscap,hjoint,hthresholds,hStaticChunksRest9⟩:=hStaticChunksRest8
+  obtain ⟨rowTolerance,hrow,hrowInitial,hrowDeep,hrowEdit,hrowSample,hrowGeom,hrowEnd,hrowCap,hremain⟩:=hStaticChunksRest9
   refine ⟨ellCap,kcap,pbound,p,εsup,finishCap,δsample,loadCap,ν,cap,
     hellEq,hell,hkcap,hpbound,hpcap',hp,hpp,hp1,hpθ,hsqrt,hεsup,hεsupcap,hfinish,hfinishA,hfinishell,
     hδsample,hload,hload1,hloadfinish,hν,hcap,hνfinish,hcapfinish,
