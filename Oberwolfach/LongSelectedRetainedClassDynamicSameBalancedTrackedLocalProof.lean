@@ -55,7 +55,12 @@ theorem long_selected_retained_class_dynamic_same_balanced_degrees_tracked_local
   try rw [hdec0K] at hsource
   try rw [hdec1]
   try rw [hdec1K]
-  rcases hsource with ⟨Dsrc,orig,hPair,hValid,hUnion,hArcs,E,hAlign,hLate,ext,inner,ψ,assign,data,hprops,pieces,hpieceEdge,hpieceArc,Pack,hExact,hload,hOldDisj,hOldPack,hApprox,hSelected,hassign,hsize,hUsed,hExtra,hcapacity,hupper,hglobal,hcompletion,piecesNew,Φ,fC,hgraphNew,hC,hR,hZ,hImage,hYavoid,hDirected,hHost,hPacked,hFirst,hTracked,hKcover,hJavoid,hPackAvoid,hEunion,hLoss,hReserve⟩
+  rcases hsource with ⟨Dsrc,orig,hPair,hValid,hUnion,hArcs,E,hAlign,hLate,ext,hChunkRest1⟩
+  rcases hChunkRest1 with ⟨inner,ψ,assign,data,hprops,pieces,hpieceEdge,hpieceArc,Pack,hExact,hChunkRest2⟩
+  rcases hChunkRest2 with ⟨hload,hOldDisj,hOldPack,hApprox,hSelected,hassign,hsize,hUsed,hExtra,hcapacity,hChunkRest3⟩
+  rcases hChunkRest3 with ⟨hupper,hglobal,hcompletion,piecesNew,Φ,fC,hgraphNew,hC,hR,hZ,hChunkRest4⟩
+  rcases hChunkRest4 with ⟨hImage,hYavoid,hDirected,hHost,hPacked,hFirst,hTracked,hKcover,hJavoid,hPackAvoid,hChunkRest5⟩
+  rcases hChunkRest5 with ⟨hEunion,hLoss,hReserve⟩
   obtain ⟨assignNew,orient,BB,g,hMcap,hBB,hEndList,hFix,hFree⟩:=hTracked
   let occupied:=fun w=>((data w).oldDomain\bufferedPathStrictInterior (fun _=>(m+1)*d) (inner w)).image (ψ w)
   let Z:=innerRequiredTargets H A (fun w=>Finset.univ.filter (fun v=>retainedRawMarkedSpokes π d (fun e=>raw (Sum.inr e)) false t Jret false false false v w))

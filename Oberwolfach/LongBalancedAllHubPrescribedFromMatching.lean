@@ -48,7 +48,13 @@ theorem long_balanced_all_hub_prescribed_from_matching
       (2*((n:ℝ)+2*(n:ℝ)^(3/4:ℝ))/(d:ℝ)+2*max α γ*n) (Mix.map q) :=by
   intro R T S hST q Q Mix hmatch hsource
   letI:Nonempty U:=Fintype.card_pos_iff.mp hU
-  rcases hsource with ⟨Dsrc,orig,hPair,hValid,hUnion,hArcs,E,hAlign,hLate,ext,inner,ψ,assign,data,hprops,pieces,hpieceEdge,hpieceArc,Pack,hExact,hload,hOldDisj,hOldPack,hApprox,hSelected,hassign,hsize,hUsed,hExtra,hcapacity,hupper,hglobal,hallload,hcompletion,piecesNew,Φ,fC,hgraphNew,hC,hR,hZ,hImage,hYavoid,hstart,hfinish,hSpokes,hsourceTail,hCover,hDirected,hHost,hPacked,hFirst,hNoNew,hTracked,hLocal,hBalance,hKcover,hJavoid,hPackAvoid,hEunion,hLoss,hReserve⟩
+  rcases hsource with ⟨Dsrc,orig,hPair,hValid,hUnion,hArcs,E,hAlign,hLate,ext,hChunkRest1⟩
+  rcases hChunkRest1 with ⟨inner,ψ,assign,data,hprops,pieces,hpieceEdge,hpieceArc,Pack,hExact,hChunkRest2⟩
+  rcases hChunkRest2 with ⟨hload,hOldDisj,hOldPack,hApprox,hSelected,hassign,hsize,hUsed,hExtra,hcapacity,hChunkRest3⟩
+  rcases hChunkRest3 with ⟨hupper,hglobal,hallload,hcompletion,piecesNew,Φ,fC,hgraphNew,hC,hR,hChunkRest4⟩
+  rcases hChunkRest4 with ⟨hZ,hImage,hYavoid,hstart,hfinish,hSpokes,hsourceTail,hCover,hDirected,hHost,hChunkRest5⟩
+  rcases hChunkRest5 with ⟨hPacked,hFirst,hNoNew,hTracked,hLocal,hBalance,hKcover,hJavoid,hPackAvoid,hEunion,hChunkRest6⟩
+  rcases hChunkRest6 with ⟨hLoss,hReserve⟩
   have hpres:∀w,((residualSubtypeSet (data w).remaining (data w).prescribed).card:ℝ)≤
       2*((n:ℝ)+2*(n:ℝ)^(3/4:ℝ))/(d:ℝ)+2*max α γ*n:=by
     intro w

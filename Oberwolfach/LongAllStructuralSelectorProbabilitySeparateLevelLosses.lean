@@ -536,13 +536,13 @@ theorem long_all_structural_selector_probability_with_separate_level_losses
     αHost rPart ζret hαHost hrPart hζret hεQHost
     K hK3 hm θ hθpos hθ htstarBound d hd cBoundary hcBoundary hspacing hcut BM hBM BO hBO
   intro lam hlam hlamθ ξCap hξCap
-  obtain ⟨epsOrd,hepsOrd,hepsOrd1,hepsOrdBudget,hAlphaOrd,hAlphaOrdBound,hγOrd,hγOrdEps,
-    ηSeed,hηSeed,tSeed,τSeed,ΔSeed,ξSeed,htSeed,hτSeed,hτSeedCap,hΔSeed,hξSeed,hξSeedEps,
-    ηOrd,hηOrd,tOrd,τOrd,ΔOrd,ξOrd,htOrd,hτOrd,hτOrdCap,hΔOrd,hξOrd,hξOrdEps,
-    lamOrd,ηListOrd,ζOrd,hlamOrd,hηListOrd,hζOrd,hζOrdΔ,hζOrdEps,hζOrdSeed,NListOrd,hNumericOrd,
-    cOrd,ξClassOrd,hcOrd,hξClassOrd,hξClassOrdCap,hξClassOrdBound,hbudgetOrd,hCapOrd,
-    eps,heps,heps1,hepsBudget,hEpsAligned,hAlpha,hAlphaBound,hγ,hγeps,hMain⟩:=
+  obtain ⟨epsOrd,hepsOrd,hepsOrd1,hepsOrdBudget,hAlphaOrd,hAlphaOrdBound,hγOrd,hγOrdEps,ηSeed,hηSeed,hChunkSelector1_1⟩:=
       hMain lam hlam hlamθ ξCap hξCap
+  rcases hChunkSelector1_1 with ⟨tSeed,τSeed,ΔSeed,ξSeed,htSeed,hτSeed,hτSeedCap,hΔSeed,hξSeed,hξSeedEps,hChunkSelector1_2⟩
+  rcases hChunkSelector1_2 with ⟨ηOrd,hηOrd,tOrd,τOrd,ΔOrd,ξOrd,htOrd,hτOrd,hτOrdCap,hΔOrd,hChunkSelector1_3⟩
+  rcases hChunkSelector1_3 with ⟨hξOrd,hξOrdEps,lamOrd,ηListOrd,ζOrd,hlamOrd,hηListOrd,hζOrd,hζOrdΔ,hζOrdEps,hChunkSelector1_4⟩
+  rcases hChunkSelector1_4 with ⟨hζOrdSeed,NListOrd,hNumericOrd,cOrd,ξClassOrd,hcOrd,hξClassOrd,hξClassOrdCap,hξClassOrdBound,hbudgetOrd,hChunkSelector1_5⟩
+  rcases hChunkSelector1_5 with ⟨hCapOrd,eps,heps,heps1,hepsBudget,hEpsAligned,hAlpha,hAlphaBound,hγ,hγeps,hMain⟩
   refine ⟨epsOrd,hepsOrd,hepsOrd1,hepsOrdBudget,hAlphaOrd,hAlphaOrdBound,hγOrd,hγOrdEps,
     ηSeed,hηSeed,tSeed,τSeed,ΔSeed,ξSeed,htSeed,hτSeed,hτSeedCap,hΔSeed,hξSeed,hξSeedEps,
     ηOrd,hηOrd,tOrd,τOrd,ΔOrd,ξOrd,htOrd,hτOrd,hτOrdCap,hΔOrd,hξOrd,hξOrdEps,

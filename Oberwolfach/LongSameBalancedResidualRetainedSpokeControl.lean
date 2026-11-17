@@ -65,7 +65,12 @@ theorem long_same_balanced_physical_residual_with_retained_factor_spoke_control
   have hdecK:selectedRetainedClassDynamicSameBalancedImageLoadFin K=sameBalancedPhysicalRetainedFactorDataSpokeControlFin K:=Subsingleton.elim _ _
   try rw [hdec] at hsource
   try rw [hdecK] at hsource
-  rcases hsource with ⟨Dsrc,orig,hPair,hValid,hUnion,hArcs,E,hAlign,hLate,ext,inner,ψ,assign,data,hprops,pieces,hpieceEdge,hpieceArc,Pack,hExact,hload,hOldDisj,hOldPack,hApprox,hSelected,hassign,hsize,hUsed,hExtra,hcapacity,hupper,hglobal,hcompletion,piecesNew,Φ,fC,hgraphNew,hC,hR,hZ,hImage,hYavoid,hstart,hfinish,hSpokes,hsourceTail,hCover,hDirected,hHost,hPacked,hFirst,⟨hinnerA,hdisA,hσ,hdegrees⟩,hKcover,hJavoid,hPackAvoid,hEunion,hLoss,hReserve⟩
+  rcases hsource with ⟨Dsrc,orig,hPair,hValid,hUnion,hArcs,E,hAlign,hLate,ext,hChunkRest1⟩
+  rcases hChunkRest1 with ⟨inner,ψ,assign,data,hprops,pieces,hpieceEdge,hpieceArc,Pack,hExact,hChunkRest2⟩
+  rcases hChunkRest2 with ⟨hload,hOldDisj,hOldPack,hApprox,hSelected,hassign,hsize,hUsed,hExtra,hcapacity,hChunkRest3⟩
+  rcases hChunkRest3 with ⟨hupper,hglobal,hcompletion,piecesNew,Φ,fC,hgraphNew,hC,hR,hZ,hChunkRest4⟩
+  rcases hChunkRest4 with ⟨hImage,hYavoid,hstart,hfinish,hSpokes,hsourceTail,hCover,hDirected,hHost,hPacked,hChunkRest5⟩
+  rcases hChunkRest5 with ⟨hFirst,⟨hinnerA,hdisA,hσ,hdegrees⟩,hKcover,hJavoid,hPackAvoid,hEunion,hLoss,hReserve⟩
   let Enew:=fun w=>((prescribedDependentGraph piecesNew w).edgeFinset).image (Sym2.map (Φ w))
   let old:=fun w=>((data w).deletedEdges\(Finset.univ.biUnion (fun i:{i // i∈(data w).s₁}=>((data w).path (.inl i)).edges.toFinset))).image (Sym2.map (ψ w))
   let tail:=fun w=>bufferedOrientedTailEmbedding (fun _=>(m+1)*d) (fun i=>ext w (.inl i)) (inner w) (hinnerA w) (hdisA w) (fC w)

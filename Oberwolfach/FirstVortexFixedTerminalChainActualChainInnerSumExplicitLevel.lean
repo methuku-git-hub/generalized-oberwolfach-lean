@@ -498,8 +498,14 @@ theorem first_vortex_fixed_terminal_chain_actual_chain_inner_sum_explicit_cap_se
   obtain ⟨Mhost,Del,hSP,hregS,hEdit,hInner,hRes,hCover,hwitness,hPrepared,hOut⟩:=hFor S hSP0 hregS0 hEdit0 hInner0 hRes0
   refine ⟨Mhost,Del,hSP,hregS,hEdit,hInner,hRes,hCover,hwitness,hPrepared,?_⟩
   intro t raw ℓ R Tmix Q q φ hKpos hθone ζRet capActive hcap hεpos hεone hmmpos hζRet hζCap hretScale hPbound hEdgeBudget hcard p₂ k₂ u hstarts hdegrees hγ0 hθ0 huDensity hcolour ζChange hChange hChangeCap hCapChange cLocal hcLocal hCapLocal hRlocalBudget hSlocalBudget σ Hraw hBudgetRow hBudgetCol
-  obtain ⟨Mix,hdis,hinc,Pack,E,Spokes,T,hclose,hPack,hApprox,hNew,hSafe,hCount,hMark,hOrd,hInnerT,hReserveT,hType,hAgree,hDiv,A,hSmall,hAout,hFactor,hSpoke,hLoss,hNoNew,hExtra,hFirst,hcloseLocal,hTypeLocal,hNewLocal,Cimage,hProtect,hImageLocal,τtarget,hτint,hτinner,hτactive,hτdeep,hτcode,hτdiv,FR,FS,hFRims,hFR,hFRlocal,hFSchange,hFS,hFSlocal,hactive,hSpokeSmall,hTypes,hSep,hAbs,hRlocal,hSloc',hNoNew',hLossLocal,hInterval,hRawInner,hOrdinary,hFRglobal,hActive,hPacked,hOldChain⟩:=
+  obtain ⟨Mix,hdis,hinc,Pack,E,Spokes,T,hclose,hPack,hApprox,hChunkExp1⟩:=
     hOut hKpos hθone ζRet capActive hcap hεpos hεone hmmpos hζRet hζCap hretScale hPbound hEdgeBudget hcard p₂ k₂ u hstarts hdegrees hγ0 hθ0 huDensity hcolour ζChange hChange hChangeCap hCapChange cLocal hcLocal hCapLocal hRlocalBudget hSlocalBudget hBudgetRow hBudgetCol
+  rcases hChunkExp1 with ⟨hNew,hSafe,hCount,hMark,hOrd,hInnerT,hReserveT,hType,hAgree,hDiv,hChunkExp2⟩
+  rcases hChunkExp2 with ⟨A,hSmall,hAout,hFactor,hSpoke,hLoss,hNoNew,hExtra,hFirst,hcloseLocal,hChunkExp3⟩
+  rcases hChunkExp3 with ⟨hTypeLocal,hNewLocal,Cimage,hProtect,hImageLocal,τtarget,hτint,hτinner,hτactive,hτdeep,hChunkExp4⟩
+  rcases hChunkExp4 with ⟨hτcode,hτdiv,FR,FS,hFRims,hFR,hFRlocal,hFSchange,hFS,hFSlocal,hChunkExp5⟩
+  rcases hChunkExp5 with ⟨hactive,hSpokeSmall,hTypes,hSep,hAbs,hRlocal,hSloc',hNoNew',hLossLocal,hInterval,hChunkExp6⟩
+  rcases hChunkExp6 with ⟨hRawInner,hOrdinary,hFRglobal,hActive,hPacked,hOldChain⟩
   let Y:=fun w=>markedIntervalRootSet π (fun _:retainedMarkedIndex π d (fun e=>raw (Sum.inr e)) false t z.2 w=>d) Subtype.val
   let Hnew:Bool→Fin n→U→Prop:=fun b v w=>if b then retainedRawMarkedSpokes π d (fun e=>raw (Sum.inr e)) false t z.2 false true true v w else v∈Spokes w\Y w
   have hActiveSmall:let W:=↥((Finset.univ\markedVortexInnerVertices Vort 1):Finset (markedVortexVertexType Vort 1))

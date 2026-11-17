@@ -526,13 +526,13 @@ theorem first_vortex_selector_host_geometry
     ni hni hpadded pstar BMseed BOseed Kpair C lam hlam hlamθ ξCap hξCap
   have hh:=hSelector εQ he he1 heAbs heRob heSmall αHost rPart ζret hHost hrPart hret heHost
     K hK hm θ hθpos hθ htstarBound d hd cBoundary hcBoundary hspacing hcut BM hBM BO hBO lam hlam hlamθ ξCap hξCap
-  obtain ⟨epsOrd,hepsOrd,hepsOrd1,hepsOrdRate,haOrd,haOrdBound,hγOrd,hγOrdBound,
-    ηSeed,hηSeed,tSeed,τSeed,ΔSeed,ξSeed,htSeed,hτSeed,hτSeedBound,hΔSeed,hξSeed,hξSeedBound,
-    ηOrd,hηOrd,tOrd,τOrd,ΔOrd,ξOrd,htOrd,hτOrd,hτOrdBound,hΔOrd,hξOrd,hξOrdBound,
-    lamOrd,ηListOrd,ζOrd,hlamOrd,hηListOrd,hζOrd,hζOrdΔ,hζOrdE,hζOrdSeed,NListOrd,hList,
-    cOrd,ξClassOrd,hcOrd,hξClassOrd,hξCapOrd,hξClassBound,hζSum,hOrient,
-    eps,heps,heps1,hepsRate,hepsLe,ha,haBound,hγ,hγBound,
-    ε₀,ηEvent,hε₀,hε₀one,hηEvent,hprob,εExtra,hExtra,hExtraBound,hh⟩:=hh
+  obtain ⟨epsOrd,hepsOrd,hepsOrd1,hepsOrdRate,haOrd,haOrdBound,hγOrd,hγOrdBound,ηSeed,hηSeed,hChunkSelector1_1⟩:=hh
+  rcases hChunkSelector1_1 with ⟨tSeed,τSeed,ΔSeed,ξSeed,htSeed,hτSeed,hτSeedBound,hΔSeed,hξSeed,hξSeedBound,hChunkSelector1_2⟩
+  rcases hChunkSelector1_2 with ⟨ηOrd,hηOrd,tOrd,τOrd,ΔOrd,ξOrd,htOrd,hτOrd,hτOrdBound,hΔOrd,hChunkSelector1_3⟩
+  rcases hChunkSelector1_3 with ⟨hξOrd,hξOrdBound,lamOrd,ηListOrd,ζOrd,hlamOrd,hηListOrd,hζOrd,hζOrdΔ,hζOrdE,hChunkSelector1_4⟩
+  rcases hChunkSelector1_4 with ⟨hζOrdSeed,NListOrd,hList,cOrd,ξClassOrd,hcOrd,hξClassOrd,hξCapOrd,hξClassBound,hζSum,hChunkSelector1_5⟩
+  rcases hChunkSelector1_5 with ⟨hOrient,eps,heps,heps1,hepsRate,hepsLe,ha,haBound,hγ,hγBound,hChunkSelector1_6⟩
+  rcases hChunkSelector1_6 with ⟨ε₀,ηEvent,hε₀,hε₀one,hηEvent,hprob,εExtra,hExtra,hExtraBound,hh⟩
   refine ⟨epsOrd,hepsOrd,hepsOrd1,hepsOrdRate,haOrd,haOrdBound,hγOrd,hγOrdBound,
     ηSeed,hηSeed,tSeed,τSeed,ΔSeed,ξSeed,htSeed,hτSeed,hτSeedBound,hΔSeed,hξSeed,hξSeedBound,
     ηOrd,hηOrd,tOrd,τOrd,ΔOrd,ξOrd,htOrd,hτOrd,hτOrdBound,hΔOrd,hξOrd,hξOrdBound,
@@ -541,11 +541,12 @@ theorem first_vortex_selector_host_geometry
     eps,heps,heps1,hepsRate,hepsLe,ha,haBound,hγ,hγBound,
     ε₀,ηEvent,hε₀,hε₀one,hηEvent,hprob,εExtra,hExtra,hExtraBound,?_⟩
   intro γLevel σLevel κmax κauxCap ζCap hγLevel hσLevel hκmax hκaux hζCap
-  obtain ⟨gammaLoss,sigmaLoss,hGamma,hSigma,hGammaCap,hSigmaCap,hGammaOrd,
-    ζCorr,ξCorr,η₀,κ,εRef,εNbr,hζCorr,hζRob,hζCap',hξCorr,hξCorrRate,hbudget,
-    hη₀,hκ,hκmax',hκaux',hεRefEq,hεRefMax,hεRef,hεNbr,hεNbrCap,
-    χ,χCommon,χBal,χNbr,χLoad,χLocal,χConfig,hχ,hχCommon,hχBal,hχNbr,hχLoad,hχLocal,hχConfig,hgap,hh⟩:=
+  obtain ⟨gammaLoss,sigmaLoss,hGamma,hSigma,hGammaCap,hSigmaCap,hGammaOrd,ζCorr,ξCorr,η₀,hChunkSelector2_1⟩:=
     hh γLevel σLevel κmax κauxCap ζCap hγLevel hσLevel hκmax hκaux hζCap
+  rcases hChunkSelector2_1 with ⟨κ,εRef,εNbr,hζCorr,hζRob,hζCap',hξCorr,hξCorrRate,hbudget,hη₀,hChunkSelector2_2⟩
+  rcases hChunkSelector2_2 with ⟨hκ,hκmax',hκaux',hεRefEq,hεRefMax,hεRef,hεNbr,hεNbrCap,χ,χCommon,hChunkSelector2_3⟩
+  rcases hChunkSelector2_3 with ⟨χBal,χNbr,χLoad,χLocal,χConfig,hχ,hχCommon,hχBal,hχNbr,hχLoad,hChunkSelector2_4⟩
+  rcases hChunkSelector2_4 with ⟨hχLocal,hχConfig,hgap,hh⟩
   refine ⟨gammaLoss,sigmaLoss,hGamma,hSigma,hGammaCap,hSigmaCap,hGammaOrd,
     ζCorr,ξCorr,η₀,κ,εRef,εNbr,hζCorr,hζRob,hζCap',hξCorr,hξCorrRate,hbudget,
     hη₀,hκ,hκmax',hκaux',hεRefEq,hεRefMax,hεRef,hεNbr,hεNbrCap,
