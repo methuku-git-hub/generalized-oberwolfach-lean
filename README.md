@@ -14,11 +14,11 @@ $C_r$-decomposition threshold: the infimum of the numbers $d\in[0,1]$ such that,
 for all sufficiently large $n$, every $n$-vertex simple graph with minimum degree
 at least $dn$, all degrees even and $r$ dividing its number of edges has an
 edge-decomposition into copies of $C_r$. For a nonempty set
-$S\subseteq\{3,4,\ldots\}$, put
+$S\subseteq\lbrace 3,4,\ldots\rbrace$, put
 $\delta_S=\sup_{r\in S}\delta_{C_r}$.
 
 **Theorem.** For every $\alpha>0$ there is an integer $N=N(\alpha)$ such that,
-for every nonempty $S\subseteq\{3,4,\ldots\}$ and every $n\ge N$, the following
+for every nonempty $S\subseteq\lbrace 3,4,\ldots\rbrace$ and every $n\ge N$, the following
 holds. Let $D$ be even and let $G$ be an $n$-vertex simple $D$-regular graph
 with
 
